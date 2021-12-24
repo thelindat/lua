@@ -23,7 +23,6 @@ namespace glm {
   /// <summary>
   /// A STL vector that uses the Lua allocator
   /// </summary>
-  /// <typeparam name="T"></typeparam>
   template<typename T>
   using List = LuaVector<T>;
 

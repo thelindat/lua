@@ -28,7 +28,6 @@
   #define GLM_ENABLE_EXPERIMENTAL
 #endif
 
-/* strlen / strcmp */
 #include <cstring>
 
 /*
@@ -124,12 +123,12 @@ extern LUA_API_LINKAGE {
 
 /* lua_gettop() macro */
 #if !defined(_gettop)
-#define _gettop(L) (cast_int((L)->top - ((L)->ci->func + 1)))
-#define _isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
+  #define _gettop(L) (cast_int((L)->top - ((L)->ci->func + 1)))
+  #define _isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
 #endif
 
 #if !defined(ispseudo)
-#define ispseudo(i) ((i) <= LUA_REGISTRYINDEX)
+  #define ispseudo(i) ((i) <= LUA_REGISTRYINDEX)
 #endif
 
 /// <summary>
@@ -192,12 +191,6 @@ static inline lua_Integer glm_flttointeger(const TValue *obj) {
   return 0;
 }
 
-/* trybinTM where the first element is predefined */
-static int num_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
-static int vec_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
-static int quat_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
-static int mat_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
-
 /*
 ** {==================================================================
 ** Object Conversion
@@ -259,6 +252,12 @@ static int mat_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId 
   #define _glmeq(a, b) ((a) == (b))
 #endif
 
+/* trybinTM where the first element is predefined */
+static int num_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
+static int vec_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
+static int quat_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
+static int mat_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
+
 /// <summary>
 /// The vector-type equivalent to luaV_finishget. The 'angle' and 'axis' fields
 /// are grit-lua compatibility fields for quaternion types.
@@ -277,7 +276,7 @@ static void vec_finishget(lua_State *L, const TValue *obj, TValue *key, StkId re
         return;
       }
       else if (strcmp(str, "axis") == 0) {
-        glmVector out(glm::axis(glm_qvalue(obj)));
+        const glmVector out(glm::axis(glm_qvalue(obj)));
         glm_setvvalue2s(res, out, LUA_VVECTOR3);
         return;
       }
@@ -300,9 +299,8 @@ static void vec_finishget(lua_State *L, const TValue *obj, TValue *key, StkId re
 }
 
 /// <summary>
-/// Runtime swizzle operation.
-///
-/// Returning the number of copied vector fields on success, zero on failure.
+/// Runtime swizzle operation: returning the number of copied vector fields on
+/// success, zero on failure.
 /// </summary>
 template<glm::length_t L>
 static glm::length_t swizzle(const lua_Float4 &v, const char *key, lua_Float4 &out) {
@@ -330,11 +328,11 @@ int glmVec_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
   return result;
 }
 
-/// This function is to interface with 'lua_getfield'. The length of the string
-/// must be recomputed.
-///
-/// @TODO: Instead of calculating the length of the string just ensure the
-/// second element is '\0'
+// As this function interfaces with 'lua_getfield'. The length of 'k' must be
+// (re-)computed.
+//
+// @TODO: Instead of calculating the length of the string just ensure the
+// second element is '\0'
 int glmVec_rawgets(const TValue *obj, const char *k, StkId res) {
   const int result = strlen(k) == 1 ? vecgets(obj, k, res) : LUA_TNONE;
   if (result == LUA_TNONE) {
@@ -352,9 +350,9 @@ int glmVec_rawget(const TValue *obj, TValue *key, StkId res) {
       break;
     }
     case LUA_TSTRING: {
-      // The 'dim', 'axis', and 'angle' fields viewed as metafields. To simplify
-      // logic the 'n' (shorthand dimensions) field will be exposed by this
-      // function.
+      // The 'dim', 'axis', and 'angle' fields are viewed as 'meta' fields. To
+      // simplify some logic, 'n' (shorthand dimensions) will be exposed by
+      // rawget.
       if (vslen(key) == 1)
         result = vecgets(obj, svalue(key), res);
       break;
@@ -438,8 +436,7 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
         default: {
           // grit-lua compatibility: dimension field takes priority over tag methods
           if (strcmp(str, "dim") == 0) {
-            const grit_length_t dims = glm_dimensions(ttypetag(obj));
-            setivalue(s2v(res), static_cast<lua_Integer>(dims));
+            setivalue(s2v(res), static_cast<lua_Integer>(glm_dimensions(ttypetag(obj))));
             return;
           }
           break;
@@ -494,7 +491,6 @@ int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2, int rtt) {
 
 int glmVec_concat(const TValue *obj, const TValue *value, StkId res) {
   const glmVector &v = glm_vvalue(obj);
-
   glmVector result = v;  // Create a copy of the vector
   glm::length_t dims = glm_dimensions(ttypetag(obj));  // Current dimensions
   if (ttisinteger(value) && dims < 4)
@@ -522,8 +518,8 @@ int glmVec_concat(const TValue *obj, const TValue *value, StkId res) {
 }
 
 int glmVec_tostr(const TValue *obj, char *buff, size_t len) {
-  int copy = 0;
   const glmVector &v = glm_vvalue(obj);
+  int copy = 0;
   switch (ttypetag(obj)) {
     case LUA_VVECTOR1: copy = glm::detail::format_type(buff, len, v.v1); break;
     case LUA_VVECTOR2: copy = glm::detail::format_type(buff, len, v.v2); break;
@@ -597,7 +593,7 @@ int glmVec_next(const TValue *obj, StkId key) {
   }
   else if (ttisnumber(key_obj)) {
     lua_Integer l_nextIdx = glm_tointeger(key_obj);
-    l_nextIdx = luaL_intop(+, l_nextIdx, 1);  /* first empty element */
+    l_nextIdx = luaL_intop(+, l_nextIdx, 1);  // first empty element
 
     const lua_Integer D = cast(lua_Integer, glm_dimensions(ttypetag(obj)));
     if (l_nextIdx >= 1 && l_nextIdx <= D) {
@@ -638,8 +634,8 @@ int glm_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res, TM
 #define INVALID_MATRIX_DIMENSIONS "invalid " GLM_STRING_MATRIX " dimension"
 
 /// <summary>
-/// If "raw" is true (denoting 'rawset'), the function will throw Lua runtime
-/// errors when attempting to operate on invalid keys/fields. Otherwise, this
+/// If "raw" is true (denoting 'rawset'), the function will throw a Lua runtime
+/// error when attempting to operate on invalid keys/fields. Otherwise, this
 /// function (like non 'raw' functions) will attempt to reference a metatable.
 /// </summary>
 static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *val, bool raw) {
@@ -694,7 +690,9 @@ static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *v
              : glm_finishset(L, obj, key, val);
 }
 
-/* Helper function for generalized matrix int-access. */
+/// <summary>
+/// Helper function for generalized matrix int-access
+/// </summary>
 static int matgeti (const TValue *obj, lua_Integer n, StkId res) {
   const grit_length_t gidx = cast(grit_length_t, n);
   const glmMatrix &m = glm_mvalue(obj);
@@ -773,11 +771,11 @@ void glmMat_objlen(const TValue *obj, StkId res) {
 
 int glmMat_tostr(const TValue *obj, char *buff, size_t len) {
   int copy = 0;
-  const glmMatrix &m = glm_mvalue(obj);
 
   // Use a custom glm::to_string implementation that avoids using std::string
   // and CRT allocator use. In addition, gtx/string_cast is broken for GCC when
   // GLM_FORCE_INLINE is enabled.
+  const glmMatrix &m = glm_mvalue(obj);
   switch (m.dimensions) {
     case LUAGLM_MATRIX_2x2: copy = glm::detail::format_type(buff, len, m.m22); break;
     case LUAGLM_MATRIX_2x3: copy = glm::detail::format_type(buff, len, m.m23); break;
@@ -806,7 +804,7 @@ int glmMat_next(const TValue *obj, StkId key) {
   }
   else if (ttisnumber(key_value)) {
     lua_Integer l_nextIdx = glm_tointeger(key_value);
-    l_nextIdx = luaL_intop(+, l_nextIdx, 1);  /* first empty element */
+    l_nextIdx = luaL_intop(+, l_nextIdx, 1);  // first empty element
 
     const lua_Integer D = cast(lua_Integer, LUAGLM_MATRIX_COLS(mvalue_dims(obj)));
     if (l_nextIdx >= 1 && l_nextIdx <= D) {
@@ -840,7 +838,7 @@ int glmMat_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
   }
 
   // @TODO: Document the specifics of this tag method and how glm::equal(M, M2)
-  // take priority over any custom method for the matrix type.
+  // will take priority over any custom method for the matrix type.
   if (!result && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
     if (!notm(tm)) {
@@ -1064,7 +1062,7 @@ lua_Integer luaO_HashString(const char *string, size_t length, int ignore_case) 
   hash ^= (hash >> 11);
   hash += (hash << 15);
 
-  /* Initial implementation sign-extended hashes */
+  // Initial implementation used sign-extended hashes
 #if defined(LUA_GRIT_COMPAT)
   return (lua_Integer)(int)hash;
 #else
@@ -1259,7 +1257,7 @@ static glm::length_t PopulateVector(lua_State *L, int idx, glm::vec<4, T> &vec, 
     return 1;
   else if (ttisvector(value)) {  // Vector: concatenate components values.
 
-    // To handle (not) 'GLM_FORCE_QUAT_DATA_XYZW' it is much easier to force an
+    // To handle (not) GLM_FORCE_QUAT_DATA_XYZW it is much easier to force an
     // explicit length rule for quaternion types. For other vector variants,
     // copy the vector or a subset to satisfy 'v_desired'
     const glmVector &v = glm_vvalue(value);
@@ -1316,7 +1314,7 @@ static glm::length_t PopulateVector(lua_State *L, int idx, glm::vec<4, T> &vec, 
 static bool PopulateMatrix(lua_State *L, int idx, int top, bool fixed_size, glmMatrix &m) {
   // Maximum number of stack values to parse from the starting "idx". Assume
   // 'idx' is positive.
-  //
+
   // idx = lua_absindex(L, idx);
   const int stack_count = (top - idx + 1);
   const TValue *o = glm_index2value(L, idx);
@@ -1351,7 +1349,7 @@ static bool PopulateMatrix(lua_State *L, int idx, int top, bool fixed_size, glmM
   // Otherwise, parse column vectors
   else {
     // If there is only one element to be parsed and it is a table, assume the
-    // matrix is packed within an array; otherwise, use the elements on the stack.
+    // matrix is packed within an array; otherwise, use values on the stack.
     const bool as_table = stack_count == 1 && ttistable(o);
     const glm::length_t m_size = LUAGLM_MATRIX_COLS(m.dimensions);
     const glm::length_t m_secondary = LUAGLM_MATRIX_ROWS(m.dimensions);
@@ -1432,11 +1430,12 @@ static int glm_createVector(lua_State *L, glm::length_t desiredSize = 0) {
   glm::vec<4, T> v(T(0));
   glm::length_t v_len = 0;
 
-  // If the vector is of a fixed/desired size and only one non-table argument has been supplied
   const int top = _gettop(L);
   if (desiredSize > 0) {
     if (top == 0)
       return glm_pushvec(L, glmVector(v), desiredSize);
+
+    // Fixed size and only one non-table argument
     if (top == 1 && glm_castvalue(glm_index2value(L, 1), v.x)) {
       if (desiredSize == 1) {
         return glm_pushvalue<T>(L, v.x);
@@ -1729,12 +1728,11 @@ LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
   } while (0)
 
 /// <summary>
-/// Parse the provided table object as a vector type, i.e., check the table for
-/// numeric (and consecutive) 'x', 'y', 'z', and 'w' fields. With 'v' as an
-/// optional vector pointer that is populated with the contents from the table.
+/// Parse the table object as a vector type, i.e., check the table for numeric
+/// and consecutive 'x', 'y', 'z', and 'w' fields. With 'v' as an optional
+/// vector pointer that is populated with the contents from the table.
 ///
-/// This function returns the variant tag (not number of dimensions) of the
-/// resultant vector... and LUA_TNIL on failure.
+/// Returning thes number of dimensions of the resultant vector; zero on failure.
 ///
 /// @NOTE: Function considered deprecated. The previous idea that tables can be
 /// implicit vector types does not "mesh" well with the glm binding library.

@@ -18,13 +18,6 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-/* Avoid old-style-cast for C++ libraries */
-#if defined(__cplusplus)
-  #define cast_vec(i) static_cast<lua_VecF>((i))
-#else
-  #define cast_vec(i) ((lua_VecF)(i))
-#endif
-
 /*
 ** {==================================================================
 ** LuaGLM C-API
@@ -64,29 +57,30 @@ LUA_API int glmMat_mat4x4 (lua_State *L);
 
 LUA_API int glmVec_qua (lua_State *L);
 
-/* Returns the name of the type encoded by the vector variant */
+/* Return the name of the GLM type (number, vector, matrix) at 'idx'. */
 LUA_API const char *glm_typename (lua_State *L, int idx);
 
-/* Push a string representing the vector/matrix object on top of the stack. */
+/*
+** Pushes onto the stack a formatted string of the vector/matrix at 'idx' and
+** returns a pointer to this string
+*/
 LUA_API const char *glm_pushstring (lua_State *L, int idx);
 
 /*
-** Unpack an individual vector and place its contents to onto the Lua stack,
-** returning the number of elements (i.e., dimensions of vector).
+** Place the contents of the vector at 'idx' onto the stack, returning the
+** number of elements (i.e., dimensions of vector).
 */
 LUA_API int glm_unpack_vector (lua_State *L, int idx);
 
 /*
-** Unpack an the individual column-vectors of the given Matrix and place them
-** onto the Lua stack, returning the number of elements, dimensions of vector,
-** placed on the stack.
+** Place the contents of the matrix at 'idx' onto the stack, returning the
+** number of elements (i.e., columns of matrix).
 */
 LUA_API int glm_unpack_matrix (lua_State *L, int idx);
 
 /*
-** Jenkins-hash the object at the provided index. String values are hashed,
-** boolean and numeric values are casted to lua_Integer; otherwise, zero is
-** returned.
+** Jenkins-hash the object at 'idx'. String values are hashed, boolean and
+** numeric values are casted to lua_Integer; otherwise, zero is returned.
 **
 ** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
 **  string character is computed then hashed.
@@ -140,14 +134,16 @@ LUA_API void lua_pushquat (lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua
 #define LUA_VQUAT (LUA_TVECTOR | (3 << 4))
 #endif
 
-/* Returns the length of the vector if it is indeed a vector, zero otherwise */
+/* Return the length of the vector if it is indeed a vector, zero otherwise. */
 LUA_API int lua_isvector (lua_State *L, int idx);
 LUA_API int lua_tovector (lua_State *L, int idx, lua_Float4 *vector);
 LUA_API void lua_pushvector (lua_State *L, lua_Float4 f4, int variant);
 LUA_API void lua_pushquatf4 (lua_State *L, lua_Float4 f4);
 
-/* Returns true if the object at the given index is a matrix, storing its
-** dimensions in size & secondary. These are extensions to the grit-lua API */
+/*
+** Return true if the object at the given index is a matrix. Storing its
+** dimension tag in 'dimensions' when not NULL; see LUAGLM_MATRIX_TYPE.
+*/
 LUA_API int lua_ismatrix (lua_State *L, int idx, int *dimensions);
 LUA_API int lua_tomatrix (lua_State *L, int idx, lua_Mat4 *matrix);
 LUA_API void lua_pushmatrix (lua_State *L, const lua_Mat4 *matrix);

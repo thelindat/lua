@@ -1,6 +1,6 @@
 /*
 ** $Id: allocator.hpp $
-** An allocator implementation for C++ STL objects.
+** An allocator implementation for C++ STL objects and other STL analogues.
 **
 ** @TODO: Header should be C++98 compliant.
 **

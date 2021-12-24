@@ -2,18 +2,8 @@
 ** $Id: bindings.hpp $
 **
 ** Template system designed to relate the various glm types (e.g., scalars, vec,
-** quaternions, and matrices) and their functions to Lua operations. This file
-** is designed to be compatible with g++, clang++, and MSVC (prior to
-** https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=vs-2019)
-**
-** For example, to execute glm::axisAngleMatrix:
-**  (1) Ensure the top two elements on a Lua stack are compatible with vec<3>
-**      and a numeric type;
-**  (2) Retrieve those values from the Lua stack and convert them into the
-**      corresponding GLM types;
-**  (3) Invoke glm::axisAngleMatrix() for those converted values;
-**  (4) Convert the result back into something that is compatible with Lua;
-**  (5) Push that value onto the Lua stack.
+** quaternions, and matrices) and their functions to Lua operations. Designed to
+** be compatible with g++, clang++, and MSVC (prior to https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=vs-2019)
 **
 ** See Copyright Notice in lua.h
 */
@@ -59,22 +49,6 @@ extern LUA_API_LINKAGE {
   #include "ext/geom/polygon.hpp"
 #endif
 
-/* Macro for implicitly handling floating point drift where possible */
-#if defined(LUAGLM_DRIFT)
-  #define glm_drift_compensate(x) glm::normalize((x))
-#else
-  #define glm_drift_compensate(x) x
-#endif
-
-/*
-@@ LUAGLM_ALIGNED compensate for some SIMD library functions being broken in GLM.
-*/
-#if !defined(LUAGLM_ALIGNED)
-  #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
-    #define LUAGLM_ALIGNED
-  #endif
-#endif
-
 /*
 @@ LUAGLM_FALLTHROUGH Macro for informing the compiler a fallthrough is intentional.
 */
@@ -89,7 +63,7 @@ extern LUA_API_LINKAGE {
 #endif
 
 /*
-@@ LUAGLM_UNREACHABLE: Unreachable code path reached.
+@@ LUAGLM_UNREACHABLE Unreachable code path reached.
 */
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
   #define LUAGLM_UNREACHABLE() __builtin_unreachable()
@@ -102,8 +76,19 @@ extern LUA_API_LINKAGE {
 #endif
 
 /*
-@@ LUAGLM_REALIGN Used to mark that the alignment requirements of the LuaGLM
-** runtime and this binding library are different. See @ICCAlign.
+@@ LUAGLM_ALIGNED compensate for some SIMD library functions being broken in GLM.
+*/
+#if !defined(LUAGLM_ALIGNED)
+  #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+    #define LUAGLM_ALIGNED
+  #endif
+#endif
+
+/*
+@@ LUAGLM_REALIGN: A mark denoting the alignment requirements of the Lua runtime
+** and binding library are different. Therefore, vectors, quats, and matrices
+** require explicit load/stores when being parsed-from/pushed-to the Lua stack.
+** Also, see @ICCAlign.
 */
 #undef LUAGLM_REALIGN
 #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
@@ -112,6 +97,13 @@ extern LUA_API_LINKAGE {
   #endif
 #elif defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
   #error "Runtime is compiled with aligned types; so should the binding!"
+#endif
+
+/* Macro for implicitly handling floating point drift where possible */
+#if defined(LUAGLM_DRIFT)
+  #define glm_drift_compensate(x) glm::normalize((x))
+#else
+  #define glm_drift_compensate(x) x
 #endif
 
 /*
@@ -165,8 +157,8 @@ namespace glm {
   #endif
 #else
   #define glm_qua_realign(Qua, T, Q) glm_drift_compensate(Qua)
-  #define glm_vec_realign(Vec, L, T, Q) (Vec)
-  #define glm_mat_realign(Mat, C, R, T, Q) (Mat)
+  #define glm_vec_realign(Vec, L, T, Q) Vec
+  #define glm_mat_realign(Mat, C, R, T, Q) Mat
   #if GLM_MESSAGES == GLM_ENABLE
     #pragma message("LuaGLM: binding and runtime compiled with same alignment")
   #endif
@@ -209,16 +201,13 @@ static LUA_INLINE const TValue *glm_i2v(lua_State *L, int idx) {
 
 /*
 ** Common header for Lua Traits.
-**
-** @NOTE: inlining this declaration will come at a (significant) cost to the
-**  size of the shared-object/static-library.
 */
 #define LUA_TRAIT_QUALIFIER static GLM_INLINE
 
 /*
-** Override GLM_FORCE_INLINE for the 'heavier' binding functions. tointegerx and
-** tonumberx are quite heavy due the requirement that the binding can be a
-** complete superset of lmathlib.
+** Override GLM_INLINE for the 'heavier' interfacing functions. tointegerx and
+** tonumberx are quite heavy (used everywhere) due the requirement that the
+** binding can be a complete superset of lmathlib.
 **
 ** @TODO: Eventually include a compile-option.
 **  #define LUA_TRAIT_QUALIFIER_NIL static GLM_INLINE
@@ -226,19 +215,20 @@ static LUA_INLINE const TValue *glm_i2v(lua_State *L, int idx) {
 #define LUA_TRAIT_QUALIFIER_NIL static GLM_NEVER_INLINE
 
 /// <summary>
-/// Forward declare a (function) parameter trait.
+/// Forward declare a function-parameter trait. The interface that interacts w/
+/// a stack iterator to convert sequences of Lua objects into GLM parameters.
 ///
-/// This structure is used to interact with a stack iterator to convert sequences
-/// of parameters into GLM objects.
+/// The relationship of Lua objects to GLM parameters may not be one-to-one and
+/// multiple Lua objects may correspond to a single GLM parameter (and vice-versa).
 /// </summary>
 template<typename T, bool FastPath = false>
 struct gLuaTrait;
 
 /// <summary>
-/// A structure that interfaces with an active Lua state.
+/// A structure that iterates/interfaces with an active Lua state.
 ///
 /// This structure serves two purposes:
-/// (1) A simple stack iterator state.
+/// (1) A simple stack iterator/state.
 /// (2) Uses SFINAE for "Push" operations: placing a value (or values) on top of
 ///   the Lua stack that represent the GLM object; returning the number of
 ///   values placed onto the stack.
@@ -247,9 +237,9 @@ struct gLuaTrait;
 /// structures that does not require additional userdata/metatable definitions.
 ///
 /// @TODO:
-///   1. An interface for generating random numbers to replace std::rand(). This
-///     allows gLuaBase to invoke math_random instead of having to maintain
-///     multiple random states.
+///   1. Interface for generating random numbers to replace std::rand(). This
+///   allows gLuaBase to invoke math_random instead of having to maintain
+///   multiple random states.
 ///
 ///   2. Consider: https://en.cppreference.com/w/cpp/numeric/random
 /// </summary>
@@ -630,8 +620,8 @@ struct gLuaBase {
     }
 
     // This code-path is not implemented for the time being. All polygons must
-    // already exist on the Lua stack. Otherwise polygon_new will need to be
-    // duplicated here.
+    // already exist on the Lua stack, otherwise, polygon_new will need to be
+    // duplicated/called here.
     return luaL_error(LB.L, "not implemented");
   }
 #endif
@@ -713,17 +703,11 @@ struct gLuaAbstractTrait : glm::type<T> {
   /// Return true if the value starting at "idx" on the Lua stack corresponds
   /// to this type.
   /// </summary>
-  /// LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) {
+  /// LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx)
 
   /// <summary>
   /// Given a current stack state, create a GLM object corresponding to the
   /// "type" this trait is capturing.
-  ///
-  /// @NOTE: This function will be invoked for each GLM bound parameter.
-  ///   Force inlining by default (the compiler should be making this decision
-  ///   anyway) will significantly increase the size of the shared object.
-  ///   Instead, this function is beholden to GLM_FORCE_INLINE which is a
-  ///   compile-time toggle.
   /// </summary>
   /// LUA_TRAIT_QUALIFIER T Next(gLuaBase &LB)
 };
@@ -1362,8 +1346,8 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   LUA_MLM_END
 
 /*
-** Place values onto the Lua stack in an order-of-evaluation independent
-** fashion; returning the number of values placed onto the Lua stack.
+** Place values onto the Lua stack in an order-of-evaluation independent nature;
+** returning the number of values placed onto the Lua stack.
 */
 #define TRAITS_PUSH(...) VA_CALL(TRAITS_PUSH, __VA_ARGS__)
 

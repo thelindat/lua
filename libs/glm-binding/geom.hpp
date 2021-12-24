@@ -1663,7 +1663,7 @@ GLM_BINDING_QUALIFIER(polygon_newindex) {
     const size_t index = gLuaTrait<size_t>::Next(LB);
     const gLuaPolygon<>::point_trait::type value = gLuaPolygon<>::point_trait::Next(LB);
 
-    poly.p->Validate(L);
+    poly.p->Validate(LB.L);
     if (index >= 1 && index <= poly.size())
       poly[index - 1] = value;
     else if (index == poly.size() + 1)

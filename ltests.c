@@ -1827,36 +1827,36 @@ static struct X { int x; } x;
       lua_pushinteger(L, dimensions);
     }
     else if EQ ("pushvector2") {
-      lua_VecF x = cast_vec(getnum);
-      lua_VecF y = cast_vec(getnum);
+      lua_VecF x = cast(lua_VecF, getnum);
+      lua_VecF y = cast(lua_VecF, getnum);
       lua_pushvector2(L1, x, y);
     }
     else if EQ ("pushvector3") {
-      lua_VecF x = cast_vec(getnum);
-      lua_VecF y = cast_vec(getnum);
-      lua_VecF z = cast_vec(getnum);
+      lua_VecF x = cast(lua_VecF, getnum);
+      lua_VecF y = cast(lua_VecF, getnum);
+      lua_VecF z = cast(lua_VecF, getnum);
       lua_pushvector3(L1, x, y, z);
     }
     else if EQ ("pushvector4") {
-      lua_VecF x = cast_vec(getnum);
-      lua_VecF y = cast_vec(getnum);
-      lua_VecF z = cast_vec(getnum);
-      lua_VecF w = cast_vec(getnum);
+      lua_VecF x = cast(lua_VecF, getnum);
+      lua_VecF y = cast(lua_VecF, getnum);
+      lua_VecF z = cast(lua_VecF, getnum);
+      lua_VecF w = cast(lua_VecF, getnum);
       lua_pushvector4(L1, x, y, z, w);
     }
     else if EQ ("pushquat") {
-      lua_VecF w = cast_vec(getnum);
-      lua_VecF x = cast_vec(getnum);
-      lua_VecF y = cast_vec(getnum);
-      lua_VecF z = cast_vec(getnum);
+      lua_VecF w = cast(lua_VecF, getnum);
+      lua_VecF x = cast(lua_VecF, getnum);
+      lua_VecF y = cast(lua_VecF, getnum);
+      lua_VecF z = cast(lua_VecF, getnum);
       lua_pushquat(L1, w, x, y, z);
     }
     else if EQ ("pushvector") {
       lua_Float4 f4;
-      f4.x = cast_vec(getnum);
-      f4.y = cast_vec(getnum);
-      f4.z = cast_vec(getnum);
-      f4.w = cast_vec(getnum);
+      f4.x = cast(lua_VecF, getnum);
+      f4.y = cast(lua_VecF, getnum);
+      f4.z = cast(lua_VecF, getnum);
+      f4.w = cast(lua_VecF, getnum);
       lua_pushvector(L, f4, getnum);
     }
     else if EQ ("checkvector2") {

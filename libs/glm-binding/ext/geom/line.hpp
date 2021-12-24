@@ -13,8 +13,7 @@
 
 namespace glm {
   /// <summary>
-  /// A line in 3D spaced defined by an origin pointer and a direction,
-  /// extending to +/- infinity.
+  /// A line in defined by an origin pointer and a direction, extending to +/- infinity.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   struct Line {

@@ -77,22 +77,6 @@
   #define LUAGLM_API LUA_API
 #endif
 
-/*
-** LuaGLM offers vectors as a primitive type in the runtime and the default
-** primitive to each vector/quaternion is float. This increases the minimum size
-** to a Value/TaggedValue to 16-bytes (or 4 x float).
-**
-** By enabling "LUAGLM_NUMBER_TYPE", the primitive type of each vector becomes
-** lua_Number.
-*/
-#if defined(LUAGLM_NUMBER_TYPE) && LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE
-  #define GLM_FLOAT_TYPE LUA_NUMBER
-  #define GLM_INT_TYPE LUA_INTEGER
-#else
-  #define GLM_FLOAT_TYPE float
-  #define GLM_INT_TYPE int
-#endif
-
 /* Floating point glm-operation type */
 typedef GLM_FLOAT_TYPE glm_Float;
 
@@ -100,9 +84,8 @@ typedef GLM_FLOAT_TYPE glm_Float;
 typedef GLM_INT_TYPE glm_Integer;
 
 /*
-** Specific lua_Number definition to avoid the usage of long doubles within the
-** GLM API, avoiding "no matching constructor for initialization of
-** 'const detail::float_t<long double>'" compilation errors.
+** GLM specific lua_Number (re)definition to avoid the usage of long double
+** within GLM (generally unsupported).
 */
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
 typedef double glm_Number;
@@ -162,13 +145,12 @@ LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &size);
 LUAGLM_API bool glm_isquat(lua_State *L, int idx);
 
 /*
-** Return true if the element at the given index is a matrix, setting "size" to
-** the number of column vectors and "secondary" as the size of each column
-** component.
+** Return true if the element at the given index is a matrix, setting
+** "dimensions" to the dimensions tag of the matrix; see LUAGLM_MATRIX_TYPE.
 */
 LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &dimensions);
 
-/* Push a vector/quaternion onto the Lua stack. */
+/* Push a vector/quaternion onto the stack. */
 LUAGLM_API int glm_pushvec1(lua_State *L, const glm::vec<1, glm_Float, LUAGLM_Q> &v);
 LUAGLM_API int glm_pushvec2(lua_State *L, const glm::vec<2, glm_Float, LUAGLM_Q> &v);
 LUAGLM_API int glm_pushvec3(lua_State *L, const glm::vec<3, glm_Float, LUAGLM_Q> &v);
@@ -187,7 +169,7 @@ LUAGLM_API glm::vec<3, glm_Float, LUAGLM_Q> glm_tovec3(lua_State *L, int idx);
 LUAGLM_API glm::vec<4, glm_Float, LUAGLM_Q> glm_tovec4(lua_State *L, int idx);
 LUAGLM_API glm::qua<glm_Float, LUAGLM_Q> glm_toquat(lua_State *L, int idx);
 
-/* Push a matrix onto the Lua stack. */
+/* Push a matrix onto the stack. */
 LUAGLM_API int glm_pushmat2x2(lua_State *L, const glm::mat<2, 2, glm_Float, LUAGLM_Q> &m);
 LUAGLM_API int glm_pushmat2x3(lua_State *L, const glm::mat<2, 3, glm_Float, LUAGLM_Q> &m);
 LUAGLM_API int glm_pushmat2x4(lua_State *L, const glm::mat<2, 4, glm_Float, LUAGLM_Q> &m);

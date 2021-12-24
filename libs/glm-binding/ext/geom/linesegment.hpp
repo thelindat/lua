@@ -14,7 +14,7 @@
 
 namespace glm {
   /// <summary>
-  /// A line segment in 3D space is a finite line with a start and end point.
+  /// A line defined by a finite start and end point.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   struct LineSegment {

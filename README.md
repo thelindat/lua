@@ -743,6 +743,7 @@ these added features.
 Ordered by priority.
 
 1. Cleanup testing scripts/environment and publish.
+1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.

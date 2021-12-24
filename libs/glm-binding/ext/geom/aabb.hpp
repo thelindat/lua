@@ -21,7 +21,7 @@ namespace glm {
   /// <summary>
   /// An axis-aligned bounding box.
   ///
-  /// Notes: operator* creates an AABB and not an OBB.
+  /// @NOTE: operator* creates an AABB and not an OBB.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   struct AABB {
@@ -668,16 +668,6 @@ namespace glm {
            && aabb.minPoint.z <= point.z && point.z <= aabb.maxPoint.z;
   }
 
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && (GLM_ARCH & GLM_ARCH_SSE41_BIT)
-  // @EXPERIMENT
-  GLM_GEOM_QUALIFIER bool contains(const AABB<4, float, aligned_highp> &aabb, const vec<4, float, aligned_highp> &point) {
-    const glm_vec4 a = _mm_cmplt_ps(point.data, aabb.minPoint.data);
-    const glm_vec4 b = _mm_cmpgt_ps(point.data, aabb.maxPoint.data);
-    const glm_vec4 c = _mm_or_ps(a, b);
-    return _mm_vec3_allzero(c) != 0;
-  }
-#endif
-
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool contains(const AABB<3, T, Q> &aabb, const vec<3, T, Q> &minPoint, const vec<3, T, Q> &maxPoint) {
     return aabb.minPoint.x <= minPoint.x && maxPoint.x <= aabb.maxPoint.x
@@ -701,16 +691,6 @@ namespace glm {
   GLM_GEOM_QUALIFIER bool contains(const AABB<L, T, Q> &aabb, const AABB<L, T, Q> &otheraabb) {
     return contains(aabb, otheraabb.minPoint, otheraabb.maxPoint);
   }
-
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && (GLM_ARCH & GLM_ARCH_SSE41_BIT)
-  // @EXPERIMENT
-  GLM_GEOM_QUALIFIER bool contains(const AABB<4, float, aligned_highp> &aabb, const AABB<4, float, aligned_highp> &otheraabb) {
-    const glm_vec4 a = _mm_cmplt_ps(otheraabb.minPoint.data, aabb.minPoint.data);
-    const glm_vec4 b = _mm_cmpgt_ps(otheraabb.maxPoint.data, aabb.maxPoint.data);
-    const glm_vec4 c = _mm_or_ps(a, b);
-    return _mm_vec3_allzero(c) != 0;
-  }
-#endif
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool contains(const AABB<L, T, Q> &aabb, const LineSegment<L, T, Q> &lineSegment) {
@@ -948,18 +928,6 @@ namespace glm {
            && other.minPoint.y < aabb.maxPoint.y
            && other.minPoint.z < aabb.maxPoint.z;
   }
-
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && (GLM_ARCH & GLM_ARCH_SSE41_BIT)
-  /// <summary>
-  /// @EXPERIMENT: Depends on SSE41
-  /// </summary>
-  GLM_GEOM_QUALIFIER bool intersects(const AABB<4, float, aligned_highp> &aabb, const AABB<4, float, aligned_highp> &other) {
-    const glm_vec4 a = _mm_cmpge_ps(aabb.minPoint.data, other.maxPoint.data);
-    const glm_vec4 b = _mm_cmpge_ps(other.minPoint.data, aabb.maxPoint.data);
-    const glm_vec4 c = _mm_or_ps(a, b);
-    return _mm_vec3_allzero(c) != 0;
-  }
-#endif
 
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<2, T, Q> &aabb, const AABB<2, T, Q> &other) {

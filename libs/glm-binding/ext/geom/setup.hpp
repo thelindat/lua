@@ -32,11 +32,6 @@
   #define GLM_CONFIG_DEFAULTED_DEFAULT_CTOR GLM_CONFIG_DEFAULTED_FUNCTIONS
 #endif
 
-/* @COMPAT: GLM_COMPILER_HIP introduced in 0.9.9.9 */
-#if !defined(GLM_COMPILER_HIP)
-  #define GLM_COMPILER_HIP 0
-#endif
-
 /* Redefinition of GLM_FUNC_QUALIFIER for "geom/" */
 #define GLM_GEOM_QUALIFIER static GLM_FUNC_QUALIFIER
 
@@ -51,6 +46,11 @@
   #define GLM_GEOM_EXCEPTIONS 1
 #else
   #define GLM_GEOM_EXCEPTIONS 0
+#endif
+
+/* @COMPAT: GLM_COMPILER_HIP introduced in 0.9.9.9 */
+#if !defined(GLM_COMPILER_HIP)
+  #define GLM_COMPILER_HIP 0
 #endif
 
 /* gtx/string_cast.hpp is available */
@@ -71,18 +71,6 @@
     } while (0)
 #else
   #define GLM_GEOM_ASSUME(x, onError)
-#endif
-
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && (GLM_ARCH & GLM_ARCH_SSE41_BIT)
-  /*
-  ** True if the x,y,z components of the component vector are all zero. Note "v"
-  ** should be the result to some binary operation, e.g., _mm_xor_ps, _mm_or_ps,
-  ** _mm_and_ps, etc.
-  **
-  ** @NOTE: Experimental until the geom/ SIMD changes are completed, 'set_epi32'
-  **  takes int parameters anyway.
-  */
-  #define _mm_vec3_allzero(v) _mm_testz_si128(_mm_castps_si128(v), _mm_set_epi32(0, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU))
 #endif
 
 /* Forward declare all structures. */

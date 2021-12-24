@@ -33,7 +33,7 @@
 **  types, if ones are not already defined, with lglmlib on load.
 @@ LUAGLM_TYPE_COERCION Enable string-to-number type coercion when parsing
 **  arguments from the Lua stack. For this binding library to be a superset of
-**  lmathlib, e.g., math = require('glm'), this flag must be enabled
+**  lmathlib, e.g., math = require('glm'), this flag must be enabled.
 @@ LUAGLM_REPLACE_MATH Force replace _G.math with the binding library on open.
 @@ LUAGLM_RECYCLE Enable object recycling: trailing/unused parameters in a
 **  function call, e.g., matrix objects, are used as a result store.
@@ -41,7 +41,7 @@
 **  force usage of LUAGLM_RECYCLE. Note, polygons other geom/ structures ignore
 **  this flag (this may change).
 @@ LUAGLM_SAFELIB Enable a general try/catch wrapper for API/binding functions.
-**  This should likely be disabled.
+**  This should not be enabled.
 **
 ** Experimental:
 @@ LUAGLM_NUMBER_ARGS Control where the lua_Number-to-float typecasting occurs

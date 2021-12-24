@@ -1,9 +1,8 @@
 /*
 ** $Id: matrix_extensions.hpp $
 **
-** matrix-specific extensions to the glm API:
-**  1. API-completing functions, often of the form of supporting mat<3, 4> and
-**     mat<4, 3> matrices;
+** matrix-specific extensions to GLM:
+**  1. API-completing functions, often to support mat<3, 4> and mat<4, 3>;
 **  2. Functions emulated/ported from other popular vector-math libraries.
 **
 ** See Copyright Notice in lua.h

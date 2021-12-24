@@ -12,13 +12,13 @@
 #include <glm/glm.hpp>
 
 /*
-** @COMPAT: GCC explicitly forbids using forceinline on variadic functions.
-**  Compiling with glm/gtx/string_cast with GLM_FORCE_INLINE will lead to errors
+** @GLMFix: GCC forbids forceinline on variadic functions. Compiling with
+** glm/gtx/string_cast with GLM_FORCE_INLINE will lead to errors
 */
 #if (GLM_COMPILER & GLM_COMPILER_GCC)
-  #define GLM_STRING_FUNC_QUALIFIER
+  #define LUAGLM_STRFUNC_QUALIFIER
 #else
-  #define GLM_STRING_FUNC_QUALIFIER GLM_FUNC_QUALIFIER
+  #define LUAGLM_STRFUNC_QUALIFIER GLM_FUNC_QUALIFIER
 #endif
 
 /*
@@ -27,22 +27,22 @@
 ** ===================================================================
 */
 
-/* Buffer size of format header */
-#define GLM_FORMAT_BUFFER 256
+/* Buffer size of format string/text */
+#define LUAGLM_FMT_LEN 256
 
 /* Simplify template casting */
-#define GLM_STRING_CAST(X) static_cast<typename lglmcast<T>::value_type>((X))
+#define LUAGLM_STRCAST(X) static_cast<typename lglmcast<T>::value_type>((X))
 
 /* Common lglm_compute_to_string header */
-#define GLM_STRING_HEADER                                                              \
-  char const *PrefixStr = lglmprefix<T>::value();                                      \
-  char const *LiteralStr = lglmliteral<T, std::numeric_limits<T>::is_iec559>::value(); \
-  char format_text[GLM_FORMAT_BUFFER];
+#define LUAGLM_STRHEADER                                                             \
+  char const *Prefix = lglmprefix<T>::value();                                       \
+  char const *Lilteral = lglmliteral<T, std::numeric_limits<T>::is_iec559>::value(); \
+  char format_text[LUAGLM_FMT_LEN];
 
 /* Forward declare functor for pushing Lua strings without intermediate std::string */
 namespace glm {
 namespace detail {
-  static GLM_STRING_FUNC_QUALIFIER int _vsnprintf(char *buff, size_t buff_len, const char *msg, ...) {
+  static LUAGLM_STRFUNC_QUALIFIER int _vsnprintf(char *buff, size_t buff_len, const char *msg, ...) {
     int length = 0;
 
     va_list list;
@@ -85,17 +85,17 @@ namespace detail {
   /// string_cast.inl: prefix without the dependency
   /// </summary>
   template<typename T> struct lglmprefix{};
-  template<> struct lglmprefix<float> { GLM_FUNC_QUALIFIER static char const * value() { return ""; } };
-  template<> struct lglmprefix<double> { GLM_FUNC_QUALIFIER static char const * value() { return "d"; } };
-  template<> struct lglmprefix<bool> { GLM_FUNC_QUALIFIER static char const * value() { return "b"; } };
-  template<> struct lglmprefix<uint8_t> { GLM_FUNC_QUALIFIER static char const * value() { return "u8"; } };
-  template<> struct lglmprefix<int8_t> { GLM_FUNC_QUALIFIER static char const * value() { return "i8"; } };
-  template<> struct lglmprefix<uint16_t> { GLM_FUNC_QUALIFIER static char const * value() { return "u16"; } };
-  template<> struct lglmprefix<int16_t> { GLM_FUNC_QUALIFIER static char const * value() { return "i16"; } };
-  template<> struct lglmprefix<uint32_t> { GLM_FUNC_QUALIFIER static char const * value() { return "u"; } };
-  template<> struct lglmprefix<int32_t> { GLM_FUNC_QUALIFIER static char const * value() { return "i"; } };
-  template<> struct lglmprefix<uint64_t> { GLM_FUNC_QUALIFIER static char const * value() { return "u64"; } };
-  template<> struct lglmprefix<int64_t> { GLM_FUNC_QUALIFIER static char const * value() { return "i64"; } };
+  template<> struct lglmprefix<float> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };
+  template<> struct lglmprefix<double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } }; // Changed for LuaGLM
+  template<> struct lglmprefix<bool> { GLM_FUNC_QUALIFIER static char const *value() { return "b"; } };
+  template<> struct lglmprefix<uint8_t> { GLM_FUNC_QUALIFIER static char const *value() { return "u8"; } };
+  template<> struct lglmprefix<int8_t> { GLM_FUNC_QUALIFIER static char const *value() { return "i8"; } };
+  template<> struct lglmprefix<uint16_t> { GLM_FUNC_QUALIFIER static char const *value() { return "u16"; } };
+  template<> struct lglmprefix<int16_t> { GLM_FUNC_QUALIFIER static char const *value() { return "i16"; } };
+  template<> struct lglmprefix<uint32_t> { GLM_FUNC_QUALIFIER static char const *value() { return "u"; } };
+  template<> struct lglmprefix<int32_t> { GLM_FUNC_QUALIFIER static char const *value() { return "i"; } };
+  template<> struct lglmprefix<uint64_t> { GLM_FUNC_QUALIFIER static char const *value() { return "u64"; } };
+  template<> struct lglmprefix<int64_t> { GLM_FUNC_QUALIFIER static char const *value() { return "i64"; } };
 
   template<typename matType>
   struct lglm_compute_to_string { };
@@ -103,30 +103,30 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<1, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<1, glm_Float> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%svec1(%s)", PrefixStr, LiteralStr);
-      return _vsnprintf(buff, buff_len, format_text, GLM_STRING_CAST(x[0]));
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec1(%s)", Prefix, Lilteral);
+      return _vsnprintf(buff, buff_len, format_text, LUAGLM_STRCAST(x[0]));
     }
   };
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<2, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<2, glm_Float> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%svec2(%s, %s)", PrefixStr, LiteralStr, LiteralStr);
-      return _vsnprintf(buff, buff_len, format_text, GLM_STRING_CAST(x[0]), GLM_STRING_CAST(x[1]));
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec2(%s, %s)", Prefix, Lilteral, Lilteral);
+      return _vsnprintf(buff, buff_len, format_text, LUAGLM_STRCAST(x[0]), LUAGLM_STRCAST(x[1]));
     }
   };
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<3, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<3, glm_Float> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%svec3(%s, %s, %s)", PrefixStr, LiteralStr, LiteralStr, LiteralStr);
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec3(%s, %s, %s)", Prefix, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0]),
-        GLM_STRING_CAST(x[1]),
-        GLM_STRING_CAST(x[2])
+        LUAGLM_STRCAST(x[0]),
+        LUAGLM_STRCAST(x[1]),
+        LUAGLM_STRCAST(x[2])
       );
     }
   };
@@ -134,13 +134,13 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<4, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<4, glm_Float> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%svec4(%s, %s, %s, %s)", PrefixStr, LiteralStr, LiteralStr, LiteralStr, LiteralStr);
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec4(%s, %s, %s, %s)", Prefix, Lilteral, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0]),
-        GLM_STRING_CAST(x[1]),
-        GLM_STRING_CAST(x[2]),
-        GLM_STRING_CAST(x[3])
+        LUAGLM_STRCAST(x[0]),
+        LUAGLM_STRCAST(x[1]),
+        LUAGLM_STRCAST(x[2]),
+        LUAGLM_STRCAST(x[3])
       );
     }
   };
@@ -148,13 +148,13 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<qua<T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, qua<glm_Float> const &q) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%squat(%s, {%s, %s, %s})", PrefixStr, LiteralStr, LiteralStr, LiteralStr, LiteralStr);
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%squat(%s, {%s, %s, %s})", Prefix, Lilteral, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(q.w),
-        GLM_STRING_CAST(q.x),
-        GLM_STRING_CAST(q.y),
-        GLM_STRING_CAST(q.z)
+        LUAGLM_STRCAST(q.w),
+        LUAGLM_STRCAST(q.x),
+        LUAGLM_STRCAST(q.y),
+        LUAGLM_STRCAST(q.z)
       );
     }
   };
@@ -162,16 +162,16 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 2, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 2, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat2x2((%s, %s), (%s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x2((%s, %s), (%s, %s))",
+        Prefix,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1])
       );
     }
   };
@@ -179,16 +179,16 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 3, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat2x3((%s, %s, %s), (%s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x3((%s, %s, %s), (%s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2])
       );
     }
   };
@@ -196,16 +196,16 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 4, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 4, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat2x4((%s, %s, %s, %s), (%s, %s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x4((%s, %s, %s, %s), (%s, %s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]), GLM_STRING_CAST(x[0][3]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2]), GLM_STRING_CAST(x[1][3])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]), LUAGLM_STRCAST(x[0][3]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2]), LUAGLM_STRCAST(x[1][3])
       );
     }
   };
@@ -213,18 +213,18 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 2, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 2, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat3x2((%s, %s), (%s, %s), (%s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x2((%s, %s), (%s, %s), (%s, %s))",
+        Prefix,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1])
       );
     }
   };
@@ -232,18 +232,18 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 3, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 3, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat3x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1]), GLM_STRING_CAST(x[2][2])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1]), LUAGLM_STRCAST(x[2][2])
       );
     }
   };
@@ -251,18 +251,18 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 4, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 4, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat3x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]), GLM_STRING_CAST(x[0][3]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2]), GLM_STRING_CAST(x[1][3]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1]), GLM_STRING_CAST(x[2][2]), GLM_STRING_CAST(x[2][3])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]), LUAGLM_STRCAST(x[0][3]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2]), LUAGLM_STRCAST(x[1][3]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1]), LUAGLM_STRCAST(x[2][2]), LUAGLM_STRCAST(x[2][3])
       );
     }
   };
@@ -270,20 +270,20 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 2, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 2, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat4x2((%s, %s), (%s, %s), (%s, %s), (%s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x2((%s, %s), (%s, %s), (%s, %s), (%s, %s))",
+        Prefix,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral,
+        Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1]),
-        GLM_STRING_CAST(x[3][0]), GLM_STRING_CAST(x[3][1])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1]),
+        LUAGLM_STRCAST(x[3][0]), LUAGLM_STRCAST(x[3][1])
       );
     }
   };
@@ -291,20 +291,20 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 3, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat4x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1]), GLM_STRING_CAST(x[2][2]),
-        GLM_STRING_CAST(x[3][0]), GLM_STRING_CAST(x[3][1]), GLM_STRING_CAST(x[3][2])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1]), LUAGLM_STRCAST(x[2][2]),
+        LUAGLM_STRCAST(x[3][0]), LUAGLM_STRCAST(x[3][1]), LUAGLM_STRCAST(x[3][2])
       );
     }
   };
@@ -312,20 +312,20 @@ namespace detail {
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 4, T, Q>> {
     static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 4, T, Q> const &x) {
-      GLM_STRING_HEADER
-      _vsnprintf(format_text, GLM_FORMAT_BUFFER, "%smat4x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
-        PrefixStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr,
-        LiteralStr, LiteralStr, LiteralStr, LiteralStr
+      LUAGLM_STRHEADER
+      _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
+        Prefix,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral,
+        Lilteral, Lilteral, Lilteral, Lilteral
       );
 
       return _vsnprintf(buff, buff_len, format_text,
-        GLM_STRING_CAST(x[0][0]), GLM_STRING_CAST(x[0][1]), GLM_STRING_CAST(x[0][2]), GLM_STRING_CAST(x[0][3]),
-        GLM_STRING_CAST(x[1][0]), GLM_STRING_CAST(x[1][1]), GLM_STRING_CAST(x[1][2]), GLM_STRING_CAST(x[1][3]),
-        GLM_STRING_CAST(x[2][0]), GLM_STRING_CAST(x[2][1]), GLM_STRING_CAST(x[2][2]), GLM_STRING_CAST(x[2][3]),
-        GLM_STRING_CAST(x[3][0]), GLM_STRING_CAST(x[3][1]), GLM_STRING_CAST(x[3][2]), GLM_STRING_CAST(x[3][3])
+        LUAGLM_STRCAST(x[0][0]), LUAGLM_STRCAST(x[0][1]), LUAGLM_STRCAST(x[0][2]), LUAGLM_STRCAST(x[0][3]),
+        LUAGLM_STRCAST(x[1][0]), LUAGLM_STRCAST(x[1][1]), LUAGLM_STRCAST(x[1][2]), LUAGLM_STRCAST(x[1][3]),
+        LUAGLM_STRCAST(x[2][0]), LUAGLM_STRCAST(x[2][1]), LUAGLM_STRCAST(x[2][2]), LUAGLM_STRCAST(x[2][3]),
+        LUAGLM_STRCAST(x[3][0]), LUAGLM_STRCAST(x[3][1]), LUAGLM_STRCAST(x[3][2]), LUAGLM_STRCAST(x[3][3])
       );
     }
   };
@@ -353,11 +353,10 @@ namespace glm {
 namespace hash {
 
   /// <summary>
+  /// @TODO:
   /// Temporary solution as the previous implementation was slow. A collection
   /// of 'spatial hashing' algorithms exist for vector-type structures that
   /// should be considered.
-  ///
-  /// @TODO: Better
   /// </summary>
   template<typename T>
   struct lglm_hash {
@@ -441,6 +440,6 @@ namespace hash {
 
 /* }================================================================== */
 
-#undef GLM_STRING_HEADER
+#undef LUAGLM_STRHEADER
 
 #endif

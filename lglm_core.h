@@ -63,8 +63,7 @@ static LUA_INLINE lu_byte glm_variant (grit_length_t dimensions) {
 * makevariant(LUA_TVECTOR, X) for some 'X'
 */
 static LUA_INLINE grit_length_t glm_dimensions (lu_byte rtt) {
-  const lu_byte D = (rtt == LUA_VQUAT) ? 4 : (2 + ((rtt & 0x30) >> 4));
-  return cast(grit_length_t, D);
+  return cast(grit_length_t, (rtt == LUA_VQUAT) ? 4 : (2 + ((rtt & 0x30) >> 4)));
 }
 
 /*
@@ -101,7 +100,7 @@ static LUA_INLINE int vecgets (const TValue *obj, const char *k, StkId res) {
     case 'y': case 'g': case '2': _n = 1; break;
     case 'z': case 'b': case '3': _n = 2; break;
     case 'w': case 'a': case '4': _n = 3; break;
-    case 'n': {  /* Dimension fields takes priority over metamethods */
+    case 'n': {  /* Dimension field takes priority over TM_INDEX */
       setivalue(s2v(res), cast(lua_Integer, glm_dimensions(ttypetag(obj))));
       return LUA_TNUMBER;
     }

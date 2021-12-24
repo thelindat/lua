@@ -1,7 +1,7 @@
 /*
 ** $Id: vector_extensions.hpp $
 **
-** Vector-specific extensions to the glm API:
+** Vector-specific extensions to GLM:
 **  1. API-completing functions, usually handling cases of functions without
 **     genType or vec<1, genType> declarations;
 **  2. Vector support for C99/C++11 <math> functions;
@@ -49,9 +49,9 @@ namespace glm {
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> up() {
       return vec<3, T, Q>(
 #if defined(GLM_FORCE_Z_UP)
-        T(0), T(0), T(1)
+      T(0), T(0), T(1)
 #else
-        T(0), T(1), T(0)
+      T(0), T(1), T(0)
 #endif
       );
     }
@@ -60,9 +60,9 @@ namespace glm {
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> forwardLH() {
       return vec<3, T, Q>(
 #if defined(GLM_FORCE_Z_UP)
-        T(0), T(-1), T(0)
+      T(0), T(-1), T(0)
 #else
-        T(0), T(0), T(1)
+      T(0), T(0), T(1)
 #endif
       );
     }
@@ -71,9 +71,9 @@ namespace glm {
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> forwardRH() {
       return vec<3, T, Q>(
 #if defined(GLM_FORCE_Z_UP)
-        T(0), T(1), T(0)
+      T(0), T(1), T(0)
 #else
-        T(0), T(0), T(-1)
+      T(0), T(0), T(-1)
 #endif
       );
     }
@@ -351,7 +351,7 @@ namespace glm {
     return scaleLength(vec<1, genType>(x), newLength).x;
   }
 
-  /* Cross produce with specific axis */
+  /* Cross product with specific axis */
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> crossXAxis(const vec<3, T, Q> &v) {
@@ -1440,8 +1440,7 @@ namespace glm {
     struct compute_rand<1, uint8, glm::defaultp> {
       GLM_FUNC_QUALIFIER static vec<1, uint8, glm::defaultp> call() {
         return vec<1, uint8, glm::defaultp>(static_cast<uint8>(
-          std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())
-        ));
+          std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
       }
     };
   }

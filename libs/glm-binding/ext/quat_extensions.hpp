@@ -1,15 +1,15 @@
 /*
 ** $Id: quat_extensions.hpp $
 **
-** Quaternion-specific extensions to the glm API:
+** Quaternion-specific extensions to GLM:
 **  1. API-completing functions;
-**  2. Functions that exist for rotation matrices but not for quaternions
-**     (without a prior call to glm::toQuat());
+**  2. Functions that exist for rotation matrices but not for quaternions; see
+**     PARSE_ROTATION_MATRIX.
 **  3. Functions emulated/ported from other popular vector-math libraries.
 **
 ** See Copyright Notice in lua.h
 **
-** @TODO: Also consider adding SIMD support for some of the quatEulerAngle functions
+** @TODO: Consider SIMD support for some of the quatEulerAngle functions
 */
 #ifndef EXT_EXTENSION_QUAT_HPP
 #define EXT_EXTENSION_QUAT_HPP

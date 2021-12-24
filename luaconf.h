@@ -843,20 +843,16 @@
 
 /*
 ** {==================================================================
-** @DEPRECATED: grit-lua vector API
-**
 ** Libraries linked against this runtime that use any GLM/vector feature will
 ** require knowledge of changes to:
-**
 **    1. LUAGLM_NUMBER_TYPE
-**    2. GLM_FORCE_SIZE_T_LENGTH
-**    3. GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+**    2. LUAGLM_FORCES_ALIGNED_GENTYPES*
+**    3. GLM_FORCE_SIZE_T_LENGTH
 **
-** In addition GLM_FORCE_QUAT_DATA_XYZW (formerly GLM_FORCE_QUAT_DATA_WXYZ)
-** needs to be considered for quaternions when operating within the C boundary.
+** In addition GLM_FORCE_QUAT_DATA_XYZW, formerly GLM_FORCE_QUAT_DATA_WXYZ,
+** requires consideration for quaternions when operating within the C boundary.
 ** ===================================================================
 */
-
 #define LUA_GRIT_API
 
 /* @NOTE: GRIT_LONG_FLOAT has been deprecated and replaced by LUAGLM_NUMBER_TYPE */
@@ -864,12 +860,25 @@
   #define LUAGLM_NUMBER_TYPE
 #endif
 
+/*
+@@ LUAGLM_NUMBER_TYPE Use lua_Number/lua_Integer as the primitive-type of each
+** vector and matrix component; otherwise use float/int.
+**
+** As vectors are offered as a base *Value* in the runtime. The minimum size of
+** each Value is increased to *at least* 16-bytes or 4xFloat (from 8-bytes).
+** It is advised to not use this macro until vectors-as-collectible types is
+** experimented with.
+*/
 #if defined(LUAGLM_NUMBER_TYPE) && LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE
   #define LUA_VEC_TYPE LUA_FLOAT_TYPE
   #define LUA_VEC_NUMBER LUA_NUMBER
+  #define GLM_FLOAT_TYPE LUA_NUMBER
+  #define GLM_INT_TYPE LUA_INTEGER
 #else
   #define LUA_VEC_TYPE LUA_FLOAT_FLOAT
   #define LUA_VEC_NUMBER float
+  #define GLM_FLOAT_TYPE float
+  #define GLM_INT_TYPE int
 #endif
 
 /*
@@ -879,7 +888,7 @@
 **    1. GLM_CONFIG_XYZW_ONLY is not enabled; and
 **    2. GLM_CONFIG_ANONYMOUS_STRUCT == GLM_ENABLE
 */
-#if !defined(RC_INVOKED) /* ignore MSVC resource compiler issues */
+#if !defined(RC_INVOKED)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
   #if LUA_VEC_TYPE == LUA_FLOAT_DOUBLE
     #error "__m256 advanced vector extnesions are not supported!"
@@ -899,9 +908,8 @@
 #endif
 
 /*
-@@ LUAGLM_USE_ANONYMOUS_STRUCT If the compiler supports anonymous structs. This
-** implementation should still be C89/C99 compatible where possible; inspired by
-** cglm.
+@@ LUAGLM_USE_ANONYMOUS_STRUCT If the compiler supports anonymous structs. Note,
+** this implementation should still be C89/C99 compatible where possible.
 */
 #if !defined(LUAGLM_USE_ANONYMOUS_STRUCT)
   #if defined(LUAGLM_NO_ANONYMOUS_STRUCT)
@@ -945,9 +953,9 @@
 #define LUAGLM_MATRIX_4x4 LUAGLM_MATRIX_TYPE(4, 4)
 
 /*
-** GLM_FORCE_SIZE_T_LENGTH forces length_t to be size_t. Otherwise it is
-** defined as an int (as GLSL declares it). This type requires synchronization
-** across the C and CPP boundaries.
+** GLM_FORCE_SIZE_T_LENGTH forces length_t to be size_t. Otherwise, defined as
+** an int as GLSL declares it. This requires synchronization across the C and
+** CPP boundaries.
 */
 #if defined(GLM_FORCE_SIZE_T_LENGTH)
   typedef size_t grit_length_t;
@@ -962,9 +970,9 @@ typedef lua_VecF lua_CFloat3[3]; /* @TODO: @ImplicitAlign */
 typedef lua_VecF lua_CFloat4[4];
 
 /*
-** grit-lua vector and quat extension. This structure is intended to be a
-** byte-wise equivalent/alias to glmVector in lglm.hpp and operates within the C
-** boundaries of the Lua runtime.
+** vector and quaternion extension. This structure is intended to be a byte-wise
+** equivalent/alias to glmVector in lglm.hpp and operates within the C boundary
+** of the Lua runtime.
 */
 LUAGLM_ALIGNED_TYPEDEF(union, lua_Float4) {
   lua_CFloat4 raw;
@@ -980,11 +988,11 @@ LUAGLM_ALIGNED_TYPEDEF(union, lua_Float4) {
 lua_Float4;
 
 /*
-** grit-lua column-oriented matrix extension. This structure is intended to be a
-** byte-wise equivalent to glmMatrix in lglm.hpp and operates within the C
-** boundaries of the Lua runtime.
+** Column-oriented matrix extension. This structure is intended to be equivalent
+** to glmMatrix in lglm.hpp and operates within the C boundaries of the Lua
+** runtime.
 **
-** When GLM_FORCE_DEFAULT_ALIGNED_GENTYPES is enabled (attempt to) mirror the
+** When GLM_FORCE_DEFAULT_ALIGNED_GENTYPES is enabled: (attempt to) mirror the
 ** alignment specified in glm/detail/qualifier.hpp. Note GLM uses unions to
 ** implicitly load and store values instead of explicit _mm_loadu_ps and
 ** _mm_storeu_ps calls.
@@ -993,9 +1001,10 @@ lua_Float4;
 ** make alignment consistent across different compilers. Avoiding issues of
 ** aligned loads, unaligned loads, auto-aligning, etc.
 *
-** These safeguards will not be required if LuaGLM ever becomes a strictly C++
-** compiled runtime. As the "C" parts of this runtime may use the structs
-** defined in lglm.hpp
+** These safeguards are not be required if LuaGLM is compiled strictly as C++ as
+** the "C" parts of this runtime may use the structs defined in lglm.hpp. Note,
+** default constructors (or lack-thereof) may require special handling with
+** certain compiler configurations.
 **
 ** @ImplicitAlign:
 ** @TODO: Compensate for: detail::storage<3, T, detail::is_aligned<Q>::value>::type

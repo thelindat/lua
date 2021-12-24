@@ -15,8 +15,8 @@
 
 namespace glm {
   /// <summary>
-  /// A line in 3D spaced defined by an origin pointer and a direction,
-  /// extending to infinity in one direction.
+  /// A line by an origin point and a direction: extending to infinity in one
+  /// direction.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   struct Ray {
