@@ -745,6 +745,7 @@ Ordered by priority.
 1. Cleanup testing scripts/environment and publish.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
+1. O3DE AzCore/Math and behaviorContext aliasing (where possible).
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. [binding](libs/glm-binding): Replace `glm/gtc/random.{inl,hpp}` with a variant that takes advantage of CXX11s [Pseudo-random number generation](https://en.cppreference.com/w/cpp/numeric/random) facilities (and unify it with `math.random`).
