@@ -144,18 +144,15 @@
 */
 #if defined(LUAGLM_EXT_CHRONO)
 
-#define LUA_SYS_CLOCK /* os_nanotime enabled */
-#define LUA_SYS_RDTSC /* os_rdtsc & os_rdtscp enabled */
-
+#define LUA_SYS_CLOCK /* high resolution timers enabled */
 #if defined(__cplusplus) && __cplusplus >= 201103L
   #include <chrono>
-/* https://docs.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps */
 #elif defined(_WIN32)
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
+  static LARGE_INTEGER info;
 
   /* Ensure the performance counter frequency is initialized. */
-  static LARGE_INTEGER info;
   static LUA_INLINE void InitPerformanceCounter(void) {
     static int init = 1;
     if (init) {
@@ -178,16 +175,9 @@
   #warning "A nanosecond resolution clock is not available."
 #endif
 
-#if defined(_MSC_VER) && defined(_M_X64)
-  #include <intrin.h>
-#elif defined(__GNUC__) && defined(__has_include) && __has_include(<x86intrin.h>)
-  #include <x86intrin.h>
-#else
-  #undef LUA_SYS_RDTSC
-#endif
-
 #if defined(LUA_SYS_CLOCK)
 #include "llimits.h"
+
 static int os_deltatime(lua_State *L) {
   const lua_Unsigned end = l_castS2U(luaL_checkinteger(L, 1));
   const lua_Unsigned start = l_castS2U(luaL_checkinteger(L, 2));
@@ -208,15 +198,15 @@ static int os_microtime(lua_State *L) {
   l_pushtime(L, ((1000000L * now.QuadPart) / info.QuadPart));
 #elif defined(HAVE_CLOCK_GETTIME)
   struct timespec spec;
-  if (clock_gettime(CLOCK_MONOTONIC, &spec) != 0)
+  if (clock_gettime(CLOCK_MONOTONIC, &spec) != 0) {
     return luaL_error(L, "clock_gettime() failed:%s", strerror(errno));
-
+  }
   l_pushtime(L, (spec.tv_sec * 1000000L) + (spec.tv_nsec / 1000L));
 #else
   struct timeval spec;
-  if (gettimeofday(&spec, NULL) < 0)
+  if (gettimeofday(&spec, NULL) < 0) {
     return luaL_error(L, "gettimeofday() failed!:%s", strerror(errno));
-
+  }
   l_pushtime(L, (spec.tv_sec * 1000000L) + spec.tv_usec);
 #endif
   return 1;
@@ -236,15 +226,15 @@ static int os_nanotime(lua_State *L) {
   l_pushtime(L, ((1000000000L * now.QuadPart) / info.QuadPart));
 #elif defined(HAVE_CLOCK_GETTIME)
   struct timespec spec;
-  if (clock_gettime(CLOCK_MONOTONIC, &spec) != 0)
+  if (clock_gettime(CLOCK_MONOTONIC, &spec) != 0) {
     return luaL_error(L, "clock_gettime() failed:%s", strerror(errno));
-
+  }
   l_pushtime(L, (spec.tv_sec * 1000000000L) + spec.tv_nsec);
 #else
   struct timeval spec;
-  if (gettimeofday(&spec, NULL) < 0)
+  if (gettimeofday(&spec, NULL) < 0) {
     return luaL_error(L, "gettimeofday() failed!:%s", strerror(errno));
-
+  }
   l_pushtime(L, (spec.tv_sec * 1000000000L) + (spec.tv_usec * 1000L));
 #endif
   return 1;
@@ -253,9 +243,19 @@ static int os_nanotime(lua_State *L) {
 #endif
 
 /*
-** Sample the rdtsc (Read Time-Stamp Counter) instruction. Returning the process
-** time stamp: cycle references since last reset.
+@@ LUA_SYS_RDTSC: Sample the rdtsc instruction and return the processor
+** timestamp.
 */
+#if defined(_MSC_VER) && defined(_M_X64)
+  #include <intrin.h>
+  #define LUA_SYS_RDTSC
+#elif defined(__GNUC__) && defined(__x86_64__)
+  #if defined(__has_include) && __has_include(<x86intrin.h>)
+    #include <x86intrin.h>
+    #define LUA_SYS_RDTSC
+  #endif
+#endif
+
 #if defined(LUA_SYS_RDTSC)
 static int os_rdtsc(lua_State *L) {
   l_pushtime(L, __rdtsc());

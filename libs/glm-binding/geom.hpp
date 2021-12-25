@@ -1538,7 +1538,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
   GLM_BINDING_BEGIN
   const int top = LB.top();
   if (!lua_isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
-    return luaL_argerror(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
+    return GLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
   }
 
   // Create a new polygon userdata.
@@ -1596,7 +1596,7 @@ GLM_BINDING_QUALIFIER(polygon_to_string) {
     return 1;
   }
 
-  return luaL_argerror(L, 1, "Polygon");
+  return GLM_ARG_ERROR(L, 1, "Polygon");
 }
 
 /// <summary>
@@ -1682,8 +1682,9 @@ extern "C" {
   /// </summary>
   static int polygon_iterator(lua_State *L) {
     GLM_BINDING_BEGIN
-    if (!gLuaPolygon<>::Is(LB.L, LB.idx))
-      return luaL_argerror(LB.L, LB.idx, gLuaPolygon<>::Label());
+    if (!gLuaPolygon<>::Is(LB.L, LB.idx)) {
+      return GLM_ARG_ERROR(LB.L, LB.idx, gLuaPolygon<>::Label());
+    }
 
     lua_settop(LB.L, LB.idx + 1);  // create a 2nd argument if there isn't one
     const gLuaPolygon<>::type poly = gLuaPolygon<>::Next(LB);  // Polygon

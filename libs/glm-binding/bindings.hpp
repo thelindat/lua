@@ -63,6 +63,17 @@ extern LUA_API_LINKAGE {
 #endif
 
 /*
+@@ LUAGLM_NO_RETURN non-return type
+*/
+#if defined(__GNUC__) || __has_attribute(__noreturn__)
+  #define LUAGLM_NO_RETURN void __attribute__((noreturn))
+#elif defined(_MSC_VER) && _MSC_VER >= 1200
+  #define LUAGLM_NO_RETURN void __declspec(noreturn)
+#else
+  #define LUAGLM_NO_RETURN void
+#endif
+
+/*
 @@ LUAGLM_UNREACHABLE Unreachable code path reached.
 */
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
@@ -95,8 +106,10 @@ extern LUA_API_LINKAGE {
   #if !defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
     #define LUAGLM_REALIGN
   #endif
-#elif defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
-  #error "Runtime is compiled with aligned types; so should the binding!"
+#else
+  #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
+    #error "Runtime is compiled with aligned types and so should the binding..."
+  #endif
 #endif
 
 /* Macro for implicitly handling floating point drift where possible */
@@ -321,11 +334,19 @@ struct gLuaBase {
   /// <summary>
   /// @HACK: luaL_typeerror that conveys noreturn information to the compiler.
   /// </summary>
-  static l_noret typeerror(lua_State *L_, int arg, const char *tname) {
+  static LUAGLM_NO_RETURN typeerror(lua_State *L_, int arg, const char *tname) {
     luaL_typeerror(L_, arg, tname);
 
     // This code should never be reached given that a lngjmp or try/catch is
     // hidden underneath luaL_typeerror.
+    LUAGLM_UNREACHABLE();
+  }
+
+  /// <summary>
+  /// @HACK: See typeerror
+  /// </summary>
+  static LUAGLM_NO_RETURN argerror(lua_State *L_, int arg, const char *extrams) {
+    luaL_argerror(L_, arg, extrams);
     LUAGLM_UNREACHABLE();
   }
 
@@ -608,12 +629,10 @@ struct gLuaBase {
     return 2;
   }
 
-  /// <summary>
-  /// All mutable operations mutate the referenced Polygon userdata; simply
-  /// push that userdata back onto the Lua stack.
-  /// </summary>
   template<typename T>
   LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Polygon<3, T> &p) {
+    // All operations mutate the referenced Polygon userdata; push it back onto
+    // the Lua stack.
     if (l_likely(p.stack_idx >= 1)) {
       lua_pushvalue(LB.L, p.stack_idx);
       return 1;
@@ -1167,7 +1186,7 @@ struct gLuaBoundedBelow : gLuaTrait<typename Tr::type, false> {
 
     const T value = Tr::Next(LB);
     if ((Inclusive && !glm::all(glm::lessThanEqual(min, value))) || (!Inclusive && !glm::all(glm::lessThan(min, value))))
-      luaL_argerror(LB.L, LB.idx - 1, "argument not in range");
+      gLuaBase::argerror(LB.L, LB.idx - 1, "argument not in range");
     return value;
   }
 };
@@ -1184,10 +1203,9 @@ struct gLuaBoundedBetween : gLuaTrait<typename Tr::type, false> {
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_TRAIT_QUALIFIER typename Tr::type Next(gLuaBase &LB) {
     using T = typename Tr::type;
-
     const T value = Tr::Next(LB);
     if (!glm::all(glm::lessThanEqual(T(0), value)) || !glm::all(glm::greaterThanEqual(T(1), value)))
-      luaL_argerror(LB.L, LB.idx - 1, "argument not in range");
+      gLuaBase::argerror(LB.L, LB.idx - 1, "argument not in range");
     return value;
   }
 };
@@ -1204,10 +1222,9 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_TRAIT_QUALIFIER typename Tr::type Next(gLuaBase &LB) {
     using T = typename Tr::type;
-
     const T value = Tr::Next(LB);
     if (std::is_integral<T>::value && glm::any(glm::equal(T(0), value)))
-      luaL_argerror(LB.L, LB.idx - 1, "zero");
+      gLuaBase::argerror(LB.L, LB.idx - 1, "zero");
     return value;
   }
 };
@@ -1512,6 +1529,8 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 
 /* Invalid glm structure configurations */
 #define GLM_INVALID_MAT_DIMENSIONS ("invalid " GLM_STRING_MATRIX " dimensions")
+#define GLM_ARG_ERROR(L, I, S) (gLuaBase::argerror((L), (I), (S)), 0)
+#define GLM_TYPE_ERROR(L, I, S) (gLuaBase::typeerror((L), (I), (S)), 0)
 
 /*
 ** Generalized int16_t, int32_t, etc. definition
@@ -1537,7 +1556,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
     default:                                                                           \
       break;                                                                           \
   }                                                                                    \
-  return luaL_typeerror((LB).L, (LB).idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
   LUA_MLM_END
 
 /* Vector definition where the lua_Number operation takes priority */
@@ -1564,7 +1583,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
     default:                                                                            \
       break;                                                                            \
   }                                                                                     \
-  return luaL_typeerror((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN); \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN); \
   LUA_MLM_END
 
 /*
@@ -1600,10 +1619,10 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
       case LUAGLM_MATRIX_3x3: ArgLayout(LB, F, gLuaMat3x3<>::fast, ##__VA_ARGS__); break; \
       case LUAGLM_MATRIX_4x4: ArgLayout(LB, F, gLuaMat4x4<>::fast, ##__VA_ARGS__); break; \
       default:                                                                            \
-        return luaL_typeerror((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
+        return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
     }                                                                                     \
   }                                                                                       \
-  return luaL_typeerror((LB).L, (LB).idx, GLM_STRING_SYMMATRIX);                          \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_SYMMATRIX);                          \
   LUA_MLM_END
 
 /*
@@ -1624,13 +1643,13 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
         case LUAGLM_MATRIX_4x3: ArgLayout(LB, F, gLuaMat4x3<>::fast, ##__VA_ARGS__); break; \
         case LUAGLM_MATRIX_4x4: ArgLayout(LB, F, gLuaMat4x4<>::fast, ##__VA_ARGS__); break; \
         default:                                                                            \
-          return luaL_typeerror((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
+          return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
       }                                                                                     \
     }                                                                                       \
     default:                                                                                \
       break;                                                                                \
   }                                                                                         \
-  return luaL_typeerror((LB).L, (LB).idx, GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);     \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);     \
   LUA_MLM_END
 
 /* }================================================================== */
@@ -1763,7 +1782,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
     const TValue *_m = glm_i2v(LB.L, LB.idx);               \
     if (l_likely(ttismatrix(_m)))                           \
       PARSE_MATRIX(LB, _m, F, ArgLayout, ##__VA_ARGS__);    \
-    return luaL_typeerror(LB.L, LB.idx, GLM_STRING_MATRIX); \
+    return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX); \
     GLM_BINDING_END                                         \
   }
 
@@ -1826,7 +1845,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   else if (Tr_Row::Is((LB).L, (LB).idx)) /* <Tr, Tr, vec> */                                    \
     return gLuaBase::Push(LB, F(_a, _b, Tr_Row::Next(LB)));                                     \
   _TR_EQUAL_ULPS(LB, F, _a, _b, _tv3) /* <Tr, Tr, ULPs> */                                      \
-  return luaL_typeerror((LB).L, (LB).idx, "none, " GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, "none, " GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
   LUA_MLM_END
 
 /* }================================================================== */

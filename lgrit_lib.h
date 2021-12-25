@@ -62,7 +62,7 @@ LUA_API const char *glm_typename (lua_State *L, int idx);
 
 /*
 ** Pushes onto the stack a formatted string of the vector/matrix at 'idx' and
-** returns a pointer to this string
+** returns a pointer to this string.
 */
 LUA_API const char *glm_pushstring (lua_State *L, int idx);
 
