@@ -215,46 +215,46 @@ integer = hash(m --[[ matNxM ]])
 string,...,string = to_string(...)
 ```
 
-### allEqual
+### all_equal
 
 ```lua
 -- glm.all(glm.equal(...)) shorthand
 
-bool = allEqual(v1 --[[ vec ]], v2 --[[ vec ]])
-bool = allEqual(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ number ]])
-bool = allEqual(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ vec ]])
-bool = allEqual(v1 --[[ vec ]], v2 --[[ vec ]], ULPs --[[ integer ]])
+bool = all_equal(v1 --[[ vec ]], v2 --[[ vec ]])
+bool = all_equal(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ number ]])
+bool = all_equal(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ vec ]])
+bool = all_equal(v1 --[[ vec ]], v2 --[[ vec ]], ULPs --[[ integer ]])
 
-bool = allEqual(q1 --[[ quat ]], q2 --[[ quat ]])
-bool = allEqual(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ number ]])
-bool = allEqual(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ vec4 ]])
-bool = allEqual(q1 --[[ quat ]], q2 --[[ quat ]], ULPs --[[ integer ]])
+bool = all_equal(q1 --[[ quat ]], q2 --[[ quat ]])
+bool = all_equal(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ number ]])
+bool = all_equal(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ vec4 ]])
+bool = all_equal(q1 --[[ quat ]], q2 --[[ quat ]], ULPs --[[ integer ]])
 
-bool = allEqual(m1 --[[ matrix ]], m2 --[[ matrix ]])
-bool = allEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ number ]])
-bool = allEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
-bool = allEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
+bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]])
+bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ number ]])
+bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
+bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
 ```
 
-### anyNotEqual
+### any_notequal
 
 ```lua
 -- glm.any(glm.notEqual(...)) shorthand
 
-bool = anyNotEqual(v1 --[[ vec ]], v2 --[[ vec ]])
-bool = anyNotEqual(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ number ]])
-bool = anyNotEqual(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ vec ]])
-bool = anyNotEqual(v1 --[[ vec ]], v2 --[[ vec ]], ULPs --[[ integer ]])
+bool = any_notequal(v1 --[[ vec ]], v2 --[[ vec ]])
+bool = any_notequal(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ number ]])
+bool = any_notequal(v1 --[[ vec ]], v2 --[[ vec ]], eps --[[ vec ]])
+bool = any_notequal(v1 --[[ vec ]], v2 --[[ vec ]], ULPs --[[ integer ]])
 
-bool = anyNotEqual(q1 --[[ quat ]], q2 --[[ quat ]])
-bool = anyNotEqual(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ number ]])
-bool = anyNotEqual(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ vec4 ]])
-bool = anyNotEqual(q1 --[[ quat ]], q2 --[[ quat ]], ULPs --[[ integer ]])
+bool = any_notequal(q1 --[[ quat ]], q2 --[[ quat ]])
+bool = any_notequal(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ number ]])
+bool = any_notequal(q1 --[[ quat ]], q2 --[[ quat ]], eps --[[ vec4 ]])
+bool = any_notequal(q1 --[[ quat ]], q2 --[[ quat ]], ULPs --[[ integer ]])
 
-bool = anyNotEqual(m1 --[[ matrix ]], m2 --[[ matrix ]])
-bool = anyNotEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ number ]])
-bool = anyNotEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
-bool = anyNotEqual(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
+bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]])
+bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ number ]])
+bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
+bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
 ```
 
 ### right

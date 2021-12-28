@@ -90,7 +90,12 @@ namespace glm {
     }
   }
 
-  /* glm::all(glm::equal(...)) shorthand ; @TODO: Optimize */
+  /*
+  ** glm::all(glm::equal(...)) shorthand
+  **
+  ** @TODO: Optimize
+  ** @TODO: detail/_vectorize.hpp all glm::all/glm::any wrappers.
+  */
 
   template<typename genIUType>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal(genIUType x, genIUType y) {
@@ -194,6 +199,16 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_isinf(const vec<L, T, Q> &x) {
     return any(isinf(x));
+  }
+
+  template<typename T>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_isfinite(const T &x) {
+    return isfinite(x);
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_isfinite(const vec<L, T, Q> &x) {
+    return all(isfinite(x));
   }
 
   /* glm::any(glm::isnan(...)) shorthand */
@@ -448,6 +463,11 @@ namespace glm {
       const T k = 1 / sqrt(v.x * v.x + v.y * v.y);
       return vec<3, T, Q>(-v.y * k, v.x * k, T(0));
     }
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<2, T, Q> perpendicularFast(const vec<2, T, Q> &v) {
+    return vec<2, T, Q>(-v.y, v.x);
   }
 
   /// <summary>
@@ -777,9 +797,51 @@ namespace glm {
     return normalize(y - x);
   }
 
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR T direction(const T x, const T y) {
-    return normalize(vec<1, T>(y - x)).x;
+  template<typename genType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType direction(const genType x, const genType y) {
+    return normalize(vec<1, genType>(y - x)).x;
+  }
+
+  /// <summary>
+  /// Returns a value 't' such that lerp(x, y, t) == value (or 0 if x == y)
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType lerpinverse(const genType x, const genType y, const genType value) {
+    return equal(x, y, glm::epsilon<genType>()) ? genType(0) : (value - x) / (y - x);
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> lerpinverse(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const vec<L, T, Q> &value) {
+    vec<L, T, Q> result(T(0));
+    for (length_t i = 0; i < L; ++i)
+      result[i] = lerpinverse(x[i], y[i], value[i]);
+    return result;
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> lerpinverse(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const T value) {
+    vec<L, T, Q> result(T(0));
+    for (length_t i = 0; i < L; ++i)
+      result[i] = lerpinverse(x[i], y[i], value);
+    return result;
+  }
+
+  /// <summary>
+  /// Normalized lerp
+  /// </summary>
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> nlerp(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const vec<L, T, Q> &t) {
+    return normalize(lerp(x, y, t));
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> nlerp(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const T t) {
+    return normalize(lerp(x, y, t));
+  }
+
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType nlerp(const genType x, const genType y, const genType t) {
+    return lerp(x, y, t);
   }
 
   /* Functions with additional integral type support. */
@@ -1067,6 +1129,32 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType convertSRGBToLinear(genType ColorSRGB, genType Gamma) {
     return convertSRGBToLinear(vec<1, genType>(ColorSRGB), Gamma).x;
+  }
+
+  /*
+  ** glm::all(glm::lessThan | glm::greaterThan | glm::lessThanEqual | glm::greaterThanEqual)
+  **
+  ** @TODO: Reorganize once scalar_extensions is implemented.
+  */
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThan(genIUType x, genIUType y) {
+    return all(lessThan(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThanEqual(genIUType x, genIUType y) {
+    return all(lessThanEqual(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThan(genIUType x, genIUType y) {
+    return all(greaterThan(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThanEqual(genIUType x, genIUType y) {
+    return all(greaterThanEqual(x, y));
   }
 
   /*
@@ -1442,7 +1530,7 @@ namespace glm {
     struct compute_rand<1, uint8, glm::defaultp> {
       GLM_FUNC_QUALIFIER static vec<1, uint8, glm::defaultp> call() {
         return vec<1, uint8, glm::defaultp>(static_cast<uint8>(
-          std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
+        std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
       }
     };
   }

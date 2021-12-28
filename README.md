@@ -702,7 +702,10 @@ For all GLM preprocessor, see the [GLM manual](https://github.com/g-truc/glm/blo
 * **LUAGLM_INCLUDE_GTX**: Include gtx headers: Experimental extensions not specified by GLSL specification.
 * **LUAGLM_INCLUDE_GEOM**: Include support for geometric structures (`ext/geom/`).
 * **LUAGLM_BINDING_ALIGNED**: Enable **GLM_FORCE_DEFAULT_ALIGNED_GENTYPES** *only* for the binding library.
-* **LUAGLM_ALIASES**: Create aliases for common (alternate) names when registering the library.
+* **LUAGLM_ALIASES**: Enable all aliasing (CMake).
+* **LUAGLM_ALIASES_SIMPLE**: Include function aliases for common names when registering the library, e.g., length vs. magnitude.
+* **LUAGLM_ALIASES_UNITY**: Include Unity Scripting API aliases.
+* **LUAGLM_ALIASES_O3DE**: Include O3DE Lua API aliases.
 * **LUAGLM_SAFELIB**: Enable a general try/catch wrapper for all binding functions.
 * **LUAGLM_TYPE_COERCION**: Enable string-to-number type coercion when parsing arguments from the Lua stack.
 * **LUAGLM_REPLACE_MATH**: Replace the global math table with the glm binding library on loading.
@@ -746,7 +749,7 @@ Ordered by priority.
 1. Cleanup TODO annotations that have accumulated over time; many are outdated.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
-1. O3DE AzCore/Math and behaviorContext aliasing (where possible).
+1. [binding](libs/glm-binding): Complete O3DE AzCore/Math (behaviorContext) aliasing (... where possible).
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. [binding](libs/glm-binding): Replace `glm/gtc/random.{inl,hpp}` with a variant that takes advantage of CXX11s [Pseudo-random number generation](https://en.cppreference.com/w/cpp/numeric/random) facilities (and unify it with `math.random`).

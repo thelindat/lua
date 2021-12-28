@@ -624,6 +624,9 @@ OPTION(LUAGLM_INCLUDE_EXT "Include ext headers: Stable extensions not specified 
 OPTION(LUAGLM_INCLUDE_GTC "Include gtc headers: Recommended extensions not specified by GLSL specification" OFF)
 OPTION(LUAGLM_INCLUDE_GTX "Include gtx headers: Experimental extensions not specified by GLSL specification" OFF)
 OPTION(LUAGLM_ALIASES "Include all function aliases" ON)
+OPTION(LUAGLM_ALIASES_SIMPLE "Include simple function aliases, e.g., length vs. magnitude" OFF)
+OPTION(LUAGLM_ALIASES_UNITY "Include Unity Scripting API aliases" OFF)
+OPTION(LUAGLM_ALIASES_O3DE "Include O3DE Lua API aliases" OFF)
 OPTION(LUAGLM_TYPE_COERCION "Enable string-to-number type coercion when parsing arguments from the Lua stack" ON)
 OPTION(LUAGLM_REPLACE_MATH "Replace the global math library on library initialization" OFF)
 OPTION(LUAGLM_INCLUDE_GEOM "Extend geometry API" ON)
@@ -714,8 +717,17 @@ IF( LUAGLM_INCLUDE_ALL )
   # ADD_COMPILE_DEFINITIONS(LUAGLM_INCLUDE_GTX)
 ENDIF()
 
-IF( LUAGLM_ALIASES )
-  ADD_COMPILE_DEFINITIONS(LUAGLM_ALIASES)
+# Enable all aliasing configurations
+IF( LUAGLM_ALIASES OR LUAGLM_ALIASES_SIMPLE )
+  ADD_COMPILE_DEFINITIONS(LUAGLM_ALIASES_SIMPLE)
+ENDIF()
+
+IF( LUAGLM_ALIASES OR LUAGLM_ALIASES_UNITY )
+  ADD_COMPILE_DEFINITIONS(LUAGLM_ALIASES_UNITY)
+ENDIF()
+
+IF( LUAGLM_ALIASES OR LUAGLM_ALIASES_O3DE )
+  ADD_COMPILE_DEFINITIONS(LUAGLM_ALIASES_O3DE)
 ENDIF()
 
 IF( LUAGLM_TYPE_COERCION )

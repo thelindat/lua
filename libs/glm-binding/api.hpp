@@ -263,8 +263,8 @@ GLM_BINDING_QUALIFIER(to_string) {
 /* glm/ext/scalar_relational.hpp, glm/ext/vector_common.hpp, glm/ext/vector_relational.hpp, glm/ext/quaternion_relational.hpp, glm/ext/matrix_relational.hpp */
 TRAITS_LAYOUT_DEFN(equal, glm::equal, LAYOUT_EQUAL, void)
 TRAITS_LAYOUT_DEFN(notEqual, glm::notEqual, LAYOUT_EQUAL, void)
-TRAITS_LAYOUT_DEFN(allEqual, glm::all_equal, LAYOUT_EQUAL, void)  /* LUA_VECTOR_EXTENSIONS */
-TRAITS_LAYOUT_DEFN(anyNotEqual, glm::any_notequal, LAYOUT_EQUAL, void)  /* LUA_VECTOR_EXTENSIONS */
+TRAITS_LAYOUT_DEFN(all_equal, glm::all_equal, LAYOUT_EQUAL, void)  /* LUA_VECTOR_EXTENSIONS */
+TRAITS_LAYOUT_DEFN(any_notequal, glm::any_notequal, LAYOUT_EQUAL, void)  /* LUA_VECTOR_EXTENSIONS */
 #if GLM_HAS_CXX11_STL
 #define LAYOUT_HASH(LB, F, Traits, ...)       \
   LUA_MLM_BEGIN                               \
@@ -735,6 +735,7 @@ TRAITS_LAYOUT_DEFN(quatLookAtRH, glm::quatLookAtRH, LAYOUT_BINARY, gLuaDir3<>)
 TRAITS_LAYOUT_DEFN(quatbillboard, glm::quatbillboard, LAYOUT_QUATERNARY, gLuaVec3<>) /* LUA_QUATERNION_EXTENSIONS */
 TRAITS_LAYOUT_DEFN(quatbillboardRH, glm::quatbillboardRH, LAYOUT_QUATERNARY, gLuaVec3<>)
 TRAITS_LAYOUT_DEFN(quatbillboardLH, glm::quatbillboardLH, LAYOUT_QUATERNARY, gLuaVec3<>)
+TRAITS_DEFN(quatFromBasis, glm::fromBasis, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
 #endif
 
 /* glm/gtx/quaternion.hpp */
@@ -1132,6 +1133,7 @@ TRAITS_DEFN(diagonal3x4, glm::diagonal3x4, gLuaVec3<>)
 TRAITS_DEFN(diagonal4x2, glm::diagonal4x2, gLuaVec2<>)
 TRAITS_DEFN(diagonal4x3, glm::diagonal4x3, gLuaVec3<>)
 TRAITS_DEFN(diagonal4x4, glm::diagonal4x4, gLuaVec4<>)
+MATRIX_DEFN(diagonal, glm::diagonal, LAYOUT_UNARY) /* LUA_MATRIX_EXTENSIONS */
 #endif
 
 #if defined(GTX_MATRIX_QUERY_HPP)
@@ -1522,6 +1524,12 @@ NUMBER_VECTOR_QUAT_DEFN(lessThan, glm::lessThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(lessThanEqual, glm::lessThanEqual, LAYOUT_BINARY)
 INTEGER_VECTOR_DEFN(ult, glm::lessThan, LAYOUT_BINARY, lua_Unsigned) /* lmathlib */
 INTEGER_VECTOR_DEFN(ulte, glm::lessThanEqual, LAYOUT_BINARY, lua_Unsigned)
+#if defined(LUAGLM_ALIASES_O3DE)
+NUMBER_VECTOR_QUAT_DEFN(all_greaterThan, glm::all_greaterThan, LAYOUT_BINARY)
+NUMBER_VECTOR_QUAT_DEFN(all_greaterThanEqual, glm::all_greaterThanEqual, LAYOUT_BINARY)
+NUMBER_VECTOR_QUAT_DEFN(all_lessThan, glm::all_lessThan, LAYOUT_BINARY)
+NUMBER_VECTOR_QUAT_DEFN(all_lessThanEqual, glm::all_lessThanEqual, LAYOUT_BINARY)
+#endif
 #endif
 
 #if defined(TRIGONOMETRIC_HPP)
@@ -1658,8 +1666,8 @@ GLM_BINDING_QUALIFIER(saturation) {
   GLM_BINDING_BEGIN
   const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
   if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloatOnly);
-  if (ttisvector3(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec3<>::fast);
-  if (ttisvector4(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec4<>::fast);
+  else if (ttisvector3(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec3<>::fast);
+  else if (ttisvector4(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec4<>::fast);
   return GLM_TYPE_ERROR(LB.L, LB.idx + 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR);
   GLM_BINDING_END
 }
@@ -1683,6 +1691,9 @@ INTEGER_NUMBER_VECTOR_DEFN(fmod, glm::fmod, LAYOUT_MODULO)
 NUMBER_VECTOR_DEFN(isfinite, glm::isfinite, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(atan2, glm::atan2, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(saturate, glm::saturate, LAYOUT_UNARY)
+#if defined(LUAGLM_ALIASES_O3DE)
+NUMBER_VECTOR_DEFN(all_isfinite, glm::all_isfinite, LAYOUT_UNARY)
+#endif
 #endif
 
 #if defined(GTX_COMPATIBILITY_HPP) || defined(EXT_QUATERNION_COMMON_HPP)
@@ -1691,6 +1702,8 @@ NUMBER_VECTOR_DEFN(saturate, glm::saturate, LAYOUT_UNARY)
 #define LAYOUT_QUAT_LERP(LB, F, Tr, ...) \
   VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, gLuaBoundedBetween<Tr::value_trait>, ##__VA_ARGS__)
 NUMBER_VECTOR_QUAT_DEFNS(lerp, glm::lerp, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_OPTIONAL, LAYOUT_QUAT_LERP)
+NUMBER_VECTOR_QUAT_DEFNS(nlerp, glm::nlerp, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_SCALAR)
+NUMBER_VECTOR_DEFN(lerpinverse, glm::lerpinverse, LAYOUT_TERNARY_OPTIONAL)
 #endif
 
 #if defined(GTX_COMPONENT_WISE_HPP)
@@ -1937,6 +1950,7 @@ GLM_BINDING_QUALIFIER(orthonormalize) {
   return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR3 " or " GLM_STRING_MATRIX "3x3");
   GLM_BINDING_END
 }
+
 GLM_BINDING_QUALIFIER(orthonormalize3) {  /* LUA_VECTOR_EXTENSIONS */
   GLM_BINDING_BEGIN
   gLuaVec3<>::type x = gLuaVec3<>::Next(LB);
@@ -1968,7 +1982,7 @@ NUMBER_VECTOR_DEFN(isPerpendicular, glm::isPerpendicular, LAYOUT_BINARY) /* LUA_
 TRAITS_LAYOUT_DEFN(perpendicular, glm::perpendicular, LAYOUT_UNARY_OR_TERNARY, gLuaVec3<>)
 TRAITS_LAYOUT_DEFN(perpendicular2, glm::perpendicular2, LAYOUT_UNARY_OR_TERNARY, gLuaVec3<>)
 TRAITS_LAYOUT_DEFN(perpendicularBasis, glm::perpendicularBasis, LAYOUT_PERPBASIS, gLuaVec3<>)
-TRAITS_DEFN(perpendicularFast, glm::perpendicularFast, gLuaVec3<>)
+TRAITS_BINARY_LAYOUT_DEFN(perpendicularFast, glm::perpendicularFast, LAYOUT_UNARY, gLuaVec3<>::fast, gLuaVec2<>::fast)
 #endif
 
 #if defined(GTX_POLAR_COORDINATES_HPP)
@@ -2162,7 +2176,7 @@ TRAITS_DEFN(scale_mat4, glm::scale, gLuaMat4x4<>, gLuaVec3<>)
 #endif
 #endif
 
-#if defined(GTX_VECTOR_ANGLE_HPP)
+#if defined(GTX_VECTOR_ANGLE_HPP) || defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
 #define ORIENTED_ANGLE_DEFN(Name, F, ...)                                                                           \
   GLM_BINDING_QUALIFIER(Name) {                                                                                     \
     GLM_BINDING_BEGIN                                                                                               \

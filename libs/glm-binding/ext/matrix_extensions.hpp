@@ -78,6 +78,17 @@ namespace glm {
   }
 
   /// <summary>
+  /// Return the diagonal-vector of the given matrix.
+  /// </summary>
+  template<length_t C, length_t R, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<(C < R ? C : R), T, Q> diagonal(const mat<C, R, T, Q> &m) {
+    vec<(C < R ? C : R), T, Q> result(T(0));
+    for (length_t i = 0; i < (C < R ? C : R); ++i)
+      result[i] = m[i][i];
+    return result;
+  }
+
+  /// <summary>
   /// Transforms the given point vector by this matrix M, i.e, returns: M * (x, y, z, 1).
   ///
   /// This function does not divide by w, or output it, so it cannot have a projection.

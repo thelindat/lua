@@ -24,6 +24,7 @@
 #endif
 
 #include <glm/glm.hpp>
+#include <glm/exponential.hpp>
 #if GLM_VERSION >= 991  // @COMPAT: Changed to ext/quaternion_common in 0.9.9.1
   #include <glm/ext/quaternion_common.hpp>
 #else
@@ -304,6 +305,15 @@ namespace glm {
   }
 
   /// <summary>
+  /// Normalized lerp. Unlike glm::lerp, this function does not sanitize 't'.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> nlerp(qua<T, Q> const &x, qua<T, Q> const &y, T a) {
+    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'nlerp' only accept floating-point inputs");
+    return normalize(x * (static_cast<T>(1) - a) + (y * a));
+  }
+
+  /// <summary>
   /// Create a quaternion in barycentric coordinates.
   /// </summary>
   template<typename T, qualifier Q>
@@ -332,6 +342,36 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR qua<T, Q> rotateFromTo(const vec<3, T, Q> &sourceDirection, const vec<3, T, Q> &targetDirection) {
     return qua<T, Q>(normalize(sourceDirection), normalize(targetDirection));
+  }
+
+  /// <summary>
+  /// quatLookAt alternative (from O3DE).
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> fromBasis(const vec<3, T, Q> &basisX, const vec<3, T, Q> &basisY, const vec<3, T, Q> &basisZ) {
+    T trace(0);
+    qua<T, Q> result = glm::identity<qua<T, Q>>();
+    if (basisZ.z < T(0)) {
+      if (basisX.x > basisY.y) {
+        trace = T(1.0) + basisX.x - basisY.y - basisZ.z;
+        result = qua<T, Q>(basisY.z - basisZ.y, trace, basisX.y + basisY.x, basisZ.x + basisX.z);
+      }
+      else {
+        trace = T(1.0) - basisX.x + basisY.y - basisZ.z;
+        result = qua<T, Q>(basisZ.x - basisX.z, basisX.y + basisY.x, trace, basisY.z + basisZ.y);
+      }
+    }
+    else {
+      if (basisX.x < -basisY.y) {
+        trace = T(1.0) - basisX.x - basisY.y + basisZ.z;
+        result = qua<T, Q>(basisX.y - basisY.x, basisZ.x + basisX.z, basisY.z + basisZ.y, trace);
+      }
+      else {
+        trace = T(1.0) + basisX.x + basisY.y + basisZ.z;
+        result = qua<T, Q>(trace, basisY.z - basisZ.y, basisZ.x - basisX.z, basisX.y - basisY.x);
+      }
+    }
+    return result * (T(0.5) * inversesqrt(trace));
   }
 
   /// <summary>
