@@ -1008,11 +1008,9 @@ lua_Float4;
 **
 ** @ImplicitAlign:
 ** @TODO: Compensate for: detail::storage<3, T, detail::is_aligned<Q>::value>::type
-** data implicitly aligning vec3 types. This requires 'GLM_HAS_ALIGNOF' emulation.
-**
-** @TODO: Consider preventing the use of 'GLM_FORCE_DEFAULT_ALIGNED_GENTYPES'
-** without 'GLM_FORCE_XYZW_ONLY' being defined in the meantime. 'matgeti' in
-** lglm.cpp compensates for this issue, however, external dependencies may not.
+** data implicitly aligning vec3 types. This requires 'GLM_HAS_ALIGNOF'
+** emulation. matgeti' in lglm.cpp compensates for this issue, however, external
+** dependencies may not.
 **
 ** @TODO: LUAGLM_USE_ANONYMOUS_STRUCT support?
 */

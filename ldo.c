@@ -262,7 +262,7 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
     catch (LuaException &_lua_e) {
       _lua_e.anchor();
       if (lj.status == 0)
-        lj.status = -1;  // @TODO: Ensure this is correct.
+        lj.status = -1;  /* @TODO: Ensure this is correct. */
     }
   }
 #endif

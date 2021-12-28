@@ -477,7 +477,7 @@ int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2, int rtt) {
   }
 
   // @TODO: Document the specifics of this tag method and how glm::equal(V, V2)
-  // take priority over any custom method for the vector type. The intent is to
+  // takes priority over any custom method for the vector type. The intent is to
   // still allow custom __eq declarations to include desired epsilon or ULPS.
   if (result == false && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
@@ -1050,6 +1050,10 @@ namespace glm {
   }
 }
 
+/// <summary>
+/// @TODO: Compile-time option to allow 32-bit or 64-bit hashing.
+/// @TODO: Compile-time hash algorithm configuration.
+/// </summary>
 lua_Integer luaO_HashString(const char *string, size_t length, int ignore_case) {
   unsigned int hash = 0;
   for (size_t i = 0; i < length; ++i) {
@@ -1736,6 +1740,8 @@ LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
 ///
 /// @NOTE: Function considered deprecated. The previous idea that tables can be
 /// implicit vector types does not "mesh" well with the glm binding library.
+///
+/// @TODO: Allow TM_INDEX instead of raw-accessing
 /// </summary>
 static int glmH_tovector(lua_State *L, const TValue *o, glmVector *v) {
   static const char *const dims[] = { "x", "y", "z", "w" };
@@ -1744,7 +1750,7 @@ static int glmH_tovector(lua_State *L, const TValue *o, glmVector *v) {
   Table* t = hvalue(o);
   for (int i = 0; i < 4; ++i) {
     TString *key = luaS_newlstr(L, dims[i], 1);  // luaS_newliteral
-    const TValue *slot = luaH_getstr(t, key);  // @TODO: Allow TM_INDEX instead of raw-accessing
+    const TValue *slot = luaH_getstr(t, key);
     if (ttisnumber(slot)) {
       if (v != GLM_NULLPTR) {
         v->v4[i] = glm_castfloat(nvalue(slot));

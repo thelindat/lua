@@ -84,8 +84,6 @@ LUA_API int glm_unpack_matrix (lua_State *L, int idx);
 **
 ** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
 **  string character is computed then hashed.
-**
-** @TODO: Possibly consider allow the potentially destructive lua_tolstring.
 */
 LUA_API lua_Integer glm_tohash (lua_State *L, int idx, int ignore_case);
 

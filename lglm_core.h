@@ -243,11 +243,6 @@ LUAI_FUNC int glmMat_equalObj (lua_State *L, const TValue *o1, const TValue *o2)
 
 /*
 ** Jenkins' one-at-a-time hash.
-**
-** It is the assume the string is properly delimited.
-**
-** @TODO: Change API to use lua_Unsigned
-** @TODO: Compile-time option to allow 32-bit or 64-bit hashing.
 */
 LUAI_FUNC lua_Integer luaO_HashString (const char* string, size_t length, int ignore_case);
 

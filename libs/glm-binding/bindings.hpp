@@ -249,12 +249,11 @@ struct gLuaTrait;
 /// A benefit to this approach is to allow the quick creation of geometric
 /// structures that does not require additional userdata/metatable definitions.
 ///
-/// @TODO:
-///   1. Interface for generating random numbers to replace std::rand(). This
-///   allows gLuaBase to invoke math_random instead of having to maintain
-///   multiple random states.
+/// @UnifiedRand: @TODO: Interface for generating random numbers to replace
+/// std::rand(). This allows gLuaBase to invoke math_random instead of having to
+/// maintain multiple random states.
 ///
-///   2. Consider: https://en.cppreference.com/w/cpp/numeric/random
+/// @TODO Consider: https://en.cppreference.com/w/cpp/numeric/random
 /// </summary>
 struct gLuaBase {
   lua_State *L;  // Current lua state.
@@ -296,10 +295,7 @@ struct gLuaBase {
   }
 
   /// <summary>
-  /// Temporary math.random() hook
-  ///
-  /// @TODO: Remove this function when math.random/std:rand functions are unified
-  /// and have proper bindings.
+  /// Temporary math.random() hook; see @UnifiedRand.
   /// </summary>
   lua_Number rand() {
     const int t = top();  // Get cached top;

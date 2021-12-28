@@ -71,8 +71,8 @@ namespace detail {
   struct lglmliteral { GLM_FUNC_QUALIFIER static char const *value() { return "%d"; } };
 
   /// <summary>
-  /// @TODO: Use the predefined literal floating-point format defined in
-  /// luaconf.h if possible
+  /// @TODO: Use the predefined literal floating-point format defined in luaconf
+  /// if possible
   /// </summary>
   template<typename T>
   struct lglmliteral<T, true> { GLM_FUNC_QUALIFIER static char const *value() { return "%f"; } };
@@ -353,10 +353,9 @@ namespace glm {
 namespace hash {
 
   /// <summary>
-  /// @TODO:
-  /// Temporary solution as the previous implementation was slow. A collection
-  /// of 'spatial hashing' algorithms exist for vector-type structures that
-  /// should be considered.
+  /// @TODO: Temporary solution as the previous implementation was slow. A
+  /// variety of 'spatial hashing' algorithms exist for vector-type structures
+  /// and should be considered.
   /// </summary>
   template<typename T>
   struct lglm_hash {

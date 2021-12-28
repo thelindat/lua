@@ -156,7 +156,7 @@ void luaT_trybinTM (lua_State *L, const TValue *p1, const TValue *p2,
   **
   ** As bitwise operators only apply to integer vectors, i.e., glm::ivec. This
   ** iteration of LuaGLM will int-cast each vector component beforehand. Native
-  ** integer-vector support is TODO.
+  ** integer-vector support is not-yet-supported.
   **
   ** @TODO: Document above.
   */

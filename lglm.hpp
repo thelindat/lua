@@ -98,8 +98,7 @@ typedef lua_Number glm_Number;
 ** of alignment and precision by the runtime/API. In practice, this is used to
 ** allow libraries to use different GLM alignment configurations.
 **
-** @ICCAlign:
-** @TODO: Improve compiler warnings/errors for when GLM_CONFIG_ALIGNED_GENTYPES
+** @TODO: @ICCAlign: Improve compiler warnings/errors for when GLM_CONFIG_ALIGNED_GENTYPES
 ** is disabled.
 */
 #if !defined(LUAGLM_Q)
@@ -299,6 +298,8 @@ union glmVector {
 
 /// <summary>
 /// Internal matrix definition.
+///
+/// @TODO: Name the anonymous union in glmMatrix similar to lua_Mat4.
 /// </summary>
 LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
   union {
@@ -467,7 +468,6 @@ union glmMatrixBoundary {
   GLM_STATIC_ASSERT(true
     && sizeof(grit_length_t) == sizeof(glm::length_t)
     && sizeof(lua_Mat4) == sizeof(glmMatrix)
-    // @TODO: Name the anonymous union in glmMatrix similar to lua_Mat4.
     && sizeof(lua_Mat4::Columns::m2) == sizeof(glmMatrix::m24)
     && sizeof(lua_Mat4::Columns::m3) == sizeof(glmMatrix::m34)
     && sizeof(lua_Mat4::Columns::m4) == sizeof(glmMatrix::m44)

@@ -1315,11 +1315,7 @@ NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_VECTOR_INT)
 #endif
 
 #if defined(COMMON_HPP) || defined(EXT_SCALAR_COMMON_HPP) || defined(EXT_VECTOR_COMMON_HPP)
-/*
-** Accumulation for min/max functions, where arguments can be the Trait or a primitive
-**
-** @TODO: Potentially handle the case of LB.idx not changing after an iteration
-*/
+/* Accumulation for min/max functions, where arguments can be the Trait or a primitive */
 #define LAYOUT_MINMAX(LB, F, Tr, ...)                                                        \
   LUA_MLM_BEGIN                                                                              \
   Tr::type base = Tr::Next(LB);                                                              \
@@ -2197,7 +2193,7 @@ NUMBER_VECTOR_DEFN(isCompNull, glm::isCompNull, LAYOUT_BINARY_EPS)
 
 #if defined(GTX_VECTOR_QUERY_HPP) || defined(GTX_MATRIX_QUERY_HPP)
 GLM_BINDING_QUALIFIER(isNormalized) {
-  GLM_BINDING_BEGIN  // @TODO: Error message 'technically' incorrect here.
+  GLM_BINDING_BEGIN  // @TODO: The error message technically incorrect here.
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_MATRIX(LB, o, glm::_isNormalized, LAYOUT_BINARY_EPS);
@@ -2206,7 +2202,7 @@ GLM_BINDING_QUALIFIER(isNormalized) {
 }
 
 GLM_BINDING_QUALIFIER(isNull) {
-  GLM_BINDING_BEGIN  // @TODO: Error message 'technically' incorrect here.
+  GLM_BINDING_BEGIN  // @TODO: The error message technically incorrect here.
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_MATRIX(LB, o, glm::_isNull, LAYOUT_BINARY_EPS);

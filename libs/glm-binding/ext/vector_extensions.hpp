@@ -8,6 +8,8 @@
 **  3. Functions emulated/ported from other popular vector-math libraries.
 **
 ** See Copyright Notice in lua.h
+**
+** @TODO: Introduce scalar_extensions.hpp; half of this header is scalar related
 */
 #ifndef EXT_EXTENSION_VECTOR_HPP
 #define EXT_EXTENSION_VECTOR_HPP

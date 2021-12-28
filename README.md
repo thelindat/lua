@@ -743,6 +743,7 @@ these added features.
 Ordered by priority.
 
 1. Cleanup testing scripts/environment and publish.
+1. Cleanup TODO annotations that have accumulated over time; many are outdated.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
 1. O3DE AzCore/Math and behaviorContext aliasing (where possible).

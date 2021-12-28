@@ -111,9 +111,11 @@ public:
     /// Create a glm value starting at the current Lua stack index
     /// </summary>
     typename Tr::type operator*() const {
+      lua_State *L_ = gLuaBase::L;
+
       typename Tr::type value = Tr::zero();
-      if (!gLuaBase::Pull(*this, gLuaBase::idx, value)) {
-        luaL_error(gLuaBase::L, "Invalid %s structure", Tr::Label());
+      if (!gLuaBase::Pull(L_, gLuaBase::idx, value)) {
+        luaL_error(L_, "Invalid %s structure", Tr::Label());
       }
       return value;
     }
@@ -150,8 +152,9 @@ public:
   typename Tr::type operator[](size_type pos) const {
     typename Tr::type value = Tr::zero();
     if (pos >= 0 && pos < size()) {
-      if (!gLuaBase::Pull(*this, pos + 1, value)) {
-        luaL_error(gLuaBase::L, "Invalid %s structure", Tr::Label());
+      lua_State *L_ = gLuaBase::L;
+      if (!gLuaBase::Pull(L_, pos + 1, value)) {
+        luaL_error(L_, "Invalid %s structure", Tr::Label());
       }
     }
     return value;
@@ -255,18 +258,19 @@ public:
       typename Tr::type value = Tr::zero();
 
       // Fetch the object within the array that *should* correspond to the trait.
-      lua_rawgeti(gLuaBase::L, gLuaBase::idx, static_cast<lua_Integer>(arrayIdx));
-      const int top_ = lua_gettop(gLuaBase::L);  // gLuaBase uses absolute values.
+      lua_State *L_ = gLuaBase::L;
+      lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(arrayIdx));
+      const int top_ = lua_gettop(L_);  // gLuaBase uses absolute values.
 
       // Parse the trait given the relative stack (starting) index.
-      if (!gLuaBase::Pull(gLuaBase::L, top_, value)) { /* noret */
-        lua_pop(gLuaBase::L, 1);
-        luaL_error(gLuaBase::L, "Invalid table index: %d for %s", static_cast<int>(arrayIdx), Tr::Label());
+      if (!gLuaBase::Pull(L_, top_, value)) { /* noret */
+        lua_pop(L_, 1);
+        luaL_error(L_, "Invalid table index: %d for %s", static_cast<int>(arrayIdx), Tr::Label());
 
         return value;  // quash compiler warnings, luaL_error is noret.
       }
 
-      lua_pop(gLuaBase::L, 1);
+      lua_pop(L_, 1);
       return value;
     }
   };
@@ -276,17 +280,18 @@ public:
   }
 
   /// <summary>
-  /// @TODO: Optimize
-  /// @NOTE: With how this binding is implemented, Lua stack adjustments, i.e.,
+  /// With how this binding is implemented, Lua stack adjustments, i.e.,
   /// luaD_growstack, should be prevented. Avoid handing control of the runtime
   /// to lua_geti (and potential __index metamethod).
+  ///
+  /// @TODO: Optimize
   /// </summary>
   typename Tr::type operator[](size_type pos) const {
     typename Tr::type value = Tr::zero();
     if (pos >= 0 && pos < size()) {
       lua_State *L_ = gLuaBase::L;
       lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(pos + 1));  // [..., element]
-      if (!gLuaBase::Pull(*this, lua_absindex(L_, -1), value)) {
+      if (!gLuaBase::Pull(L_, lua_absindex(L_, -1), value)) {
         lua_pop(L_, 1);
         luaL_error(L_, "Invalid %s structure", Tr::Label());
       }
