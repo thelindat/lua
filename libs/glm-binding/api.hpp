@@ -254,9 +254,10 @@
 /* glm/gtx/string_cast.hpp */
 GLM_BINDING_QUALIFIER(to_string) {
   GLM_BINDING_BEGIN
-  for (int i = LB.idx; i <= LB.top(); ++i)
+  const int n = LB.top();
+  for (int i = LB.idx; i <= n; ++i)
     lua_tostring(LB.L, i);
-  return LB.top();
+  return n;
   GLM_BINDING_END
 }
 
@@ -274,7 +275,8 @@ TRAITS_LAYOUT_DEFN(any_notequal, glm::any_notequal, LAYOUT_EQUAL, void)  /* LUA_
 
 GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
   GLM_BINDING_BEGIN
-  while (LB.idx <= LB.top()) {
+  const int n = LB.top();
+  while (LB.idx <= n) {
     const TValue *_tv = glm_i2v(LB.L, LB.idx);
     switch (ttypetag(_tv)) {
       case LUA_VTRUE:
@@ -293,7 +295,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       }
     }
   }
-  return _gettop(LB.L) - LB.top();
+  return LB.top() - n;
   GLM_BINDING_END
 }
 #endif
@@ -305,7 +307,8 @@ TRAITS_DEFN(forwardLH, glm::unit::forwardLH<glm_Float>)
 TRAITS_DEFN(forwardRH, glm::unit::forwardRH<glm_Float>)
 GLM_BINDING_QUALIFIER(unpack) {
   GLM_BINDING_BEGIN
-  for (; LB.idx <= LB.top(); ++LB.idx) {
+  const int n = LB.top();
+  for (; LB.idx <= n; ++LB.idx) {
     const TValue *_tv = glm_i2v(LB.L, LB.idx);
     switch (ttype(_tv)) {
       case LUA_TVECTOR: glm_unpack_vector(LB.L, LB.idx); break;
@@ -316,7 +319,7 @@ GLM_BINDING_QUALIFIER(unpack) {
       }
     }
   }
-  return _gettop(LB.L) - LB.top();
+  return LB.top() - n;
   GLM_BINDING_END
 }
 
@@ -1320,8 +1323,9 @@ NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_VECTOR_INT)
 /* Accumulation for min/max functions, where arguments can be the Trait or a primitive */
 #define LAYOUT_MINMAX(LB, F, Tr, ...)                                                        \
   LUA_MLM_BEGIN                                                                              \
+  const int _n = (LB).top();                                                                 \
   Tr::type base = Tr::Next(LB);                                                              \
-  while ((LB).idx <= (LB).top()) {                                                           \
+  while ((LB).idx <= _n) {                                                                   \
     if (Tr::safe::Is((LB).L, (LB).idx))                                                      \
       base = F(base, Tr::safe::Next(LB));                                                    \
     else if (Tr::value_trait::Is((LB).L, (LB).idx))                                          \

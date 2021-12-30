@@ -258,17 +258,15 @@ struct gLuaTrait;
 struct gLuaBase {
   lua_State *L;  // Current lua state.
   int idx;  // Iteration pointer.
-  int ltop;  // Number of function parameters (lazily cached)
-
-  gLuaBase(lua_State *baseL, int baseIdx = 1)
-    : L(baseL), idx(baseIdx), ltop(0) {
-  }
 
   /// <summary>
-  /// Lazy catching lua_gettop
+  /// Lazy cache of lua_gettop: used for object-recycling and to prevent
+  /// clobbering, i.e., writing to the same object twice. This value ensures
   /// </summary>
-  GLM_INLINE int top() {
-    return (ltop == 0) ? ((ltop = _gettop(L))) : ltop;
+  int recycle_top;
+
+  gLuaBase(lua_State *baseL, int baseIdx = 1)
+    : L(baseL), idx(baseIdx), recycle_top(0) {
   }
 
   /// <summary>
@@ -276,7 +274,7 @@ struct gLuaBase {
   /// method has been invoked at least once.
   /// </summary>
   GLM_INLINE int top() const {
-    return ltop;  // return (ltop == 0) ? _gettop(L) : ltop;
+    return _gettop(L);
   }
 
   /// <summary>
@@ -298,7 +296,7 @@ struct gLuaBase {
   /// Temporary math.random() hook; see @UnifiedRand.
   /// </summary>
   lua_Number rand() {
-    const int t = top();  // Get cached top;
+    const int _n = top();  // Get cached top;
     lua_checkstack(L, 3);
     if (lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE) == LUA_TTABLE) {  // [..., load_tab]
       if (lua_getfield(L, -1, LUA_MATHLIBNAME) == LUA_TTABLE) {  // [..., load_tab, math_tab]
@@ -311,7 +309,7 @@ struct gLuaBase {
       }
     }
 
-    lua_pop(L, _gettop(L) - t);  // Fallback to std::rand() if lmathlib has not been loaded
+    lua_pop(L, top() - _n);  // Fallback to std::rand() if lmathlib has not been loaded
     return cast_num(std::rand()) / cast_num((RAND_MAX));
   }
 
@@ -321,7 +319,8 @@ struct gLuaBase {
   /// </summary>
   GLM_INLINE bool can_recycle() {
 #if defined(LUAGLM_RECYCLE)
-    return (idx < 0 || idx <= top());
+    const int n = (recycle_top == 0) ? (recycle_top = _gettop(L)) : recycle_top;
+    return (idx < 0 || idx <= n);
 #else
     return false;
 #endif
@@ -464,8 +463,6 @@ struct gLuaBase {
 
   /// <summary>
   /// Attempt to push the vector as an glm::ivec; falling back to glm::vec otherwise.
-  ///
-  /// @NOTE: Future-proofing.
   /// </summary>
   template<glm::length_t L, typename T>
   LUA_TRAIT_QUALIFIER int PushNumInt(const gLuaBase &LB, const glm::vec<L, T> &v) {
@@ -517,7 +514,7 @@ struct gLuaBase {
       setfltvalue(s2v(LB.L->top), cast_num(v.x));
     }
     else {
-      lua_assert(false);  // should never be hit
+      LUAGLM_UNREACHABLE();  // should never be hit
       setnilvalue(s2v(LB.L->top));
     }
     api_incr_top(LB.L);
@@ -544,12 +541,10 @@ struct gLuaBase {
       lua_State *L_ = LB.L;
 
       lua_lock(L_);
-      const TValue *o = glm_i2v(L_, LB.idx);
-      if (l_likely(ttismatrix(o))) {
-        LB.idx++;
-
+      const TValue *o = glm_i2v(L_, LB.idx++);
+      if (l_likely(ttismatrix(o))) {  // lua_pushvalue
         glm_mat_boundary(mvalue_ref(o)) = glm_mat_realign(m, C, R, glm_Float, LUAGLM_Q);
-        setobj2s(L_, L_->top, o);  // lua_pushvalue
+        setobj2s(L_, L_->top, o);
         api_incr_top(L_);
         lua_unlock(L_);
         return 1;
@@ -557,8 +552,7 @@ struct gLuaBase {
       lua_unlock(L_);
     }
 
-#if defined(LUAGLM_FORCED_RECYCLE)
-    /* This library allocating memory is verboten! */
+#if defined(LUAGLM_FORCED_RECYCLE)  // This library allocating memory is verboten!
     return luaL_error(LB.L, "library configured to not allocate additional memory; use recycling mechanisms")
 #else
     return glm_pushmat(LB.L, glmMatrix(m));
@@ -625,8 +619,8 @@ struct gLuaBase {
     return 2;
   }
 
-  template<typename T>
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Polygon<3, T> &p) {
+  template<glm::length_t D, typename T>
+  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Polygon<D, T> &p) {
     // All operations mutate the referenced Polygon userdata; push it back onto
     // the Lua stack.
     if (l_likely(p.stack_idx >= 1)) {
@@ -1676,17 +1670,17 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   #define GLM_BINDING_BEGIN         \
     gLuaBase LB(L);                 \
     /* Ensure LB.top() is cached */ \
-    const int __top = LB.top();     \
+    const int _stop = LB.top();     \
     try {
 
   #define GLM_BINDING_END                 \
     }                                     \
     catch (const std::exception &e) {     \
-      lua_settop(L, __top);               \
+      lua_settop(L, _stop);               \
       lua_pushstring(L, e.what());        \
     }                                     \
     catch (...) {                         \
-      lua_settop(L, __top);               \
+      lua_settop(L, _stop);               \
       lua_pushstring(L, "GLM exception"); \
     }                                     \
     return lua_error(L);

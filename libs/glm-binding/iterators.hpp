@@ -22,7 +22,6 @@ class glmLuaIterator : public gLuaBase {
 public:
   glmLuaIterator(lua_State *L_, int idx_ = 1)
     : gLuaBase(L_, idx_) {
-    gLuaBase::top();  // Cache lua_gettop
   }
 
   // virtual ~glmLuaIterator() = default; // VERBOTEN!
@@ -47,7 +46,6 @@ class glmLuaContainer : public gLuaBase {
 public:
   glmLuaContainer(lua_State *L_, int idx_ = 1)
     : gLuaBase(L_, idx_) {
-    gLuaBase::top();  // Cache lua_gettop
   }
 
   // Interface Outline.
@@ -87,24 +85,22 @@ class glmLuaStack : public glmLuaContainer<Tr> {
 public:
   using size_type = typename glmLuaContainer<Tr>::size_type;
 
-  glmLuaStack(lua_State *L_, int idx_ = 1)
-    : glmLuaContainer<Tr>(L_, idx_) {
-  }
-
   class Iterator : public glmLuaIterator<Tr> {
     friend class glmLuaStack;
 
   private:
+    int m_top;  // Cache of lua_gettop on instantiation
+
     /// <summary>
     /// Within stack bounds.
     /// </summary>
     bool valid() const {
-      return gLuaBase::idx >= 1 && gLuaBase::idx <= lua_gettop(gLuaBase::L);
+      return gLuaBase::idx >= 1 && gLuaBase::idx <= m_top;
     }
 
   public:
-    Iterator(lua_State *L_, int idx_ = 1)
-      : glmLuaIterator<Tr>(L_, idx_) {
+    Iterator(lua_State *L_, int idx_, int top_)
+      : glmLuaIterator<Tr>(L_, idx_), m_top(top_) {
     }
 
     /// <summary>
@@ -115,7 +111,7 @@ public:
 
       typename Tr::type value = Tr::zero();
       if (!gLuaBase::Pull(L_, gLuaBase::idx, value)) {
-        luaL_error(L_, "Invalid %s structure", Tr::Label());
+        luaL_error(L_, "iterator: invalid %s structure", Tr::Label());
       }
       return value;
     }
@@ -145,37 +141,34 @@ public:
     }
   };
 
-  size_type size() const {
-    return static_cast<size_type>(gLuaBase::top());
+private:
+  int m_top;  // Cache of lua_gettop on instantiation
+
+public:
+  glmLuaStack(lua_State *L_, int idx_ = 1)
+    : glmLuaContainer<Tr>(L_, idx_), m_top(gLuaBase::top()) {
+  }
+
+  inline size_type size() const {
+    return static_cast<size_type>(m_top);
   }
 
   typename Tr::type operator[](size_type pos) const {
     typename Tr::type value = Tr::zero();
     if (pos >= 0 && pos < size()) {
-      lua_State *L_ = gLuaBase::L;
-      if (!gLuaBase::Pull(L_, pos + 1, value)) {
-        luaL_error(L_, "Invalid %s structure", Tr::Label());
+      if (!gLuaBase::Pull(gLuaBase::L, pos + 1, value)) {
+        luaL_error(gLuaBase::L, "operator[]: invalid %s structure", Tr::Label());
       }
     }
     return value;
   }
 
   Iterator begin() const {
-    return Iterator(gLuaBase::L, gLuaBase::idx);
+    return Iterator(gLuaBase::L, gLuaBase::idx, m_top);
   }
 
   Iterator end() const {
-    return Iterator(gLuaBase::L, gLuaBase::top() + 1);
-  }
-
-  /// <summary>
-  /// Sugar forEach helper.
-  /// </summary>
-  void forEach(std::function<void(const typename Tr::type &)> func) {
-    auto e = end();
-    for (auto b = begin(); b != e; ++b) {
-      func(*b);
-    }
+    return Iterator(gLuaBase::L, m_top + 1, m_top);
   }
 };
 
@@ -187,67 +180,45 @@ class glmLuaArray : public glmLuaContainer<Tr> {
 public:
   using size_type = typename glmLuaContainer<Tr>::size_type;
 
-private:
-  /// <summary>
-  /// Cached array length.
-  ///
-  /// @TODO: Method to invalidate if table is mutated.
-  /// </summary>
-  size_type arraySize = 0;
-
-  bool valid() const {
-    return lua_istable(gLuaBase::L, gLuaBase::idx);
-  }
-
-public:
-  glmLuaArray(lua_State *L_, int idx_ = 1)
-    : glmLuaContainer<Tr>(L_, idx_) {
-    if (!lua_istable(L_, idx_)) {
-      // @TODO: Throw assertion failure.
-    }
-
-    arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
-  }
-
   class Iterator : public glmLuaIterator<Tr> {
     friend class glmLuaArray;
 
   private:
-    size_type arrayIdx;  // Current array index.
-    size_type arraySize;  // (Precomputed) array size.
+    size_type m_arrayIdx;  // Current array index.
+    size_type m_arraySize;  // (Precomputed) array size.
 
     /// <summary>
     /// Within array bounds & is a valid trait.
     /// </summary>
     GLM_INLINE bool valid() const {
-      return arrayIdx >= 1 && arrayIdx <= arraySize;
+      return m_arrayIdx >= 1 && m_arrayIdx <= m_arraySize;
     }
 
   public:
-    Iterator(lua_State *L_, int idx_, size_type arrayIdx_, size_type arraySize_)
-      : glmLuaIterator<Tr>(L_, idx_), arrayIdx(arrayIdx_), arraySize(arraySize_) {
+    Iterator(lua_State *L_, int idx_, size_type arrayIdx, size_type arraySize)
+      : glmLuaIterator<Tr>(L_, idx_), m_arrayIdx(arrayIdx), m_arraySize(arraySize) {
     }
 
-    Iterator(lua_State *L_, int idx_, size_type arraySize_ = 1)
-      : glmLuaIterator<Tr>(L_, idx_), arrayIdx(arraySize_) {
-      arraySize = lua_istable(L_, idx_) ? static_cast<size_type>(lua_rawlen(L_, idx_)) : 0;
+    Iterator(lua_State *L_, int idx_, size_type arrayIdx)
+      : glmLuaIterator<Tr>(L_, idx_), m_arrayIdx(arrayIdx) {
+      m_arraySize = lua_istable(L_, idx_) ? static_cast<size_type>(lua_rawlen(L_, idx_)) : 0;
     }
 
     /// <summary>
     /// Goto the next element in the array.
     /// </summary>
     const Iterator &operator++() {
-      arrayIdx++;
+      m_arrayIdx++;
       return *this;
     }
 
     const Iterator &operator++(int) {  // @HACK
-      arrayIdx++;
+      m_arrayIdx++;
       return *this;
     }
 
     bool operator==(const Iterator &rhs) const {
-      return (arrayIdx == rhs.arrayIdx) || (!valid() && !rhs.valid());
+      return (m_arrayIdx == rhs.m_arrayIdx) || (!valid() && !rhs.valid());
     }
 
     bool operator!=(const Iterator &rhs) const {
@@ -259,32 +230,44 @@ public:
 
       // Fetch the object within the array that *should* correspond to the trait.
       lua_State *L_ = gLuaBase::L;
-      lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(arrayIdx));
-      const int top_ = lua_gettop(L_);  // gLuaBase uses absolute values.
-
-      // Parse the trait given the relative stack (starting) index.
-      if (!gLuaBase::Pull(L_, top_, value)) { /* noret */
+      lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(m_arrayIdx));  // [..., element]
+      if (!gLuaBase::Pull(L_, lua_absindex(L_, -1), value)) {
         lua_pop(L_, 1);
-        luaL_error(L_, "Invalid table index: %d for %s", static_cast<int>(arrayIdx), Tr::Label());
-
+        luaL_error(L_, "iterator: invalid table index: %d for %s", static_cast<int>(m_arrayIdx), Tr::Label());
         return value;  // quash compiler warnings, luaL_error is noret.
       }
 
-      lua_pop(L_, 1);
+      lua_pop(L_, 1);  // [...]
       return value;
     }
   };
 
-  size_type size() const {
-    return arraySize;
+private:
+  /// <summary>
+  /// Cached array length. @TODO: method to invalidate if table is mutated.
+  /// </summary>
+  size_type m_arraySize = 0;
+
+public:
+  glmLuaArray(lua_State *L_, int idx_ = 1)
+    : glmLuaContainer<Tr>(L_, idx_) {
+
+    // @TODO: assert(lua_istable(L_, idx_));
+    m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
+  }
+
+  bool valid() const {
+    return lua_istable(gLuaBase::L, gLuaBase::idx);
+  }
+
+  inline size_type size() const {
+    return m_arraySize;
   }
 
   /// <summary>
   /// With how this binding is implemented, Lua stack adjustments, i.e.,
   /// luaD_growstack, should be prevented. Avoid handing control of the runtime
-  /// to lua_geti (and potential __index metamethod).
-  ///
-  /// @TODO: Optimize
+  /// to lua_geti and potential __index metamethod.
   /// </summary>
   typename Tr::type operator[](size_type pos) const {
     typename Tr::type value = Tr::zero();
@@ -293,7 +276,7 @@ public:
       lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(pos + 1));  // [..., element]
       if (!gLuaBase::Pull(L_, lua_absindex(L_, -1), value)) {
         lua_pop(L_, 1);
-        luaL_error(L_, "Invalid %s structure", Tr::Label());
+        luaL_error(L_, "operator[]: invalid %s structure", Tr::Label());
       }
       lua_pop(L_, 1);  // [...]
     }
@@ -305,31 +288,24 @@ public:
   }
 
   Iterator end() const {
-    const size_type _tablesize = size();
-    return Iterator(gLuaBase::L, gLuaBase::idx, _tablesize + 1, _tablesize);
+    const size_type arraySize = size();
+    return Iterator(gLuaBase::L, gLuaBase::idx, arraySize + 1, arraySize);
   }
 
   /// <summary>
-  /// Create an iterator at the specified array index "a_idx".
+  /// Create an iterator at the specified array index.
   /// </summary>
-
-  Iterator begin(size_type a_idx = 1) {
-    return Iterator(gLuaBase::L, gLuaBase::idx, a_idx);
+  Iterator begin(size_type arrayIndex = 1) {
+    return Iterator(gLuaBase::L, gLuaBase::idx, arrayIndex);
   }
 
-  Iterator end(size_type a_end_idx = 0) {
-    const size_type _tablesize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
-
-    a_end_idx = (a_end_idx == 0) ? _tablesize + 1 : a_end_idx;
-    return Iterator(gLuaBase::L, gLuaBase::idx, a_end_idx, _tablesize);
-  }
-
-  /// Sugar
-  void forEach(std::function<void(const typename Tr::type &)> func) {
-    auto e = end();
-    for (auto b = begin(); b != e; ++b) {
-      func(*b);
-    }
+  /// <summary>
+  /// Create an iterator ending at the specified array index.
+  /// </summary>
+  Iterator end(size_type arrayEndIndex = 0) {
+    const size_type arraySize = size();
+    arrayEndIndex = (arrayEndIndex == 0) ? arraySize + 1 : arrayEndIndex;
+    return Iterator(gLuaBase::L, gLuaBase::idx, arrayEndIndex, arraySize);
   }
 };
 

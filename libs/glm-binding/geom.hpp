@@ -1536,7 +1536,7 @@ GLM_BINDING_QUALIFIER(polygon_extremePoint) {
 /// </summary>
 GLM_BINDING_QUALIFIER(polygon_new) {
   GLM_BINDING_BEGIN
-  const int top = LB.top();
+  const int n = LB.top();
   if (!lua_isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
     return GLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
   }
@@ -1566,7 +1566,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
   #endif
       polygon->p = ::new (list) PolyList(LB.L, allocator);
 
-      if (l_likely(top >= 1 && lua_istable(LB.L, LB.idx))) {
+      if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
         glmLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
         const auto e = lArray.end();
         for (auto b = lArray.begin(); b != e; ++b) {
