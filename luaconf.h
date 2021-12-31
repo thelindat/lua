@@ -263,9 +263,14 @@
 ** ===================================================================
 */
 
-/* __has_attribute is supported on gcc >=5, clang >=2.9, and icc >=17 */
-#if !defined(__has_attribute)
-  #define __has_attribute(x) 0
+/*
+@@ LUA_HAS_ATTRIBUTE __has_attribute wrapper; supported on gcc >=5, clang >=2.9,
+** and icc >=17.
+*/
+#if defined(__has_attribute)
+  #define LUA_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+  #define LUA_HAS_ATTRIBUTE(x) 0
 #endif
 
 /*
@@ -316,7 +321,7 @@
 #if defined(__GNUC__) && ((__GNUC__*100 + __GNUC_MINOR__) >= 302) && \
     defined(__ELF__)		/* { */
 #define LUAI_FUNC __attribute__((visibility("internal"))) extern
-#elif __has_attribute(visibility) && defined(__ELF__)	/* { */
+#elif LUA_HAS_ATTRIBUTE(visibility) && defined(__ELF__)	/* { */
 #define LUAI_FUNC __attribute__((visibility("internal"))) extern
 #else
 #define LUAI_FUNC	extern
@@ -795,7 +800,7 @@
 
 #if defined(_MSC_VER)
   #define LUA_INLINE __forceinline
-#elif __has_attribute(__always_inline__)
+#elif LUA_HAS_ATTRIBUTE(__always_inline__)
   #define LUA_INLINE inline __attribute__((__always_inline__))
 #elif defined(LUA_USE_C89)
   #define LUA_INLINE
@@ -805,7 +810,7 @@
 
 #if defined(__cplusplus) && __cplusplus >= 201703
   #define LUA_FALLTHROUGH [[fallthrough]]
-#elif __has_attribute(__fallthrough__)
+#elif LUA_HAS_ATTRIBUTE(__fallthrough__)
   #define LUA_FALLTHROUGH __attribute__((__fallthrough__))
 #else
   #define LUA_FALLTHROUGH /* FALLTHROUGH */
@@ -813,7 +818,7 @@
 
 #if defined(_MSC_VER)
   #define LUA_ALIGNED_(x) __declspec(align(x))
-#elif __has_attribute(aligned)
+#elif LUA_HAS_ATTRIBUTE(aligned)
   #define LUA_ALIGNED_(x) __attribute__((aligned(x)))
 #else
   #define LUA_ALIGNED_(x)

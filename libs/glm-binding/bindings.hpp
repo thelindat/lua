@@ -50,11 +50,29 @@ extern LUA_API_LINKAGE {
 #endif
 
 /*
+@@ LUAGLM_HAS_ATTRIBUTE __has_attribute wrapper.
+*/
+#if defined(__has_attribute)
+  #define LUAGLM_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+  #define LUAGLM_HAS_ATTRIBUTE(x) 0
+#endif
+
+/*
+@@ LUAGLM_HAS_CPP_ATTRIBUTE __has_cpp_attribute wrapper.
+*/
+#if defined(__has_cpp_attribute)
+  #define LUAGLM_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#else
+  #define LUAGLM_HAS_CPP_ATTRIBUTE(x) 0
+#endif
+
+/*
 @@ LUAGLM_FALLTHROUGH Macro for informing the compiler a fallthrough is intentional.
 */
-#if defined __has_cpp_attribute && __has_cpp_attribute(fallthrough) && !defined(__INTEL_COMPILER)
+#if LUAGLM_HAS_CPP_ATTRIBUTE(fallthrough) && !defined(__INTEL_COMPILER)
   #define LUAGLM_FALLTHROUGH [[fallthrough]]
-#elif __has_attribute(__fallthrough__)
+#elif LUAGLM_HAS_ATTRIBUTE(__fallthrough__)
   #define LUAGLM_FALLTHROUGH __attribute__((__fallthrough__))
 #else
   #define LUAGLM_FALLTHROUGH \
@@ -65,7 +83,7 @@ extern LUA_API_LINKAGE {
 /*
 @@ LUAGLM_NO_RETURN non-return type
 */
-#if defined(__GNUC__) || __has_attribute(__noreturn__)
+#if defined(__GNUC__) || LUAGLM_HAS_ATTRIBUTE(__noreturn__)
   #define LUAGLM_NO_RETURN void __attribute__((noreturn))
 #elif defined(_MSC_VER) && _MSC_VER >= 1200
   #define LUAGLM_NO_RETURN void __declspec(noreturn)

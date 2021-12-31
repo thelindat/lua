@@ -154,7 +154,7 @@ typedef LUAI_UACINT l_uacInt;
 */
 #if !defined(l_noret)
 
-#if defined(__GNUC__) || __has_attribute(__noreturn__)
+#if defined(__GNUC__) || LUA_HAS_ATTRIBUTE(__noreturn__)
 #define l_noret		void __attribute__((noreturn))
 #elif defined(_MSC_VER) && _MSC_VER >= 1200
 #define l_noret		void __declspec(noreturn)

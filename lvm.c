@@ -51,7 +51,7 @@
 **
 ** Note: icc/icpc does not recognize these optimization levels.
 */
-#if defined(LUA_USE_JUMPTABLE) && __has_attribute(optimize) && !defined(__INTEL_COMPILER)
+#if defined(LUA_USE_JUMPTABLE) && LUA_HAS_ATTRIBUTE(optimize) && !defined(__INTEL_COMPILER)
   #define LUA_JUMPTABLE_ATTRIBUTE __attribute((optimize("no-crossjumping", "no-gcse")))
 #else
   #define LUA_JUMPTABLE_ATTRIBUTE
