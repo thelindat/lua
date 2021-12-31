@@ -59,7 +59,7 @@ CWARNSC= -Wdeclaration-after-statement \
 # ('-ftrapv' for runtime checks of integer overflows)
 # -fsanitize=undefined -ftrapv -fno-inline
 # Note: Disable -DNDEBUG
-# TESTS= -DLUA_USER_H='"ltests.h"' -O0 -g
+TESTS= -DLUA_USER_H='"ltests.h"' -O0 -g
 
 # Additional compiler options for internal tests. Useful when compiling with
 # GLM_FORCE_DEFAULT_ALIGNED_GENTYPES as additional 'alignment' requirements are
@@ -202,6 +202,16 @@ help:
 guess:
 	@echo Guessing `$(UNAME)`
 	@$(MAKE) `$(UNAME)`
+
+shuffled:
+	@echo Building Base Lua
+	$(MAKE) clean
+	$(MAKE) OPCODE="shuffle/base/" linux-readline
+	@echo Shuffling opcode set
+	./lua shuffle/sort.lua --output=shuffle/shuffled/ --seed=${RANDOM}
+	@echo Building Shuffled Lua
+	$(MAKE) clean
+	$(MAKE) OPCODE="shuffle/shuffled/" linux-readline
 
 AIX aix:
 	$(MAKE) $(ALL) CC="xlc" CFLAGS="-O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN" SYSLIBS="-ldl" SYSLDFLAGS="-brtl -bexpall"
