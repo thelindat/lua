@@ -614,10 +614,10 @@ int luaV_equalobj (lua_State *L, const TValue *t1, const TValue *t2) {
     case LUA_VBLOBSTR: return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
 #endif
     case LUA_VLNGSTR: return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
-    case LUA_VVECTOR2: return glmVec_equalObj(L, t1, t2, LUA_VVECTOR2);
-    case LUA_VVECTOR3: return glmVec_equalObj(L, t1, t2, LUA_VVECTOR3);
-    case LUA_VVECTOR4: return glmVec_equalObj(L, t1, t2, LUA_VVECTOR4);
-    case LUA_VQUAT: return glmVec_equalObj(L, t1, t2, LUA_VQUAT);
+    case LUA_VVECTOR2: return glmVec_equalObj(L, t1, t2);
+    case LUA_VVECTOR3: return glmVec_equalObj(L, t1, t2);
+    case LUA_VVECTOR4: return glmVec_equalObj(L, t1, t2);
+    case LUA_VQUAT: return glmVec_equalObj(L, t1, t2);
     case LUA_VMATRIX: return glmMat_equalObj(L, t1, t2);
     case LUA_VUSERDATA: {
       if (uvalue(t1) == uvalue(t2)) return 1;

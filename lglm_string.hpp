@@ -27,6 +27,9 @@
 ** ===================================================================
 */
 
+/* Avoid declaring GLM_INLINE in the string formatting functions. */
+#define LUAGLM_FMT_QUALIFIER GLM_CUDA_FUNC_DEF
+
 /* Buffer size of format string/text */
 #define LUAGLM_FMT_LEN 256
 
@@ -102,7 +105,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<1, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<1, glm_Float> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, vec<1, glm_Float> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec1(%s)", Prefix, Lilteral);
       return _vsnprintf(buff, buff_len, format_text, LUAGLM_STRCAST(x[0]));
@@ -111,7 +114,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<2, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<2, glm_Float> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, vec<2, glm_Float> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec2(%s, %s)", Prefix, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text, LUAGLM_STRCAST(x[0]), LUAGLM_STRCAST(x[1]));
@@ -120,7 +123,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<3, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<3, glm_Float> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, vec<3, glm_Float> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec3(%s, %s, %s)", Prefix, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
@@ -133,7 +136,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<vec<4, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, vec<4, glm_Float> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, vec<4, glm_Float> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%svec4(%s, %s, %s, %s)", Prefix, Lilteral, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
@@ -147,7 +150,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<qua<T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, qua<glm_Float> const &q) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, qua<glm_Float> const &q) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%squat(%s, {%s, %s, %s})", Prefix, Lilteral, Lilteral, Lilteral, Lilteral);
       return _vsnprintf(buff, buff_len, format_text,
@@ -161,7 +164,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 2, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 2, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 2, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x2((%s, %s), (%s, %s))",
         Prefix,
@@ -178,7 +181,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 3, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x3((%s, %s, %s), (%s, %s, %s))",
         Prefix,
@@ -195,7 +198,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<2, 4, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 4, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<2, 4, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat2x4((%s, %s, %s, %s), (%s, %s, %s, %s))",
         Prefix,
@@ -212,7 +215,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 2, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 2, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 2, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x2((%s, %s), (%s, %s), (%s, %s))",
         Prefix,
@@ -231,7 +234,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 3, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 3, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 3, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
         Prefix,
@@ -250,7 +253,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<3, 4, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 4, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<3, 4, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat3x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
         Prefix,
@@ -269,7 +272,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 2, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 2, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 2, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x2((%s, %s), (%s, %s), (%s, %s), (%s, %s))",
         Prefix,
@@ -290,7 +293,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 3, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 3, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x3((%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s))",
         Prefix,
@@ -311,7 +314,7 @@ namespace detail {
 
   template<typename T, qualifier Q>
   struct lglm_compute_to_string<mat<4, 4, T, Q>> {
-    static GLM_FUNC_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 4, T, Q> const &x) {
+    static LUAGLM_FMT_QUALIFIER int call(char *buff, size_t buff_len, mat<4, 4, T, Q> const &x) {
       LUAGLM_STRHEADER
       _vsnprintf(format_text, LUAGLM_FMT_LEN, "%smat4x4((%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s), (%s, %s, %s, %s))",
         Prefix,

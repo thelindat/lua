@@ -9,7 +9,7 @@
 **
 ** See Copyright Notice in lua.h
 **
-** @TODO: Consider SIMD support for some of the quatEulerAngle functions
+** @TODO: SIMD support for some of the quatEulerAngle functions
 */
 #ifndef EXT_EXTENSION_QUAT_HPP
 #define EXT_EXTENSION_QUAT_HPP
@@ -414,8 +414,8 @@ namespace glm {
   /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER void __axisAngle(qua<T, Q> const &q, vec<3, T, Q> &out_axis, T &out_angle) {
-    out_angle = angle(q);
     out_axis = axis(q);
+    out_angle = angle(q);
   }
 
   /// <summary>

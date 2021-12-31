@@ -332,7 +332,7 @@ int glmVec_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
 // (re-)computed.
 //
 // @TODO: Instead of calculating the length of the string just ensure the
-// second element is '\0'
+// second element is '\0': (k != GLM_NULLPTR && k[0] != '\0' && k[1] == '\0');
 int glmVec_rawgets(const TValue *obj, const char *k, StkId res) {
   const int result = strlen(k) == 1 ? vecgets(obj, k, res) : LUA_TNONE;
   if (result == LUA_TNONE) {
@@ -462,11 +462,11 @@ void glmVec_objlen(const TValue *obj, StkId res) {
   }
 }
 
-int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2, int rtt) {
+int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
   bool result = false;
   const glmVector &v = glm_vvalue(o1);
   const glmVector &other_v = glm_vvalue(o2);
-  switch (rtt) {
+  switch (ttypetag(o1)) {
     case LUA_VVECTOR2: result = _glmeq(v.v2, other_v.v2); break;
     case LUA_VVECTOR3: result = _glmeq(v.v3, other_v.v3); break;
     case LUA_VVECTOR4: result = _glmeq(v.v4, other_v.v4); break;
@@ -476,9 +476,9 @@ int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2, int rtt) {
     }
   }
 
-  // @TODO: Document the specifics of this tag method and how glm::equal(V, V2)
-  // takes priority over any custom method for the vector type. The intent is to
-  // still allow custom __eq declarations to include desired epsilon or ULPS.
+  // @TODO: Document glm::equal(V, V2) taking priority over any custom method
+  // for the vector type. The intent is to still allow custom __eq declarations
+  // to include desired epsilon or ULPS.
   if (result == false && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
     if (!notm(tm)) {
@@ -563,10 +563,19 @@ size_t glmVec_hash(const TValue *obj) {
 
 namespace glm {
   /// <summary>
-  /// Return true if each component of the vector is finite.
+  /// Return true if all components of the vector are finite.
+  ///
+  /// @NOTE: -ffast-math will break this condition.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_DECL bool __isfinite(vec<L, T, Q> const &v);
+  GLM_FUNC_QUALIFIER bool __isfinite(vec<L, T, Q> const &v) {
+    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isnan' only accept floating-point inputs");
+
+    bool result = true;
+    for (length_t l = 0; l < L; ++l)
+      result &= glm::isfinite(v[l]);
+    return result;
+  }
 }
 
 int glmVec_isfinite(const TValue *obj) {
@@ -837,8 +846,8 @@ int glmMat_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
     }
   }
 
-  // @TODO: Document the specifics of this tag method and how glm::equal(M, M2)
-  // will take priority over any custom method for the matrix type.
+  // @TODO: Document glm::equal(M, M2) taking priority over any custom method
+  // for the matrix type.
   if (!result && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
     if (!notm(tm)) {
@@ -1015,21 +1024,6 @@ LUAGLM_API glm::mat<4, 4, glm_Float> glm_tomat4x4(lua_State *L, int idx) { retur
 
 namespace glm {
   /// <summary>
-  /// Return true if all components of the vector are finite.
-  ///
-  /// @NOTE: -ffast-math will break this condition.
-  /// </summary>
-  template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool __isfinite(vec<L, T, Q> const &v) {
-    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isnan' only accept floating-point inputs");
-
-    bool result = true;
-    for (length_t l = 0; l < L; ++l)
-      result &= glm::isfinite(v[l]);
-    return result;
-  }
-
-  /// <summary>
   /// @GLMFix: Generalized slerp implementation.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
@@ -1051,8 +1045,7 @@ namespace glm {
 }
 
 /// <summary>
-/// @TODO: Compile-time option to allow 32-bit or 64-bit hashing.
-/// @TODO: Compile-time hash algorithm configuration.
+/// @TODO: Compile-time hash algorithm configuration (algorithm, 32-bit, 64-bit, etc).
 /// </summary>
 lua_Integer luaO_HashString(const char *string, size_t length, int ignore_case) {
   unsigned int hash = 0;
@@ -1740,8 +1733,6 @@ LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
 ///
 /// @NOTE: Function considered deprecated. The previous idea that tables can be
 /// implicit vector types does not "mesh" well with the glm binding library.
-///
-/// @TODO: Allow TM_INDEX instead of raw-accessing
 /// </summary>
 static int glmH_tovector(lua_State *L, const TValue *o, glmVector *v) {
   static const char *const dims[] = { "x", "y", "z", "w" };
@@ -1970,8 +1961,6 @@ LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
 /*
 ** {==================================================================
 ** Metamethod implementations. Ugly.
-**
-** @TODO: Profile/tune statements below.
 **
 ** @GLMIndependent: Operation done only on vec4/mat4x4. Used as an optimization
 ** as the function is independently applied to each component of the structure.

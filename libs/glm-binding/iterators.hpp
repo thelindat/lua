@@ -252,7 +252,7 @@ public:
   glmLuaArray(lua_State *L_, int idx_ = 1)
     : glmLuaContainer<Tr>(L_, idx_) {
 
-    // @TODO: assert(lua_istable(L_, idx_));
+    // assert(lua_istable(L_, idx_));
     m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
   }
 

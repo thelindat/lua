@@ -293,16 +293,10 @@ checkI(function () return -k0//1 end, 0)
 checkK(function () return 3^-1 end, 1/3)
 checkK(function () return (1 + 1)^(50 + 50) end, 2^100)
 checkK(function () return (-2)^(31 - 2) end, -0x20000000 + 0.0)
-checkF(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7.0)
-
--- Integer Exponentiation
---checkI(function () return (1 + 1)^(50 + 50) end, 2^100)
---checkK(function () return (-2)^(31 - 2) end, -0x20000000 + 0.0): @TODO
---checkF(function () return -((2.0^8 + -(-1)) % 8)//2 * 4 - 3 end, -7.0)
-
 checkF(function () return (-k3^0 + 5) // 3.0 end, 1.0)
 checkI(function () return -k3 % 5 end, 2)
 checkF(function () return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3 end, -5.0)
+checkF(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7.0)
 checkI(function () return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD end, 0xF4)
 checkI(function () return ~(~kFF0 | kFF0) end, 0)
 checkI(function () return ~~-1024.0 end, -1024)

@@ -1,7 +1,7 @@
 /// <summary>
 /// See Copyright Notice in setup.hpp
 ///
-/// @TODO: Cleanup template definitions and introduce Triangle2D support.
+/// @TODO: Triangle2D support.
 /// </summary>
 #ifndef EXT_GEOM_TRIANGLE_HPP
 #define EXT_GEOM_TRIANGLE_HPP
@@ -252,7 +252,7 @@ namespace glm {
 
   /// <summary>
   /// Compute all face normals of the triangle.
-  /// @TODO: @LuaGLM Commented out until binding implementation is complete.
+  /// @TODO: Commented out until binding implementation is complete.
   /// </summary>
   // template<length_t L, typename T, qualifier Q>
   // GLM_GEOM_QUALIFIER void faceNormals(const Triangle<L, T, Q> &t, vec<L, T, Q> (&normals)[4]) {
@@ -264,7 +264,7 @@ namespace glm {
 
   /// <summary>
   /// Compute the directions of each edge.
-  /// @TODO: @LuaGLM Commented out until binding implementation is complete.
+  /// @TODO: Commented out until binding implementation is complete.
   /// </summary>
   // template<length_t L, typename T, qualifier Q>
   // GLM_GEOM_QUALIFIER void faceNormals(const Triangle<L, T, Q> &t, vec<L, T, Q> (&directions)[3]) {

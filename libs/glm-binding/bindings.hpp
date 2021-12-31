@@ -240,8 +240,7 @@ static LUA_INLINE const TValue *glm_i2v(lua_State *L, int idx) {
 ** tonumberx are quite heavy (used everywhere) due the requirement that the
 ** binding can be a complete superset of lmathlib.
 **
-** @TODO: Eventually include a compile-option.
-**  #define LUA_TRAIT_QUALIFIER_NIL static GLM_INLINE
+** #define LUA_TRAIT_QUALIFIER_NIL static GLM_INLINE
 */
 #define LUA_TRAIT_QUALIFIER_NIL static GLM_NEVER_INLINE
 
@@ -269,9 +268,7 @@ struct gLuaTrait;
 ///
 /// @UnifiedRand: @TODO: Interface for generating random numbers to replace
 /// std::rand(). This allows gLuaBase to invoke math_random instead of having to
-/// maintain multiple random states.
-///
-/// @TODO Consider: https://en.cppreference.com/w/cpp/numeric/random
+/// maintain multiple random states. Consider: https://en.cppreference.com/w/cpp/numeric/random
 /// </summary>
 struct gLuaBase {
   lua_State *L;  // Current lua state.
@@ -1600,9 +1597,9 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 ** @NOTE: This parser does not throw an error if the Value is not a known matrix
 **  value. This is to simplify the EQUAL/HASH operations.
 */
-#define PARSE_MATRIX(LB, Value, F, ArgLayout, ...)                                      \
+#define PARSE_MATRIX(LB, MatrixType, F, ArgLayout, ...)                                 \
   LUA_MLM_BEGIN                                                                         \
-  switch (mvalue_dims(Value)) {                                                         \
+  switch (MatrixType) {                                                                 \
     case LUAGLM_MATRIX_2x2: ArgLayout(LB, F, gLuaMat2x2<>::fast, ##__VA_ARGS__); break; \
     case LUAGLM_MATRIX_2x3: ArgLayout(LB, F, gLuaMat2x3<>::fast, ##__VA_ARGS__); break; \
     case LUAGLM_MATRIX_2x4: ArgLayout(LB, F, gLuaMat2x4<>::fast, ##__VA_ARGS__); break; \
@@ -1776,22 +1773,22 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   }
 
 /* A glm::function that defined over any quaternions */
-#define QUAT_DEFN(Name, F, ArgLayout, ...)        \
-  GLM_BINDING_QUALIFIER(Name) {                   \
-    GLM_BINDING_BEGIN                             \
-    ArgLayout(LB, F,  gLuaQuat<>, ##__VA_ARGS__); \
-    GLM_BINDING_END                               \
+#define QUAT_DEFN(Name, F, ArgLayout, ...)       \
+  GLM_BINDING_QUALIFIER(Name) {                  \
+    GLM_BINDING_BEGIN                            \
+    ArgLayout(LB, F, gLuaQuat<>, ##__VA_ARGS__); \
+    GLM_BINDING_END                              \
   }
 
 /* A glm::function that defined over any NxM matrix */
-#define MATRIX_DEFN(Name, F, ArgLayout, ...)                \
-  GLM_BINDING_QUALIFIER(Name) {                             \
-    GLM_BINDING_BEGIN                                       \
-    const TValue *_m = glm_i2v(LB.L, LB.idx);               \
-    if (l_likely(ttismatrix(_m)))                           \
-      PARSE_MATRIX(LB, _m, F, ArgLayout, ##__VA_ARGS__);    \
-    return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX); \
-    GLM_BINDING_END                                         \
+#define MATRIX_DEFN(Name, F, ArgLayout, ...)                          \
+  GLM_BINDING_QUALIFIER(Name) {                                       \
+    GLM_BINDING_BEGIN                                                 \
+    const TValue *_m = glm_i2v(LB.L, LB.idx);                         \
+    if (l_likely(ttismatrix(_m)))                                     \
+      PARSE_MATRIX(LB, mvalue_dims(_m), F, ArgLayout, ##__VA_ARGS__); \
+    return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX);           \
+    GLM_BINDING_END                                                   \
   }
 
 /* A glm::function that operates only on NxN matrices */

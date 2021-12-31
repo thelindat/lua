@@ -101,6 +101,28 @@ namespace glm {
     return any(notEqual(x, y, MaxULPs));
   }
 
+  /* glm::all(glm::lessThan | glm::greaterThan | glm::lessThanEqual | glm::greaterThanEqual) */
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThan(genIUType x, genIUType y) {
+    return all(lessThan(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThanEqual(genIUType x, genIUType y) {
+    return all(lessThanEqual(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThan(genIUType x, genIUType y) {
+    return all(greaterThan(x, y));
+  }
+
+  template<typename genIUType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThanEqual(genIUType x, genIUType y) {
+    return all(greaterThanEqual(x, y));
+  }
+
   /* glm::any(glm::isinf(...)) shorthand */
 
   template<typename T>
@@ -464,32 +486,6 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType convertSRGBToLinear(genType ColorSRGB, genType Gamma) {
     return convertSRGBToLinear(vec<1, genType>(ColorSRGB), Gamma).x;
-  }
-
-  /*
-  ** glm::all(glm::lessThan | glm::greaterThan | glm::lessThanEqual | glm::greaterThanEqual)
-  **
-  ** @TODO: Reorganize once scalar_extensions is implemented.
-  */
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThan(genIUType x, genIUType y) {
-    return all(lessThan(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThanEqual(genIUType x, genIUType y) {
-    return all(lessThanEqual(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThan(genIUType x, genIUType y) {
-    return all(greaterThan(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThanEqual(genIUType x, genIUType y) {
-    return all(greaterThanEqual(x, y));
   }
 
   /*

@@ -228,11 +228,14 @@ namespace glm {
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER LineSegment<L, T, Q> edge(const Polygon<L, T, Q> &polygon, size_t i) {
-    if (polygon.size() == 0 || i >= polygon.size())
+    const size_t size = polygon.size();
+    if (size == 0 || i >= size)
       return LineSegment<L, T, Q>();
-    if (polygon.size() == 1)
+    else if (size == 1)
       return LineSegment<L, T, Q>(polygon[0], polygon[0]);
-    return LineSegment<L, T, Q>(polygon[i], polygon[(i + 1) % polygon.size()]);
+    else {
+      return LineSegment<L, T, Q>(polygon[i], polygon[(i + 1) % size]);
+    }
   }
 
   /// <summary>
@@ -241,11 +244,14 @@ namespace glm {
   /// </summary>
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER LineSegment<2, T, Q> edge2d(const Polygon<3, T, Q> &polygon, size_t i) {
-    if (polygon.size() == 0 || i >= polygon.size())
+    const size_t size = polygon.size();
+    if (size == 0 || i >= size)
       return LineSegment<2, T, Q>();
-    if (polygon.size() == 1)
+    else if (size == 1)
       return LineSegment<2, T, Q>(vec<2, T, Q>(T(0)), vec<2, T, Q>(T(0)));
-    return LineSegment<2, T, Q>(mapTo2D(polygon, i), mapTo2D(polygon, (i + 1) % polygon.size()));
+    else {
+      return LineSegment<2, T, Q>(mapTo2D(polygon, i), mapTo2D(polygon, (i + 1) % size));
+    }
   }
 
   /// <summary>

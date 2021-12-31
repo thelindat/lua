@@ -1,10 +1,6 @@
 /*
 ** Geometric setup
 **
-** @TODO: GLM_CONFIG_DEFAULTED_FUNCTIONS support
-** @TODO: Each structure should be including their required glm headers/functions
-**  rather than depending on the bulk-include below.
-**
 ** See Copyright Notice at the end of this file
 */
 #ifndef EXT_GEOM_SETUP_HPP
@@ -39,8 +35,8 @@
 #define GLM_GEOM_QUALIFIER_NOINLINE static GLM_NEVER_INLINE
 
 /*
-** Basic exception-handling check. @TODO: Allow STL dependencies iff exception
-** handling is enabled.
+** Basic exception-handling check. Allow STL dependencies iff exception handling
+** is enabled.
 */
 #if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
   #define GLM_GEOM_EXCEPTIONS 1

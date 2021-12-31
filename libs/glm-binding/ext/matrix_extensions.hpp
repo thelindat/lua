@@ -637,14 +637,6 @@ namespace glm {
     t3 = T3;
   }
 
-  /// <summary>
-  /// @TODO
-  /// </summary>
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<2, 2, T, Q> affineInverse(mat<2, 2, T, Q> const &m) {
-    return inverse(mat<2, 2, T, Q>(m));
-  }
-
   template<length_t C, length_t R, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER mat<C, R, T, Q> rotateNormalizedAxis(mat<C, R, T, Q> const &m, T const &angle, vec<3, T, Q> const &v) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid rotation matrix");

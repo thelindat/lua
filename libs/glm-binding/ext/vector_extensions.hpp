@@ -85,12 +85,7 @@ namespace glm {
     }
   }
 
-  /*
-  ** glm::all(glm::equal(...)) shorthand
-  **
-  ** @TODO: Optimize
-  ** @TODO: detail/_vectorize.hpp all glm::all/glm::any wrappers.
-  */
+  /* glm::all(glm::equal(...)) shorthand */
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
@@ -117,7 +112,7 @@ namespace glm {
     return all(equal(x, y, MaxULPs));
   }
 
-  /* glm::any(glm::notEqual(...)) shorthand ; @TODO: Optimize */
+  /* glm::any(glm::notEqual(...)) shorthand */
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
@@ -142,6 +137,28 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(vec<L, T, Q> const &x, vec<L, T, Q> const &y, vec<L, int, Q> const &MaxULPs) {
     return any(notEqual(x, y, MaxULPs));
+  }
+
+  /* glm::all(glm::lessThan | glm::greaterThan | glm::lessThanEqual | glm::greaterThanEqual) */
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThan(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
+    return all(lessThan(x, y));
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThanEqual(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
+    return all(lessThanEqual(x, y));
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThan(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
+    return all(greaterThan(x, y));
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThanEqual(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
+    return all(greaterThanEqual(x, y));
   }
 
   /* glm::any(glm::isinf(...)) shorthand */
@@ -208,7 +225,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool isUniform(vec<L, T, Q> const &v) {
     bool result = true;
-    for (length_t i = 1; i < L; ++i)  // @TODO: detail::compute_isuniform_vector
+    for (length_t i = 1; i < L; ++i)
       result &= (v[i] == v[0]);  // @TODO: equal(v[i], v[0], epsilon<T>())
     return result;
   }
@@ -219,7 +236,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> reverse(vec<L, T, Q> const &v) {
     vec<L, T, Q> result;
-    for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_reverse_vector
+    for (length_t i = 0; i < L; ++i)
       result[i] = v[L - i - 1];
     return result;
   }
@@ -231,6 +248,16 @@ namespace glm {
   GLM_FUNC_QUALIFIER void sincos(vec<L, T, Q> const &v, vec<L, T, Q> &s, vec<L, T, Q> &c) {
     s = sin(v);
     c = cos(v);
+  }
+
+  /// <summary>
+  /// Create a normalized vec2 from an angle (in radians).
+  /// </summary>
+  template<typename T, qualifier Q = glm::defaultp>
+  GLM_FUNC_QUALIFIER vec<2, T, Q> fromAngle(T angle) {
+    T sin, cos;
+    sincos(angle, sin, cos);
+    return vec<2, T, Q>(sin, cos);
   }
 
   /// <summary>
@@ -248,9 +275,6 @@ namespace glm {
 
   /// <summary>
   /// Scales the length of vector "v" to "newLength".
-  ///
-  /// @TODO: Follow GLM design and introduce:
-  ///   detail::scale_length<L, T, Q, detail::is_aligned<Q>::value>::call(v)
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> scaleLength(const vec<L, T, Q> &v, T newLength) {
@@ -485,7 +509,7 @@ namespace glm {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lerpAngle' only accept floating-point inputs");
 
     vec<L, T, Q> Result(T(0));
-    for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_mixangle_vector
+    for (length_t i = 0; i < L; ++i)
       Result[i] = lerpAngle<T>(x[i], y[i], t);
     return Result;
   }
@@ -495,7 +519,7 @@ namespace glm {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lerpAngle' only accept floating-point inputs");
 
     vec<L, T, Q> Result(T(0));
-    for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_mixangle_vector
+    for (length_t i = 0; i < L; ++i)
       Result[i] = lerpAngle<T>(x[i], y[i], t[i]);
     return Result;
   }
@@ -882,7 +906,7 @@ namespace glm {
   GLM_FUNC_QUALIFIER vec<L, bool, Q> isunordered(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isunordered' only accept floating-point inputs.");
     vec<L, bool, Q> Result(false);
-    for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_isunordered_vector
+    for (length_t i = 0; i < L; ++i)
       Result[i] = isunordered(v[i], v2[i]);
     return Result;
   }
@@ -939,7 +963,7 @@ namespace glm {
   GLM_FUNC_QUALIFIER vec<L, T, Q> scalbn(vec<L, T, Q> const &v, vec<L, int, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'scalbn' only accept floating-point inputs.");
     vec<L, T, Q> Result(T(0));
-    for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_scalebn_vector
+    for (length_t i = 0; i < L; ++i)
       Result[i] = scalbn(v[i], v2[i]);
     return Result;
   }

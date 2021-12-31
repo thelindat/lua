@@ -2,8 +2,6 @@
 ** $Id: allocator.hpp $
 ** An allocator implementation for C++ STL objects and other STL analogues.
 **
-** @TODO: Header should be C++98 compliant.
-**
 ** See Copyright Notice in lua.h
 */
 #ifndef BINDING_ALLOCATOR_HPP
@@ -183,7 +181,7 @@ private:
   /// </summary>
   inline void *realloc_(void *block, size_t osize, size_t nsize) {
     void *p = m_alloc.realloc(block, osize, nsize);
-    if (p == GLM_NULLPTR)  // @TODO: parameter that controls luaL_error vs apicheck
+    if (p == GLM_NULLPTR)
       luaL_error(m_state, "LuaVector allocation failure");
     return p;
   }

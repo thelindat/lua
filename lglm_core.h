@@ -139,7 +139,7 @@ LUAI_FUNC void glmVec_geti (lua_State *L, const TValue *obj, lua_Integer key, St
 LUAI_FUNC void glmVec_objlen (const TValue *obj, StkId res);
 
 /* luaV_equalobj variant for matrix types */
-LUAI_FUNC int glmVec_equalObj (lua_State *L, const TValue *o1, const TValue *o2, int rtt);
+LUAI_FUNC int glmVec_equalObj (lua_State *L, const TValue *o1, const TValue *o2);
 
 /* Attempt to concatenate a number (or vector) to another  */
 LUAI_FUNC int glmVec_concat (const TValue *obj, const TValue *value, StkId res);
