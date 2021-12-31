@@ -765,6 +765,85 @@ namespace glm {
     return __matrixCompMult(mat<C, R, U, Q>(x), static_cast<U>(1) - a) + __matrixCompMult(mat<C, R, U, Q>(y), a);
   }
 
+  /// <summary>
+  /// @GLMFix: Generic axisAngle support for all rotation matrices; code from
+  /// glm/gtx/matrix_interpolation.inl. Function __ prefixed to avoid potential
+  /// conflict with GLM in the future.
+  /// </summary>
+  template<length_t C, length_t R, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER void __axisAngle(mat<C, R, T, Q> const &m, vec<3, T, Q> &axis, T &angle) {
+    GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid rotation matrix");
+    const T epsilon = std::numeric_limits<T>::epsilon() * static_cast<T>(1e2);
+
+    const bool nearSymmetrical = abs(m[1][0] - m[0][1]) < epsilon && abs(m[2][0] - m[0][2]) < epsilon && abs(m[2][1] - m[1][2]) < epsilon;
+    if (nearSymmetrical) {
+      const bool nearIdentity = abs(m[1][0] + m[0][1]) < epsilon && abs(m[2][0] + m[0][2]) < epsilon && abs(m[2][1] + m[1][2]) < epsilon && abs(m[0][0] + m[1][1] + m[2][2] - T(3.0)) < epsilon;
+      if (nearIdentity) {
+        angle = static_cast<T>(0.0);
+        axis = vec<3, T, Q>(static_cast<T>(1.0), static_cast<T>(0.0), static_cast<T>(0.0));
+        return;
+      }
+
+      angle = pi<T>();
+      const T xx = (m[0][0] + static_cast<T>(1.0)) * static_cast<T>(0.5);
+      const T yy = (m[1][1] + static_cast<T>(1.0)) * static_cast<T>(0.5);
+      const T zz = (m[2][2] + static_cast<T>(1.0)) * static_cast<T>(0.5);
+      const T xy = (m[1][0] + m[0][1]) * static_cast<T>(0.25);
+      const T xz = (m[2][0] + m[0][2]) * static_cast<T>(0.25);
+      const T yz = (m[2][1] + m[1][2]) * static_cast<T>(0.25);
+      if ((xx > yy) && (xx > zz)) {
+        if (xx < epsilon) {
+          axis.x = static_cast<T>(0.0);
+          axis.y = static_cast<T>(0.7071);
+          axis.z = static_cast<T>(0.7071);
+        }
+        else {
+          axis.x = sqrt(xx);
+          axis.y = xy / axis.x;
+          axis.z = xz / axis.x;
+        }
+      }
+      else if (yy > zz) {
+        if (yy < epsilon) {
+          axis.x = static_cast<T>(0.7071);
+          axis.y = static_cast<T>(0.0);
+          axis.z = static_cast<T>(0.7071);
+        }
+        else {
+          axis.y = sqrt(yy);
+          axis.x = xy / axis.y;
+          axis.z = yz / axis.y;
+        }
+      }
+      else {
+        if (zz < epsilon) {
+          axis.x = static_cast<T>(0.7071);
+          axis.y = static_cast<T>(0.7071);
+          axis.z = static_cast<T>(0.0);
+        }
+        else {
+          axis.z = sqrt(zz);
+          axis.x = xz / axis.z;
+          axis.y = yz / axis.z;
+        }
+      }
+      return;
+    }
+
+    const T angleCos = (m[0][0] + m[1][1] + m[2][2] - static_cast<T>(1)) * static_cast<T>(0.5);
+    if (angleCos >= static_cast<T>(1.0)) {
+      angle = static_cast<T>(0.0);
+    }
+    else if (angleCos <= static_cast<T>(-1.0)) {
+      angle = pi<T>();
+    }
+    else {
+      angle = acos(angleCos);
+    }
+
+    axis = normalize(vec<3, T, Q>(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]));
+  }
+
   /* }====================================================== */
 }
 

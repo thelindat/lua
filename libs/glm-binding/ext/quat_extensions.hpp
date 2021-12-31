@@ -34,6 +34,7 @@
 #include <glm/gtx/fast_square_root.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
 
 #include "vector_extensions.hpp"
 #include "matrix_extensions.hpp"
@@ -406,6 +407,15 @@ namespace glm {
   ** Fixes
   ** =======================================================
   */
+
+  /// <summary>
+  /// API completeness for matrix_extensions.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER void __axisAngle(qua<T, Q> const &q, vec<3, T, Q> &out_axis, T &out_angle) {
+    out_angle = angle(q);
+    out_axis = axis(q);
+  }
 
   /// <summary>
   /// API completeness for vector_extensions.

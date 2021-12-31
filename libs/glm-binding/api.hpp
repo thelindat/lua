@@ -1063,17 +1063,18 @@ MATRIX_DEFN(rq_decompose, glm::rq_decompose, LAYOUT_QRDECOMPOSE)
 
 /* glm/gtx/matrix_interpolation.hpp */
 #if defined(GTX_MATRIX_INTERPOLATION_HPP)
+#define LAYOUT_AXIS_ANGLE(LB, F, Tr, ...) \
+  LUA_MLM_BEGIN                           \
+  gLuaVec3<>::type axis;                  \
+  gLuaVec3<>::value_type angle;           \
+  F(Tr::Next(LB), axis, angle);           \
+  TRAITS_PUSH(LB, axis, angle);           \
+  LUA_MLM_END
+
 TRAITS_DEFN(axisAngleMatrix, glm::axisAngleMatrix, gLuaDir3<>, gLuaFloat)
 TRAITS_DEFN(extractMatrixRotation, glm::extractMatrixRotation, gLuaMat4x4<>)
 TRAITS_DEFN(interpolate, glm::interpolate, gLuaMat4x4<>, gLuaMat4x4<>, gLuaFloat)
-GLM_BINDING_QUALIFIER(axisAngle) {
-  GLM_BINDING_BEGIN
-  gLuaVec3<>::type axis;
-  gLuaVec3<>::value_type angle;
-  glm::axisAngle(gLuaMat4x4<>::Next(LB), axis, angle);
-  TRAITS_PUSH(LB, axis, angle);
-  GLM_BINDING_END
-}
+ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
 #endif
 
 /* glm/gtx/matrix_major_storage.hpp */
