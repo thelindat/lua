@@ -31,6 +31,8 @@
 #include "lglm_core.h"
 #endif
 
+/* shuffled mapping macros */
+#include "lobject_loptotms.h"
 
 /*
 ** Computes ceil(log2(x))
@@ -130,7 +132,7 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
                  StkId res) {
   if (!luaO_rawarith(L, op, p1, p2, s2v(res))) {
     /* could not perform raw operation; try metamethod */
-    luaT_trybinTM(L, p1, p2, res, cast(TMS, (op - LUA_OPADD) + TM_ADD));
+    luaT_trybinTM(L, p1, p2, res, luaop_to_tms(op));
   }
 }
 

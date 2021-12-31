@@ -1,0 +1,22 @@
+/* Binary Operators */
+OPR_ADD, /* arithmetic operator */
+OPR_SUB, /* arithmetic operator */
+OPR_MUL, /* arithmetic operator */
+OPR_MOD, /* arithmetic operator */
+OPR_POW, /* arithmetic operator */
+OPR_DIV, /* arithmetic operator */
+OPR_IDIV, /* arithmetic operator */
+OPR_BAND, /* bitwise operator */
+OPR_BOR, /* bitwise operator */
+OPR_BXOR, /* bitwise operator */
+OPR_SHL, /* bitwise operator */
+OPR_SHR, /* bitwise operator */
+OPR_CONCAT, /* string operator */
+OPR_EQ, /* comparison operator */
+OPR_LT, /* comparison operator */
+OPR_LE, /* comparison operator */
+OPR_NE, /* comparison operator */
+OPR_GT, /* comparison operator */
+OPR_GE, /* comparison operator */
+OPR_AND, /* logical operator */
+OPR_OR, /* logical operator */

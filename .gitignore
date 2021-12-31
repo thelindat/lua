@@ -1,6 +1,9 @@
 .gitattributes
 manual/manual.html
 
+# Shuffled Opcode Sets
+shuffle/shuffled/
+
 # Test scripts 
 libs/scripts/tests
 

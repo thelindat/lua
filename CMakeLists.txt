@@ -764,6 +764,7 @@ OPTION(LUA_INCLUDE_LIBGLM "Build lglm into the runtime and include it in the ini
 INCLUDE_DIRECTORIES( . )
 INCLUDE_DIRECTORIES( ./libs/glm/ )
 INCLUDE_DIRECTORIES( ./libs/glm-binding/ )
+INCLUDE_DIRECTORIES( ./shuffle/base/ )
 
 SET(LUA_PUBLIC_HDRS luaconf.h lua.h lauxlib.h lualib.h lua.hpp lglm.hpp )
 

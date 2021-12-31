@@ -16,36 +16,13 @@
 * grep "ORDER TM" and "ORDER OP"
 */
 typedef enum {
-  TM_INDEX,
-  TM_NEWINDEX,
-  TM_GC,
-  TM_MODE,
-  TM_LEN,
-  TM_EQ,  /* last tag method with fast access */
-  TM_ADD,
-  TM_SUB,
-  TM_MUL,
-  TM_MOD,
-  TM_POW,
-  TM_DIV,
-  TM_IDIV,
-  TM_BAND,
-  TM_BOR,
-  TM_BXOR,
-  TM_SHL,
-  TM_SHR,
-  TM_UNM,
-  TM_BNOT,
-  TM_LT,
-  TM_LE,
-  TM_CONCAT,
-  TM_CALL,
-  TM_CLOSE,
+  #include "ltm_tms.h"
   TM_N		/* number of elements in the enum */
 } TMS;
 
 /* ORDER TM: Used to simplify logic in ltm.c: luaT_trybinTM */
-#define tmbitop(o)  ((TM_BAND <= (o) && (o) <= TM_SHR) || (o) == TM_BNOT)
+/* #define tmbitop(o)((TM_BAND <= (o) && (o) <= TM_SHR) || (o) == TM_BNOT) */
+#include "ltm_bitop.h"
 
 /*
 ** Mask with 1 in all fast-access methods. A 1 in any of these bits
@@ -53,7 +30,8 @@ typedef enum {
 ** corresponding metamethod field. (Bit 7 of the flag is used for
 ** 'isrealasize'.)
 */
-#define maskflags	(~(~0u << (TM_EQ + 1)))
+/* #define maskflags	(~(~0u << (TM_EQ + 1))) */
+#include "ltm_maskflags.h"
 
 
 /*
@@ -64,7 +42,7 @@ typedef enum {
 
 
 #define gfasttm(g,et,e) ((et) == NULL ? NULL : \
-  ((et)->flags & (1u<<(e))) ? NULL : luaT_gettm(et, e, (g)->tmname[e]))
+  ((et)->flags & tagmethod(e)) ? NULL : luaT_gettm(et, e, (g)->tmname[e]))
 
 #define fasttm(l,et,e)	gfasttm(G(l), et, e)
 
