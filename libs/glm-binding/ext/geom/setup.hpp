@@ -1,7 +1,6 @@
 /*
 ** Geometric setup
 **
-** @TODO: GLM_EXTERNAL_TEMPLATE support
 ** @TODO: GLM_CONFIG_DEFAULTED_FUNCTIONS support
 ** @TODO: Each structure should be including their required glm headers/functions
 **  rather than depending on the bulk-include below.
@@ -23,6 +22,7 @@
   #include <glm/simd/platform.h>
 #endif
 
+#include "ext/scalar_extensions.hpp"
 #include "ext/vector_extensions.hpp"
 #include "ext/quat_extensions.hpp"
 #include "ext/matrix_extensions.hpp"

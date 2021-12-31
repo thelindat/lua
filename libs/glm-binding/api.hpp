@@ -77,6 +77,7 @@
   #include <glm/gtx/hash.hpp>
 #endif
 
+#include "ext/scalar_extensions.hpp"
 #include "ext/vector_extensions.hpp"
 #include "ext/matrix_extensions.hpp"
 #include "ext/quat_extensions.hpp"

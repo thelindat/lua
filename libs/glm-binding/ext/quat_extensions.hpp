@@ -36,6 +36,7 @@
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 
+#include "scalar_extensions.hpp"
 #include "vector_extensions.hpp"
 #include "matrix_extensions.hpp"
 
@@ -440,6 +441,19 @@ namespace glm {
   GLM_FUNC_QUALIFIER T __orientedAngle(const qua<T, Q> &x, const qua<T, Q> &y, const vec<3, T, Q> &ref) {
     const qua<T, Q> rot = y * conjugate(x);
     return __angle(rot) * sign(dot(ref, axis(rot)));
+  }
+
+  /// <summary>
+  /// @GLMFix: __slerp in vector_extensions
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> __slerp(qua<T, Q> const &x, qua<T, Q> const &y, T const &a) {
+    return slerp(x, y, a);
+  }
+
+  template<typename T, typename S, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> __slerp(qua<T, Q> const &x, qua<T, Q> const &y, T a, S k) {
+    return slerp(x, y, a, k);
   }
 
 #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)

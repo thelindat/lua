@@ -8,8 +8,6 @@
 **  3. Functions emulated/ported from other popular vector-math libraries.
 **
 ** See Copyright Notice in lua.h
-**
-** @TODO: Introduce scalar_extensions.hpp; half of this header is scalar related
 */
 #ifndef EXT_EXTENSION_VECTOR_HPP
 #define EXT_EXTENSION_VECTOR_HPP
@@ -18,13 +16,9 @@
 #endif
 
 #include <glm/glm.hpp>
-#include <glm/gtc/packing.hpp>
-#include <glm/gtc/bitfield.hpp>
-#include <glm/gtc/color_space.hpp>
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/orthonormalize.hpp>
 #include <glm/gtx/projection.hpp>
-#include <glm/gtx/spline.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #if GLM_VERSION < 998  // @COMPAT: ext/scalar_common.hpp introduced in 0.9.9.8
   #include <glm/gtx/extended_min_max.hpp>
@@ -32,6 +26,7 @@
   #include <glm/ext/scalar_common.hpp>
 #endif
 
+#include "scalar_extensions.hpp"
 #if GLM_MESSAGES == GLM_ENABLE && !defined(GLM_EXT_INCLUDED)
   #pragma message("GLM: GLM_EXT_vector_ext extension included")
 #endif
@@ -97,26 +92,6 @@ namespace glm {
   ** @TODO: detail/_vectorize.hpp all glm::all/glm::any wrappers.
   */
 
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal(genIUType x, genIUType y) {
-    return x == y;  // @TODO: equal(x, y, epsilon<genIUType>())
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(T const &x, T const &y) {
-    return equal(x, y);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(T const &x, T const &y, T eps) {
-    return equal(x, y, eps);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(T const &x, T const &y, int MaxULPs) {
-    return equal(x, y, MaxULPs);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
     return all(equal(x, y));
@@ -143,26 +118,6 @@ namespace glm {
   }
 
   /* glm::any(glm::notEqual(...)) shorthand ; @TODO: Optimize */
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool notEqual(genIUType x, genIUType y) {
-    return x != y;  // @TODO: glm::notEqual(x, y, glm::epsilon<genIUType>())
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(T const &x, T const &y) {
-    return notEqual(x, y);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(T const &x, T const &y, T eps) {
-    return notEqual(x, y, eps);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(T const &x, T const &y, int MaxULPs) {
-    return notEqual(x, y, MaxULPs);
-  }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
@@ -191,19 +146,9 @@ namespace glm {
 
   /* glm::any(glm::isinf(...)) shorthand */
 
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_isinf(const T &x) {
-    return isinf(x);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_isinf(const vec<L, T, Q> &x) {
     return any(isinf(x));
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_isfinite(const T &x) {
-    return isfinite(x);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -213,26 +158,19 @@ namespace glm {
 
   /* glm::any(glm::isnan(...)) shorthand */
 
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_isnan(const T &x) {
-    return isnan(x);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_isnan(const vec<L, T, Q> &x) {
     return any(isnan(x));
   }
 
-  /* The other useful sign() implementation: where >= 0 returns +1 */
+  /*
+  ** The other useful sign() implementation: where >= 0 returns +1. This
+  ** implementation avoids using detail::functor.
+  */
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> signP(const vec<L, T, Q> &x) {
     return vec<L, T, Q>(lessThanEqual(vec<L, T, Q>(0), x)) - vec<L, T, Q>(lessThan(x, vec<L, T, Q>(0)));
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType signP(genType v) {
-    return (v >= 0) ? genType(1) : genType(-1);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -240,17 +178,7 @@ namespace glm {
     return vec<L, T, Q>(lessThan(vec<L, T, Q>(0), x)) - vec<L, T, Q>(lessThanEqual(x, vec<L, T, Q>(0)));
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType signN(genType v) {
-    return (v > 0) ? genType(1) : genType(-1);
-  }
-
   /* API Completeness */
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType fclamp(genType x) {
-    return fclamp(x, genType(0), genType(1));
-  }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> fclamp(vec<L, T, Q> const &x) {
@@ -285,12 +213,6 @@ namespace glm {
     return result;
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isUniform(genType v) {
-    ((void)v);
-    return true;
-  }
-
   /// <summary>
   /// Reverse the elements of a vector
   /// </summary>
@@ -302,31 +224,11 @@ namespace glm {
     return result;
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType reverse(genType v) {
-    return v;
-  }
-
-  /// <summary>
-  /// @COMPAT: Old versions of GLM include unnecessary precision qualifiers for
-  /// glm::atan2 and glm::saturate.
-  /// </summary>
-  template<typename T>
-  GLM_FUNC_QUALIFIER T atan2_(T x, T y) {
-    return atan(x, y);
-  }
-
   /// <summary>
   /// calculate sin and cos simultaneously.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER void sincos(vec<L, T, Q> const &v, vec<L, T, Q> &s, vec<L, T, Q> &c) {
-    s = sin(v);
-    c = cos(v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER void sincos(genType v, genType &s, genType &c) {
     s = sin(v);
     c = cos(v);
   }
@@ -562,14 +464,8 @@ namespace glm {
 
   /// <summary>
   /// Loops "t", so that it is never greater than "length" and less than zero.
-  ///
-  /// Note: This function is an emulation of: Unity.Mathf.Repeat
+  /// This function is an emulation of: Unity.Mathf.Repeat
   /// </summary>
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType loopRepeat(genType t, genType length) {
-    return clamp(t - floor(t / length) * length, genType(0), length);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> loopRepeat(const vec<L, T, Q> &t, const vec<L, T, Q> &length) {
     return clamp(t - floor(t / length) * length, vec<L, T, Q>(0), length);
@@ -581,27 +477,9 @@ namespace glm {
   }
 
   /// <summary>
-  /// Return the shortest difference between two angles (radians)
+  /// A lerp implementation that ensures values interpolate correctly when
+  /// wrapped around two-pi. This function is an emulation of: Unity.Mathf.LerpAngle
   /// </summary>
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType deltaAngle(genType a, genType b) {
-    const genType dt = loopRepeat((b - a), two_pi<genType>());
-    return min(two_pi<genType>() - dt, dt);
-  }
-
-  /// <summary>
-  /// A lerp implementation that ensures values interpolate correctly when they wrap around two-pi.
-  ///
-  /// Note: This function is an emulation of: Unity.Mathf.LerpAngle
-  /// </summary>
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType lerpAngle(genType a, genType b, genType t) {
-    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'lerpAngle' only accept floating-point inputs");
-
-    const genType dt = loopRepeat((b - a), two_pi<genType>());
-    return lerp(a, a + (dt > pi<genType>() ? dt - two_pi<genType>() : dt), t);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> lerpAngle(const vec<L, T, Q> &x, const vec<L, T, Q> &y, T t) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lerpAngle' only accept floating-point inputs");
@@ -623,20 +501,8 @@ namespace glm {
   }
 
   /// <summary>
-  /// Returns a value that will increment and decrement between the value 0 and length.
-  ///
-  /// Note: This function is an emulation of: Unity.Mathf.PingPong
-  /// </summary>
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType pingPong(genType t, genType length) {
-    t = loopRepeat(t, length * genType(2));
-    return length - abs(t - length);
-  }
-
-  /// <summary>
-  /// Return a position between two points, moving no further than maxDist.
-  ///
-  /// Note: This function is an emulation of: Unity.Vector3.MoveTowards
+  /// Return a position between two points, moving no further than maxDist. This
+  /// function is an emulation of: Unity.Vector3.MoveTowards
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> moveTowards(const vec<L, T, Q> &current, const vec<L, T, Q> &target, T maxDist) {
@@ -650,19 +516,9 @@ namespace glm {
     return current + (delta / (sqrt(sqdist) * maxDist));
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType moveTowards(genType current, genType target, genType maxDist) {
-    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'moveTowards' only accept floating-point inputs");
-    if (abs(target - current) <= maxDist)
-      return target;
-
-    return current + sign(target - current) * maxDist;
-  }
-
   /// <summary>
   /// Return a rotation between two directions, rotating no further than maxRadians.
-  ///
-  /// Note: This function is an emulation of: Unity.Vector3.RotateTowards
+  /// This function is an emulation of: Unity.Vector3.RotateTowards
   /// </summary>
   /// <param name="current">Current direction</param>
   /// <param name="target">Desired direction</param>
@@ -764,29 +620,17 @@ namespace glm {
     return normalize(vec<3, T, Q>(worldPos));  // Direction of the ray; originating at the camera position.
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType snap(const genType value, const genType step) {
-    if (step != genType(0))  // @TODO: notEqual(step, genType(0), epsilon<genType>())
-      return floor((value / step) + genType(0.5)) * step;
-    return value;
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> snap(const vec<L, T, Q> &x, const vec<L, T, Q> &y) {
     return detail::functor2<vec, L, T, Q>::call(snap, x, y);
   }
 
   /// <summary>
-  /// Inverse of each vector component
+  /// Inverse of each vector component.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, T, Q> inverse(const vec<L, T, Q> &x) {
     return vec<L, T, Q>(T(1)) / x;
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR T inverse(const T &x) {
-    return T(1) / x;
   }
 
   /// <summary>
@@ -797,19 +641,9 @@ namespace glm {
     return normalize(y - x);
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType direction(const genType x, const genType y) {
-    return normalize(vec<1, genType>(y - x)).x;
-  }
-
   /// <summary>
   /// Returns a value 't' such that lerp(x, y, t) == value (or 0 if x == y)
   /// </summary>
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType lerpinverse(const genType x, const genType y, const genType value) {
-    return equal(x, y, glm::epsilon<genType>()) ? genType(0) : (value - x) / (y - x);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> lerpinverse(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const vec<L, T, Q> &value) {
     vec<L, T, Q> result(T(0));
@@ -839,32 +673,7 @@ namespace glm {
     return normalize(lerp(x, y, t));
   }
 
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType nlerp(const genType x, const genType y, const genType t) {
-    return lerp(x, y, t);
-  }
-
   /* Functions with additional integral type support. */
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type iceil(T x) {
-    return x;
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type ifloor(T x) {
-    return x;
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, T>::type iceil(T x) {
-    return ceil(x);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, T>::type ifloor(T x) {
-    return floor(x);
-  }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, vec<L, T, Q>>::type iceil(vec<L, T, Q> const &x) {
@@ -886,23 +695,6 @@ namespace glm {
     return floor(x);
   }
 
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, T>::type imod(T x, T y) {
-    if (y == T(0))
-      return T(0);  // attempt to perform 'n % 0'
-    return ((x % y) + y) % y;
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, T>::type imod(T x, T y) {
-    return x - y * (x / y);
-  }
-
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, T>::type imod(T x, T y) {
-    return mod(x, y);
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> imod(vec<L, T, Q> const &x, T y) {
     return mod(x, y);  // @TODO: Handle modulo-zero for integer vectors.
@@ -918,144 +710,11 @@ namespace glm {
     return pow(base, vec<L, T, Q>(exponent));
   }
 
-  template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type pow(T x, uint y) {
-    if (y == T(0))
-      return x >= T(0) ? T(1) : T(-1);
-
-    T result = x;
-    for (uint i = 1; i < y; ++i)
-      result *= x;
-    return result;
-  }
-
   /* Missing implicit genType support. */
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any(bool b) {
-    return b;
-  }
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all(bool b) {
-    return b;
-  }
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool not_(bool b) {
-    return !b;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool lessThan(genIUType x, genIUType y) {
-    return x < y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool lessThanEqual(genIUType x, genIUType y) {
-    return x <= y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool greaterThan(genIUType x, genIUType y) {
-    return x > y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool greaterThanEqual(genIUType x, genIUType y) {
-    return x >= y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genIUType compAdd(genIUType v) {
-    return v;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genIUType compMul(genIUType v) {
-    return v;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genIUType compMin(genIUType v) {
-    return v;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genIUType compMax(genIUType v) {
-    return v;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType atan2(genType x, genType y) {
-    return atan(x, y);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType normalize(genType x) {
-    return normalize(vec<1, genType>(x)).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isNormalized(genType x, genType eps = epsilon<genType>()) {
-    return isNormalized(vec<1, genType>(x), eps);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isNull(genType x, genType eps = epsilon<genType>()) {
-    return isNull(vec<1, genType>(x), eps);
-  }
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<1, bool, Q> isCompNull(vec<1, T, Q> const &v, T eps = epsilon<T>) {
     return vec<1, bool, Q>(abs(v.x) < eps);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isCompNull(genType v, genType eps = epsilon<genType>()) {
-    return abs(v) < eps;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool areOrthonormal(genType v0, genType v1, genType eps = epsilon<genType>()) {
-    return areOrthonormal(vec<1, genType>(v0), vec<1, genType>(v1), eps);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool areOrthogonal(genType v0, genType v1, genType eps = epsilon<genType>()) {
-    return areOrthogonal(vec<1, genType>(v0), vec<1, genType>(v1), eps);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType normalizeDot(genType x, genType y) {
-    return normalizeDot(vec<1, genType>(x), vec<1, genType>(y));
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType fastNormalizeDot(genType x, genType y) {
-    return fastNormalizeDot(vec<1, genType>(x), vec<1, genType>(y));
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType saturate(genType x) {
-    return clamp(x, genType(0), genType(1));
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool openBounded(genType Value, genType Min, genType Max) {
-    return openBounded(vec<1, genType>(Value), vec<1, genType>(Min), vec<1, genType>(Max)).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool closeBounded(genType Value, genType Min, genType Max) {
-    return closeBounded(vec<1, genType>(Value), vec<1, genType>(Min), vec<1, genType>(Max)).x;
-  }
-
-  template<typename floatType, typename T>
-  GLM_FUNC_QUALIFIER floatType compNormalize(T x) {
-    return compNormalize<floatType>(vec<1, T>(x)).x;
-  }
-
-  template<typename T, typename floatType>
-  GLM_FUNC_QUALIFIER T compScale(floatType x) {
-    return compScale<T>(vec<1, floatType>(x)).x;
   }
 
   template<typename T, qualifier Q>
@@ -1066,95 +725,6 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<1, T, Q> lerp(const vec<1, T, Q> &x, const vec<1, T, Q> &y, const vec<1, T, Q> &a) {
     return mix(x, y, a);
-  }
-
-  GLM_FUNC_QUALIFIER uint16 packHalf(float v) {
-    return packHalf<1, defaultp>(vec<1, float>(v)).x;
-  }
-
-  GLM_FUNC_QUALIFIER float unpackHalf(uint16 v) {
-    return unpackHalf<1, defaultp>(vec<1, uint16>(v)).x;
-  }
-
-  template<typename uintType, typename floatType>
-  GLM_FUNC_QUALIFIER uintType packUnorm(floatType v) {
-    return packUnorm<uintType, 1, floatType, defaultp>(vec<1, floatType>(v)).x;
-  }
-
-  template<typename floatType, typename uintType>
-  GLM_FUNC_QUALIFIER floatType unpackUnorm(uintType v) {
-    return unpackUnorm<floatType, 1, uintType, defaultp>(vec<1, uintType>(v)).x;
-  }
-
-  template<typename intType, typename floatType>
-  GLM_FUNC_QUALIFIER intType packSnorm(floatType v) {
-    return packSnorm<intType, 1, floatType, defaultp>(vec<1, floatType>(v)).x;
-  }
-
-  template<typename floatType, typename intType>
-  GLM_FUNC_QUALIFIER floatType unpackSnorm(intType v) {
-    return unpackSnorm<floatType, 1, intType, defaultp>(vec<1, intType>(v)).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType catmullRom(genType v1, genType v2, genType v3, genType v4, genType s) {
-    return catmullRom<vec<1, genType>>(vec<1, genType>(v1), vec<1, genType>(v2), vec<1, genType>(v3), vec<1, genType>(v4), s).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType hermite(genType v1, genType t1, genType v2, genType t2, genType s) {
-    return hermite<vec<1, genType>>(vec<1, genType>(v1), vec<1, genType>(t1), vec<1, genType>(v2), vec<1, genType>(t2), s).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType cubic(genType v1, genType v2, genType v3, genType v4, genType s) {
-    return cubic<vec<1, genType>>(vec<1, genType>(v1), vec<1, genType>(v2), vec<1, genType>(v3), vec<1, genType>(v4), s).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType convertLinearToSRGB(genType ColorLinear) {
-    return convertLinearToSRGB(vec<1, genType>(ColorLinear)).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType convertLinearToSRGB(genType ColorLinear, genType Gamma) {
-    return convertLinearToSRGB(vec<1, genType>(ColorLinear), Gamma).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType convertSRGBToLinear(genType ColorSRGB) {
-    return convertSRGBToLinear(vec<1, genType>(ColorSRGB)).x;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType convertSRGBToLinear(genType ColorSRGB, genType Gamma) {
-    return convertSRGBToLinear(vec<1, genType>(ColorSRGB), Gamma).x;
-  }
-
-  /*
-  ** glm::all(glm::lessThan | glm::greaterThan | glm::lessThanEqual | glm::greaterThanEqual)
-  **
-  ** @TODO: Reorganize once scalar_extensions is implemented.
-  */
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThan(genIUType x, genIUType y) {
-    return all(lessThan(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_lessThanEqual(genIUType x, genIUType y) {
-    return all(lessThanEqual(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThan(genIUType x, genIUType y) {
-    return all(greaterThan(x, y));
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_greaterThanEqual(genIUType x, genIUType y) {
-    return all(greaterThanEqual(x, y));
   }
 
   /*
@@ -1255,107 +825,57 @@ namespace glm {
   */
 
 #if GLM_HAS_CXX11_STL
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType copysign(genType x, genType y) {
-    return copysign(vec<1, genType>(x), vec<1, genType>(y)).x;
-  }
-
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> copysign(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
-    return detail::functor2<vec, L, T, Q>::call(std::copysign, v, v2);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType cbrt(genType x) {
-    return cbrt(vec<1, genType>(x)).x;
+    return detail::functor2<vec, L, T, Q>::call(copysign, v, v2);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> cbrt(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'cbrt' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::cbrt, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType expm1(genType x) {
-    return expm1(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(cbrt, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> expm1(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'expm1' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::expm1, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType erf(genType x) {
-    return erf(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(expm1, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> erf(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'erf' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::erf, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType erfc(genType x) {
-    return erfc(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(erf, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> erfc(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'erfc' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::erfc, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER int fpclassify(genType x) {
-    return fpclassify(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(erfc, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, int, Q> fpclassify(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'fpclassify' only accept floating-point inputs.");
-    return detail::functor1<vec, L, int, T, Q>::call(std::fpclassify, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType fdim(genType x, genType y) {
-    return fdim(vec<1, genType>(x), vec<1, genType>(y)).x;
+    return detail::functor1<vec, L, int, T, Q>::call(fpclassify, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> fdim(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'fdim' only accept floating-point inputs.");
-    return detail::functor2<vec, L, T, Q>::call(std::fdim, v, v2);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType hypot(genType x, genType y) {
-    return hypot(vec<1, genType>(x), vec<1, genType>(y)).x;
+    return detail::functor2<vec, L, T, Q>::call(fdim, v, v2);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> hypot(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'hypot' only accept floating-point inputs.");
-    return detail::functor2<vec, L, T, Q>::call(std::hypot, v, v2);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isnormal(genType x) {
-    return isnormal(vec<1, genType>(x)).x;
+    return detail::functor2<vec, L, T, Q>::call(hypot, v, v2);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, bool, Q> isnormal(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isnormal' only accept floating-point inputs.");
-    return detail::functor1<vec, L, bool, T, Q>::call(std::isnormal, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER bool isunordered(genType x, genType y) {
-    return isunordered(vec<1, genType>(x), vec<1, genType>(y)).x;
+    return detail::functor1<vec, L, bool, T, Q>::call(isnormal, v);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -1363,101 +883,56 @@ namespace glm {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isunordered' only accept floating-point inputs.");
     vec<L, bool, Q> Result(false);
     for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_isunordered_vector
-      Result[i] = std::isunordered(v[i], v2[i]);
+      Result[i] = isunordered(v[i], v2[i]);
     return Result;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER int ilogb(genType x) {
-    return ilogb(vec<1, genType>(x)).x;
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, int, Q> ilogb(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'ilogb' only accept floating-point inputs.");
-    return detail::functor1<vec, L, int, T, Q>::call(std::ilogb, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType lgamma(genType x) {
-    return lgamma(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, int, T, Q>::call(ilogb, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> lgamma(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lgamma' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::lgamma, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType log10(genType x) {
-    return log10(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(lgamma, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> log10(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'log10' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::log10, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType log1p(genType x) {
-    return log1p(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(log10, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> log1p(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'log1p' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::log1p, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType logb(genType x) {
-    return logb(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(log1p, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> logb(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'logb' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::logb, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType nearbyint(genType x) {
-    return nearbyint(vec<1, genType>(x)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(logb, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> nearbyint(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'nearbyint' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::nearbyint, v);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType nextafter(genType x, genType y) {
-    return nextafter(vec<1, genType>(x), vec<1, genType>(y)).x;
+    return detail::functor1<vec, L, T, T, Q>::call(nearbyint, v);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> nextafter(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'nextafter' only accept floating-point inputs.");
-    return detail::functor2<vec, L, T, Q>::call(std::nextafter, v, v2);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType remainder(genType x, genType y) {
-    return remainder(vec<1, genType>(x), vec<1, genType>(y)).x;
+    return detail::functor2<vec, L, T, Q>::call(nextafter, v, v2);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> remainder(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'remainder' only accept floating-point inputs.");
-    return detail::functor2<vec, L, T, Q>::call(std::remainder, v, v2);
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType scalbn(genType x, int y) {
-    return scalbn(vec<1, genType>(x), vec<1, int>(y)).x;
+    return detail::functor2<vec, L, T, Q>::call(remainder, v, v2);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -1465,19 +940,14 @@ namespace glm {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'scalbn' only accept floating-point inputs.");
     vec<L, T, Q> Result(T(0));
     for (length_t i = 0; i < L; ++i)  // @TODO: detail::compute_scalebn_vector
-      Result[i] = std::scalbn(v[i], v2[i]);
+      Result[i] = scalbn(v[i], v2[i]);
     return Result;
-  }
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType tgamma(genType x) {
-    return tgamma(vec<1, genType>(x)).x;
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> tgamma(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'tgamma' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(std::tgamma, v);
+    return detail::functor1<vec, L, T, T, Q>::call(tgamma, v);
   }
 #endif
 
@@ -1512,17 +982,6 @@ namespace glm {
   }
 
   /// <summary>
-  /// @GLMFix: -Werror when using bitfieldFillOne and bitfieldFillZero:
-  ///
-  /// libs/glm/glm/./gtc/bitfield.inl:229:29: warning: comparison of integer expressions of different signedness: ‘int’ and ‘long unsigned int’ [-Wsign-compare]
-  ///   229 | return Bits >= sizeof(genIUType) * 8 ? ~static_cast<genIUType>(0) : (static_cast<genIUType>(1) << Bits) - static_cast<genIUType>(1);
-  /// </summary>
-  template<>
-  GLM_FUNC_QUALIFIER int mask(int Bits) {
-    return detail::mask(Bits);  // Use alternate/duplicate mask implementation
-  }
-
-  /// <summary>
   /// @GLMFix: 'int' to 'unsigned char' [-Wimplicit-int-conversion]
   /// </summary>
   namespace detail {
@@ -1551,9 +1010,12 @@ namespace glm {
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType __angle(const genType &x, const genType &y) {
-    return angle<genType>(x, y);
+    return glm::angle<genType>(x, y);
   }
 
+  /// <summary>
+  /// orientedAngle implementation that uses __angle
+  /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER T __orientedAngle(vec<2, T, Q> const &x, vec<2, T, Q> const &y) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'orientedAngle' only accept floating-point inputs");
@@ -1587,16 +1049,6 @@ namespace glm {
     const T t1 = sin((static_cast<T>(1) - a) * Alpha) / SinAlpha;
     const T t2 = sin(a * Alpha) / SinAlpha;
     return x * t1 + y * t2;
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER qua<T, Q> __slerp(qua<T, Q> const &x, qua<T, Q> const &y, T const &a) {
-    return slerp(x, y, a);
-  }
-
-  template<typename T, typename S, qualifier Q>
-  GLM_FUNC_QUALIFIER qua<T, Q> __slerp(qua<T, Q> const &x, qua<T, Q> const &y, T a, S k) {
-    return slerp(x, y, a, k);
   }
 
   template<typename genType>
