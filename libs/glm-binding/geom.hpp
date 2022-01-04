@@ -7,6 +7,7 @@
 #ifndef BINDING_GEOM_HPP
 #define BINDING_GEOM_HPP
 
+#include "lua.hpp"
 #include "lglm.hpp"
 #include "lglm_core.h"
 
@@ -109,7 +110,9 @@
 /// </summary>
 template<bool isNear, bool isRelative, typename T = glm_Float>
 struct gLuaRelativePosition : gLuaTrait<T> {
-  static GLM_CONSTEXPR const char *Label() { return "RelativePosition"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "RelativePosition";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR T zero() {
     GLM_IF_CONSTEXPR(isNear)
@@ -143,7 +146,9 @@ struct gLuaAABB : gLuaAbstractTrait<glm::AABB<L, T>> {
   /// </summary>
   using point_trait = gLuaTrait<typename glm::AABB<L, T>::point_type>;
 
-  static GLM_CONSTEXPR const char *Label() { return "AABB"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "AABB";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::AABB<L, T> zero() {
     return glm::AABB<L, T>();
@@ -181,7 +186,9 @@ struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T>> {
   /// </summary>
   using one_trait = gLuaRelativePosition<false, false, T>;
 
-  static GLM_CONSTEXPR const char *Label() { return "Line"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Line";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Line<L, T> zero() {
     return glm::Line<L, T>();
@@ -209,7 +216,9 @@ struct gLuaSegment : gLuaAbstractTrait<glm::LineSegment<L, T>> {
   using zero_trait = gLuaRelativePosition<true, true, T>;  // @RelativeZero
   using one_trait = gLuaRelativePosition<false, true, T>;  // @RelativeOne
 
-  static GLM_CONSTEXPR const char *Label() { return "Segment"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Segment";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::LineSegment<L, T> zero() {
     return glm::LineSegment<L, T>();
@@ -237,7 +246,9 @@ struct gLuaRay : gLuaAbstractTrait<glm::Ray<L, T>> {
   using zero_trait = gLuaRelativePosition<true, true, T>;  // @RelativeZero
   using one_trait = gLuaRelativePosition<false, false, T>;  // @RelativeOne
 
-  static GLM_CONSTEXPR const char *Label() { return "Ray"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Ray";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Ray<L, T> zero() {
     return glm::Ray<L, T>();
@@ -263,7 +274,9 @@ struct gLuaTriangle : gLuaAbstractTrait<glm::Triangle<L, T>> {
   using fast = gLuaTriangle;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Triangle<L, T>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() { return "Triangle"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Triangle";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Triangle<L, T> zero() {
     return glm::Triangle<L, T>();
@@ -290,7 +303,9 @@ struct gLuaSphere : gLuaAbstractTrait<glm::Sphere<L, T>> {
   using fast = gLuaSphere;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Sphere<L, T>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() { return "Sphere"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Sphere";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Plane<L, T> zero() {
     return glm::Plane<L, T>();
@@ -316,7 +331,9 @@ struct gLuaPlane : gLuaAbstractTrait<glm::Plane<L, T>> {
   using fast = gLuaPlane;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Plane<L, T>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() { return "Plane"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Plane";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Plane<L, T> zero() {
     return glm::Plane<L, T>();
@@ -348,8 +365,16 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
   using fast = gLuaPolygon;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Polygon<3, T>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() { return "Polygon"; }
-  static GLM_CONSTEXPR const char *Metatable() { return "GLM_POLYGON"; }
+  static GLM_CONSTEXPR const char *Label() {
+    return "Polygon";
+  }
+
+  /// <summary>
+  /// Global metatable name for Polygon userdata
+  /// </summary>
+  static GLM_CONSTEXPR const char *Metatable() {
+    return "GLM_POLYGON";
+  }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Polygon<3, T> zero() {
     return glm::Polygon<3, T>(GLM_NULLPTR);
@@ -444,7 +469,7 @@ TRAITS_DEFN(aabb_enclosePolygon, glm::enclose, gLuaAABB<>, gLuaPolygon<>)
 TRAITS_DEFN(aabb_intersectsAABB, glm::intersects, gLuaAABB<>, gLuaAABB<>)
 TRAITS_DEFN(aabb_intersectsSphere, glm::intersects, gLuaAABB<>, gLuaSphere<>)
 TRAITS_DEFN(aabb_intersectsPlane, glm::intersects, gLuaAABB<>, gLuaPlane<>)
-//TRAITS_DEFN(aabb_intersectsTriangle, glm::intersects, gLuaAABB<>, gLuaTriangle<>)
+// TRAITS_DEFN(aabb_intersectsTriangle, glm::intersects, gLuaAABB<>, gLuaTriangle<>)
 TRAITS_LAYOUT_DEFN(aabb_intersectsLine, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaLine<>)
 TRAITS_LAYOUT_DEFN(aabb_intersectsSegment, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaSegment<>)
 TRAITS_LAYOUT_DEFN(aabb_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaRay<>)
@@ -453,74 +478,111 @@ TRAITS_DEFN(aabb_slabs, glm::slabs, gLuaAABB<>, gLuaRay<>)
 TRAITS_LAYOUT_DEFN(aabb_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaAABB<>, gLuaAABB<>::point_trait)
 
 static const luaL_Reg luaglm_aabblib[] = {
-  { "new", glm_aabb_new },
-  { "fromCenterAndSize", glm_aabb_fromCenterAndSize },
-  { "aabbFromSphere", glm_aabb_fromSphere },
-  { "operator_negate", glm_aabb_operator_negate },
-  { "operator_equals", glm_aabb_operator_equals },
-  { "operator_add", glm_aabb_operator_add },
-  { "operator_sub", glm_aabb_operator_sub },
-  { "operator_mul", glm_aabb_operator_mul },
-  { "equal", glm_aabb_equal },
-  { "notEqual", glm_aabb_notEqual },
-  //{ "tostring", glm_aabb_tostring },
-  { "isinf", glm_aabb_isinf },
-  { "isnan", glm_aabb_isnan },
-  { "isfinite", glm_aabb_isfinite },
-  { "isDegenerate", glm_aabb_isDegenerate },
-  { "centerPoint", glm_aabb_centerPoint },
-  { "centroid", glm_aabb_centerPoint },
-  { "pointInside", glm_aabb_pointInside },
-  { "minimalEnclosingSphere", glm_aabb_minimalEnclosingSphere },
-  { "maximalContainedSphere", glm_aabb_maximalContainedSphere },
-  { "edge", glm_aabb_edge },
-  { "cornerPoint", glm_aabb_cornerPoint },
-  { "extremePoint", glm_aabb_extremePoint },
-  { "pointOnEdge", glm_aabb_pointOnEdge },
-  { "faceCenterPoint", glm_aabb_faceCenterPoint },
-  { "facePoint", glm_aabb_facePoint },
-  { "faceNormal", glm_aabb_faceNormal },
-  { "facePlane", glm_aabb_facePlane },
-  { "size", glm_aabb_size },
-  { "halfSize", glm_aabb_halfSize },
-  { "diagonal", glm_aabb_size },
-  { "halfDiagonal", glm_aabb_halfSize },
-  { "volume", glm_aabb_volume },
-  { "surfaceArea", glm_aabb_surfaceArea },
-  { "scale", glm_aabb_scale },
-  { "closestPoint", glm_aabb_closestPoint },
-  { "distance", glm_aabb_distance },
-  { "distanceSphere", glm_aabb_distanceSphere },
-  { "contains", glm_aabb_contains },
-  { "containsAABB", glm_aabb_containsAABB },
-  { "containsSegment", glm_aabb_containsSegment },
-  { "containsTriangle", glm_aabb_containsTriangle },
-  { "containsSphere", glm_aabb_containsSphere },
-  { "containsPolygon", glm_aabb_containsPolygon },
-  { "grow", glm_aabb_grow },
-  { "enclose", glm_aabb_enclose },
-  { "encloseSegment", glm_aabb_encloseSegment },
-  { "encloseTriangle", glm_aabb_encloseTriangle },
-  { "encloseSphere", glm_aabb_encloseSphere },
-  { "encloseAABB", glm_aabb_encloseAABB },
-  { "enclosePolygon", glm_aabb_enclosePolygon },
-  { "intersectsAABB", glm_aabb_intersectsAABB },
-  { "intersectsSphere", glm_aabb_intersectsSphere },
-  { "intersectsPlane", glm_aabb_intersectsPlane },
-  //{ "intersectsTriangle", glm_aabb_intersectsTriangle },
-  { "intersectsLine", glm_aabb_intersectsLine },
-  { "intersectsSegment", glm_aabb_intersectsSegment },
-  { "intersectsRay", glm_aabb_intersectsRay },
-  { "intersection", glm_aabb_intersection },
-  { "slabs", glm_aabb_slabs },
-  { "projectToAxis", glm_aabb_projectToAxis },
+  { "new", GLM_NAME(aabb_new) },
+  { "fromCenterAndSize", GLM_NAME(aabb_fromCenterAndSize) },
+  { "aabbFromSphere", GLM_NAME(aabb_fromSphere) },
+  { "operator_negate", GLM_NAME(aabb_operator_negate) },
+  { "operator_equals", GLM_NAME(aabb_operator_equals) },
+  { "operator_add", GLM_NAME(aabb_operator_add) },
+  { "operator_sub", GLM_NAME(aabb_operator_sub) },
+  { "operator_mul", GLM_NAME(aabb_operator_mul) },
+  { "equal", GLM_NAME(aabb_equal) },
+  { "notEqual", GLM_NAME(aabb_notEqual) },
+  //{ "tostring", GLM_NAME(aabb_tostring) },
+  { "isinf", GLM_NAME(aabb_isinf) },
+  { "isnan", GLM_NAME(aabb_isnan) },
+  { "isfinite", GLM_NAME(aabb_isfinite) },
+  { "isDegenerate", GLM_NAME(aabb_isDegenerate) },
+  { "centerPoint", GLM_NAME(aabb_centerPoint) },
+  { "centroid", GLM_NAME(aabb_centerPoint) },
+  { "pointInside", GLM_NAME(aabb_pointInside) },
+  { "minimalEnclosingSphere", GLM_NAME(aabb_minimalEnclosingSphere) },
+  { "maximalContainedSphere", GLM_NAME(aabb_maximalContainedSphere) },
+  { "edge", GLM_NAME(aabb_edge) },
+  { "cornerPoint", GLM_NAME(aabb_cornerPoint) },
+  { "extremePoint", GLM_NAME(aabb_extremePoint) },
+  { "pointOnEdge", GLM_NAME(aabb_pointOnEdge) },
+  { "faceCenterPoint", GLM_NAME(aabb_faceCenterPoint) },
+  { "facePoint", GLM_NAME(aabb_facePoint) },
+  { "faceNormal", GLM_NAME(aabb_faceNormal) },
+  { "facePlane", GLM_NAME(aabb_facePlane) },
+  { "size", GLM_NAME(aabb_size) },
+  { "halfSize", GLM_NAME(aabb_halfSize) },
+  { "diagonal", GLM_NAME(aabb_size) },
+  { "halfDiagonal", GLM_NAME(aabb_halfSize) },
+  { "volume", GLM_NAME(aabb_volume) },
+  { "surfaceArea", GLM_NAME(aabb_surfaceArea) },
+  { "scale", GLM_NAME(aabb_scale) },
+  { "closestPoint", GLM_NAME(aabb_closestPoint) },
+  { "distance", GLM_NAME(aabb_distance) },
+  { "distanceSphere", GLM_NAME(aabb_distanceSphere) },
+  { "contains", GLM_NAME(aabb_contains) },
+  { "containsAABB", GLM_NAME(aabb_containsAABB) },
+  { "containsSegment", GLM_NAME(aabb_containsSegment) },
+  { "containsTriangle", GLM_NAME(aabb_containsTriangle) },
+  { "containsSphere", GLM_NAME(aabb_containsSphere) },
+  { "containsPolygon", GLM_NAME(aabb_containsPolygon) },
+  { "grow", GLM_NAME(aabb_grow) },
+  { "enclose", GLM_NAME(aabb_enclose) },
+  { "encloseSegment", GLM_NAME(aabb_encloseSegment) },
+  { "encloseTriangle", GLM_NAME(aabb_encloseTriangle) },
+  { "encloseSphere", GLM_NAME(aabb_encloseSphere) },
+  { "encloseAABB", GLM_NAME(aabb_encloseAABB) },
+  { "enclosePolygon", GLM_NAME(aabb_enclosePolygon) },
+  { "intersectsAABB", GLM_NAME(aabb_intersectsAABB) },
+  { "intersectsSphere", GLM_NAME(aabb_intersectsSphere) },
+  { "intersectsPlane", GLM_NAME(aabb_intersectsPlane) },
+  //{ "intersectsTriangle", GLM_NAME(aabb_intersectsTriangle) },
+  { "intersectsLine", GLM_NAME(aabb_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(aabb_intersectsSegment) },
+  { "intersectsRay", GLM_NAME(aabb_intersectsRay) },
+  { "intersection", GLM_NAME(aabb_intersection) },
+  { "slabs", GLM_NAME(aabb_slabs) },
+  { "projectToAxis", GLM_NAME(aabb_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectAABB", glm_aabb_intersectsAABB },
-  { "intersectSphere", glm_aabb_intersectsSphere },
-  { "intersectPlane", glm_aabb_intersectsPlane },
-  { "intersectLine", glm_aabb_intersectsLine },
-  { "intersectSegment", glm_aabb_intersectsSegment },
-  { "intersectRay", glm_aabb_intersectsRay },
+  { "intersectAABB", GLM_NAME(aabb_intersectsAABB) },
+  { "intersectSphere", GLM_NAME(aabb_intersectsSphere) },
+  { "intersectPlane", GLM_NAME(aabb_intersectsPlane) },
+  { "intersectLine", GLM_NAME(aabb_intersectsLine) },
+  { "intersectSegment", GLM_NAME(aabb_intersectsSegment) },
+  { "intersectRay", GLM_NAME(aabb_intersectsRay) },
+#if defined(LUAGLM_ALIASES_O3DE)
+  //{ "ToString", GLM_NAME() }, // @TODO
+  //{ "CreateNull", GLM_NAME() }, // @TODO
+  //{ "IsValid", GLM_NAME() }, // @TODO: !isDegenerate
+  //{ "CreateFromPoint", GLM_NAME() }, // @TODO
+  //{ "CreateFromMinMax", GLM_NAME() }, // @TODO
+  //{ "CreateFromMinMaxValues", GLM_NAME() }, // @TODO
+  { "CreateCenterHalfExtents", GLM_NAME(aabb_fromCenterAndSize) },
+  { "CreateCenterRadius", GLM_NAME(aabb_fromSphere) },
+  //{ "CreateFromObb", GLM_NAME() }, // @TODO
+  { "GetExtents", GLM_NAME(aabb_size) },
+  //{ "GetXExtent", GLM_NAME() }, // @TODO
+  //{ "GetYExtent", GLM_NAME() }, // @TODO
+  //{ "GetZExtent", GLM_NAME() }, // @TODO
+  { "GetCenter", GLM_NAME(aabb_centerPoint) },
+  { "GetAsSphere", GLM_NAME(aabb_minimalEnclosingSphere) },
+  { "Contains", GLM_NAME(aabb_containsAABB) },  // @TODO: const Vector3& or const Aabb&
+  { "ContainsVector3", GLM_NAME(aabb_contains) },
+  { "Overlaps", GLM_NAME(aabb_intersectsAABB) },  // @TODO: Handles boundaries differently.
+  //{ "Disjoint", GLM_NAME() }, // @TODO
+  //{ "Expand", GLM_NAME() }, // @TODO; GetExpanded
+  { "AddPoint", GLM_NAME(aabb_enclose) },
+  { "AddAabb", GLM_NAME(aabb_encloseAABB) },
+  { "GetDistance", GLM_NAME(aabb_distance) },
+  //{ "Clamp", GLM_NAME() }, // @TODO; GetClamped
+  //{ "SetNull", GLM_NAME() }, // @TODO
+  { "Translate", GLM_NAME(aabb_operator_add) },
+  { "GetTranslated", GLM_NAME(aabb_operator_add) },
+  { "GetSurfaceArea", GLM_NAME(aabb_surfaceArea) },
+  //{ "GetTransformedObb", GLM_NAME() }, // @TODO
+  //{ "GetTransformedAabb", GLM_NAME() }, // @TODO
+  { "ApplyTransform", GLM_NAME(aabb_operator_mul) },
+  //{ "Clone", GLM_NAME() }, // @TODO
+  { "IsFinite", GLM_NAME(aabb_isfinite) },
+  { "Equal", GLM_NAME(aabb_equal) },
+  //{ "Set", GLM_NAME() }, // Pointless; immutable arguments
+#endif
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -585,56 +647,56 @@ TRAITS_LAYOUT_DEFN(aabb2d_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gL
 TRAITS_LAYOUT_DEFN(aabb2d_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaAABB<2>, gLuaAABB<2>::point_trait)
 
 static const luaL_Reg luaglm_aabb2dlib[] = {
-  { "new", glm_aabb2d_new },
-  { "fromCenterAndSize", glm_aabb2d_fromCenterAndSize },
-  { "aabbFromSphere", glm_aabb2d_fromSphere },
-  { "operator_negate", glm_aabb2d_operator_negate },
-  { "operator_equals", glm_aabb2d_operator_equals },
-  { "operator_add", glm_aabb2d_operator_add },
-  { "operator_sub", glm_aabb2d_operator_sub },
-  { "operator_mul", glm_aabb2d_operator_mul },
-  { "equal", glm_aabb2d_equal },
-  { "notEqual", glm_aabb2d_notEqual },
-  //{ "tostring", glm_aabb2d_tostring },
-  { "isinf", glm_aabb2d_isinf },
-  { "isnan", glm_aabb2d_isnan },
-  { "isfinite", glm_aabb2d_isfinite },
-  { "isDegenerate", glm_aabb2d_isDegenerate },
-  { "centerPoint", glm_aabb2d_centerPoint },
-  { "centroid", glm_aabb2d_centerPoint },
-  { "pointInside", glm_aabb2d_pointInside },
-  { "edge", glm_aabb2d_edge },
-  { "cornerPoint", glm_aabb2d_cornerPoint },
-  { "extremePoint", glm_aabb2d_extremePoint },
-  { "size", glm_aabb2d_size },
-  { "halfSize", glm_aabb2d_halfSize },
-  { "diagonal", glm_aabb2d_size },
-  { "halfDiagonal", glm_aabb2d_halfSize },
-  { "volume", glm_aabb2d_volume },
-  { "scale", glm_aabb2d_scale },
-  { "closestPoint", glm_aabb2d_closestPoint },
-  { "distance", glm_aabb2d_distance },
-  { "distanceSphere", glm_aabb2d_distanceSphere },
-  { "contains", glm_aabb2d_contains },
-  { "containsAABB", glm_aabb2d_containsAABB },
-  { "containsSegment", glm_aabb2d_containsSegment },
-  { "containsSphere", glm_aabb2d_containsSphere },
-  { "grow", glm_aabb2d_grow },
-  { "enclose", glm_aabb2d_enclose },
-  { "encloseSegment", glm_aabb2d_encloseSegment },
-  { "encloseSphere", glm_aabb2d_encloseSphere },
-  { "encloseAABB", glm_aabb2d_encloseAABB },
-  { "intersectsAABB", glm_aabb2d_intersectsAABB },
-  { "intersectsLine", glm_aabb2d_intersectsLine },
-  { "intersectsSegment", glm_aabb2d_intersectsSegment },
-  { "intersectsRay", glm_aabb2d_intersectsRay },
-  { "intersection", glm_aabb2d_intersection },
-  { "projectToAxis", glm_aabb2d_projectToAxis },
+  { "new", GLM_NAME(aabb2d_new) },
+  { "fromCenterAndSize", GLM_NAME(aabb2d_fromCenterAndSize) },
+  { "aabbFromSphere", GLM_NAME(aabb2d_fromSphere) },
+  { "operator_negate", GLM_NAME(aabb2d_operator_negate) },
+  { "operator_equals", GLM_NAME(aabb2d_operator_equals) },
+  { "operator_add", GLM_NAME(aabb2d_operator_add) },
+  { "operator_sub", GLM_NAME(aabb2d_operator_sub) },
+  { "operator_mul", GLM_NAME(aabb2d_operator_mul) },
+  { "equal", GLM_NAME(aabb2d_equal) },
+  { "notEqual", GLM_NAME(aabb2d_notEqual) },
+  //{ "tostring", GLM_NAME(aabb2d_tostring) },
+  { "isinf", GLM_NAME(aabb2d_isinf) },
+  { "isnan", GLM_NAME(aabb2d_isnan) },
+  { "isfinite", GLM_NAME(aabb2d_isfinite) },
+  { "isDegenerate", GLM_NAME(aabb2d_isDegenerate) },
+  { "centerPoint", GLM_NAME(aabb2d_centerPoint) },
+  { "centroid", GLM_NAME(aabb2d_centerPoint) },
+  { "pointInside", GLM_NAME(aabb2d_pointInside) },
+  { "edge", GLM_NAME(aabb2d_edge) },
+  { "cornerPoint", GLM_NAME(aabb2d_cornerPoint) },
+  { "extremePoint", GLM_NAME(aabb2d_extremePoint) },
+  { "size", GLM_NAME(aabb2d_size) },
+  { "halfSize", GLM_NAME(aabb2d_halfSize) },
+  { "diagonal", GLM_NAME(aabb2d_size) },
+  { "halfDiagonal", GLM_NAME(aabb2d_halfSize) },
+  { "volume", GLM_NAME(aabb2d_volume) },
+  { "scale", GLM_NAME(aabb2d_scale) },
+  { "closestPoint", GLM_NAME(aabb2d_closestPoint) },
+  { "distance", GLM_NAME(aabb2d_distance) },
+  { "distanceSphere", GLM_NAME(aabb2d_distanceSphere) },
+  { "contains", GLM_NAME(aabb2d_contains) },
+  { "containsAABB", GLM_NAME(aabb2d_containsAABB) },
+  { "containsSegment", GLM_NAME(aabb2d_containsSegment) },
+  { "containsSphere", GLM_NAME(aabb2d_containsSphere) },
+  { "grow", GLM_NAME(aabb2d_grow) },
+  { "enclose", GLM_NAME(aabb2d_enclose) },
+  { "encloseSegment", GLM_NAME(aabb2d_encloseSegment) },
+  { "encloseSphere", GLM_NAME(aabb2d_encloseSphere) },
+  { "encloseAABB", GLM_NAME(aabb2d_encloseAABB) },
+  { "intersectsAABB", GLM_NAME(aabb2d_intersectsAABB) },
+  { "intersectsLine", GLM_NAME(aabb2d_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(aabb2d_intersectsSegment) },
+  { "intersectsRay", GLM_NAME(aabb2d_intersectsRay) },
+  { "intersection", GLM_NAME(aabb2d_intersection) },
+  { "projectToAxis", GLM_NAME(aabb2d_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectAABB", glm_aabb2d_intersectsAABB },
-  { "intersectLine", glm_aabb2d_intersectsLine },
-  { "intersectSegment", glm_aabb2d_intersectsSegment },
-  { "intersectRay", glm_aabb2d_intersectsRay },
+  { "intersectAABB", GLM_NAME(aabb2d_intersectsAABB) },
+  { "intersectLine", GLM_NAME(aabb2d_intersectsLine) },
+  { "intersectSegment", GLM_NAME(aabb2d_intersectsSegment) },
+  { "intersectRay", GLM_NAME(aabb2d_intersectsRay) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -678,41 +740,41 @@ TRAITS_LAYOUT_DEFN(line_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV,
 TRAITS_LAYOUT_DEFN(line_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaLine<>, gLuaLine<>::point_trait)
 
 static const luaL_Reg luaglm_linelib[] = {
-  { "operator_negate", glm_line_operator_negate },
-  { "operator_equals", glm_line_operator_equals },
-  { "operator_add", glm_line_operator_add },
-  { "operator_sub", glm_line_operator_sub },
-  { "operator_mul", glm_line_operator_mul },
-  { "equal", glm_line_equal },
-  { "notEqual", glm_line_notEqual },
-  //{ "tostring", glm_line_tostring },
-  { "to_segment", glm_line_to_segment },
-  { "isinf", glm_line_isinf },
-  { "isnan", glm_line_isnan },
-  { "isfinite", glm_line_isfinite },
-  { "getPoint", glm_line_getpoint },
-  { "closest", glm_line_closest },
-  { "closestRay", glm_line_closestRay },
-  { "closestLine", glm_line_closestLine },
-  { "closestSegment", glm_line_closestSegment },
-  { "closestTriangle", glm_line_closestTriangle },
-  { "contains", glm_line_contains },
-  { "containsRay", glm_line_containsRay },
-  { "containsSegment", glm_line_containsSegment },
-  { "distance", glm_line_distance },
-  { "distanceRay", glm_line_distanceRay },
-  { "distanceLine", glm_line_distanceLine },
-  { "distanceSegment", glm_line_distanceSegment },
-  { "distanceSphere", glm_line_distanceSphere },
-  { "intersectsAABB", glm_line_intersectsAABB },
-  { "intersectsSphere", glm_line_intersectsSphere },
-  { "intersectsPlane", glm_line_intersectsPlane },
-  { "intersectsTriangle", glm_line_intersectsTriangle },
-  { "projectToAxis", glm_line_projectToAxis },
+  { "operator_negate", GLM_NAME(line_operator_negate) },
+  { "operator_equals", GLM_NAME(line_operator_equals) },
+  { "operator_add", GLM_NAME(line_operator_add) },
+  { "operator_sub", GLM_NAME(line_operator_sub) },
+  { "operator_mul", GLM_NAME(line_operator_mul) },
+  { "equal", GLM_NAME(line_equal) },
+  { "notEqual", GLM_NAME(line_notEqual) },
+  //{ "tostring", GLM_NAME(line_tostring) },
+  { "to_segment", GLM_NAME(line_to_segment) },
+  { "isinf", GLM_NAME(line_isinf) },
+  { "isnan", GLM_NAME(line_isnan) },
+  { "isfinite", GLM_NAME(line_isfinite) },
+  { "getPoint", GLM_NAME(line_getpoint) },
+  { "closest", GLM_NAME(line_closest) },
+  { "closestRay", GLM_NAME(line_closestRay) },
+  { "closestLine", GLM_NAME(line_closestLine) },
+  { "closestSegment", GLM_NAME(line_closestSegment) },
+  { "closestTriangle", GLM_NAME(line_closestTriangle) },
+  { "contains", GLM_NAME(line_contains) },
+  { "containsRay", GLM_NAME(line_containsRay) },
+  { "containsSegment", GLM_NAME(line_containsSegment) },
+  { "distance", GLM_NAME(line_distance) },
+  { "distanceRay", GLM_NAME(line_distanceRay) },
+  { "distanceLine", GLM_NAME(line_distanceLine) },
+  { "distanceSegment", GLM_NAME(line_distanceSegment) },
+  { "distanceSphere", GLM_NAME(line_distanceSphere) },
+  { "intersectsAABB", GLM_NAME(line_intersectsAABB) },
+  { "intersectsSphere", GLM_NAME(line_intersectsSphere) },
+  { "intersectsPlane", GLM_NAME(line_intersectsPlane) },
+  { "intersectsTriangle", GLM_NAME(line_intersectsTriangle) },
+  { "projectToAxis", GLM_NAME(line_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectAABB", glm_line_intersectsAABB },
-  { "intersectSphere", glm_line_intersectsSphere },
-  { "intersectPlane", glm_line_intersectsPlane },
+  { "intersectAABB", GLM_NAME(line_intersectsAABB) },
+  { "intersectSphere", GLM_NAME(line_intersectsSphere) },
+  { "intersectPlane", GLM_NAME(line_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -753,38 +815,38 @@ TRAITS_LAYOUT_DEFN(ray_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV, 
 TRAITS_LAYOUT_DEFN(ray_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaRay<>, gLuaRay<>::point_trait)
 
 static const luaL_Reg luaglm_raylib[] = {
-  { "operator_negate", glm_ray_operator_negate },
-  { "operator_equals", glm_ray_operator_equals },
-  { "operator_add", glm_ray_operator_add },
-  { "operator_sub", glm_ray_operator_sub },
-  { "operator_mul", glm_ray_operator_mul },
-  { "equal", glm_ray_equal },
-  { "notEqual", glm_ray_notEqual },
-  //{ "tostring", glm_ray_tostring },
-  { "isinf", glm_ray_isinf },
-  { "isnan", glm_ray_isnan },
-  { "isfinite", glm_ray_isfinite },
-  { "getPoint", glm_ray_getPoint },
-  { "closest", glm_ray_closest },
-  { "closestRay", glm_ray_closestRay },
-  { "closestLine", glm_ray_closestLine },
-  { "closestSegment", glm_ray_closestSegment },
-  { "contains", glm_ray_contains },
-  { "containsSegment", glm_ray_containsSegment },
-  { "distance", glm_ray_distance },
-  { "distanceRay", glm_ray_distanceRay },
-  { "distanceLine", glm_ray_distanceLine },
-  { "distanceSegment", glm_ray_distanceSegment },
-  { "distanceSphere", glm_ray_distanceSphere },
-  { "intersectsSphere", glm_ray_intersectsSphere },
-  { "intersectsAABB", glm_ray_intersectsAABB },
-  { "intersectsTriangle", glm_ray_intersectsTriangle },
-  { "intersectPlane", glm_ray_intersectsPlane },
-  { "projectToAxis", glm_ray_projectToAxis },
+  { "operator_negate", GLM_NAME(ray_operator_negate) },
+  { "operator_equals", GLM_NAME(ray_operator_equals) },
+  { "operator_add", GLM_NAME(ray_operator_add) },
+  { "operator_sub", GLM_NAME(ray_operator_sub) },
+  { "operator_mul", GLM_NAME(ray_operator_mul) },
+  { "equal", GLM_NAME(ray_equal) },
+  { "notEqual", GLM_NAME(ray_notEqual) },
+  //{ "tostring", GLM_NAME(ray_tostring) },
+  { "isinf", GLM_NAME(ray_isinf) },
+  { "isnan", GLM_NAME(ray_isnan) },
+  { "isfinite", GLM_NAME(ray_isfinite) },
+  { "getPoint", GLM_NAME(ray_getPoint) },
+  { "closest", GLM_NAME(ray_closest) },
+  { "closestRay", GLM_NAME(ray_closestRay) },
+  { "closestLine", GLM_NAME(ray_closestLine) },
+  { "closestSegment", GLM_NAME(ray_closestSegment) },
+  { "contains", GLM_NAME(ray_contains) },
+  { "containsSegment", GLM_NAME(ray_containsSegment) },
+  { "distance", GLM_NAME(ray_distance) },
+  { "distanceRay", GLM_NAME(ray_distanceRay) },
+  { "distanceLine", GLM_NAME(ray_distanceLine) },
+  { "distanceSegment", GLM_NAME(ray_distanceSegment) },
+  { "distanceSphere", GLM_NAME(ray_distanceSphere) },
+  { "intersectsSphere", GLM_NAME(ray_intersectsSphere) },
+  { "intersectsAABB", GLM_NAME(ray_intersectsAABB) },
+  { "intersectsTriangle", GLM_NAME(ray_intersectsTriangle) },
+  { "intersectPlane", GLM_NAME(ray_intersectsPlane) },
+  { "projectToAxis", GLM_NAME(ray_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectSphere", glm_ray_intersectsSphere },
-  { "intersectAABB", glm_ray_intersectsAABB },
-  { "intersectPlane", glm_ray_intersectsPlane },
+  { "intersectSphere", GLM_NAME(ray_intersectsSphere) },
+  { "intersectAABB", GLM_NAME(ray_intersectsAABB) },
+  { "intersectPlane", GLM_NAME(ray_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -832,42 +894,42 @@ TRAITS_LAYOUT_DEFN(segment_intersectsSegment, glm::intersects, GEOM_INTERSECTS, 
 TRAITS_LAYOUT_DEFN(segment_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV, gLuaSegment<>, gLuaTriangle<>)
 
 static const luaL_Reg luaglm_segmentlib[] = {
-  { "operator_negate", glm_segment_operator_negate },
-  { "operator_equals", glm_segment_operator_equals },
-  { "operator_add", glm_segment_operator_add },
-  { "operator_sub", glm_segment_operator_sub },
-  { "operator_mul", glm_segment_operator_mul },
-  { "equal", glm_segment_equal },
-  { "notEqual", glm_segment_notEqual },
-  //{ "tostring", glm_segment_tostring },
-  { "length", glm_segment_length },
-  { "length2", glm_segment_length2 },
-  { "isfinite", glm_segment_isfinite },
-  { "getPoint", glm_segment_getPoint },
-  { "centerPoint", glm_segment_centerPoint },
-  { "centroid", glm_segment_centerPoint },
-  { "reverse", glm_segment_reverse },
-  { "dir", glm_segment_dir },
-  { "extremePoint", glm_segment_extremePoint },
-  { "closestPoint", glm_segment_closestPoint },
-  { "closestRay", glm_segment_closestRay },
-  { "closestLine", glm_segment_closestLine },
-  { "closestSegment", glm_segment_closestSegment },
-  { "containsPoint", glm_segment_containsPoint },
-  { "containsSegment", glm_segment_containsSegment },
-  { "closestTriangle", glm_segment_closestTriangle },
-  { "distance2", glm_segment_distance2 },
-  { "distanceSegment2", glm_segment_distanceSegment2 },
-  { "distance", glm_segment_distance },
-  { "distanceRay", glm_segment_distanceRay },
-  { "distanceLine", glm_segment_distanceLine },
-  { "distanceSegment", glm_segment_distanceSegment },
-  { "distancePlane", glm_segment_distancePlane },
-  { "intersectsSphere", glm_segment_intersectsSphere },
-  { "intersectsAABB", glm_segment_intersectsAABB },
-  { "intersectsPlane", glm_segment_intersectsPlane },
-  { "intersectsSegment", glm_segment_intersectsSegment },
-  { "intersectsTriangle", glm_segment_intersectsTriangle },
+  { "operator_negate", GLM_NAME(segment_operator_negate) },
+  { "operator_equals", GLM_NAME(segment_operator_equals) },
+  { "operator_add", GLM_NAME(segment_operator_add) },
+  { "operator_sub", GLM_NAME(segment_operator_sub) },
+  { "operator_mul", GLM_NAME(segment_operator_mul) },
+  { "equal", GLM_NAME(segment_equal) },
+  { "notEqual", GLM_NAME(segment_notEqual) },
+  //{ "tostring", GLM_NAME(segment_tostring) },
+  { "length", GLM_NAME(segment_length) },
+  { "length2", GLM_NAME(segment_length2) },
+  { "isfinite", GLM_NAME(segment_isfinite) },
+  { "getPoint", GLM_NAME(segment_getPoint) },
+  { "centerPoint", GLM_NAME(segment_centerPoint) },
+  { "centroid", GLM_NAME(segment_centerPoint) },
+  { "reverse", GLM_NAME(segment_reverse) },
+  { "dir", GLM_NAME(segment_dir) },
+  { "extremePoint", GLM_NAME(segment_extremePoint) },
+  { "closestPoint", GLM_NAME(segment_closestPoint) },
+  { "closestRay", GLM_NAME(segment_closestRay) },
+  { "closestLine", GLM_NAME(segment_closestLine) },
+  { "closestSegment", GLM_NAME(segment_closestSegment) },
+  { "containsPoint", GLM_NAME(segment_containsPoint) },
+  { "containsSegment", GLM_NAME(segment_containsSegment) },
+  { "closestTriangle", GLM_NAME(segment_closestTriangle) },
+  { "distance2", GLM_NAME(segment_distance2) },
+  { "distanceSegment2", GLM_NAME(segment_distanceSegment2) },
+  { "distance", GLM_NAME(segment_distance) },
+  { "distanceRay", GLM_NAME(segment_distanceRay) },
+  { "distanceLine", GLM_NAME(segment_distanceLine) },
+  { "distanceSegment", GLM_NAME(segment_distanceSegment) },
+  { "distancePlane", GLM_NAME(segment_distancePlane) },
+  { "intersectsSphere", GLM_NAME(segment_intersectsSphere) },
+  { "intersectsAABB", GLM_NAME(segment_intersectsAABB) },
+  { "intersectsPlane", GLM_NAME(segment_intersectsPlane) },
+  { "intersectsSegment", GLM_NAME(segment_intersectsSegment) },
+  { "intersectsTriangle", GLM_NAME(segment_intersectsTriangle) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -910,37 +972,37 @@ TRAITS_LAYOUT_DEFN(segment2d_intersectsAABB, glm::intersects, GEOM_INTERSECTS, g
 TRAITS_LAYOUT_DEFN(segment2d_intersectsSegment, glm::intersects, GEOM_INTERSECTS, gLuaSegment<2>, gLuaSegment<2>)
 
 static const luaL_Reg luaglm_segment2dlib[] = {
-  { "operator_negate", glm_segment2d_operator_negate },
-  { "operator_equals", glm_segment2d_operator_equals },
-  { "operator_add", glm_segment2d_operator_add },
-  { "operator_sub", glm_segment2d_operator_sub },
-  { "equal", glm_segment2d_equal },
-  { "notEqual", glm_segment2d_notEqual },
-  //{ "tostring", glm_segment2d_tostring },
-  { "length", glm_segment2d_length },
-  { "length2", glm_segment2d_length2 },
-  { "isfinite", glm_segment2d_isfinite },
-  { "getPoint", glm_segment2d_getPoint },
-  { "centerPoint", glm_segment2d_centerPoint },
-  { "centroid", glm_segment2d_centerPoint },
-  { "reverse", glm_segment2d_reverse },
-  { "dir", glm_segment2d_dir },
-  { "extremePoint", glm_segment2d_extremePoint },
-  { "closestPoint", glm_segment2d_closestPoint },
-  { "closestRay", glm_segment2d_closestRay },
-  { "closestLine", glm_segment2d_closestLine },
-  { "closestSegment", glm_segment2d_closestSegment },
-  { "containsPoint", glm_segment2d_containsPoint },
-  { "containsSegment", glm_segment2d_containsSegment },
-  { "distance2", glm_segment2d_distance2 },
-  { "distanceSegment2", glm_segment2d_distanceSegment2 },
-  { "distance", glm_segment2d_distance },
-  { "distanceRay", glm_segment2d_distanceRay },
-  { "distanceLine", glm_segment2d_distanceLine },
-  { "distanceSegment", glm_segment2d_distanceSegment },
-  { "distancePlane", glm_segment2d_distancePlane },
-  { "intersectsAABB", glm_segment2d_intersectsAABB },
-  { "intersectsSegment", glm_segment2d_intersectsSegment },
+  { "operator_negate", GLM_NAME(segment2d_operator_negate) },
+  { "operator_equals", GLM_NAME(segment2d_operator_equals) },
+  { "operator_add", GLM_NAME(segment2d_operator_add) },
+  { "operator_sub", GLM_NAME(segment2d_operator_sub) },
+  { "equal", GLM_NAME(segment2d_equal) },
+  { "notEqual", GLM_NAME(segment2d_notEqual) },
+  //{ "tostring", GLM_NAME(segment2d_tostring) },
+  { "length", GLM_NAME(segment2d_length) },
+  { "length2", GLM_NAME(segment2d_length2) },
+  { "isfinite", GLM_NAME(segment2d_isfinite) },
+  { "getPoint", GLM_NAME(segment2d_getPoint) },
+  { "centerPoint", GLM_NAME(segment2d_centerPoint) },
+  { "centroid", GLM_NAME(segment2d_centerPoint) },
+  { "reverse", GLM_NAME(segment2d_reverse) },
+  { "dir", GLM_NAME(segment2d_dir) },
+  { "extremePoint", GLM_NAME(segment2d_extremePoint) },
+  { "closestPoint", GLM_NAME(segment2d_closestPoint) },
+  { "closestRay", GLM_NAME(segment2d_closestRay) },
+  { "closestLine", GLM_NAME(segment2d_closestLine) },
+  { "closestSegment", GLM_NAME(segment2d_closestSegment) },
+  { "containsPoint", GLM_NAME(segment2d_containsPoint) },
+  { "containsSegment", GLM_NAME(segment2d_containsSegment) },
+  { "distance2", GLM_NAME(segment2d_distance2) },
+  { "distanceSegment2", GLM_NAME(segment2d_distanceSegment2) },
+  { "distance", GLM_NAME(segment2d_distance) },
+  { "distanceRay", GLM_NAME(segment2d_distanceRay) },
+  { "distanceLine", GLM_NAME(segment2d_distanceLine) },
+  { "distanceSegment", GLM_NAME(segment2d_distanceSegment) },
+  { "distancePlane", GLM_NAME(segment2d_distancePlane) },
+  { "intersectsAABB", GLM_NAME(segment2d_intersectsAABB) },
+  { "intersectsSegment", GLM_NAME(segment2d_intersectsSegment) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -988,7 +1050,7 @@ TRAITS_LAYOUT_DEFN(triangle_closestSegment, glm::closestPoint, GEOM_INTERSECTS_P
 TRAITS_LAYOUT_DEFN(triangle_closestLine, glm::closestPoint, GEOM_INTERSECTS_PT, gLuaTriangle<>, gLuaLine<>)
 TRAITS_DEFN(triangle_distance, glm::distance, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 TRAITS_DEFN(triangle_distanceSphere, glm::distance, gLuaTriangle<>, gLuaSphere<>)
-//TRAITS_DEFN(triangle_intersectsAABB, glm::intersects, gLuaTriangle<>, gLuaAABB<>)
+// TRAITS_DEFN(triangle_intersectsAABB, glm::intersects, gLuaTriangle<>, gLuaAABB<>)
 TRAITS_LAYOUT_DEFN(triangle_intersectsRay, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaRay<>)
 TRAITS_LAYOUT_DEFN(triangle_intersectsLine, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaLine<>)
 TRAITS_LAYOUT_DEFN(triangle_intersectsSegment, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaSegment<>)
@@ -996,51 +1058,51 @@ TRAITS_DEFN(triangle_intersectsPlane, glm::intersects, gLuaTriangle<>, gLuaPlane
 TRAITS_LAYOUT_DEFN(triangle_intersectsSphere, glm::intersects, GEOM_INTERSECTS_PT, gLuaTriangle<>, gLuaSphere<>)
 
 static const luaL_Reg luaglm_trianglelib[] = {
-  { "operator_negate", glm_triangle_operator_negate },
-  { "operator_equals", glm_triangle_operator_equals },
-  { "operator_add", glm_triangle_operator_add },
-  { "operator_sub", glm_triangle_operator_sub },
-  { "operator_mul", glm_triangle_operator_mul },
-  { "equal", glm_triangle_equal },
-  { "notEqual", glm_triangle_notEqual },
-  //{ "tostring", glm_triangle_tostring },
-  { "isinf", glm_triangle_isinf },
-  { "isnan", glm_triangle_isnan },
-  { "isfinite", glm_triangle_isfinite },
-  { "isDegenerate", glm_triangle_isDegenerate },
-  { "centroid", glm_triangle_centroid },
-  { "area", glm_triangle_area },
-  { "signedArea", glm_triangle_signedArea },
-  { "perimeter", glm_triangle_perimeter },
-  { "edge", glm_triangle_edge },
-  { "cornerPoint", glm_triangle_cornerPoint },
-  { "extremePoint", glm_triangle_extremePoint },
-  { "boundingAABB", glm_triangle_boundingAABB },
-  { "uvw", glm_triangle_barycentric_uvw },
-  { "uv", glm_triangle_barycentric_uv },
-  { "pointuv", glm_triangle_barycentric_pointuv },
-  { "pointuvw", glm_triangle_barycentric_pointuvw },
-  { "inside_triangle", glm_triangle_barycentric_inside },
-  { "planeCCW", glm_triangle_planeCCW },
-  { "planeCW", glm_triangle_planeCW },
-  { "unnormalizedNormalCCW", glm_triangle_unnormalizedNormalCCW },
-  { "unnormalizedNormalCW", glm_triangle_unnormalizedNormalCW },
-  { "normalCCW", glm_triangle_normalCCW },
-  { "normalCW", glm_triangle_normalCW },
-  { "closestPoint", glm_triangle_closestPoint },
-  { "closestSegment", glm_triangle_closestSegment },
-  { "closestLine", glm_triangle_closestLine },
-  { "contains", glm_triangle_contains },
-  { "containsSegment", glm_triangle_containsSegment },
-  { "containsTriangle", glm_triangle_containsTriangle },
-  { "distance", glm_triangle_distance },
-  { "distanceSphere", glm_triangle_distanceSphere },
-  //{ "intersectsAABB", glm_triangle_intersectsAABB },
-  { "intersectsRay", glm_triangle_intersectsRay },
-  { "intersectsLine", glm_triangle_intersectsLine },
-  { "intersectsSegment", glm_triangle_intersectsSegment },
-  { "intersectsSphere", glm_triangle_intersectsSphere },
-  { "intersectsPlane", glm_triangle_intersectsPlane },
+  { "operator_negate", GLM_NAME(triangle_operator_negate) },
+  { "operator_equals", GLM_NAME(triangle_operator_equals) },
+  { "operator_add", GLM_NAME(triangle_operator_add) },
+  { "operator_sub", GLM_NAME(triangle_operator_sub) },
+  { "operator_mul", GLM_NAME(triangle_operator_mul) },
+  { "equal", GLM_NAME(triangle_equal) },
+  { "notEqual", GLM_NAME(triangle_notEqual) },
+  //{ "tostring", GLM_NAME(triangle_tostring) },
+  { "isinf", GLM_NAME(triangle_isinf) },
+  { "isnan", GLM_NAME(triangle_isnan) },
+  { "isfinite", GLM_NAME(triangle_isfinite) },
+  { "isDegenerate", GLM_NAME(triangle_isDegenerate) },
+  { "centroid", GLM_NAME(triangle_centroid) },
+  { "area", GLM_NAME(triangle_area) },
+  { "signedArea", GLM_NAME(triangle_signedArea) },
+  { "perimeter", GLM_NAME(triangle_perimeter) },
+  { "edge", GLM_NAME(triangle_edge) },
+  { "cornerPoint", GLM_NAME(triangle_cornerPoint) },
+  { "extremePoint", GLM_NAME(triangle_extremePoint) },
+  { "boundingAABB", GLM_NAME(triangle_boundingAABB) },
+  { "uvw", GLM_NAME(triangle_barycentric_uvw) },
+  { "uv", GLM_NAME(triangle_barycentric_uv) },
+  { "pointuv", GLM_NAME(triangle_barycentric_pointuv) },
+  { "pointuvw", GLM_NAME(triangle_barycentric_pointuvw) },
+  { "inside_triangle", GLM_NAME(triangle_barycentric_inside) },
+  { "planeCCW", GLM_NAME(triangle_planeCCW) },
+  { "planeCW", GLM_NAME(triangle_planeCW) },
+  { "unnormalizedNormalCCW", GLM_NAME(triangle_unnormalizedNormalCCW) },
+  { "unnormalizedNormalCW", GLM_NAME(triangle_unnormalizedNormalCW) },
+  { "normalCCW", GLM_NAME(triangle_normalCCW) },
+  { "normalCW", GLM_NAME(triangle_normalCW) },
+  { "closestPoint", GLM_NAME(triangle_closestPoint) },
+  { "closestSegment", GLM_NAME(triangle_closestSegment) },
+  { "closestLine", GLM_NAME(triangle_closestLine) },
+  { "contains", GLM_NAME(triangle_contains) },
+  { "containsSegment", GLM_NAME(triangle_containsSegment) },
+  { "containsTriangle", GLM_NAME(triangle_containsTriangle) },
+  { "distance", GLM_NAME(triangle_distance) },
+  { "distanceSphere", GLM_NAME(triangle_distanceSphere) },
+  //{ "intersectsAABB", GLM_NAME(triangle_intersectsAABB) },
+  { "intersectsRay", GLM_NAME(triangle_intersectsRay) },
+  { "intersectsLine", GLM_NAME(triangle_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(triangle_intersectsSegment) },
+  { "intersectsSphere", GLM_NAME(triangle_intersectsSphere) },
+  { "intersectsPlane", GLM_NAME(triangle_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -1067,7 +1129,7 @@ GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
 }
 
 // @BloatTodo:
-//GLM_BINDING_QUALIFIER(sphere_optimalEnclosingSphere) {
+// GLM_BINDING_QUALIFIER(sphere_optimalEnclosingSphere) {
 //  GLM_BINDING_BEGIN
 //  using point_trait = gLuaSphere<>::point_trait;
 //  switch (LB.top()) {
@@ -1128,59 +1190,67 @@ TRAITS_DEFN(sphere_maximalContainedAABB, glm::maximalContainedAABB, gLuaSphere<>
 TRAITS_LAYOUT_DEFN(sphere_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaSphere<>, gLuaSphere<>::point_trait)
 
 static const luaL_Reg luaglm_spherelib[] = {
-  { "operator_negate", glm_sphere_operator_negate },
-  { "operator_equals", glm_sphere_operator_equals },
-  { "operator_add", glm_sphere_operator_add },
-  { "operator_sub", glm_sphere_operator_sub },
-  { "operator_mul", glm_sphere_operator_mul },
-  { "equal", glm_sphere_equal },
-  { "notEqual", glm_sphere_notEqual },
-  //{ "tostring", glm_sphere_tostring },
-  { "volume", glm_sphere_volume },
-  { "surfaceArea", glm_sphere_surfaceArea },
-  { "isinf", glm_sphere_isinf },
-  { "isnan", glm_sphere_isnan },
-  { "isfinite", glm_sphere_isfinite },
-  { "isDegenerate", glm_sphere_isDegenerate },
-  { "extremePoint", glm_sphere_extremePoint },
-  { "contains", glm_sphere_contains },
-  { "containsSegment", glm_sphere_containsSegment },
-  { "containsSphere", glm_sphere_containsSphere },
-  { "containsTriangle", glm_sphere_containsTriangle },
-  { "containsAABB", glm_sphere_containsAABB },
-  { "distance", glm_sphere_distance },
-  { "distanceSphere", glm_sphere_distanceSphere },
-  { "distanceAABB", glm_sphere_distanceAABB },
-  { "distanceRay", glm_sphere_distanceRay },
-  { "distanceSegment", glm_sphere_distanceSegment },
-  { "distanceLine", glm_sphere_distanceLine },
-  { "distanceTriangle", glm_sphere_distanceTriangle },
-  { "closestPoint", glm_sphere_closestPoint },
-  { "intersectsSphere", glm_sphere_intersectsSphere },
-  { "intersectsAABB", glm_sphere_intersectsAABB },
-  { "intersectsLine", glm_sphere_intersectsLine },
-  { "intersectsSegment", glm_sphere_intersectsSegment },
-  { "intersectsRay", glm_sphere_intersectsRay },
-  { "intersectsPlane", glm_sphere_intersectsPlane },
-  { "intersectsTriangle", glm_sphere_intersectsTriangle },
-  { "enclose", glm_sphere_enclose },
-  { "encloseSegment", glm_sphere_encloseSegment },
-  { "encloseSphere", glm_sphere_encloseSphere },
-  { "encloseAABB", glm_sphere_encloseAABB },
-  { "encloseTriangle", glm_sphere_encloseTriangle },
-  { "extendRadiusToContain", glm_sphere_extendRadiusToContain },
-  { "extendRadiusToContainSphere", glm_sphere_extendRadiusToContainSphere },
-  { "maximalContainedAABB", glm_sphere_maximalContainedAABB },
-  { "fitThroughPoints", glm_sphere_fitThroughPoints },
-  //{ "optimalEnclosingSphere", glm_sphere_optimalEnclosingSphere },  // @BloatTodo
-  { "projectToAxis", glm_sphere_projectToAxis },
+  { "operator_negate", GLM_NAME(sphere_operator_negate) },
+  { "operator_equals", GLM_NAME(sphere_operator_equals) },
+  { "operator_add", GLM_NAME(sphere_operator_add) },
+  { "operator_sub", GLM_NAME(sphere_operator_sub) },
+  { "operator_mul", GLM_NAME(sphere_operator_mul) },
+  { "equal", GLM_NAME(sphere_equal) },
+  { "notEqual", GLM_NAME(sphere_notEqual) },
+  //{ "tostring", GLM_NAME(sphere_tostring) },
+  { "volume", GLM_NAME(sphere_volume) },
+  { "surfaceArea", GLM_NAME(sphere_surfaceArea) },
+  { "isinf", GLM_NAME(sphere_isinf) },
+  { "isnan", GLM_NAME(sphere_isnan) },
+  { "isfinite", GLM_NAME(sphere_isfinite) },
+  { "isDegenerate", GLM_NAME(sphere_isDegenerate) },
+  { "extremePoint", GLM_NAME(sphere_extremePoint) },
+  { "contains", GLM_NAME(sphere_contains) },
+  { "containsSegment", GLM_NAME(sphere_containsSegment) },
+  { "containsSphere", GLM_NAME(sphere_containsSphere) },
+  { "containsTriangle", GLM_NAME(sphere_containsTriangle) },
+  { "containsAABB", GLM_NAME(sphere_containsAABB) },
+  { "distance", GLM_NAME(sphere_distance) },
+  { "distanceSphere", GLM_NAME(sphere_distanceSphere) },
+  { "distanceAABB", GLM_NAME(sphere_distanceAABB) },
+  { "distanceRay", GLM_NAME(sphere_distanceRay) },
+  { "distanceSegment", GLM_NAME(sphere_distanceSegment) },
+  { "distanceLine", GLM_NAME(sphere_distanceLine) },
+  { "distanceTriangle", GLM_NAME(sphere_distanceTriangle) },
+  { "closestPoint", GLM_NAME(sphere_closestPoint) },
+  { "intersectsSphere", GLM_NAME(sphere_intersectsSphere) },
+  { "intersectsAABB", GLM_NAME(sphere_intersectsAABB) },
+  { "intersectsLine", GLM_NAME(sphere_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(sphere_intersectsSegment) },
+  { "intersectsRay", GLM_NAME(sphere_intersectsRay) },
+  { "intersectsPlane", GLM_NAME(sphere_intersectsPlane) },
+  { "intersectsTriangle", GLM_NAME(sphere_intersectsTriangle) },
+  { "enclose", GLM_NAME(sphere_enclose) },
+  { "encloseSegment", GLM_NAME(sphere_encloseSegment) },
+  { "encloseSphere", GLM_NAME(sphere_encloseSphere) },
+  { "encloseAABB", GLM_NAME(sphere_encloseAABB) },
+  { "encloseTriangle", GLM_NAME(sphere_encloseTriangle) },
+  { "extendRadiusToContain", GLM_NAME(sphere_extendRadiusToContain) },
+  { "extendRadiusToContainSphere", GLM_NAME(sphere_extendRadiusToContainSphere) },
+  { "maximalContainedAABB", GLM_NAME(sphere_maximalContainedAABB) },
+  { "fitThroughPoints", GLM_NAME(sphere_fitThroughPoints) },
+  //{ "optimalEnclosingSphere", GLM_NAME(sphere_optimalEnclosingSphere) },  // @BloatTodo
+  { "projectToAxis", GLM_NAME(sphere_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectSphere", glm_sphere_intersectsSphere },
-  { "intersectAABB", glm_sphere_intersectsAABB },
-  { "intersectLine", glm_sphere_intersectsLine },
-  { "intersectSegment", glm_sphere_intersectsSegment },
-  { "intersectRay", glm_sphere_intersectsRay },
-  { "intersectPlane", glm_sphere_intersectsPlane },
+  { "intersectSphere", GLM_NAME(sphere_intersectsSphere) },
+  { "intersectAABB", GLM_NAME(sphere_intersectsAABB) },
+  { "intersectLine", GLM_NAME(sphere_intersectsLine) },
+  { "intersectSegment", GLM_NAME(sphere_intersectsSegment) },
+  { "intersectRay", GLM_NAME(sphere_intersectsRay) },
+  { "intersectPlane", GLM_NAME(sphere_intersectsPlane) },
+#if defined(LUAGLM_ALIASES_O3DE)
+  //{ "CreateUnitSphere", GLM_NAME() }, // @TODO
+  //{ "CreateFromAabb", GLM_NAME() }, // @TODO
+  //{ "GetCenter", GLM_NAME() }, // API is functional; not required
+  //{ "GetRadius", GLM_NAME() }, // API is functional; not required
+  //{ "SetCenter", GLM_NAME() }, // API is functional; not required
+  //{ "SetRadius", GLM_NAME() }, // API is functional; not required
+#endif
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -1231,51 +1301,51 @@ TRAITS_DEFN(circle_maximalContainedAABB, glm::maximalContainedAABB, gLuaSphere<2
 TRAITS_LAYOUT_DEFN(circle_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaSphere<2>, gLuaSphere<2>::point_trait)
 
 static const luaL_Reg luaglm_circlelib[] = {
-  { "operator_negate", glm_circle_operator_negate },
-  { "operator_equals", glm_circle_operator_equals },
-  { "operator_add", glm_circle_operator_add },
-  { "operator_sub", glm_circle_operator_sub },
-  { "equal", glm_circle_equal },
-  { "notEqual", glm_circle_notEqual },
-  //{ "tostring", glm_circle_tostring },
-  { "area", glm_circle_area },
-  { "isinf", glm_circle_isinf },
-  { "isnan", glm_circle_isnan },
-  { "isfinite", glm_circle_isfinite },
-  { "isDegenerate", glm_circle_isDegenerate },
-  { "extremePoint", glm_circle_extremePoint },
-  { "contains", glm_circle_contains },
-  { "containsSegment", glm_circle_containsSegment },
-  { "containsCircle", glm_circle_containsCircle },
-  { "containsAABB", glm_circle_containsAABB },
-  { "distance", glm_circle_distance },
-  { "distanceSphere", glm_circle_distanceSphere },
-  { "distanceAABB", glm_circle_distanceAABB },
-  { "distanceRay", glm_circle_distanceRay },
-  { "distanceSegment", glm_circle_distanceSegment },
-  { "distanceLine", glm_circle_distanceLine },
-  { "closestPoint", glm_circle_closestPoint },
-  { "intersectsCircle", glm_circle_intersectsCircle },
-  { "intersectsAABB", glm_circle_intersectsAABB },
-  { "intersectsLine", glm_circle_intersectsLine },
-  { "intersectsSegment", glm_circle_intersectsSegment },
-  { "intersectsRay", glm_circle_intersectsRay },
-  { "intersectsPlane", glm_circle_intersectsPlane },
-  { "enclose", glm_circle_enclose },
-  { "encloseSegment", glm_circle_encloseSegment },
-  { "encloseSphere", glm_circle_encloseSphere },
-  { "encloseAABB", glm_circle_encloseAABB },
-  { "extendRadiusToContain", glm_circle_extendRadiusToContain },
-  { "extendRadiusToContainCircle", glm_circle_extendRadiusToContainCircle },
-  { "maximalContainedAABB", glm_circle_maximalContainedAABB },
-  { "projectToAxis", glm_circle_projectToAxis },
+  { "operator_negate", GLM_NAME(circle_operator_negate) },
+  { "operator_equals", GLM_NAME(circle_operator_equals) },
+  { "operator_add", GLM_NAME(circle_operator_add) },
+  { "operator_sub", GLM_NAME(circle_operator_sub) },
+  { "equal", GLM_NAME(circle_equal) },
+  { "notEqual", GLM_NAME(circle_notEqual) },
+  //{ "tostring", GLM_NAME(circle_tostring) },
+  { "area", GLM_NAME(circle_area) },
+  { "isinf", GLM_NAME(circle_isinf) },
+  { "isnan", GLM_NAME(circle_isnan) },
+  { "isfinite", GLM_NAME(circle_isfinite) },
+  { "isDegenerate", GLM_NAME(circle_isDegenerate) },
+  { "extremePoint", GLM_NAME(circle_extremePoint) },
+  { "contains", GLM_NAME(circle_contains) },
+  { "containsSegment", GLM_NAME(circle_containsSegment) },
+  { "containsCircle", GLM_NAME(circle_containsCircle) },
+  { "containsAABB", GLM_NAME(circle_containsAABB) },
+  { "distance", GLM_NAME(circle_distance) },
+  { "distanceSphere", GLM_NAME(circle_distanceSphere) },
+  { "distanceAABB", GLM_NAME(circle_distanceAABB) },
+  { "distanceRay", GLM_NAME(circle_distanceRay) },
+  { "distanceSegment", GLM_NAME(circle_distanceSegment) },
+  { "distanceLine", GLM_NAME(circle_distanceLine) },
+  { "closestPoint", GLM_NAME(circle_closestPoint) },
+  { "intersectsCircle", GLM_NAME(circle_intersectsCircle) },
+  { "intersectsAABB", GLM_NAME(circle_intersectsAABB) },
+  { "intersectsLine", GLM_NAME(circle_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(circle_intersectsSegment) },
+  { "intersectsRay", GLM_NAME(circle_intersectsRay) },
+  { "intersectsPlane", GLM_NAME(circle_intersectsPlane) },
+  { "enclose", GLM_NAME(circle_enclose) },
+  { "encloseSegment", GLM_NAME(circle_encloseSegment) },
+  { "encloseSphere", GLM_NAME(circle_encloseSphere) },
+  { "encloseAABB", GLM_NAME(circle_encloseAABB) },
+  { "extendRadiusToContain", GLM_NAME(circle_extendRadiusToContain) },
+  { "extendRadiusToContainCircle", GLM_NAME(circle_extendRadiusToContainCircle) },
+  { "maximalContainedAABB", GLM_NAME(circle_maximalContainedAABB) },
+  { "projectToAxis", GLM_NAME(circle_projectToAxis) },
   // @DEPRECATED: intersectsObject
-  { "intersectCircle", glm_circle_intersectsCircle },
-  { "intersectAABB", glm_circle_intersectsAABB },
-  { "intersectLine", glm_circle_intersectsLine },
-  { "intersectSegment", glm_circle_intersectsSegment },
-  { "intersectRay", glm_circle_intersectsRay },
-  { "intersectPlane", glm_circle_intersectsPlane },
+  { "intersectCircle", GLM_NAME(circle_intersectsCircle) },
+  { "intersectAABB", GLM_NAME(circle_intersectsAABB) },
+  { "intersectLine", GLM_NAME(circle_intersectsLine) },
+  { "intersectSegment", GLM_NAME(circle_intersectsSegment) },
+  { "intersectRay", GLM_NAME(circle_intersectsRay) },
+  { "intersectPlane", GLM_NAME(circle_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -1299,6 +1369,9 @@ TRAITS_DEFN(plane_fromLine, glm::planeFrom, gLuaLine<>, gLuaPlane<>::point_trait
 TRAITS_DEFN(plane_fromLineSegment, glm::planeFrom, gLuaSegment<>, gLuaPlane<>::point_trait)
 TRAITS_DEFN(plane_fromPointNormal, glm::planeFrom, gLuaPlane<>::point_trait, gLuaPlane<>::point_trait)
 TRAITS_DEFN(plane_fromPoints, glm::planeFrom, gLuaPlane<>::point_trait, gLuaPlane<>::point_trait, gLuaPlane<>::point_trait)
+TRAITS_DEFN(plane_isinf, glm::isinf, gLuaPlane<>)
+TRAITS_DEFN(plane_isnan, glm::isnan, gLuaPlane<>)
+TRAITS_DEFN(plane_isfinite, glm::isfinite, gLuaPlane<>)
 TRAITS_DEFN(plane_isDegenerate, glm::isDegenerate, gLuaPlane<>)
 TRAITS_DEFN(plane_isParallel, glm::isParallel, gLuaPlane<>, gLuaPlane<>, gLuaPlane<>::eps_trait)
 TRAITS_DEFN(plane_areOnSameSide, glm::areOnSameSide, gLuaPlane<>, gLuaPlane<>::point_trait, gLuaPlane<>::point_trait)
@@ -1394,70 +1467,93 @@ GLM_BINDING_QUALIFIER(plane_clipTriangle) {
 }
 
 static const luaL_Reg luaglm_planelib[] = {
-  { "operator_negate", glm_plane_operator_negate },
-  { "operator_equals", glm_plane_operator_equals },
-  { "operator_add", glm_plane_operator_add },
-  { "operator_sub", glm_plane_operator_sub },
-  { "operator_mul", glm_plane_operator_mul },
-  { "equal", glm_plane_equal },
-  { "notEqual", glm_plane_notEqual },
-  //{ "tostring", glm_plane_tostring },
-  { "fromRay", glm_plane_fromRay },
-  { "fromLine", glm_plane_fromLine },
-  { "fromLineSegment", glm_plane_fromLineSegment },
-  { "fromPointNormal", glm_plane_fromPointNormal },
-  { "fromPoints", glm_plane_fromPoints },
-  { "isDegenerate", glm_plane_isDegenerate },
-  { "isParallel", glm_plane_isParallel },
-  { "areOnSameSide", glm_plane_areOnSameSide },
-  { "examineSide", glm_plane_examineSide },
-  { "isInPositiveDirection", glm_plane_isInPositiveDirection },
-  { "isOnPositiveSide", glm_plane_isOnPositiveSide },
-  { "passesThroughOrigin", glm_plane_passesThroughOrigin },
-  { "angle", glm_plane_angle },
-  { "reverseNormal", glm_plane_reverseNormal },
-  { "pointOnPlane", glm_plane_pointOnPlane },
-  { "point", glm_plane_point },
-  { "refract", glm_plane_refract },
-  { "project", glm_plane_project },
-  { "projectLine", glm_plane_projectLine },
-  { "projectSegment", glm_plane_projectSegment },
-  { "projectRay", glm_plane_projectRay },
-  { "projectTriangle", glm_plane_projectTriangle },
-  { "projectToNegativeHalf", glm_plane_projectToNegativeHalf },
-  { "projectToPositiveHalf", glm_plane_projectToPositiveHalf },
-  { "distance", glm_plane_distance },
-  { "distanceSegment", glm_plane_distanceSegment },
-  { "distanceSphere", glm_plane_distanceSphere },
-  { "signedDistance", glm_plane_signedDistance },
-  { "signedDistanceLine", glm_plane_signedDistanceLine },
-  { "signedDistanceSegment", glm_plane_signedDistanceSegment },
-  { "signedDistanceRay", glm_plane_signedDistanceRay },
-  { "signedDistanceAABB", glm_plane_signedDistanceAABB },
-  { "signedDistanceSphere", glm_plane_signedDistanceSphere },
-  { "signedDistanceTriangle", glm_plane_signedDistanceTriangle },
-  { "orthoProjection", glm_plane_orthoProjection },
-  { "mirrorMatrix", glm_plane_mirrorMatrix },
-  { "mirror", glm_plane_mirror },
-  { "closestPointRay", glm_plane_closestPointRay },
-  { "closestPointSegment", glm_plane_closestPointSegment },
-  { "contains", glm_plane_contains },
-  { "containsLine", glm_plane_containsLine },
-  { "containsRay", glm_plane_containsRay },
-  { "containsSegment", glm_plane_containsSegment },
-  { "containsTriangle", glm_plane_containsTriangle },
-  { "intersectsRay", glm_plane_intersectsRay },
-  { "intersectsLine", glm_plane_intersectsLine },
-  { "intersectsSegment", glm_plane_intersectsSegment },
-  { "intersectsTriangle", glm_plane_intersectsTriangle },
-  { "intersectsSphere", glm_plane_intersectsSphere },
-  { "intersectsAABB", glm_plane_intersectsAABB },
-  { "intersectsPlane", glm_plane_intersectsPlane },
-  { "intersectsTriangle", glm_plane_intersectsTriangle },
-  { "clipSegment", glm_plane_clipSegment },
-  { "clipLine", glm_plane_clipLine },
-  { "clipTriangle", glm_plane_clipTriangle },
-  { GLM_NULLPTR, GLM_NULLPTR },
+  { "operator_negate", GLM_NAME(plane_operator_negate) },
+  { "operator_equals", GLM_NAME(plane_operator_equals) },
+  { "operator_add", GLM_NAME(plane_operator_add) },
+  { "operator_sub", GLM_NAME(plane_operator_sub) },
+  { "operator_mul", GLM_NAME(plane_operator_mul) },
+  { "equal", GLM_NAME(plane_equal) },
+  { "notEqual", GLM_NAME(plane_notEqual) },
+  //{ "tostring", GLM_NAME(plane_tostring) },
+  { "isinf", GLM_NAME(plane_isinf) },
+  { "isnan", GLM_NAME(plane_isnan) },
+  { "isfinite", GLM_NAME(plane_isfinite) },
+  { "fromRay", GLM_NAME(plane_fromRay) },
+  { "fromLine", GLM_NAME(plane_fromLine) },
+  { "fromLineSegment", GLM_NAME(plane_fromLineSegment) },
+  { "fromPointNormal", GLM_NAME(plane_fromPointNormal) },
+  { "fromPoints", GLM_NAME(plane_fromPoints) },
+  { "isDegenerate", GLM_NAME(plane_isDegenerate) },
+  { "isParallel", GLM_NAME(plane_isParallel) },
+  { "areOnSameSide", GLM_NAME(plane_areOnSameSide) },
+  { "examineSide", GLM_NAME(plane_examineSide) },
+  { "isInPositiveDirection", GLM_NAME(plane_isInPositiveDirection) },
+  { "isOnPositiveSide", GLM_NAME(plane_isOnPositiveSide) },
+  { "passesThroughOrigin", GLM_NAME(plane_passesThroughOrigin) },
+  { "angle", GLM_NAME(plane_angle) },
+  { "reverseNormal", GLM_NAME(plane_reverseNormal) },
+  { "pointOnPlane", GLM_NAME(plane_pointOnPlane) },
+  { "point", GLM_NAME(plane_point) },
+  { "refract", GLM_NAME(plane_refract) },
+  { "project", GLM_NAME(plane_project) },
+  { "projectLine", GLM_NAME(plane_projectLine) },
+  { "projectSegment", GLM_NAME(plane_projectSegment) },
+  { "projectRay", GLM_NAME(plane_projectRay) },
+  { "projectTriangle", GLM_NAME(plane_projectTriangle) },
+  { "projectToNegativeHalf", GLM_NAME(plane_projectToNegativeHalf) },
+  { "projectToPositiveHalf", GLM_NAME(plane_projectToPositiveHalf) },
+  { "distance", GLM_NAME(plane_distance) },
+  { "distanceSegment", GLM_NAME(plane_distanceSegment) },
+  { "distanceSphere", GLM_NAME(plane_distanceSphere) },
+  { "signedDistance", GLM_NAME(plane_signedDistance) },
+  { "signedDistanceLine", GLM_NAME(plane_signedDistanceLine) },
+  { "signedDistanceSegment", GLM_NAME(plane_signedDistanceSegment) },
+  { "signedDistanceRay", GLM_NAME(plane_signedDistanceRay) },
+  { "signedDistanceAABB", GLM_NAME(plane_signedDistanceAABB) },
+  { "signedDistanceSphere", GLM_NAME(plane_signedDistanceSphere) },
+  { "signedDistanceTriangle", GLM_NAME(plane_signedDistanceTriangle) },
+  { "orthoProjection", GLM_NAME(plane_orthoProjection) },
+  { "mirrorMatrix", GLM_NAME(plane_mirrorMatrix) },
+  { "mirror", GLM_NAME(plane_mirror) },
+  { "closestPointRay", GLM_NAME(plane_closestPointRay) },
+  { "closestPointSegment", GLM_NAME(plane_closestPointSegment) },
+  { "contains", GLM_NAME(plane_contains) },
+  { "containsLine", GLM_NAME(plane_containsLine) },
+  { "containsRay", GLM_NAME(plane_containsRay) },
+  { "containsSegment", GLM_NAME(plane_containsSegment) },
+  { "containsTriangle", GLM_NAME(plane_containsTriangle) },
+  { "intersectsRay", GLM_NAME(plane_intersectsRay) },
+  { "intersectsLine", GLM_NAME(plane_intersectsLine) },
+  { "intersectsSegment", GLM_NAME(plane_intersectsSegment) },
+  { "intersectsTriangle", GLM_NAME(plane_intersectsTriangle) },
+  { "intersectsSphere", GLM_NAME(plane_intersectsSphere) },
+  { "intersectsAABB", GLM_NAME(plane_intersectsAABB) },
+  { "intersectsPlane", GLM_NAME(plane_intersectsPlane) },
+  { "intersectsTriangle", GLM_NAME(plane_intersectsTriangle) },
+  { "clipSegment", GLM_NAME(plane_clipSegment) },
+  { "clipLine", GLM_NAME(plane_clipLine) },
+  { "clipTriangle", GLM_NAME(plane_clipTriangle) },
+#if defined(LUAGLM_ALIASES_O3DE)
+  //{ "ToString", GLM_NAME() }, // @TODO
+  //{ "CreateFromCoefficients", GLM_NAME() }, // @TODO
+  //{ "CreateFromNormalAndPoint", GLM_NAME() }, // @TODO
+  //{ "CreateFromNormalAndDistance", GLM_NAME() }, // @TODO
+  { "CreateFromTriangle", GLM_NAME(plane_fromPoints) },
+  { "ApplyTransform", GLM_NAME(plane_operator_mul) },
+  { "GetTransform", GLM_NAME(plane_operator_mul) },
+  { "GetPointDist", GLM_NAME(plane_distance) },
+  { "GetProjected", GLM_NAME(plane_project) },
+  { "CastRay", GLM_NAME(plane_intersectsRay) },
+  { "IntersectSegment", GLM_NAME(plane_intersectsSegment) },
+  { "IsFinite", GLM_NAME(plane_isfinite) },
+  //{ "Clone", GLM_NAME() }, // @Pointless
+  //{ "GetNormal", GLM_NAME() }, // Pointless
+  //{ "GetDistance", GLM_NAME() }, // Pointless
+  //{ "SetNormal", GLM_NAME() }, // Immutable arguments
+  //{ "SetDistance", GLM_NAME() }, // Immutable arguments
+  //{ "GetPlaneEquationCoefficients", GLM_NAME() }, // Pointless?
+#endif
+  { GLM_NULLPTR, GLM_NULLPTR }
 };
 
 /* }================================================================== */
@@ -1552,7 +1648,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     lua_setmetatable(LB.L, -2);  // [..., poly]
     LuaCrtAllocator<gLuaPolygon<>::point_trait::type> allocator(LB.L);
 
-    // Create a std::vector backed by the Lua allocator.
+    // Create a vector backed by the Lua allocator.
     using PolyList = glm::List<gLuaPolygon<>::point_trait::type>;
     PolyList *list = static_cast<PolyList *>(allocator.realloc(GLM_NULLPTR, 0, sizeof(PolyList)));
     if (l_unlikely(list == GLM_NULLPTR)) {
@@ -1561,25 +1657,15 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     }
 
     // Populate the polygon with an array of coordinates, if one exists.
-  #if GLM_GEOM_EXCEPTIONS
-    try {
-  #endif
-      polygon->p = ::new (list) PolyList(LB.L, allocator);
-
-      if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
-        glmLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
-        const auto e = lArray.end();
-        for (auto b = lArray.begin(); b != e; ++b) {
-          polygon->p->push_back(*b);
-        }
+    polygon->p = ::new (list) PolyList(LB.L, allocator);
+    if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
+      glmLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
+      const auto e = lArray.end();
+      for (auto b = lArray.begin(); b != e; ++b) {
+        polygon->p->push_back(*b);
       }
-  #if GLM_GEOM_EXCEPTIONS
     }
-    catch (...) {
-      lua_pop(L, 1);
-      return luaL_error(L, "unknown polygon error");
-    }
-  #endif
+
     return 1;
   }
 
@@ -1710,64 +1796,64 @@ GLM_BINDING_QUALIFIER(polygon_pairs) {
 }
 
 static const luaL_Reg luaglm_polylib[] = {
-  { "__gc", glm_polygon_gc },
-  { "__index", glm_polygon_index },  // Array access
-  { "__newindex", glm_polygon_newindex },  // Only allow append
-  { "__len", glm_polygon_len },  // # of Points
-  { "__call", glm_polygon_call },  // Generate a table.
-  { "__pairs", glm_polygon_pairs },
-  { "__unm", glm_polygon_operator_negate },  // Negate all points.
-  { "__eq", glm_polygon_operator_equals },
-  { "__add", glm_polygon_operator_add },
-  { "__sub", glm_polygon_operator_sub },
-  { "__mul", glm_polygon_operator_mul },
-  { "__tostring", glm_polygon_to_string },
-  { "new", glm_polygon_new },
-  { "operator_negate", glm_polygon_operator_negate },
-  { "operator_equals", glm_polygon_operator_equals },
-  { "operator_add", glm_polygon_operator_add },
-  { "operator_sub", glm_polygon_operator_sub },
-  { "operator_mul", glm_polygon_operator_mul },
-  { "edge", glm_polygon_edge },
-  { "edge2d", glm_polygon_edge2d },
-  { "diagonal", glm_polygon_diagonal },
-  { "diagonalExists", glm_polygon_diagonalExists },
-  { "basisU", glm_polygon_basisU },
-  { "basisV", glm_polygon_basisV },
-  { "mapTo2D", glm_polygon_mapTo2D },
-  { "mapFrom2D", glm_polygon_mapFrom2D },
-  { "area", glm_polygon_area },
-  { "perimeter", glm_polygon_perimeter },
-  { "centroid", glm_polygon_centroid },
-  { "isPlanar", glm_polygon_isPlanar },
-  { "isSimple", glm_polygon_isSimple },
-  { "isNull", glm_polygon_isNull },
-  { "isfinite", glm_polygon_isfinite },
-  { "isDegenerate", glm_polygon_isDegenerate },
-  { "isConvex", glm_polygon_isConvex },
-  { "extremePoint", glm_polygon_extremePoint },
-  { "projectToAxis", glm_polygon_projectToAxis },
-  { "planeCCW", glm_polygon_planeCCW },
-  { "normalCCW", glm_polygon_normalCCW },
-  { "planeCW", glm_polygon_planeCW },
-  { "normalCW", glm_polygon_normalCW },
-  { "pointOnEdge", glm_polygon_pointOnEdge },
-  { "edgeNormal", glm_polygon_edgeNormal },
-  { "edgePlane", glm_polygon_edgePlane },
-  { "containsSegment2D", glm_polygon_containsSegment2D },
-  { "contains", glm_polygon_contains },
-  { "containsAbove", glm_polygon_containsAbove },
-  { "containsBelow", glm_polygon_containsBelow },
-  { "containsPolygon", glm_polygon_containsPolygon },
-  { "containsSegment", glm_polygon_containsSegment },
-  { "containsTriangle", glm_polygon_containsTriangle },
-  { "minimalEnclosingAABB", glm_polygon_minimalEnclosingAABB },
-  { "intersectsSegment2D", glm_polygon_intersectsSegment2D },
-  { "intersectsLine", glm_polygon_intersectsLine },
-  { "intersectsRay", glm_polygon_intersectsRay },
-  { "intersectsSegment", glm_polygon_intersectsSegment },
-  { "intersectsPlane", glm_polygon_intersectsPlane },
-  { GLM_NULLPTR, GLM_NULLPTR },
+  { "__gc", GLM_NAME(polygon_gc) },
+  { "__index", GLM_NAME(polygon_index) },  // Array access
+  { "__newindex", GLM_NAME(polygon_newindex) },  // Only allow append
+  { "__len", GLM_NAME(polygon_len) },  // # of Points
+  { "__call", GLM_NAME(polygon_call) },  // Generate a table.
+  { "__pairs", GLM_NAME(polygon_pairs) },
+  { "__unm", GLM_NAME(polygon_operator_negate) },  // Negate all points.
+  { "__eq", GLM_NAME(polygon_operator_equals) },
+  { "__add", GLM_NAME(polygon_operator_add) },
+  { "__sub", GLM_NAME(polygon_operator_sub) },
+  { "__mul", GLM_NAME(polygon_operator_mul) },
+  { "__tostring", GLM_NAME(polygon_to_string) },
+  { "new", GLM_NAME(polygon_new) },
+  { "operator_negate", GLM_NAME(polygon_operator_negate) },
+  { "operator_equals", GLM_NAME(polygon_operator_equals) },
+  { "operator_add", GLM_NAME(polygon_operator_add) },
+  { "operator_sub", GLM_NAME(polygon_operator_sub) },
+  { "operator_mul", GLM_NAME(polygon_operator_mul) },
+  { "edge", GLM_NAME(polygon_edge) },
+  { "edge2d", GLM_NAME(polygon_edge2d) },
+  { "diagonal", GLM_NAME(polygon_diagonal) },
+  { "diagonalExists", GLM_NAME(polygon_diagonalExists) },
+  { "basisU", GLM_NAME(polygon_basisU) },
+  { "basisV", GLM_NAME(polygon_basisV) },
+  { "mapTo2D", GLM_NAME(polygon_mapTo2D) },
+  { "mapFrom2D", GLM_NAME(polygon_mapFrom2D) },
+  { "area", GLM_NAME(polygon_area) },
+  { "perimeter", GLM_NAME(polygon_perimeter) },
+  { "centroid", GLM_NAME(polygon_centroid) },
+  { "isPlanar", GLM_NAME(polygon_isPlanar) },
+  { "isSimple", GLM_NAME(polygon_isSimple) },
+  { "isNull", GLM_NAME(polygon_isNull) },
+  { "isfinite", GLM_NAME(polygon_isfinite) },
+  { "isDegenerate", GLM_NAME(polygon_isDegenerate) },
+  { "isConvex", GLM_NAME(polygon_isConvex) },
+  { "extremePoint", GLM_NAME(polygon_extremePoint) },
+  { "projectToAxis", GLM_NAME(polygon_projectToAxis) },
+  { "planeCCW", GLM_NAME(polygon_planeCCW) },
+  { "normalCCW", GLM_NAME(polygon_normalCCW) },
+  { "planeCW", GLM_NAME(polygon_planeCW) },
+  { "normalCW", GLM_NAME(polygon_normalCW) },
+  { "pointOnEdge", GLM_NAME(polygon_pointOnEdge) },
+  { "edgeNormal", GLM_NAME(polygon_edgeNormal) },
+  { "edgePlane", GLM_NAME(polygon_edgePlane) },
+  { "containsSegment2D", GLM_NAME(polygon_containsSegment2D) },
+  { "contains", GLM_NAME(polygon_contains) },
+  { "containsAbove", GLM_NAME(polygon_containsAbove) },
+  { "containsBelow", GLM_NAME(polygon_containsBelow) },
+  { "containsPolygon", GLM_NAME(polygon_containsPolygon) },
+  { "containsSegment", GLM_NAME(polygon_containsSegment) },
+  { "containsTriangle", GLM_NAME(polygon_containsTriangle) },
+  { "minimalEnclosingAABB", GLM_NAME(polygon_minimalEnclosingAABB) },
+  { "intersectsSegment2D", GLM_NAME(polygon_intersectsSegment2D) },
+  { "intersectsLine", GLM_NAME(polygon_intersectsLine) },
+  { "intersectsRay", GLM_NAME(polygon_intersectsRay) },
+  { "intersectsSegment", GLM_NAME(polygon_intersectsSegment) },
+  { "intersectsPlane", GLM_NAME(polygon_intersectsPlane) },
+  { GLM_NULLPTR, GLM_NULLPTR }
 };
 
 /* }================================================================== */

@@ -431,8 +431,6 @@ namespace glm {
 
   /// <summary>
   /// Return the center of mass of the polygon.
-  ///
-  /// Per MathGeoLib: This function does not properly compute the centroid.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER vec<L, T, Q> centroid(const Polygon<L, T, Q> &polygon) {

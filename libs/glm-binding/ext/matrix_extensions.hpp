@@ -668,6 +668,48 @@ namespace glm {
     return Result;
   }
 
+  /// <summary>
+  /// glm::inverse that assumes the last row is (0, 0, 0, 1)
+  /// </summary>
+  template<length_t C, length_t R, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> inverse_transform(mat<C, R, T, Q> const &m) {
+    GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
+    const T OneOverDeterminant = static_cast<T>(1) / (
+		+ m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+		- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+		+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
+
+    mat<C, R, T, Q> Inverse;
+    Inverse[0][0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]) * OneOverDeterminant;
+    Inverse[1][0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]) * OneOverDeterminant;
+    Inverse[2][0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]) * OneOverDeterminant;
+    Inverse[0][1] = -(m[0][1] * m[2][2] - m[2][1] * m[0][2]) * OneOverDeterminant;
+    Inverse[1][1] = +(m[0][0] * m[2][2] - m[2][0] * m[0][2]) * OneOverDeterminant;
+    Inverse[2][1] = -(m[0][0] * m[2][1] - m[2][0] * m[0][1]) * OneOverDeterminant;
+    Inverse[0][2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]) * OneOverDeterminant;
+    Inverse[1][2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]) * OneOverDeterminant;
+    Inverse[2][2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]) * OneOverDeterminant;
+    GLM_IF_CONSTEXPR(R > 3) {
+      Inverse[0][3] = T(0);
+      Inverse[1][3] = T(0);
+      Inverse[2][3] = T(0);
+      GLM_IF_CONSTEXPR(C > 3) {
+        Inverse[3][3] = T(1);
+      }
+    }
+    return Inverse;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverse_transform(mat<3, 3, T, Q> const &m) {
+    return inverse(m);
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER mat<2, 2, T, Q> inverse_transform(mat<2, 2, T, Q> const &m) {
+    return inverse(m);
+  }
+
   /*
   ** {======================================================
   ** Fixes

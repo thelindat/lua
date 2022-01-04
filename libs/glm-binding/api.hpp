@@ -714,6 +714,7 @@ GLM_BINDING_QUALIFIER(inverse) {
   GLM_BINDING_END
 }
 SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // LUA_MATRIX_EXTENSIONS
+ROTATION_MATRIX_DEFN(inverse_transform, glm::inverse_transform, LAYOUT_UNARY)
 #endif
 
 /* glm/ext/quaternion_trigonometric.hpp */

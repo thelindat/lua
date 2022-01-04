@@ -403,6 +403,14 @@ namespace glm {
 #endif
   }
 
+  /// <summary>
+  /// API completeness for matrix_extensions.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> inverse_transform(const qua<T, Q> &q) {
+    return inverse(q);
+  }
+
   /*
   ** {======================================================
   ** Fixes

@@ -56,13 +56,13 @@ namespace glm {
       d = dot(point, normal);
     }
 
-    Plane(const Plane<L, T, Q> &line)
-      : normal(line.normal), d(line.d) {
+    Plane(const Plane<L, T, Q> &plane)
+      : normal(plane.normal), d(plane.d) {
     }
 
-    Plane<L, T, Q> &operator=(const Plane<L, T, Q> &line) {
-      normal = line.normal;
-      d = line.d;
+    Plane<L, T, Q> &operator=(const Plane<L, T, Q> &plane) {
+      normal = plane.normal;
+      d = plane.d;
       return *this;
     }
   };
@@ -192,7 +192,7 @@ namespace glm {
   }
 
   /// <summary>
-  /// Construct a plane by specifying three points on the plane.
+  /// Construct a plane by specifying three points on the plane; @TODO: Triangle<3, T, Q>
   /// </summary>
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER Plane<3, T, Q> planeFrom(const vec<3, T, Q> &v1, const vec<3, T, Q> &v2, const vec<3, T, Q> &v3) {
@@ -205,6 +205,27 @@ namespace glm {
     else {
       return Plane<3, T, Q>(vec<3, T, Q>{ T(0), T(0), T(1) }, T(0));
     }
+  }
+
+  /// <summary>
+  /// Tests if any component of the plane is infinite.
+  /// </summary>
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER bool isinf(const Plane<L, T, Q> &plane) {
+    return any_isinf(plane.normal) || any_isinf(plane.d);
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER bool isnan(const Plane<L, T, Q> &plane) {
+    return any_isnan(plane.normal) || any_isnan(plane.d);
+  }
+
+  /// <summary>
+  /// Test if all components of the plane are finite.
+  /// </summary>
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER bool isfinite(const Plane<L, T, Q> &plane) {
+    return all(isfinite(plane.normal)) && all(isfinite(plane.d));
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -672,7 +693,8 @@ namespace glm {
   /// Tests whether the plane and the given object intersect.
 
   /// <summary>
-  /// Per MathGeoLib: "try to improve stability with lines that are almost parallel with the plane."
+  /// This function attempts to improve stability with lines that are almost
+  /// parallel with the plane.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersectLinePlane(const vec<L, T, Q> &planeNormal, T planeD, const vec<L, T, Q> &linePos, const vec<L, T, Q> &lineDir, T &d) {

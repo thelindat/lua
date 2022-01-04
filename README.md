@@ -749,6 +749,7 @@ Ordered by priority.
 1. Cleanup TODO annotations that have accumulated over time; many are outdated.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
+1. Initial support for frustums (both orthographic and perspective) and OBBs, or, at minimum, the more computationally complex parts of these structures.
 1. [binding](libs/glm-binding): Complete O3DE AzCore/Math (behaviorContext) aliasing (... where possible).
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
@@ -766,7 +767,6 @@ Ordered by priority.
 1. Support for integer vectors/matrices. Either by introducing an additional type, e.g., `LUA_TVECTORI`, or splitting the vector tag `LUA_TVECTOR` into `LUA_TVECTOR2`, `LUA_TVECTOR3`, `LUA_TVECTOR4`, and `LUA_TQUAT` and use variant bits for the primitive type.
 1. Support for meshes and retrofit current spatial indexing structures for triangles; consider BSPs.
 1. Include broad phase collision scripting examples, e.g., dynamic AABB tree and/or multibox sweep-and-prune.
-1. Initial support for frustums (both orthographic and perspective) and OBBs, or, at minimum, the more computationally complex parts of these structures.
 1. A significantly less efficient shared-library implementation, using tables and/or userdata instead of first-class types, for Lua5.1, Lua5.2, Lua5.3, Lua5.4, and [LuaJIT](https://github.com/LuaJIT/LuaJIT).
 
 ## Benchmarking
@@ -859,6 +859,7 @@ Secondary values represent the benchmarks output with transform recycling
 
 1. [grit-lua](https://github.com/grit-engine/grit-lua): Original implementation and inspiration.
 1. [MathGeoLib](https://github.com/juj/MathGeoLib/): [Geometry API](libs/glm-binding/geom) is distributed under [Apache License](http://www.apache.org/licenses/LICENSE-2.0.html).
+1. [O3DE](https://github.com/o3de/o3de): Reference for Extended API (aliases).
 1. [SharpDX](https://github.com/sharpdx/SharpDX): Reference for Extended API (aliases).
 1. [Godot Engine](https://docs.godotengine.org/en/stable/classes/): Reference for Extended API (aliases).
 1. [Unity](https://docs.unity3d.com/ScriptReference/UnityEngine.CoreModule.html): Reference for Extended API (aliases and emulation of some [mathf](https://docs.unity3d.com/ScriptReference/Mathf.html) functions).

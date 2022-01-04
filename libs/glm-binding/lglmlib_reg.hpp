@@ -70,6 +70,7 @@ GLM_LUA_REG(mat_sub),
 GLM_LUA_REG(mat_mul),
 GLM_LUA_REG(mat_negate),
 #if defined(LUAGLM_ALIASES_O3DE)
+//{ "Clone", GLM_NAME() }, // @TODO
 //{ "Add", GLM_NAME() }, // @TODO
 //{ "Subtract", GLM_NAME() }, // @TODO
 //{ "Unary", GLM_NAME() }, // @TODO
@@ -433,6 +434,14 @@ GLM_LUA_REG(snap),  // LUA_VECTOR_EXTENSIONS
 #if defined(GTC_COLOR_SPACE_HPP) && !defined(GLM_FORCE_XYZW_ONLY)
 GLM_LUA_REG(convertLinearToSRGB),
 GLM_LUA_REG(convertSRGBToLinear),
+#if defined(LUAGLM_ALIASES_O3DE)
+//{ "ToU32", GLM_NAME() }, // @TODO
+//{ "FromU32", GLM_NAME() }, // @TODO
+//{ "ToU32LinearToGamma", GLM_NAME() }, // @TODO
+//{ "FromU32GammaToLinear", GLM_NAME() }, // @TODO
+{ "LinearToGamma", GLM_NAME(convertLinearToSRGB) },
+{ "GammaToLinear", GLM_NAME(convertSRGBToLinear) },
+#endif
 #endif
 
 #if defined(GTC_NOISE_HPP)
@@ -1043,9 +1052,13 @@ GLM_LUA_REG(conjugate),
 #if defined(EXT_QUATERNION_COMMON_HPP) || defined(MATRIX_HPP)
 GLM_LUA_REG(inverse),
 GLM_LUA_REG(invertible),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(inverse_transform),
+//{ "SetRotationPartFromQuaternion", GLM_NAME() }, // @TODO
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetReciprocal", GLM_NAME(inverse) },
 { "GetReciprocalEstimate", GLM_NAME(inverse) },
+{ "GetInverseFull", GLM_NAME(inverse) }, // @TODO; InvertFull; InvertFast
+{ "GetInverseTransform", GLM_NAME(inverse_transform) }, // @TODO: InvertTransform
 #endif
 #endif
 
@@ -1201,9 +1214,6 @@ GLM_LUA_REG(row),
 #if defined(GTC_MATRIX_INVERSE_HPP)
 GLM_LUA_REG(affineInverse),
 GLM_LUA_REG(inverseTranspose),
-#if defined(LUAGLM_ALIASES_O3DE)
-//{ "InvertFull", GLM_NAME() }, // @TODO; InvertFast
-#endif
 #endif
 
 #if defined(GTX_EULER_ANGLES_HPP)
@@ -1292,9 +1302,9 @@ GLM_LUA_REG(quatEulerAngleZYZ),  // LUA_QUATERNION_EXTENSIONS
 { "eulerZYZ", GLM_NAME(eulerAngleZYZ) },
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-{ "CreateRotationX", GLM_NAME(quatEulerAngleX) },
-{ "CreateRotationY", GLM_NAME(quatEulerAngleY) },
-{ "CreateRotationZ", GLM_NAME(quatEulerAngleZ) },
+{ "CreateRotationX", GLM_NAME(eulerAngleX) },
+{ "CreateRotationY", GLM_NAME(eulerAngleY) },
+{ "CreateRotationZ", GLM_NAME(eulerAngleZ) },
 #endif
 #endif
 
