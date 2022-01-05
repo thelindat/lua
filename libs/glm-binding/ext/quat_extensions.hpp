@@ -411,6 +411,14 @@ namespace glm {
     return inverse(q);
   }
 
+  /// <summary>
+  /// Get the shortest equivalent of the rotation.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> shortest_equivalent(const qua<T, Q> &q) {
+    return (q.w < T(0.0)) ? -q : q;
+  }
+
   /*
   ** {======================================================
   ** Fixes

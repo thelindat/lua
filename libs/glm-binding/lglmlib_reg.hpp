@@ -528,6 +528,14 @@ GLM_LUA_REG(compMin),
 GLM_LUA_REG(compMul),
 GLM_LUA_REG(compNormalize),
 GLM_LUA_REG(compScale),
+//GLM_LUA_REG(compNormalize_i8),
+//GLM_LUA_REG(compNormalize_u8),
+//GLM_LUA_REG(compNormalize_i16),
+//GLM_LUA_REG(compNormalize_u16),
+//GLM_LUA_REG(compScale_i8),
+//GLM_LUA_REG(compScale_u8),
+//GLM_LUA_REG(compScale_i16),
+//GLM_LUA_REG(compScale_u16),
 #if defined(LUAGLM_ALIASES_UNITY)
 //{ "Scale", GLM_NAME() }, // @TODO
 #endif
@@ -785,6 +793,7 @@ GLM_LUA_REG(transformPos),  // LUA_MATRIX_EXTENSIONS
 GLM_LUA_REG(transformPosPerspective),
 GLM_LUA_REG(transformDir),
 GLM_LUA_REG(rotateFromTo),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(shortest_equivalent),
 #if defined(LUAGLM_INLINED_TEMPLATES)
 GLM_LUA_REG(rotate_mat3),
 GLM_LUA_REG(rotate_mat4),
@@ -1091,6 +1100,9 @@ GLM_LUA_REG(quatFromBasis),
 #endif
 #if defined(LUAGLM_ALIASES_UNITY)
 { "LookRotation", GLM_NAME(quatLookAt) },
+#endif
+#if defined(LUAGLM_ALIASES_O3DE)
+{ "GetEulerRadians", GLM_NAME(eulerAngles) },  // @TODO: Missing matrix equivalent
 #endif
 #endif
 

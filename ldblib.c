@@ -152,8 +152,6 @@ static void treatstackoption (lua_State *L, lua_State *L1, const char *fname) {
 ** L1 needs stack space for an optional input (function) plus
 ** two optional outputs (function and line table) from function
 ** 'lua_getinfo'.
-**
-** @TODO: LUA_SANDBOX_DBLIB
 */
 static int db_getinfo (lua_State *L) {
   lua_Debug ar;

@@ -101,7 +101,24 @@ the same C API functions:
 
 See [lglm.hpp](lglm.hpp) the external header for interfacing with ``glm``
 defined structures within Lua. The deprecated grit-lua C API can still be
-referenced by [lgrit_lib.h](lgrit_lib.h).
+referenced by [lgrit\_lib.h](lgrit_lib.h).
+
+### Metamethods
+
+For performance reasons, most unary and binary operators have internal
+implementations that take precedence over any external metamethod.
+
+The following list corresponds to the reserved metamethods for unary and binary
+operators when the objects being operated on are either numbers, vectors,
+quaternions, or matrices. ... Formatting TBD.
+
+* **Number**: TM\_ADD, TM\_SUB, TM\_MUL, TM\_DIV.
+* **Vector**:
+  + TM\_EQ, TM\_LEN, TM\_ADD, TM\_SUB, TM\_MUL, TM\_MOD, TM\_POW, TM\_DIV,
+  + TM\_IDIV, TM\_BAND, TM\_BOR, TM\_BXOR, TM\_SHL, TM\_SHR, TM\_UNM, TM\_BNOT.
+* **Quaternion**:
+  + TM\_EQ, TM\_LEN, TM\_ADD, TM\_SUB, TM\_MUL, TM\_POW, TM\_DIV, TM\_UNM.
+* **Matrix**: TM\_EQ, TM\_LEN, TM\_ADD, TM\_SUB, TM\_MUL, TM\_DIV, TM\_UNM.
 
 ## Matrices
 
@@ -849,7 +866,7 @@ Secondary values represent the benchmarks output with transform recycling
 | MGL Lua5.4                   | 40.310      | 40.290      | 9544        | 33.592        | 202       |
 | CPML Lua5.4                  | 66.32/61.46 | 66.28/61.43 | 23364/10004 | 55.267/51.217 | 332/307   |
 
-### TODO
+### Benchmark TODO
 
 * Other things not Lua.
 * [Unity.Mathematics](https://github.com/Unity-Technologies/Unity.Mathematics)

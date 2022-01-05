@@ -1632,7 +1632,7 @@ GLM_BINDING_QUALIFIER(polygon_extremePoint) {
 /// </summary>
 GLM_BINDING_QUALIFIER(polygon_new) {
   GLM_BINDING_BEGIN
-  const int n = LB.top();
+  const int n = LB.top_for_recycle();
   if (!lua_isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
     return GLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
   }

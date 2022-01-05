@@ -58,6 +58,13 @@
   #define GLM_GEOM_TOSTRING 0
 #endif
 
+/* Separate assert within ext/geom */
+#if defined(LUAGLM_SAFELIB)
+  #define GLM_GEOM_ASSERT(x) assert(x)
+#else
+  #define GLM_GEOM_ASSERT(x)
+#endif
+
 /* Check runtime preconditions on geom structures (often related to ensuring normalized vectors) */
 #if defined(LUAGLM_SAFELIB)
   #define GLM_GEOM_ASSUME(x, onError) \

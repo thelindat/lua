@@ -73,10 +73,6 @@ namespace detail {
   template<typename T, bool isFloat = false>
   struct lglmliteral { GLM_FUNC_QUALIFIER static char const *value() { return "%d"; } };
 
-  /// <summary>
-  /// @TODO: Use the predefined literal floating-point format defined in luaconf
-  /// if possible
-  /// </summary>
   template<typename T>
   struct lglmliteral<T, true> { GLM_FUNC_QUALIFIER static char const *value() { return "%f"; } };
 #if GLM_MODEL == GLM_MODEL_32 && GLM_COMPILER && GLM_COMPILER_VC

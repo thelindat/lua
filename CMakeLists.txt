@@ -127,7 +127,6 @@ IF( MSVC )
   ENDIF()
 
   # Override the C runtime allocator on Windows
-  # @TODO: snmalloc support
   IF( LUA_CRT_ALLOC )
     IF( CMAKE_BUILD_TYPE AND ${CMAKE_BUILD_TYPE} MATCHES Debug )
       MESSAGE(FATAL_ERROR "The Debug target isn't supported along with LUA_CRT_ALLOC!")

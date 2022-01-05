@@ -46,10 +46,12 @@ namespace glm {
 
     Line(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
       : pos(position), dir(normalize(direction)) {
+      GLM_GEOM_ASSERT(glm::isNormalized(dir));
     }
 
     Line(const Line<L, T, Q> &line)
       : pos(line.pos), dir(line.dir) {
+      GLM_GEOM_ASSERT(glm::isNormalized(dir));
     }
   };
 
@@ -80,25 +82,21 @@ namespace glm {
 
   template<typename T, qualifier Q>
   static Line<3, T, Q> operator*(const mat<3, 3, T, Q> &m, const Line<3, T, Q> &line) {
-    GLM_GEOM_ASSUME(isNormalized(line.dir, epsilon<T>()), line);
     return Line<3, T, Q>(m * line.pos, m * line.dir);
   }
 
   template<typename T, qualifier Q>
   static Line<3, T, Q> operator*(const mat<3, 4, T, Q> &m, const Line<3, T, Q> &line) {
-    GLM_GEOM_ASSUME(isNormalized(line.dir, epsilon<T>()), line);
     return Line<3, T, Q>(m * line.pos, m * line.dir);
   }
 
   template<typename T, qualifier Q>
   static Line<3, T, Q> operator*(const mat<4, 3, T, Q> &m, const Line<3, T, Q> &line) {
-    GLM_GEOM_ASSUME(isNormalized(line.dir, epsilon<T>()), line);
     return Line<3, T, Q>(transformPos(m, line.pos), transformDir(m, line.dir));
   }
 
   template<typename T, qualifier Q>
   static Line<3, T, Q> operator*(const mat<4, 4, T, Q> &m, const Line<3, T, Q> &line) {
-    GLM_GEOM_ASSUME(isNormalized(line.dir, epsilon<T>()), line);
     return Line<3, T, Q>(transformPos(m, line.pos), transformDir(m, line.dir));
   }
 

@@ -329,12 +329,19 @@ struct gLuaBase {
   }
 
   /// <summary>
+  /// Returns lua_gettop ensuring the value is cached for object recycling.
+  /// </summary>
+  GLM_INLINE int top_for_recycle() {
+    return (recycle_top == 0) ? (recycle_top = _gettop(L)) : recycle_top;
+  }
+
+  /// <summary>
   /// Return true if the current iteration pointer references a valid, and
   /// recyclable, data structure.
   /// </summary>
   GLM_INLINE bool can_recycle() {
 #if defined(LUAGLM_RECYCLE)
-    const int n = (recycle_top == 0) ? (recycle_top = _gettop(L)) : recycle_top;
+    const int n = top_for_recycle();
     return (idx < 0 || idx <= n);
 #else
     return false;
@@ -467,7 +474,8 @@ struct gLuaBase {
   /// <summary>
   /// Attempt to push the number as an integer; falling back to number otherwise
   /// </summary>
-  LUA_TRAIT_QUALIFIER int PushNumInt(const gLuaBase &LB, lua_Number d) {
+  LUA_TRAIT_QUALIFIER int PushNumInt(const gLuaBase &LB, glm_Number gd) {
+    const lua_Number d = static_cast<lua_Number>(gd);
     lua_Integer n = 0;
     if (lua_numbertointeger(d, &n)) /* does 'd' fit in an integer? */
       lua_pushinteger(LB.L, n); /* result is integer */
@@ -1684,7 +1692,6 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 #if defined(LUAGLM_SAFELIB)
   #define GLM_BINDING_BEGIN         \
     gLuaBase LB(L);                 \
-    /* Ensure LB.top() is cached */ \
     const int _stop = LB.top();     \
     try {
 

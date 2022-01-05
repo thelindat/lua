@@ -63,7 +63,7 @@
 /* Set a GLM constant value into the table on top of the stack. */
 #define GLM_CONSTANT(L, Name)                             \
   LUA_MLM_BEGIN                                           \
-  lua_pushnumber((L), GLM_NAMESPACE(Name)<glm_Number>()); \
+  lua_pushnumber((L), GLM_NAMESPACE(Name)<lua_Number>()); \
   lua_setfield((L), -2, "" REG_STR(Name));                \
   LUA_MLM_END
 
@@ -234,10 +234,10 @@ extern "C" {
     GLM_CONSTANT(L, epsilon);
 #endif
     GLM_CONSTANT(L, pi); /* lmathlib */
-    lua_pushnumber(L, glm::two_pi<glm_Number>()); lua_setfield(L, -2, "tau");
-    lua_pushnumber(L, glm::epsilon<glm_Number>()); lua_setfield(L, -2, "eps");
-    lua_pushnumber(L, static_cast<glm_Number>(glm::epsilon<glm_Float>())); lua_setfield(L, -2, "feps");
-    lua_pushnumber(L, std::numeric_limits<glm_Number>::infinity()); lua_setfield(L, -2, "huge");
+    lua_pushnumber(L, glm::two_pi<lua_Number>()); lua_setfield(L, -2, "tau");
+    lua_pushnumber(L, glm::epsilon<lua_Number>()); lua_setfield(L, -2, "eps");
+    lua_pushnumber(L, static_cast<lua_Number>(glm::epsilon<glm_Float>())); lua_setfield(L, -2, "feps");
+    lua_pushnumber(L, std::numeric_limits<lua_Number>::infinity()); lua_setfield(L, -2, "huge");
     lua_pushinteger(L, std::numeric_limits<lua_Integer>::max()); lua_setfield(L, -2, "maxinteger");
     lua_pushinteger(L, std::numeric_limits<lua_Integer>::min()); lua_setfield(L, -2, "mininteger");
     lua_pushinteger(L, FP_INFINITE); lua_setfield(L, -2, "FP_INFINITE"); /* c99 */

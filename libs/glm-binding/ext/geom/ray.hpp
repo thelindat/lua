@@ -49,14 +49,17 @@ namespace glm {
 
     Ray(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
       : pos(position), dir(normalize(direction)) {
+      GLM_GEOM_ASSERT(glm::isNormalized(dir));
     }
 
     Ray(const Line<L, T, Q> &line)
       : pos(line.pos), dir(line.dir) {
+      GLM_GEOM_ASSERT(glm::isNormalized(dir));
     }
 
     Ray(const Ray<L, T, Q> &ray)
       : pos(ray.pos), dir(ray.dir) {
+      GLM_GEOM_ASSERT(glm::isNormalized(dir));
     }
 
     Ray<L, T, Q> &operator=(const Ray<L, T, Q> &ray) {
@@ -93,25 +96,21 @@ namespace glm {
 
   template<typename T, qualifier Q>
   static Ray<3, T, Q> operator*(const mat<3, 3, T, Q> &m, const Ray<3, T, Q> &ray) {
-    GLM_GEOM_ASSUME(isNormalized(ray.dir, epsilon<T>()), ray);
     return Ray<3, T, Q>(m * ray.pos, m * ray.dir);
   }
 
   template<typename T, qualifier Q>
   static Ray<3, T, Q> operator*(const mat<3, 4, T, Q> &m, const Ray<3, T, Q> &ray) {
-    GLM_GEOM_ASSUME(isNormalized(ray.dir, epsilon<T>()), ray);
     return Ray<3, T, Q>(m * ray.pos, m * ray.dir);
   }
 
   template<typename T, qualifier Q>
   static Ray<3, T, Q> operator*(const mat<4, 3, T, Q> &m, const Ray<3, T, Q> &ray) {
-    GLM_GEOM_ASSUME(isNormalized(ray.dir, epsilon<T>()), ray);
     return Ray<3, T, Q>(transformPos(m, ray.pos), transformDir(m, ray.dir));
   }
 
   template<typename T, qualifier Q>
   static Ray<3, T, Q> operator*(const mat<4, 4, T, Q> &m, const Ray<3, T, Q> &ray) {
-    GLM_GEOM_ASSUME(isNormalized(ray.dir, epsilon<T>()), ray);
     return Ray<3, T, Q>(transformPos(m, ray.pos), transformDir(m, ray.dir));
   }
 
@@ -186,7 +185,6 @@ namespace glm {
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER vec<L, T, Q> getPoint(const Ray<L, T, Q> &ray, T d) {
-    GLM_GEOM_ASSUME(isNormalized(ray.dir, epsilon<T>()), ray.pos);
     return ray.pos + d * ray.dir;
   }
 

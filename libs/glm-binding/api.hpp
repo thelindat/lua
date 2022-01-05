@@ -308,7 +308,7 @@ TRAITS_DEFN(forwardLH, glm::unit::forwardLH<glm_Float>)
 TRAITS_DEFN(forwardRH, glm::unit::forwardRH<glm_Float>)
 GLM_BINDING_QUALIFIER(unpack) {
   GLM_BINDING_BEGIN
-  const int n = LB.top();
+  const int n = LB.top_for_recycle();
   for (; LB.idx <= n; ++LB.idx) {
     const TValue *_tv = glm_i2v(LB.L, LB.idx);
     switch (ttype(_tv)) {
@@ -1365,7 +1365,7 @@ GLM_BINDING_QUALIFIER(clamp) {
 
 GLM_BINDING_QUALIFIER(min) { /* Ported: static int math_min (lua_State *L) */
   GLM_BINDING_BEGIN
-  const int n = LB.top();  /* number of arguments */
+  const int n = LB.top_for_recycle();  /* number of arguments */
   luaL_argcheck(L, n >= 1, 1, "value expected");
 
   const TValue *o = glm_i2v(LB.L, LB.idx);
@@ -1384,7 +1384,7 @@ GLM_BINDING_QUALIFIER(min) { /* Ported: static int math_min (lua_State *L) */
 
 GLM_BINDING_QUALIFIER(max) { /* Ported: static int math_max (lua_State *L) */
   GLM_BINDING_BEGIN
-  const int n = LB.top();  /* number of arguments */
+  const int n = LB.top_for_recycle();  /* number of arguments */
   luaL_argcheck(L, n >= 1, 1, "value expected");
 
   const TValue *o = glm_i2v(LB.L, LB.idx);
@@ -1718,9 +1718,17 @@ INTEGER_NUMBER_VECTOR_DEFN(compAdd, glm::compAdd, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMax, glm::compMax, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMin, glm::compMin, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMul, glm::compMul, LAYOUT_UNARY)
-/* @TODO: Allow Normalize/Scale for different types, e.g., u8, i8, u16, i16 */
 INTEGER_VECTOR_DEFN(compNormalize, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm_Integer)
-INTEGER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY, glm_Float)
+NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
+/* glm::compNormalize/glm::compScale for different types, e.g., u8, i8, u16, i16 */
+//INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
+//INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
+//INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
+//INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
+//NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
+//NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
+//NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
+//NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_EASING_HPP)
@@ -2105,6 +2113,7 @@ GLM_BINDING_QUALIFIER(rotate) {
 
 //TRAITS_DEFN(rotate_slow, glm::rotate_slow, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
 TRAITS_LAYOUT_DEFN(rotateFromTo, glm::rotateFromTo, LAYOUT_BINARY, gLuaVec3<>)  // LUA_QUATERNION_EXTENSIONS
+QUAT_DEFN(shortest_equivalent, glm::shortest_equivalent, LAYOUT_UNARY)
 ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
 ROTATION_MATRIX_DEFN(transformPos, glm::transformPos, LAYOUT_UNARY, gLuaVec3<>)
 TRAITS_DEFN(transformPosPerspective, glm::transformPosPerspective, gLuaMat4x4<>, gLuaVec3<>)

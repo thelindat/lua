@@ -363,7 +363,6 @@ namespace glm {
   GLM_GEOM_QUALIFIER int intersectLine(const Line<L, T, Q> &line, const Sphere<L, T, Q> &sphere, T &d1, T &d2) {
     d1 = std::numeric_limits<T>::infinity();
     d2 = -std::numeric_limits<T>::infinity();
-    GLM_GEOM_ASSUME(isNormalized(line.dir, epsilon<T>()), 0);
 
     const vec<L, T, Q> a = line.pos - sphere.pos;
     const T radSq = sphere.r * sphere.r;

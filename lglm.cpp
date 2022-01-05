@@ -105,8 +105,6 @@ extern LUA_API_LINKAGE {
 **
 **    type_quat_simd.inl:94:11: error: could not convert ‘Result’ from
 **    ‘glm::vec<4, float, glm::aligned_highp>’ to ‘glm::qua<float, glm::aligned_highp>’
-**
-** @TODO: __arm__/_M_ARM
 */
 #undef LUAGLM_ALIGNED
 #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
@@ -476,9 +474,6 @@ int glmVec_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
     }
   }
 
-  // @TODO: Document glm::equal(V, V2) taking priority over any custom method
-  // for the vector type. The intent is to still allow custom __eq declarations
-  // to include desired epsilon or ULPS.
   if (result == false && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
     if (!notm(tm)) {
@@ -846,8 +841,6 @@ int glmMat_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
     }
   }
 
-  // @TODO: Document glm::equal(M, M2) taking priority over any custom method
-  // for the matrix type.
   if (!result && L != GLM_NULLPTR) {
     const TValue *tm = luaT_gettmbyobj(L, o1, TM_EQ);
     if (!notm(tm)) {

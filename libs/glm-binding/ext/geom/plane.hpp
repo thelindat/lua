@@ -49,15 +49,17 @@ namespace glm {
 
     Plane(const point_type &direction, T offset)
       : normal(direction), d(offset) {
+      GLM_GEOM_ASSERT(glm::isNormalized(normal));
     }
 
-    Plane(const point_type &point, const point_type &normal_) {
-      normal = normal_;
-      d = dot(point, normal);
+    Plane(const point_type &point, const point_type &normal_)
+      : normal(normal_), d(dot(point, normal)) {
+      GLM_GEOM_ASSERT(glm::isNormalized(normal));
     }
 
     Plane(const Plane<L, T, Q> &plane)
       : normal(plane.normal), d(plane.d) {
+      GLM_GEOM_ASSERT(glm::isNormalized(normal));
     }
 
     Plane<L, T, Q> &operator=(const Plane<L, T, Q> &plane) {
@@ -706,8 +708,9 @@ namespace glm {
 
     if (denom != T(0)) {  // @TODO: notEqual(denom, T(0), epsilon<T>())
       d = (planeD - dot(planeNormal, linePos)) / denom;
-      if (abs(d) < epsilon<T>())
+      if (abs(d) < epsilon<T>()) {
         return true;
+      }
     }
 
     d = T(0);
