@@ -536,7 +536,7 @@ do
     local co = coroutine.create(f)
     assert(coroutine.resume(co, co))
   end
-  -- Now, thread and closure are not reacheable any more.
+  -- Now, thread and closure are not reachable any more.
   collectgarbage()
   assert(collected)
   collectgarbage("restart")

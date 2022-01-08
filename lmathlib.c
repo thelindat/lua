@@ -888,7 +888,7 @@ static const luaL_Reg mathlib[] = {
   { "trunc", math_trunc },
 #endif
 #endif
-  /* grit-lua compatbility */
+  /* grit-lua compatibility */
   { "clamp", glmVec_clamp },
   /* placeholders */
   {"random", NULL},

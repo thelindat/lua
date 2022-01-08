@@ -418,7 +418,7 @@ namespace glm {
   GLM_GEOM_QUALIFIER bool closestPointLineLine(const vec<L, T, Q> &v0, const vec<L, T, Q> &v1, const vec<L, T, Q> &v2, const vec<L, T, Q> &v3, T &d1, T &d2) {
     const bool isNullV1 = isNull(v1, epsilon<T>());
     const bool isNullV3 = isNull(v3, epsilon<T>());
-    if (isNullV1 || isNullV3) {  // atleast one line is degenerate
+    if (isNullV1 || isNullV3) {  // at least one line is degenerate
       d1 = isNullV1 ? T(0) : T(0.5);
       d2 = isNullV3 ? T(0) : T(0.5);
       return false;

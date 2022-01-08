@@ -113,7 +113,7 @@ do
   errorcodes("ab\xff")
   errorcodes("\u{110000}")
 
-  -- calling interation function with invalid arguments
+  -- calling iteration function with invalid arguments
   local f = utf8.codes("")
   assert(f("", 2) == nil)
   assert(f("", -1) == nil)

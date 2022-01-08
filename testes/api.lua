@@ -811,7 +811,7 @@ F = function (x)
     assert(T.udataval(A) == B)
     debug.getmetatable(A)    -- just access it
   end
-  A = x   -- ressurect userdata
+  A = x   -- resurrect userdata
   B = udval
   return 1,2,3
 end

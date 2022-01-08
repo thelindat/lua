@@ -1722,7 +1722,7 @@ LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
 /// and consecutive 'x', 'y', 'z', and 'w' fields. With 'v' as an optional
 /// vector pointer that is populated with the contents from the table.
 ///
-/// Returning thes number of dimensions of the resultant vector; zero on failure.
+/// Returning the number of dimensions of the resultant vector; zero on failure.
 ///
 /// @NOTE: Function considered deprecated. The previous idea that tables can be
 /// implicit vector types does not "mesh" well with the glm binding library.
