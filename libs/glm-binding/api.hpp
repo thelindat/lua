@@ -242,7 +242,7 @@
     }  LUAGLM_FALLTHROUGH;                                                                              \
     case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                                \
     case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                           \
-    case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaTrait<lua_Number>, gLuaTrait<lua_Number>); break; \
+    case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaTrait<glm_Number>, gLuaTrait<glm_Number>); break; \
     case LUA_VVECTOR2: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec2<>::fast, gLuaVec2<>::fast); break;          \
     case LUA_VVECTOR3: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec3<>::fast, gLuaVec3<>::fast); break;          \
     case LUA_VVECTOR4: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec4<>::fast, gLuaVec4<>::fast); break;          \
@@ -287,7 +287,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VSHRSTR:
       case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
-      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaTrait<lua_Number>::fast); break;
+      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaTrait<glm_Number>::fast); break;
       case LUA_VVECTOR2: LAYOUT_HASH(LB, std::hash, gLuaVec2<>::fast); break;
       case LUA_VVECTOR3: LAYOUT_HASH(LB, std::hash, gLuaVec3<>::fast); break;
       case LUA_VVECTOR4: LAYOUT_HASH(LB, std::hash, gLuaVec4<>::fast); break;

@@ -869,6 +869,9 @@ template<bool FastPath> struct gLuaTrait<unsigned long int, FastPath> : gLuaPrim
 template<bool FastPath> struct gLuaTrait<unsigned long long int, FastPath> : gLuaPrimitive<unsigned long long int, FastPath> { };
 template<bool FastPath> struct gLuaTrait<float, FastPath> : gLuaPrimitive<float, FastPath> { };
 template<bool FastPath> struct gLuaTrait<double, FastPath> : gLuaPrimitive<double, FastPath> { };
+#if 0 && LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+template<bool FastPath> struct gLuaTrait<long double, FastPath> : gLuaPrimitive<long double, FastPath> { };
+#endif
 
 template<bool FastPath>
 struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const char *> {
