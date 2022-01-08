@@ -68,6 +68,17 @@ extern LUA_API_LINKAGE {
 #endif
 
 /*
+@@ GLM_NOEXCEPT noexcept wrapper
+*/
+#if !defined(GLM_NOEXCEPT)
+  #if defined(GLM_CXX11_NOEXCEPT)
+    #define GLM_NOEXCEPT noexcept
+  #else
+    #define GLM_NOEXCEPT
+  #endif
+#endif
+
+/*
 @@ LUAGLM_FALLTHROUGH Macro for informing the compiler a fallthrough is intentional.
 */
 #if LUAGLM_HAS_CPP_ATTRIBUTE(fallthrough) && !defined(__INTEL_COMPILER)
@@ -265,10 +276,6 @@ struct gLuaTrait;
 ///
 /// A benefit to this approach is to allow the quick creation of geometric
 /// structures that does not require additional userdata/metatable definitions.
-///
-/// @UnifiedRand: @TODO: Interface for generating random numbers to replace
-/// std::rand(). This allows gLuaBase to invoke math_random instead of having to
-/// maintain multiple random states. Consider: https://en.cppreference.com/w/cpp/numeric/random
 /// </summary>
 struct gLuaBase {
   lua_State *L;  // Current lua state.
@@ -307,25 +314,49 @@ struct gLuaBase {
     idx = top() + 1;
   }
 
-  /// <summary>
-  /// Temporary math.random() hook; see @UnifiedRand.
-  /// </summary>
-  lua_Number rand() {
-    const int _n = top();  // Get cached top;
-    lua_checkstack(L, 3);
-    if (lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE) == LUA_TTABLE) {  // [..., load_tab]
-      if (lua_getfield(L, -1, LUA_MATHLIBNAME) == LUA_TTABLE) {  // [..., load_tab, math_tab]
-        if (lua_getfield(L, -1, "random") == LUA_TFUNCTION) {  // [..., load_tab, math_tab, rand_func]
-          lua_call(L, 0, 1);
-          lua_Number result = lua_tonumber(L, -1);  // [..., load_tab, math_tab, result]
-          lua_pop(L, 3);
-          return result;
-        }
-      }
-    }
+  /* std::random_device analogue using math.random */
+  using result_type = unsigned int;
 
-    lua_pop(L, top() - _n);  // Fallback to std::rand() if lmathlib has not been loaded
-    return cast_num(std::rand()) / cast_num((RAND_MAX));
+  /// <summary>
+  /// Return the smallest possible value in the output range.
+  /// </summary>
+  static constexpr result_type min() {
+    return 0;
+  }
+
+  /// <summary>
+  /// Return the largest possible value in the output range.
+  /// </summary>
+  static constexpr result_type max() {
+    return static_cast<result_type>(-1);
+  }
+
+  /// <summary>
+  /// Return the entropy estimate for the non-deterministic random number generator.
+  /// </summary>
+  double entropy() const GLM_NOEXCEPT {
+    return 32.0;
+  }
+
+  /// <summary>
+  /// Advances the engine's state and returns the generated value. For
+  /// performance reasons, this implementation requires lua_upvalueindex(1) to
+  /// reference math.random,
+  /// </summary>
+  result_type operator()() {
+    result_type result = 0;
+    lua_checkstack(L, 2);
+    lua_pushvalue(L, lua_upvalueindex(1));  // [..., rand_func]
+    if (lua_isfunction(L, -1)) {
+      lua_pushunsigned(L, max());  // [..., rand_func, upper limit]
+      lua_call(L, 1, 1);  // [..., result]
+      result = static_cast<result_type>(lua_tounsigned(L, -1));
+    }
+    else { // Otherwise, fallback to std::rand if lmathlib has not been cached.
+      result = static_cast<result_type>(cast_num(max()) * (cast_num(std::rand()) / cast_num(RAND_MAX)));
+    }
+    lua_pop(L, 1);  // [...]
+    return result;
   }
 
   /// <summary>

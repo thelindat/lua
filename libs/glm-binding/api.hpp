@@ -101,6 +101,7 @@
 #define VECTOR_RELATIONAL_HPP
 #if defined(LUAGLM_INCLUDE_ALL)
   #define PACKING_HPP
+  //#define STD_RANDOM
 #endif
 
 #if defined(LUAGLM_INCLUDE_ALL) || defined(LUAGLM_INCLUDE_EXT)
@@ -1598,12 +1599,6 @@ TRAITS_DEFN(circularRand, glm::circularRand, gRandValue)
 TRAITS_DEFN(diskRand, glm::diskRand, gRandValue)
 TRAITS_DEFN(gaussRand, glm::gaussRand, gRandValue, gRandValue)
 TRAITS_DEFN(sphericalRand, glm::sphericalRand, gRandValue)
-#if defined(_DEBUG)  // Temporary; see gLuaBase documentation
-GLM_BINDING_QUALIFIER(srand) {
-  std::srand(static_cast<unsigned>(lua_tointeger(L, 1)));
-  return 0;
-}
-#endif
 #endif
 
 #if defined(GTC_RECIPROCAL_HPP)
@@ -2243,6 +2238,62 @@ NUMBER_VECTOR_DEFN(pingPong, glm::pingPong, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
 #endif
 
+/* }================================================================== */
+
+/*
+** {==================================================================
+** <random>
+** ===================================================================
+*/
+// @TODO: sanitize arguments, e.g., uniform_real_distribution requires:
+//  min <= max && (0 <= min || max <= min + (numeric_limits<T>::max)()
+#if defined(STD_RANDOM) && GLM_HAS_CXX11_STL
+#include <random>
+
+#define RAND_TRAIT(LB, F, A, ...) RANDOM_DEVICE(LB, F, A) /* Avoid /Zc:preprocessor- headache */
+#define RANDOM_DEVICE(...) VA_CALL(RANDOM_DEVICE, __VA_ARGS__) /* Mapping to <random> structures */
+#define RANDOM_DEVICE1(LB) return gLuaBase::Push(LB, 0) /* zero */
+#define RANDOM_DEVICE2(LB, F) return gLuaBase::Push(LB, F()(LB)) /* std::rand_func<>()(LB) */
+
+/* std::rand_func<>(a)(LB) */
+#define RANDOM_DEVICE3(LB, F, A)                                 \
+  LUA_MLM_BEGIN                                                  \
+  if (A::Is((LB).L, (LB).idx))                                   \
+    return gLuaBase::Push(LB, F(A::Next((LB).L, (LB).idx))(LB)); \
+  return gLuaBase::Push(LB, F()(LB));                            \
+  LUA_MLM_END
+
+/* std::rand_func<>(a, b)(LB) */
+#define RANDOM_DEVICE4(LB, F, A, B)                                  \
+  LUA_MLM_BEGIN                                                      \
+  if (A::Is((LB).L, (LB).idx) && B::Is((LB).L, (LB).idx + 1)) {      \
+    const A::type _a = A::Next((LB).L, (LB).idx);                    \
+    return gLuaBase::Push(LB, F(_a, B::Next((LB).L, (LB).idx))(LB)); \
+  }                                                                  \
+  return gLuaBase::Push(LB, F()(LB));                                \
+  LUA_MLM_END
+
+LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaInteger)
+LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, gLuaTrait<double>)
+LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaTrait<double>)
+LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaTrait<double>)
+LAYOUT_DEFN(geometric, std::geometric_distribution<lua_Integer>, RAND_TRAIT, gLuaTrait<double>)
+LAYOUT_DEFN(poisson, std::poisson_distribution<lua_Integer>, RAND_TRAIT, gLuaTrait<double>)
+LAYOUT_DEFN(exponential, std::exponential_distribution<glm_Number>, RAND_TRAIT, gLuaNumber)
+LAYOUT_DEFN(gamma, std::gamma_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(weibull, std::weibull_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(extreme_value, std::extreme_value_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(normal, std::normal_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(lognormal, std::lognormal_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(chi_squared, std::chi_squared_distribution<glm_Number>, RAND_TRAIT, gLuaNumber)
+LAYOUT_DEFN(cauchy, std::cauchy_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(fisher_f, std::fisher_f_distribution<glm_Number>, RANDOM_DEVICE, gLuaNumber, gLuaNumber)
+LAYOUT_DEFN(student_t, std::student_t_distribution<glm_Number>, RAND_TRAIT, gLuaNumber)
+// discrete
+// piecewise_constant_distribution
+// piecewise_linear_distribution
+#endif
 /* }================================================================== */
 
 #endif

@@ -152,6 +152,8 @@ static const luaL_Reg luaglm_lib[] = {
 #endif
   /* Metamethods */
   { "__index", GLM_NULLPTR },
+  /* RNG API */
+  { "distribution", GLM_NULLPTR },
   /* Geometry API */
 #if defined(LUAGLM_INCLUDE_GEOM)
   { "aabb", GLM_NULLPTR },
@@ -173,6 +175,30 @@ static const luaL_Reg luaglm_lib[] = {
   { "_DESCRIPTION", GLM_NULLPTR },
   { "_GLM_VERSION", GLM_NULLPTR },
   { "_GLM_SIMD", GLM_NULLPTR },
+  { GLM_NULLPTR, GLM_NULLPTR }
+};
+
+/* Functions with math.rand() upvalue */
+static const luaL_Reg luaglm_randfuncs[] = {
+#if defined(STD_RANDOM) && GLM_HAS_CXX11_STL
+  GLM_LUA_REG(uniform_int),
+  GLM_LUA_REG(uniform_real),
+  GLM_LUA_REG(bernoulli),
+  GLM_LUA_REG(binomial),
+  GLM_LUA_REG(negative_binomial),
+  GLM_LUA_REG(geometric),
+  GLM_LUA_REG(poisson),
+  GLM_LUA_REG(exponential),
+  GLM_LUA_REG(gamma),
+  GLM_LUA_REG(weibull),
+  GLM_LUA_REG(extreme_value),
+  GLM_LUA_REG(normal),
+  GLM_LUA_REG(lognormal),
+  GLM_LUA_REG(chi_squared),
+  GLM_LUA_REG(cauchy),
+  GLM_LUA_REG(fisher_f),
+  GLM_LUA_REG(student_t),
+#endif
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -268,6 +294,16 @@ extern "C" {
         lua_getfield(L, -1, "type"); lua_setfield(L, -4, "type");
         lua_getfield(L, -1, "random"); lua_setfield(L, -4, "random");
         lua_getfield(L, -1, "randomseed"); lua_setfield(L, -4, "randomseed");
+
+        /* distribution functions prefer math.random as an upvalue */
+        luaL_newlibtable(L, luaglm_randfuncs);  // [..., glm, load_tab, math_tab, dist_tab]
+        if (lua_getfield(L, -2, "random") == LUA_TFUNCTION) {  // [..., glm, load_tab, math_tab, dist_tab, random]
+          luaL_setfuncs(L, luaglm_randfuncs, 1);  // [..., glm, load_tab, math_tab, dist_tab]
+        }
+        else {
+          lua_pop(L, 1);  // [..., glm, load_tab, math_tab, dist_tab]
+        }
+        lua_setfield(L, -4, "distribution");  // [..., glm, load_tab, math_tab]
       }
       lua_pop(L, 1);
     }

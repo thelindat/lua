@@ -396,10 +396,6 @@ GLM_LUA_REG(diskRand),
 GLM_LUA_REG(gaussRand),
 GLM_LUA_REG(linearRand),
 GLM_LUA_REG(sphericalRand),
-#if defined(_DEBUG)
-/* Temporary */
-GLM_LUA_REG(srand),
-#endif
 #endif
 
 #if defined(GTC_RECIPROCAL_HPP)
