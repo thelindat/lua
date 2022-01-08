@@ -45,13 +45,14 @@
 **
 ** Experimental:
 @@ LUAGLM_NUMBER_ARGS Control where the lua_Number-to-float typecasting occurs
-**  during the binding to *float-only* functions: parsing parameters (default)
-**  or pushing result, e.g., glm::eulerAngleXYZ.
+**  when binding to *float-only* functions:
+**    1. parsing parameters (default);
+**    2. pushing result, e.g., glm::eulerAngleXYZ.
 @@ LUAGLM_DRIFT Implicitly normalize parameters that expect direction vectors
 **  and quaternions.
 @@ LUAGLM_INLINED_TEMPLATES Enable inlined-template resolution. Function names
 **  include object types to be parsed, e.g., F_P1P2, up to template resolution.
-**  TODO: Include inlined binding examples using C++14-isms.
+**  @TODO: Include inlined binding examples using C++14-isms.
 */
 #include "bindings.hpp"
 #include "iterators.hpp"
@@ -230,26 +231,26 @@
 ** Missing: "vec<L, int, Q> const& ULPs". The current design makes it impossible
 ** to differentiate between a vector of eps values and ULP values.
 */
-#define LAYOUT_EQUAL(LB, F, ...)                                                               \
-  LUA_MLM_BEGIN                                                                                \
-  const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                               \
-  switch (ttypetag(_tv)) {                                                                     \
-    case LUA_VNUMINT: {                                                                        \
-      if (gLuaInteger::Is((LB).L, (LB).idx + 1))                                               \
-        VA_CALL(BIND_FUNC, LB, F, gLuaInteger::fast, gLuaInteger);                             \
-    }  LUAGLM_FALLTHROUGH;                                                                     \
-    case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                       \
-    case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                  \
-    case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaNumber, gLuaNumber); break;              \
-    case LUA_VVECTOR2: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec2<>::fast, gLuaVec2<>::fast); break; \
-    case LUA_VVECTOR3: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec3<>::fast, gLuaVec3<>::fast); break; \
-    case LUA_VVECTOR4: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec4<>::fast, gLuaVec4<>::fast); break; \
-    case LUA_VQUAT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaQuat<>::fast, gLuaVec4<>::fast); break;    \
-    case LUA_VMATRIX: PARSE_MATRIX(LB, mvalue_dims(_tv), F, LAYOUT_MATRIX_EQUAL); break;       \
-    default:                                                                                   \
-      break;                                                                                   \
-  }                                                                                            \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);        \
+#define LAYOUT_EQUAL(LB, F, ...)                                                                        \
+  LUA_MLM_BEGIN                                                                                         \
+  const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                                        \
+  switch (ttypetag(_tv)) {                                                                              \
+    case LUA_VNUMINT: {                                                                                 \
+      if (gLuaInteger::Is((LB).L, (LB).idx + 1))                                                        \
+        VA_CALL(BIND_FUNC, LB, F, gLuaInteger::fast, gLuaInteger);                                      \
+    }  LUAGLM_FALLTHROUGH;                                                                              \
+    case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                                \
+    case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                           \
+    case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaTrait<lua_Number>, gLuaTrait<lua_Number>); break; \
+    case LUA_VVECTOR2: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec2<>::fast, gLuaVec2<>::fast); break;          \
+    case LUA_VVECTOR3: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec3<>::fast, gLuaVec3<>::fast); break;          \
+    case LUA_VVECTOR4: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec4<>::fast, gLuaVec4<>::fast); break;          \
+    case LUA_VQUAT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaQuat<>::fast, gLuaVec4<>::fast); break;             \
+    case LUA_VMATRIX: PARSE_MATRIX(LB, mvalue_dims(_tv), F, LAYOUT_MATRIX_EQUAL); break;                \
+    default:                                                                                            \
+      break;                                                                                            \
+  }                                                                                                     \
+  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);                 \
   LUA_MLM_END
 
 /* glm/gtx/string_cast.hpp */
@@ -263,15 +264,15 @@ GLM_BINDING_QUALIFIER(to_string) {
 }
 
 /* glm/ext/scalar_relational.hpp, glm/ext/vector_common.hpp, glm/ext/vector_relational.hpp, glm/ext/quaternion_relational.hpp, glm/ext/matrix_relational.hpp */
-TRAITS_LAYOUT_DEFN(equal, glm::equal, LAYOUT_EQUAL, void)
-TRAITS_LAYOUT_DEFN(notEqual, glm::notEqual, LAYOUT_EQUAL, void)
-TRAITS_LAYOUT_DEFN(all_equal, glm::all_equal, LAYOUT_EQUAL, void)  // LUA_VECTOR_EXTENSIONS
-TRAITS_LAYOUT_DEFN(any_notequal, glm::any_notequal, LAYOUT_EQUAL, void)  // LUA_VECTOR_EXTENSIONS
+LAYOUT_DEFN(equal, glm::equal, LAYOUT_EQUAL, void)
+LAYOUT_DEFN(notEqual, glm::notEqual, LAYOUT_EQUAL, void)
+LAYOUT_DEFN(all_equal, glm::all_equal, LAYOUT_EQUAL, void)  // LUA_VECTOR_EXTENSIONS
+LAYOUT_DEFN(any_notequal, glm::any_notequal, LAYOUT_EQUAL, void)  // LUA_VECTOR_EXTENSIONS
 #if GLM_HAS_CXX11_STL
-#define LAYOUT_HASH(LB, F, Traits, ...)       \
-  LUA_MLM_BEGIN                               \
-  F<Traits::type> hash;                       \
-  gLuaBase::Push(LB, hash(Traits::Next(LB))); \
+#define LAYOUT_HASH(LB, F, Traits, ...)                     \
+  LUA_MLM_BEGIN                                             \
+  F<Traits::type> hash;                                     \
+  gLuaBase::Push(LB, hash(Traits::Next((LB).L, (LB).idx))); \
   LUA_MLM_END
 
 GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
@@ -285,7 +286,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VSHRSTR:
       case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
-      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumber::fast); break;
+      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaTrait<lua_Number>::fast); break;
       case LUA_VVECTOR2: LAYOUT_HASH(LB, std::hash, gLuaVec2<>::fast); break;
       case LUA_VVECTOR3: LAYOUT_HASH(LB, std::hash, gLuaVec3<>::fast); break;
       case LUA_VVECTOR4: LAYOUT_HASH(LB, std::hash, gLuaVec4<>::fast); break;
@@ -507,22 +508,22 @@ GLM_BINDING_QUALIFIER(mat_negate) {
 */
 
 #if defined(INTEGER_HPP)
-#define LAYOUT_ADD_CARRY(LB, F, Tr, ...)  \
-  LUA_MLM_BEGIN                           \
-  const Tr::type a = Tr::Next(LB);        \
-  const Tr::type b = Tr::safe::Next(LB);  \
-  Tr::type carry = Tr::zero();            \
-  TRAITS_PUSH(LB, F(a, b, carry), carry); \
+#define LAYOUT_ADD_CARRY(LB, F, Tr, ...)               \
+  LUA_MLM_BEGIN                                        \
+  const Tr::type a = Tr::Next((LB).L, (LB).idx);       \
+  const Tr::type b = Tr::safe::Next((LB).L, (LB).idx); \
+  Tr::type carry = Tr::zero();                         \
+  TRAITS_PUSH(LB, F(a, b, carry), carry);              \
   LUA_MLM_END
 
-#define LAYOUT_MUL_EXTENDED(LB, F, Tr, ...) \
-  LUA_MLM_BEGIN                             \
-  const Tr::type a = Tr::Next(LB);          \
-  const Tr::type b = Tr::safe::Next(LB);    \
-  Tr::type lsb = Tr::zero();                \
-  Tr::type msb = Tr::zero();                \
-  F(a, b, lsb, msb);                        \
-  TRAITS_PUSH(LB, lsb, msb);                \
+#define LAYOUT_MUL_EXTENDED(LB, F, Tr, ...)            \
+  LUA_MLM_BEGIN                                        \
+  const Tr::type a = Tr::Next((LB).L, (LB).idx);       \
+  const Tr::type b = Tr::safe::Next((LB).L, (LB).idx); \
+  Tr::type lsb = Tr::zero();                           \
+  Tr::type msb = Tr::zero();                           \
+  F(a, b, lsb, msb);                                   \
+  TRAITS_PUSH(LB, lsb, msb);                           \
   LUA_MLM_END
 
 #if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
@@ -686,8 +687,8 @@ NUMBER_VECTOR_DEFN(float_distance, glm::float_distance, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(next_float, glm::next_float, LAYOUT_NEXT_FLOAT)
 NUMBER_VECTOR_DEFN(prev_float, glm::prev_float, LAYOUT_NEXT_FLOAT)
 #else
-TRAITS_LAYOUT_DEFN(next_float, glm::next_float, LAYOUT_NEXT_FLOAT, gLuaNumber)
-TRAITS_LAYOUT_DEFN(prev_float, glm::prev_float, LAYOUT_NEXT_FLOAT, gLuaNumber)
+LAYOUT_DEFN(next_float, glm::next_float, LAYOUT_NEXT_FLOAT, gLuaNumber)
+LAYOUT_DEFN(prev_float, glm::prev_float, LAYOUT_NEXT_FLOAT, gLuaNumber)
 #endif
 #endif
 
@@ -700,7 +701,7 @@ TRAITS_LAYOUT_DEFN(prev_float, glm::prev_float, LAYOUT_NEXT_FLOAT, gLuaNumber)
 */
 
 #if defined(EXT_QUATERNION_COMMON_HPP)
-QUAT_DEFN(conjugate, glm::conjugate, LAYOUT_UNARY)
+TRAITS_DEFN(conjugate, glm::conjugate, gLuaQuat<>)
 #endif
 
 #if defined(EXT_QUATERNION_COMMON_HPP) || defined(MATRIX_HPP)
@@ -709,7 +710,8 @@ GLM_BINDING_QUALIFIER(inverse) {
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_SYMMETRIC_MATRIX(LB, glm::inverse, LAYOUT_UNARY);
-  PARSE_NUMBER_VECTOR_QUAT(LB, glm::inverse, LAYOUT_UNARY, LAYOUT_UNARY, LAYOUT_UNARY);
+  else
+    PARSE_NUMBER_VECTOR_QUAT(LB, glm::inverse, LAYOUT_UNARY, LAYOUT_UNARY, LAYOUT_UNARY);
   return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
   GLM_BINDING_END
 }
@@ -719,37 +721,37 @@ ROTATION_MATRIX_DEFN(inverse_transform, glm::inverse_transform, LAYOUT_UNARY)
 
 /* glm/ext/quaternion_trigonometric.hpp */
 #if defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
-QUAT_DEFN(axis, glm::axis, LAYOUT_UNARY)
+TRAITS_DEFN(axis, glm::axis, gLuaQuat<>)
 TRAITS_DEFN(angleAxis, glm::angleAxis, gLuaVec3<>::value_trait, gLuaDir3<>)
 #endif
 
 /* glm/gtc/quaternion.hpp */
 #if defined(GTC_QUATERNION_HPP)
-QUAT_DEFN(eulerAngles, glm::eulerAngles, LAYOUT_UNARY)
-QUAT_DEFN(mat3_cast, glm::mat3_cast, LAYOUT_UNARY)
-QUAT_DEFN(mat4_cast, glm::mat4_cast, LAYOUT_UNARY)
-QUAT_DEFN(pitch, glm::pitch, LAYOUT_UNARY)
-QUAT_DEFN(roll, glm::roll, LAYOUT_UNARY)
-QUAT_DEFN(yaw, glm::yaw, LAYOUT_UNARY)
-TRAITS_LAYOUT_DEFN(quatLookAt, glm::quatLookAt, LAYOUT_BINARY, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(quatLookAtLH, glm::quatLookAtLH, LAYOUT_BINARY, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(quatLookAtRH, glm::quatLookAtRH, LAYOUT_BINARY, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(quatbillboard, glm::quatbillboard, LAYOUT_QUATERNARY, gLuaVec3<>)  // LUA_QUATERNION_EXTENSIONS
-TRAITS_LAYOUT_DEFN(quatbillboardRH, glm::quatbillboardRH, LAYOUT_QUATERNARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(quatbillboardLH, glm::quatbillboardLH, LAYOUT_QUATERNARY, gLuaVec3<>)
+TRAITS_DEFN(eulerAngles, glm::eulerAngles, gLuaQuat<>)
+TRAITS_DEFN(mat3_cast, glm::mat3_cast, gLuaQuat<>)
+TRAITS_DEFN(mat4_cast, glm::mat4_cast, gLuaQuat<>)
+TRAITS_DEFN(pitch, glm::pitch, gLuaQuat<>)
+TRAITS_DEFN(roll, glm::roll, gLuaQuat<>)
+TRAITS_DEFN(yaw, glm::yaw, gLuaQuat<>)
+TRAITS_DEFN(quatLookAt, glm::quatLookAt, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(quatLookAtLH, glm::quatLookAtLH, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(quatLookAtRH, glm::quatLookAtRH, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(quatbillboard, glm::quatbillboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)  // LUA_QUATERNION_EXTENSIONS
+TRAITS_DEFN(quatbillboardRH, glm::quatbillboardRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(quatbillboardLH, glm::quatbillboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 TRAITS_DEFN(quatFromBasis, glm::fromBasis, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
 #endif
 
 /* glm/gtx/quaternion.hpp */
 #if defined(GTX_QUATERNION_HPP)
-QUAT_DEFN(extractRealComponent, glm::extractRealComponent, LAYOUT_UNARY)
-QUAT_DEFN(fastMix, glm::fastMix, LAYOUT_TERNARY_SCALAR)
-QUAT_DEFN(intermediate, glm::intermediate, LAYOUT_TERNARY)
-QUAT_DEFN(shortMix, glm::shortMix, LAYOUT_TERNARY_SCALAR)
-QUAT_DEFN(toMat3, glm::toMat3, LAYOUT_UNARY)
-QUAT_DEFN(toMat4, glm::toMat4, LAYOUT_UNARY)
-QUAT_DEFN(squad, glm::squad, LAYOUT_QUATERNARY, gLuaQuat<>::value_trait)
-TRAITS_LAYOUT_DEFN(rotation, glm::rotation, LAYOUT_BINARY, gLuaVec3<>)
+TRAITS_DEFN(extractRealComponent, glm::extractRealComponent, gLuaQuat<>)
+TRAITS_DEFN(fastMix, glm::fastMix, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>::value_trait)
+TRAITS_DEFN(intermediate, glm::intermediate, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>)
+TRAITS_DEFN(shortMix, glm::shortMix, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>::value_trait)
+TRAITS_DEFN(toMat3, glm::toMat3, gLuaQuat<>)
+TRAITS_DEFN(toMat4, glm::toMat4, gLuaQuat<>)
+TRAITS_DEFN(squad, glm::squad, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>::value_trait)
+TRAITS_DEFN(rotation, glm::rotation, gLuaVec3<>, gLuaVec3<>)
 ROTATION_MATRIX_DEFN(quat_cast, glm::quat_cast, LAYOUT_UNARY)
 TRAITS_DEFN(quat_identity, glm::identity<gLuaQuat<>::type>)
 #endif
@@ -768,6 +770,19 @@ ROTATION_MATRIX_DEFN(rotateNormalizedAxis, glm::rotateNormalizedAxis, LAYOUT_UNA
 */
 
 #if defined(MATRIX_HPP)
+#define LAYOUT_OUTERPRODUCT(LB, F, Tr, ...)                                           \
+  LUA_MLM_BEGIN                                                                       \
+  const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);                                     \
+  switch (ttypetag(_tv2)) {                                                           \
+    case LUA_VVECTOR2: BIND_FUNC(LB, glm::outerProduct, Tr, gLuaVec2<>::fast); break; \
+    case LUA_VVECTOR3: BIND_FUNC(LB, glm::outerProduct, Tr, gLuaVec3<>::fast); break; \
+    case LUA_VVECTOR4: BIND_FUNC(LB, glm::outerProduct, Tr, gLuaVec4<>::fast); break; \
+    default: {                                                                        \
+      break;                                                                          \
+    }                                                                                 \
+  }                                                                                   \
+  LUA_MLM_END
+
 SYMMETRIC_MATRIX_DEFN(determinant, glm::determinant, LAYOUT_UNARY)
 #if defined(LUAGLM_ALIGNED)
 MATRIX_DEFN(matrixCompMult, glm::__matrixCompMult, LAYOUT_BINARY)
@@ -778,41 +793,10 @@ MATRIX_DEFN(transpose, glm::transpose, LAYOUT_UNARY)
 GLM_BINDING_QUALIFIER(outerProduct) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
-  const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
   switch (ttypetag(_tv)) {
-    case LUA_VVECTOR2: {
-      switch (ttypetag(_tv2)) {
-        case LUA_VVECTOR2: BIND_FUNC(LB, glm::outerProduct, gLuaVec2<>::fast, gLuaVec2<>::fast); break;
-        case LUA_VVECTOR3: BIND_FUNC(LB, glm::outerProduct, gLuaVec2<>::fast, gLuaVec3<>::fast); break;
-        case LUA_VVECTOR4: BIND_FUNC(LB, glm::outerProduct, gLuaVec2<>::fast, gLuaVec4<>::fast); break;
-        default: {
-          break;
-        }
-      }
-      break;
-    }
-    case LUA_VVECTOR3: {
-      switch (ttypetag(_tv2)) {
-        case LUA_VVECTOR2: BIND_FUNC(LB, glm::outerProduct, gLuaVec3<>::fast, gLuaVec2<>::fast); break;
-        case LUA_VVECTOR3: BIND_FUNC(LB, glm::outerProduct, gLuaVec3<>::fast, gLuaVec3<>::fast); break;
-        case LUA_VVECTOR4: BIND_FUNC(LB, glm::outerProduct, gLuaVec3<>::fast, gLuaVec4<>::fast); break;
-        default: {
-          break;
-        }
-      }
-      break;
-    }
-    case LUA_VVECTOR4: {
-      switch (ttypetag(_tv2)) {
-        case LUA_VVECTOR2: BIND_FUNC(LB, glm::outerProduct, gLuaVec4<>::fast, gLuaVec2<>::fast); break;
-        case LUA_VVECTOR3: BIND_FUNC(LB, glm::outerProduct, gLuaVec4<>::fast, gLuaVec3<>::fast); break;
-        case LUA_VVECTOR4: BIND_FUNC(LB, glm::outerProduct, gLuaVec4<>::fast, gLuaVec4<>::fast); break;
-        default: {
-          break;
-        }
-      }
-      break;
-    }
+    case LUA_VVECTOR2: LAYOUT_OUTERPRODUCT(LB, glm::outerProduct, gLuaVec2<>::fast); break;
+    case LUA_VVECTOR3: LAYOUT_OUTERPRODUCT(LB, glm::outerProduct, gLuaVec3<>::fast); break;
+    case LUA_VVECTOR4: LAYOUT_OUTERPRODUCT(LB, glm::outerProduct, gLuaVec4<>::fast); break;
     default: {
       break;
     }
@@ -823,60 +807,61 @@ GLM_BINDING_QUALIFIER(outerProduct) {
 #endif
 
 #if defined(EXT_MATRIX_CLIP_SPACE_HPP)
-using gAspect = gLuaBoundedBelow<gLuaFloatOnly, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
-using gFov = gLuaBoundedBelow<gLuaFloatOnly, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
+using gAspect = gLuaBoundedBelow<gLuaCNum, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
+using gFov = gLuaBoundedBelow<gLuaCNum, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
 using gHeight = gFov;  // @GLMAssert: assert(height > static_cast<T>(0));
 using gWidth = gFov;  // @GLMAssert: assert(width > static_cast<T>(0));
-TRAITS_LAYOUT_DEFN(frustum, glm::frustum, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumLH, glm::frustumLH, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumLH_NO, glm::frustumLH_NO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumLH_ZO, glm::frustumLH_ZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumNO, glm::frustumNO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumRH, glm::frustumRH, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumRH_NO, glm::frustumRH_NO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumRH_ZO, glm::frustumRH_ZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(frustumZO, glm::frustumZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(infinitePerspective, glm::infinitePerspective, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(infinitePerspectiveLH, glm::infinitePerspectiveLH, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(infinitePerspectiveRH, glm::infinitePerspectiveRH, LAYOUT_TERNARY, gLuaFloatOnly)
+TRAITS_DEFN(frustum, glm::frustum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumLH, glm::frustumLH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumLH_NO, glm::frustumLH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumLH_ZO, glm::frustumLH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumNO, glm::frustumNO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumRH, glm::frustumRH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumRH_NO, glm::frustumRH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumRH_ZO, glm::frustumRH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(frustumZO, glm::frustumZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(infinitePerspective, glm::infinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(infinitePerspectiveLH, glm::infinitePerspectiveLH, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(infinitePerspectiveRH, glm::infinitePerspectiveRH, gLuaCNum, gLuaCNum, gLuaCNum)
 GLM_BINDING_QUALIFIER(ortho) {
   GLM_BINDING_BEGIN
-  if (gLuaFloatOnly::Is(LB.L, LB.idx + 4) && gLuaFloatOnly::Is(LB.L, LB.idx + 5))
-    LAYOUT_SENARY(LB, glm::ortho, gLuaFloatOnly);
-  LAYOUT_QUATERNARY(LB, glm::ortho, gLuaFloatOnly);
+  if (gLuaCNum::Is(LB.L, LB.idx + 4))
+    BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
+  BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
   GLM_BINDING_END
 }
-TRAITS_LAYOUT_DEFN(orthoLH, glm::orthoLH, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoLH_NO, glm::orthoLH_NO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoLH_ZO, glm::orthoLH_ZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoNO, glm::orthoNO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoRH, glm::orthoRH, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoRH_NO, glm::orthoRH_NO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoRH_ZO, glm::orthoRH_ZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orthoZO, glm::orthoZO, LAYOUT_SENARY, gLuaFloatOnly)
-TRAITS_DEFN(perspective, glm::perspective, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveLH, glm::perspectiveLH, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveLH_NO, glm::perspectiveLH_NO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveLH_ZO, glm::perspectiveLH_ZO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveNO, glm::perspectiveNO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveRH, glm::perspectiveRH, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveRH_NO, glm::perspectiveRH_NO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveRH_ZO, glm::perspectiveRH_ZO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveZO, glm::perspectiveZO, gLuaFloatOnly, gAspect, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFov, glm::perspectiveFov, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovLH, glm::perspectiveFovLH, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovLH_NO, glm::perspectiveFovLH_NO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovLH_ZO, glm::perspectiveFovLH_ZO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovNO, glm::perspectiveFovNO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovRH, glm::perspectiveFovRH, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovRH_NO, glm::perspectiveFovRH_NO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovRH_ZO, glm::perspectiveFovRH_ZO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
-TRAITS_DEFN(perspectiveFovZO, glm::perspectiveFovZO, gFov, gWidth, gHeight, gLuaFloatOnly, gLuaFloatOnly)
+TRAITS_DEFN(orthoLH, glm::orthoLH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoLH_NO, glm::orthoLH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoLH_ZO, glm::orthoLH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoNO, glm::orthoNO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoRH, glm::orthoRH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoRH_NO, glm::orthoRH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoRH_ZO, glm::orthoRH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orthoZO, glm::orthoZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspective, glm::perspective, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveLH, glm::perspectiveLH, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveLH_NO, glm::perspectiveLH_NO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveLH_ZO, glm::perspectiveLH_ZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveNO, glm::perspectiveNO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveRH, glm::perspectiveRH, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveRH_NO, glm::perspectiveRH_NO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveRH_ZO, glm::perspectiveRH_ZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveZO, glm::perspectiveZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFov, glm::perspectiveFov, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovLH, glm::perspectiveFovLH, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovLH_NO, glm::perspectiveFovLH_NO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovLH_ZO, glm::perspectiveFovLH_ZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovNO, glm::perspectiveFovNO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovRH, glm::perspectiveFovRH, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovRH_NO, glm::perspectiveFovRH_NO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovRH_ZO, glm::perspectiveFovRH_ZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(perspectiveFovZO, glm::perspectiveFovZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
 GLM_BINDING_QUALIFIER(tweakedInfinitePerspective) {
   GLM_BINDING_BEGIN
-  if (gLuaFloatOnly::Is(LB.L, LB.idx + 4))
-    LAYOUT_QUATERNARY(LB, glm::tweakedInfinitePerspective, gLuaFloatOnly);
-  LAYOUT_TERNARY(LB, glm::tweakedInfinitePerspective, gLuaFloatOnly);
+  if (gLuaCNum::Is(LB.L, LB.idx + 3))
+    BIND_FUNC(LB, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
+  else
+    BIND_FUNC(LB, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum);
   GLM_BINDING_END
 }
 #endif
@@ -884,8 +869,8 @@ GLM_BINDING_QUALIFIER(tweakedInfinitePerspective) {
 #if defined(EXT_MATRIX_TRANSFORM_HPP) || defined(GTX_MATRIX_TRANSFORM_2D_HPP)
 GLM_BINDING_QUALIFIER(identity) {
   GLM_BINDING_BEGIN
-  const lua_Integer size = gLuaInteger::Next(LB);
-  const lua_Integer secondary = gLuaInteger::Next(LB);
+  const lua_Integer size = gLuaInteger::Next(LB.L, LB.idx);
+  const lua_Integer secondary = gLuaInteger::Next(LB.L, LB.idx);
   switch (LUAGLM_MATRIX_TYPE(size, secondary)) {
     case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, glm::identity<gLuaMat2x2<>::type>());
     case LUAGLM_MATRIX_2x3: return gLuaBase::Push(LB, glm::identity<gLuaMat2x3<>::type>());
@@ -907,9 +892,9 @@ GLM_BINDING_QUALIFIER(identity) {
 TRAITS_DEFN(lookAt, glm::lookAt, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
 TRAITS_DEFN(lookAtLH, glm::lookAtLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
 TRAITS_DEFN(lookAtRH, glm::lookAtRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(lookRotation, glm::lookRotation, LAYOUT_BINARY, gLuaDir3<>)  // LUA_MATRIX_EXTENSIONS
-TRAITS_LAYOUT_DEFN(lookRotationRH, glm::lookRotationRH, LAYOUT_BINARY, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(lookRotationLH, glm::lookRotationLH, LAYOUT_BINARY, gLuaDir3<>)
+TRAITS_DEFN(lookRotation, glm::lookRotation, gLuaDir3<>, gLuaDir3<>)  // LUA_MATRIX_EXTENSIONS
+TRAITS_DEFN(lookRotationRH, glm::lookRotationRH, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(lookRotationLH, glm::lookRotationLH, gLuaDir3<>, gLuaDir3<>)
 TRAITS_DEFN(billboard, glm::billboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 TRAITS_DEFN(billboardRH, glm::billboardRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 TRAITS_DEFN(billboardLH, glm::billboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
@@ -927,10 +912,10 @@ TRAITS_DEFN(unProject, glm::unProject, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, g
 TRAITS_DEFN(unProjectNO, glm::unProjectNO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
 TRAITS_DEFN(unProjectZO, glm::unProjectZO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
 TRAITS_DEFN(rayPicking, glm::rayPicking, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat)  // LUA_VECTOR_EXTENSIONS
-TRAITS_LAYOUT_DEFN(containsProjection, glm::containsProjection, LAYOUT_BINARY_EPS, gLuaMat4x4<>)  // LUA_MATRIX_EXTENSIONS
+TRAITS_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<>::eps_trait)  // LUA_MATRIX_EXTENSIONS
 #endif
 
-#if defined(GTC_MATRIX_ACCESS_HPP) // @NOTE: These GLM functions are zero-based
+#if defined(GTC_MATRIX_ACCESS_HPP)  // @NOTE: These GLM functions are zero-based
 #define LAYOUT_MATRIX_ACCESS_COLUMN(LB, F, Tr, ...) \
   LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::col_type, Tr::row_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
 #define LAYOUT_MATRIX_ACCESS_ROW(LB, F, Tr, ...) \
@@ -940,7 +925,7 @@ TRAITS_LAYOUT_DEFN(containsProjection, glm::containsProjection, LAYOUT_BINARY_EP
   const lua_Integer _idx = luaL_checkinteger((LB).L, (LB).idx + 1); \
   if (_idx < 0 || _idx >= cast(lua_Integer, TrDims::length()))      \
     return GLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");     \
-  else if (TrComp::Is((LB.L), (LB).idx + 2)) /* Set */              \
+  else if (TrComp::Is((LB).L, (LB).idx + 2)) /* Set */              \
     VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, TrComp, ##__VA_ARGS__);    \
   else                                                              \
     VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, ##__VA_ARGS__); /* Get */  \
@@ -951,7 +936,7 @@ MATRIX_DEFN(row, glm::row, LAYOUT_MATRIX_ACCESS_ROW)
 #endif
 
 #if defined(GTC_MATRIX_INVERSE_HPP)
-TRAITS_BINARY_LAYOUT_DEFN(affineInverse, glm::affineInverse, LAYOUT_UNARY, gLuaMat3x3<>, gLuaMat4x4<>)
+BINARY_LAYOUT_DEFN(affineInverse, glm::affineInverse, LAYOUT_UNARY, gLuaMat3x3<>, gLuaMat4x4<>)
 SYMMETRIC_MATRIX_DEFN(inverseTranspose, glm::inverseTranspose, LAYOUT_UNARY)
 #endif
 
@@ -960,38 +945,38 @@ SYMMETRIC_MATRIX_DEFN(inverseTranspose, glm::inverseTranspose, LAYOUT_UNARY)
 #define LAYOUT_EULER_DECOMPOSE(LB, F, Tr, ...) \
   LUA_MLM_BEGIN                                \
   Tr::value_type a, b, c;                      \
-  F(Tr::Next(LB), a, b, c);                    \
+  F(Tr::Next((LB).L, (LB).idx), a, b, c);      \
   TRAITS_PUSH(LB, a, b, c);                    \
   LUA_MLM_END
 
-TRAITS_LAYOUT_DEFN(derivedEulerAngleX, glm::derivedEulerAngleX, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(derivedEulerAngleY, glm::derivedEulerAngleY, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(derivedEulerAngleZ, glm::derivedEulerAngleZ, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleX, glm::eulerAngleX, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXY, glm::eulerAngleXY, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXYX, glm::eulerAngleXYX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXYZ, glm::eulerAngleXYZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXZ, glm::eulerAngleXZ, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXZX, glm::eulerAngleXZX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleXZY, glm::eulerAngleXZY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleY, glm::eulerAngleY, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYX, glm::eulerAngleYX, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYXY, glm::eulerAngleYXY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYXZ, glm::eulerAngleYXZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYZ, glm::eulerAngleYZ, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYZX, glm::eulerAngleYZX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleYZY, glm::eulerAngleYZY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZ, glm::eulerAngleZ, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZX, glm::eulerAngleZX, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZXY, glm::eulerAngleZXY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZXZ, glm::eulerAngleZXZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZY, glm::eulerAngleZY, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZYX, glm::eulerAngleZYX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(eulerAngleZYZ, glm::eulerAngleZYZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(orientate2, glm::orientate2, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_BINARY_LAYOUT_DEFN(orientate3, glm::orientate3, LAYOUT_UNARY, gLuaFloat, gLuaVec3<>::fast)
-TRAITS_LAYOUT_DEFN(orientate4, glm::orientate4, LAYOUT_UNARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(yawPitchRoll, glm::yawPitchRoll, LAYOUT_TERNARY, gLuaFloatOnly)
+TRAITS_DEFN(derivedEulerAngleX, glm::derivedEulerAngleX, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(derivedEulerAngleY, glm::derivedEulerAngleY, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(derivedEulerAngleZ, glm::derivedEulerAngleZ, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleX, glm::eulerAngleX, gLuaCNum)
+TRAITS_DEFN(eulerAngleXY, glm::eulerAngleXY, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleXYX, glm::eulerAngleXYX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleXYZ, glm::eulerAngleXYZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleXZ, glm::eulerAngleXZ, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleXZX, glm::eulerAngleXZX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleXZY, glm::eulerAngleXZY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleY, glm::eulerAngleY, gLuaCNum)
+TRAITS_DEFN(eulerAngleYX, glm::eulerAngleYX, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleYXY, glm::eulerAngleYXY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleYXZ, glm::eulerAngleYXZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleYZ, glm::eulerAngleYZ, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleYZX, glm::eulerAngleYZX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleYZY, glm::eulerAngleYZY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZ, glm::eulerAngleZ, gLuaCNum)
+TRAITS_DEFN(eulerAngleZX, glm::eulerAngleZX, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZXY, glm::eulerAngleZXY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZXZ, glm::eulerAngleZXZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZY, glm::eulerAngleZY, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZYX, glm::eulerAngleZYX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(eulerAngleZYZ, glm::eulerAngleZYZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(orientate2, glm::orientate2, gLuaCNum)
+BINARY_LAYOUT_DEFN(orientate3, glm::orientate3, LAYOUT_UNARY, gLuaFloat, gLuaVec3<>::fast)
+TRAITS_DEFN(orientate4, glm::orientate4, gLuaVec3<>)
+TRAITS_DEFN(yawPitchRoll, glm::yawPitchRoll, gLuaCNum, gLuaCNum, gLuaCNum)
 ROTATION_MATRIX_DEFN(extractEulerAngleXYX, glm::extractEulerAngleXYX, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleXYZ, glm::extractEulerAngleXYZ, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleXZX, glm::extractEulerAngleXZX, LAYOUT_EULER_DECOMPOSE)
@@ -1004,27 +989,27 @@ ROTATION_MATRIX_DEFN(extractEulerAngleZXY, glm::extractEulerAngleZXY, LAYOUT_EUL
 ROTATION_MATRIX_DEFN(extractEulerAngleZXZ, glm::extractEulerAngleZXZ, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYX, glm::extractEulerAngleZYX, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYZ, glm::extractEulerAngleZYZ, LAYOUT_EULER_DECOMPOSE)
-TRAITS_LAYOUT_DEFN(quatEulerAngleX, glm::quatEulerAngleX, LAYOUT_UNARY, gLuaFloatOnly)  // LUA_QUATERNION_EXTENSIONS
-TRAITS_LAYOUT_DEFN(quatEulerAngleXY, glm::quatEulerAngleXY, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleXYX, glm::quatEulerAngleXYX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleXYZ, glm::quatEulerAngleXYZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleXZ, glm::quatEulerAngleXZ, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleXZX, glm::quatEulerAngleXZX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleXZY, glm::quatEulerAngleXZY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleY, glm::quatEulerAngleY, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYX, glm::quatEulerAngleYX, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYXY, glm::quatEulerAngleYXY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYXZ, glm::quatEulerAngleYXZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYZ, glm::quatEulerAngleYZ, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYZX, glm::quatEulerAngleYZX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleYZY, glm::quatEulerAngleYZY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZ, glm::quatEulerAngleZ, LAYOUT_UNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZX, glm::quatEulerAngleZX, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZXY, glm::quatEulerAngleZXY, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZXZ, glm::quatEulerAngleZXZ, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZY, glm::quatEulerAngleZY, LAYOUT_BINARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZYX, glm::quatEulerAngleZYX, LAYOUT_TERNARY, gLuaFloatOnly)
-TRAITS_LAYOUT_DEFN(quatEulerAngleZYZ, glm::quatEulerAngleZYZ, LAYOUT_TERNARY, gLuaFloatOnly)
+TRAITS_DEFN(quatEulerAngleX, glm::quatEulerAngleX, gLuaCNum)  // LUA_QUATERNION_EXTENSIONS
+TRAITS_DEFN(quatEulerAngleXY, glm::quatEulerAngleXY, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleXYX, glm::quatEulerAngleXYX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleXYZ, glm::quatEulerAngleXYZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleXZ, glm::quatEulerAngleXZ, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleXZX, glm::quatEulerAngleXZX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleXZY, glm::quatEulerAngleXZY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleY, glm::quatEulerAngleY, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYX, glm::quatEulerAngleYX, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYXY, glm::quatEulerAngleYXY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYXZ, glm::quatEulerAngleYXZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYZ, glm::quatEulerAngleYZ, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYZX, glm::quatEulerAngleYZX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleYZY, glm::quatEulerAngleYZY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZ, glm::quatEulerAngleZ, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZX, glm::quatEulerAngleZX, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZXY, glm::quatEulerAngleZXY, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZXZ, glm::quatEulerAngleZXZ, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZY, glm::quatEulerAngleZY, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZYX, glm::quatEulerAngleZYX, gLuaCNum, gLuaCNum, gLuaCNum)
+TRAITS_DEFN(quatEulerAngleZYZ, glm::quatEulerAngleZYZ, gLuaCNum, gLuaCNum, gLuaCNum)
 #endif
 
 #if defined(GTX_MATRIX_CROSS_PRODUCT_HPP)
@@ -1038,7 +1023,7 @@ GLM_BINDING_QUALIFIER(decompose) {
   gLuaQuat<>::type orientation;
   gLuaVec4<>::type perspective;
   gLuaVec3<>::type scale, translation, skew;
-  if (glm::decompose(gLuaMat4x4<>::Next(LB), scale, orientation, translation, skew, perspective))
+  if (glm::decompose(gLuaMat4x4<>::Next(LB.L, LB.idx), scale, orientation, translation, skew, perspective))
     TRAITS_PUSH(LB, scale, orientation, translation, skew, perspective);
   return gLuaBase::Push(LB);
   GLM_BINDING_END
@@ -1050,7 +1035,7 @@ GLM_BINDING_QUALIFIER(decompose) {
   LUA_MLM_BEGIN                            \
   Tr::q_type::type q = Tr::q_type::zero(); \
   Tr::r_type::type r = Tr::r_type::zero(); \
-  F(Tr::Next(LB), q, r);                   \
+  F(Tr::Next((LB).L, (LB).idx), q, r);     \
   TRAITS_PUSH(LB, q, r);                   \
   LUA_MLM_END
 
@@ -1062,12 +1047,12 @@ MATRIX_DEFN(rq_decompose, glm::rq_decompose, LAYOUT_QRDECOMPOSE)
 
 /* glm/gtx/matrix_interpolation.hpp */
 #if defined(GTX_MATRIX_INTERPOLATION_HPP)
-#define LAYOUT_AXIS_ANGLE(LB, F, Tr, ...) \
-  LUA_MLM_BEGIN                           \
-  gLuaVec3<>::type axis;                  \
-  gLuaVec3<>::value_type angle;           \
-  F(Tr::Next(LB), axis, angle);           \
-  TRAITS_PUSH(LB, axis, angle);           \
+#define LAYOUT_AXIS_ANGLE(LB, F, Tr, ...)     \
+  LUA_MLM_BEGIN                               \
+  gLuaVec3<>::type axis;                      \
+  gLuaVec3<>::value_type angle;               \
+  F(Tr::Next((LB).L, (LB).idx), axis, angle); \
+  TRAITS_PUSH(LB, axis, angle);               \
   LUA_MLM_END
 
 TRAITS_DEFN(axisAngleMatrix, glm::axisAngleMatrix, gLuaDir3<>, gLuaFloat)
@@ -1078,39 +1063,39 @@ ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
 
 /* glm/gtx/matrix_major_storage.hpp */
 #if defined(GTX_MATRIX_MAJOR_STORAGE_HPP)
-#define MATRIX_MAJOR_DEFN(Name, F, ArgLayout, Tr) \
-  GLM_BINDING_QUALIFIER(Name) {                   \
-    GLM_BINDING_BEGIN                             \
-    if (Tr::col_type::Is((LB.L), (LB).idx))       \
-      ArgLayout(LB, F, Tr::col_type);             \
-    return gLuaBase::Push(LB, F(Tr::Next(LB)));   \
-    GLM_BINDING_END                               \
+#define MATRIX_MAJOR_DEFN(Name, F, ArgLayout, Tr)             \
+  GLM_BINDING_QUALIFIER(Name) {                               \
+    GLM_BINDING_BEGIN                                         \
+    if (Tr::col_type::Is((LB).L, (LB).idx))                   \
+      ArgLayout(LB, F, Tr::col_type);                         \
+    return gLuaBase::Push(LB, F(Tr::Next((LB).L, (LB).idx))); \
+    GLM_BINDING_END                                           \
   }
 
 #define MAJOR(A, B) A##B
-#define MATRIX_GENERAL_MAJOR_DEFN(Name, F)                                                              \
-  GLM_BINDING_QUALIFIER(Name) {                                                                         \
-    GLM_BINDING_BEGIN                                                                                   \
-    const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                                      \
-    switch (ttypetag(_tv)) {                                                                            \
-      case LUA_VVECTOR2: LAYOUT_BINARY(LB, MAJOR(F, 2), gLuaVec2<>::fast); break;                       \
-      case LUA_VVECTOR3: LAYOUT_TERNARY(LB, MAJOR(F, 3), gLuaVec3<>::fast); break;                      \
-      case LUA_VVECTOR4: LAYOUT_QUATERNARY(LB, MAJOR(F, 4), gLuaVec4<>::fast); break;                   \
-      case LUA_VMATRIX: {                                                                               \
-        switch (mvalue_dims(_tv)) {                                                                     \
-          case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, MAJOR(F, 2)(gLuaMat2x2<>::fast::Next(LB))); \
-          case LUAGLM_MATRIX_3x3: return gLuaBase::Push(LB, MAJOR(F, 3)(gLuaMat3x3<>::fast::Next(LB))); \
-          case LUAGLM_MATRIX_4x4: return gLuaBase::Push(LB, MAJOR(F, 4)(gLuaMat4x4<>::fast::Next(LB))); \
-          default:                                                                                      \
-            break;                                                                                      \
-        }                                                                                               \
-        break;                                                                                          \
-      }                                                                                                 \
-      default:                                                                                          \
-        break;                                                                                          \
-    }                                                                                                   \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                \
-    GLM_BINDING_END                                                                                     \
+#define MATRIX_GENERAL_MAJOR_DEFN(Name, F)                                                                            \
+  GLM_BINDING_QUALIFIER(Name) {                                                                                       \
+    GLM_BINDING_BEGIN                                                                                                 \
+    const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                                                    \
+    switch (ttypetag(_tv)) {                                                                                          \
+      case LUA_VVECTOR2: LAYOUT_BINARY(LB, MAJOR(F, 2), gLuaVec2<>::fast); break;                                     \
+      case LUA_VVECTOR3: LAYOUT_TERNARY(LB, MAJOR(F, 3), gLuaVec3<>::fast); break;                                    \
+      case LUA_VVECTOR4: LAYOUT_QUATERNARY(LB, MAJOR(F, 4), gLuaVec4<>::fast); break;                                 \
+      case LUA_VMATRIX: {                                                                                             \
+        switch (mvalue_dims(_tv)) {                                                                                   \
+          case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, MAJOR(F, 2)(gLuaMat2x2<>::fast::Next((LB).L, (LB).idx))); \
+          case LUAGLM_MATRIX_3x3: return gLuaBase::Push(LB, MAJOR(F, 3)(gLuaMat3x3<>::fast::Next((LB).L, (LB).idx))); \
+          case LUAGLM_MATRIX_4x4: return gLuaBase::Push(LB, MAJOR(F, 4)(gLuaMat4x4<>::fast::Next((LB).L, (LB).idx))); \
+          default:                                                                                                    \
+            break;                                                                                                    \
+        }                                                                                                             \
+        break;                                                                                                        \
+      }                                                                                                               \
+      default:                                                                                                        \
+        break;                                                                                                        \
+    }                                                                                                                 \
+    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                              \
+    GLM_BINDING_END                                                                                                   \
   }
 
 MATRIX_MAJOR_DEFN(colMajor2, glm::colMajor2, LAYOUT_BINARY, gLuaMat2x2<>)
@@ -1159,28 +1144,28 @@ GLM_BINDING_QUALIFIER(scaleBias) {
   if (gLuaMat4x4<>::fast::Is(LB.L, LB.idx))
     BIND_FUNC(LB, glm::__scaleBias, gLuaMat4x4<>::fast, gLuaFloat, gLuaFloat);
 
-  const gLuaFloatOnly::type a = gLuaFloatOnly::Next(LB);
-  const gLuaFloatOnly::type b = gLuaFloatOnly::Next(LB);
-  return gLuaBase::Push(LB, glm::__scaleBias<typename gLuaFloatOnly::type, glm::qualifier::defaultp>(a, b));
+  const gLuaCNum::type a = gLuaCNum::Next(LB.L, LB.idx);
+  const gLuaCNum::type b = gLuaCNum::Next(LB.L, LB.idx);
+  return gLuaBase::Push(LB, glm::__scaleBias<typename gLuaCNum::type, glm::qualifier::defaultp>(a, b));
   GLM_BINDING_END
 }
 #endif
 
 #if defined(GTX_MATRIX_TRANSFORM_2D_HPP)
-TRAITS_LAYOUT_DEFN(shearX, glm::shearX, LAYOUT_BINARY_SCALAR, gLuaMat3x3<>)
-TRAITS_LAYOUT_DEFN(shearY, glm::shearY, LAYOUT_BINARY_SCALAR, gLuaMat3x3<>)
+TRAITS_DEFN(shearX, glm::shearX, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
+TRAITS_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
 #endif
 
 #if defined(GTX_PCA_HPP)  // @COMPAT: pca.hpp introduced in 0.9.9.9
 #include <glm/gtx/pca.hpp>
-#define LAYOUT_FIND_EIGEN(LB, F, Tr, ...)                                      \
-  LUA_MLM_BEGIN                                                                \
-  Tr::type outVectors = Tr::zero();                                            \
-  Tr::col_type::type outValues = Tr::col_type::zero();                         \
-  glm::length_t count = glm::length_t(F(Tr::Next(LB), outValues, outVectors)); \
-  if (outValues.length() == count)                                             \
-    glm::sortEigenvalues(outValues, outVectors);                               \
-  TRAITS_PUSH(LB, count, outValues, outVectors);                               \
+#define LAYOUT_FIND_EIGEN(LB, F, Tr, ...)                                                    \
+  LUA_MLM_BEGIN                                                                              \
+  Tr::type outVectors = Tr::zero();                                                          \
+  Tr::col_type::type outValues = Tr::col_type::zero();                                       \
+  glm::length_t count = glm::length_t(F(Tr::Next((LB).L, (LB).idx), outValues, outVectors)); \
+  if (outValues.length() == count)                                                           \
+    glm::sortEigenvalues(outValues, outVectors);                                             \
+  TRAITS_PUSH(LB, count, outValues, outVectors);                                             \
   LUA_MLM_END
 
 #define LAYOUT_COMPUTE_COVARIANCE(LB, F, Mat, Cols, ...)               \
@@ -1189,7 +1174,7 @@ TRAITS_LAYOUT_DEFN(shearY, glm::shearY, LAYOUT_BINARY_SCALAR, gLuaMat3x3<>)
   glmLuaArray<Vec> lArray((LB).L, (LB).idx++);                         \
   if (Vec::fast::Is((LB).L, (LB).idx)) {                               \
     return gLuaBase::Push(LB, F<Cols, Mat::value_type, glm::defaultp>( \
-      lArray.begin(), lArray.end(), Vec::fast::Next(LB)                \
+      lArray.begin(), lArray.end(), Vec::fast::Next((LB).L, (LB).idx)  \
     ));                                                                \
   }                                                                    \
   else {                                                               \
@@ -1228,30 +1213,30 @@ GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
 ** ===================================================================
 */
 
-#define LAYOUT_FREXP(LB, F, Tr, ...)       \
-  LUA_MLM_BEGIN                            \
-  Tr::as_type<int>::type v2;               \
-  const Tr::type v3 = F(Tr::Next(LB), v2); \
-  TRAITS_PUSH(LB, v3, v2);                 \
+#if defined(COMMON_HPP)
+#define LAYOUT_FREXP(LB, F, Tr, ...)                     \
+  LUA_MLM_BEGIN                                          \
+  Tr::as_type<int>::type v2;                             \
+  const Tr::type v3 = F(Tr::Next((LB).L, (LB).idx), v2); \
+  TRAITS_PUSH(LB, v3, v2);                               \
   LUA_MLM_END
 
-#define LAYOUT_MODF(LB, F, Tr, ...)            \
-  LUA_MLM_BEGIN                                \
-  Tr::type v2;                                 \
-  const Tr::type v3 = F(Tr::Next(LB), v2);     \
-  const int _a = gLuaBase::PushNumInt(LB, v2); \
-  const int _b = gLuaBase::Push(LB, v3);       \
-  return _a + _b;                              \
+#define LAYOUT_MODF(LB, F, Tr, ...)                      \
+  LUA_MLM_BEGIN                                          \
+  Tr::type v2;                                           \
+  const Tr::type v3 = F(Tr::Next((LB).L, (LB).idx), v2); \
+  const int _a = gLuaBase::PushNumInt(LB, v2);           \
+  const int _b = gLuaBase::Push(LB, v3);                 \
+  return _a + _b;                                        \
   LUA_MLM_END
 
 #define LAYOUT_UNARY_NUMINT(LB, F, Tr, ...) \
-  return gLuaBase::PushNumInt(LB, F(Tr::Next(LB)));
+  return gLuaBase::PushNumInt(LB, F(Tr::Next((LB).L, (LB).idx)));
 
-#if defined(COMMON_HPP)
 INTEGER_NUMBER_VECTOR_DEFN(abs, glm::abs, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(fract, glm::fract, LAYOUT_UNARY)
 #if GLM_HAS_CXX11_STL
-TRAITS_LAYOUT_DEFN(fma, glm::fma, LAYOUT_TERNARY, gLuaNumber)
+TRAITS_DEFN(fma, glm::fma, gLuaNumber, gLuaNumber, gLuaNumber)
 #else
 NUMBER_VECTOR_DEFN(fma, glm::fma, LAYOUT_TERNARY)
 #endif
@@ -1269,9 +1254,22 @@ NUMBER_VECTOR_DEFN(trunc, glm::trunc, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(ldexp, glm::ldexp, LAYOUT_VECTOR_INT)
 NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP, int)
 NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
+INTEGER_NUMBER_VECTOR_DEFN(mod, glm::imod, LAYOUT_MODULO)  // lmathlib compat
+INTEGER_NUMBER_VECTOR_DEFNS(ceil, glm::iceil, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
+INTEGER_NUMBER_VECTOR_DEFNS(floor, glm::ifloor, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
+#if GLM_HAS_CXX11_STL
+NUMBER_VECTOR_DEFN(fdim, glm::fdim, LAYOUT_BINARY)
+NUMBER_VECTOR_DEFN(hypot, glm::hypot, LAYOUT_BINARY)
+NUMBER_VECTOR_DEFN(isnormal, glm::isnormal, LAYOUT_UNARY)
+NUMBER_VECTOR_DEFN(isunordered, glm::isunordered, LAYOUT_BINARY)
+NUMBER_VECTOR_DEFN(nearbyint, glm::nearbyint, LAYOUT_UNARY)
+NUMBER_VECTOR_DEFN(nextafter, glm::nextafter, LAYOUT_BINARY)
+// @TODO: nexttoward
+NUMBER_VECTOR_DEFN(remainder, glm::remainder, LAYOUT_BINARY)
+NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_VECTOR_INT)
+#endif
 
 /* lmathlib compatibility */
-INTEGER_NUMBER_VECTOR_DEFN(mod, glm::imod, LAYOUT_MODULO)
 GLM_BINDING_QUALIFIER(modf) {
   GLM_BINDING_BEGIN
   if (lua_isinteger(LB.L, LB.idx)) {
@@ -1283,6 +1281,7 @@ GLM_BINDING_QUALIFIER(modf) {
   GLM_BINDING_END
 }
 
+/* lmathlib compatibility */
 GLM_BINDING_QUALIFIER(toint) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
@@ -1297,40 +1296,26 @@ GLM_BINDING_QUALIFIER(toint) {
         lua_pushinteger(LB.L, n);
       else {
         luaL_checkany(LB.L, 1);
-        luaL_pushfail(LB.L);  /* value is not convertible to integer */
+        luaL_pushfail(LB.L); /* value is not convertible to integer */
       }
       return 1;
     }
   }
   GLM_BINDING_END
 }
-
-INTEGER_NUMBER_VECTOR_DEFNS(ceil, glm::iceil, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
-INTEGER_NUMBER_VECTOR_DEFNS(floor, glm::ifloor, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
-#if GLM_HAS_CXX11_STL
-NUMBER_VECTOR_DEFN(fdim, glm::fdim, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(hypot, glm::hypot, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(isnormal, glm::isnormal, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(isunordered, glm::isunordered, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(nearbyint, glm::nearbyint, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(nextafter, glm::nextafter, LAYOUT_BINARY)
-/* nexttoward */
-NUMBER_VECTOR_DEFN(remainder, glm::remainder, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_VECTOR_INT)
-#endif
 #endif
 
 #if defined(COMMON_HPP) || defined(EXT_SCALAR_COMMON_HPP) || defined(EXT_VECTOR_COMMON_HPP)
-/* Accumulation for min/max functions, where arguments can be the Trait or a primitive */
+/* Accumulation for min/max functions, where arguments can be Tr or a primitive */
 #define LAYOUT_MINMAX(LB, F, Tr, ...)                                                        \
   LUA_MLM_BEGIN                                                                              \
   const int _n = (LB).top();                                                                 \
-  Tr::type base = Tr::Next(LB);                                                              \
+  Tr::type base = Tr::Next((LB).L, (LB).idx);                                                \
   while ((LB).idx <= _n) {                                                                   \
     if (Tr::safe::Is((LB).L, (LB).idx))                                                      \
-      base = F(base, Tr::safe::Next(LB));                                                    \
+      base = F(base, Tr::safe::Next((LB).L, (LB).idx));                                      \
     else if (Tr::value_trait::Is((LB).L, (LB).idx))                                          \
-      base = F(base, Tr::value_trait::Next(LB));                                             \
+      base = F(base, Tr::value_trait::Next((LB).L, (LB).idx));                               \
     else                                                                                     \
       return luaL_error((LB).L, "%s or %s expected", Tr::Label(), Tr::value_trait::Label()); \
   }                                                                                          \
@@ -1363,14 +1348,14 @@ GLM_BINDING_QUALIFIER(clamp) {
   GLM_BINDING_END
 }
 
-GLM_BINDING_QUALIFIER(min) { /* Ported: static int math_min (lua_State *L) */
+GLM_BINDING_QUALIFIER(min) { /* lmathlib: static int math_min (lua_State *L) */
   GLM_BINDING_BEGIN
-  const int n = LB.top_for_recycle();  /* number of arguments */
+  const int n = LB.top_for_recycle(); /* number of arguments */
   luaL_argcheck(L, n >= 1, 1, "value expected");
 
   const TValue *o = glm_i2v(LB.L, LB.idx);
-  if (ttisnumber(o) || cvt2num(o)) {  /* string -> number coercion; follow lmathlib */
-    int imin = 1;  /* index of current minimum value */
+  if (ttisnumber(o) || cvt2num(o)) { /* string -> number coercion; follow lmathlib */
+    int imin = 1; /* index of current minimum value */
     for (int i = 2; i <= n; i++) {
       if (lua_compare(L, i, imin, LUA_OPLT))
         imin = i;
@@ -1382,14 +1367,14 @@ GLM_BINDING_QUALIFIER(min) { /* Ported: static int math_min (lua_State *L) */
   GLM_BINDING_END
 }
 
-GLM_BINDING_QUALIFIER(max) { /* Ported: static int math_max (lua_State *L) */
+GLM_BINDING_QUALIFIER(max) { /* lmathlib: static int math_max (lua_State *L) */
   GLM_BINDING_BEGIN
-  const int n = LB.top_for_recycle();  /* number of arguments */
+  const int n = LB.top_for_recycle(); /* number of arguments */
   luaL_argcheck(L, n >= 1, 1, "value expected");
 
   const TValue *o = glm_i2v(LB.L, LB.idx);
-  if (ttisnumber(o) || cvt2num(o)) {  /* string -> number coercion; follow lmathlib */
-    int imax = 1;  /* index of current maximum value */
+  if (ttisnumber(o) || cvt2num(o)) { /* string -> number coercion; follow lmathlib */
+    int imax = 1; /* index of current maximum value */
     for (int i = 2; i <= n; i++) {
       if (lua_compare(L, imax, i, LUA_OPLT))
         imax = i;
@@ -1403,7 +1388,6 @@ GLM_BINDING_QUALIFIER(max) { /* Ported: static int math_max (lua_State *L) */
 #endif
 
 #if defined(COMMON_HPP) || defined(EXT_MATRIX_COMMON_HPP)
-/* trait + trait + {trait || value_trait || bool} op */
 #define LAYOUT_MIX(LB, F, Tr, ...)                                           \
   LUA_MLM_BEGIN                                                              \
   if (gLuaTrait<bool>::Is((LB).L, (LB).idx + 2))                             \
@@ -1420,6 +1404,7 @@ GLM_BINDING_QUALIFIER(mix) {
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_SYMMETRIC_MATRIX(LB, glm::__mix, LAYOUT_TERNARY_OPTIONAL);
+  else
 #endif
   PARSE_NUMBER_VECTOR_QUAT(LB, glm::mix, LAYOUT_MIX, LAYOUT_MIX, LAYOUT_TERNARY_SCALAR);
   return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
@@ -1454,7 +1439,8 @@ GLM_BINDING_QUALIFIER(pow) {
   GLM_BINDING_BEGIN
   if (gLuaInteger::Is(LB.L, LB.idx) && gLuaTrait<unsigned>::Is(LB.L, LB.idx + 1))
     BIND_FUNC(LB, glm::pow, gLuaInteger, gLuaTrait<unsigned>);
-  PARSE_NUMBER_VECTOR_QUAT(LB, glm::pow, LAYOUT_BINARY_SCALAR, LAYOUT_BINARY_OPTIONAL, LAYOUT_BINARY_SCALAR);
+  else
+    PARSE_NUMBER_VECTOR_QUAT(LB, glm::pow, LAYOUT_BINARY_SCALAR, LAYOUT_BINARY_OPTIONAL, LAYOUT_BINARY_SCALAR);
   GLM_BINDING_END
 }
 
@@ -1476,13 +1462,15 @@ GLM_BINDING_QUALIFIER(cross) {
     case LUA_VVECTOR3: {
       if (gLuaQuat<>::fast::Is(LB.L, LB.idx + 1))
         BIND_FUNC(LB, glm::cross, gLuaVec3<>::fast, gLuaQuat<>::fast); /* glm/gtx/quaternion.hpp */
-      BIND_FUNC(LB, glm::cross, gLuaVec3<>::fast, gLuaVec3<>); /* glm/geometric.hpp */
+      else
+        BIND_FUNC(LB, glm::cross, gLuaVec3<>::fast, gLuaVec3<>); /* glm/geometric.hpp */
       break;
     }
     case LUA_VQUAT: {
       if (gLuaQuat<>::fast::Is(LB.L, LB.idx + 1)) /* glm/gtx/quaternion.hpp */
         BIND_FUNC(LB, glm::cross, gLuaQuat<>::fast, gLuaQuat<>::fast); /* <quat, quat> */
-      BIND_FUNC(LB, glm::cross, gLuaQuat<>::fast, gLuaVec3<>); /* <quat, vector3> */
+      else
+        BIND_FUNC(LB, glm::cross, gLuaQuat<>::fast, gLuaVec3<>); /* <quat, vector3> */
       break;
     }
     default: {
@@ -1539,11 +1527,11 @@ NUMBER_VECTOR_QUAT_DEFN(all_lessThanEqual, glm::all_lessThanEqual, LAYOUT_BINARY
 #endif
 
 #if defined(TRIGONOMETRIC_HPP)
-#define LAYOUT_SINCOS(LB, F, Tr, ...) \
-  LUA_MLM_BEGIN                       \
-  Tr::type s, c;                      \
-  F(Tr::Next(LB), s, c);              \
-  TRAITS_PUSH(LB, s, c);              \
+#define LAYOUT_SINCOS(LB, F, Tr, ...)  \
+  LUA_MLM_BEGIN                        \
+  Tr::type s, c;                       \
+  F(Tr::Next((LB).L, (LB).idx), s, c); \
+  TRAITS_PUSH(LB, s, c);               \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(acos, glm::acos, LAYOUT_UNARY)
@@ -1581,7 +1569,6 @@ INTEGER_VECTOR_DEFN(prevPowerOfTwo, glm::prevPowerOfTwo, LAYOUT_UNARY, lua_Unsig
 #endif
 
 #if defined(GTC_EPSILON_HPP)
-/* trait + trait + {trait || epsilon} op */
 #define LAYOUT_EPSILON_EQUAL(LB, F, Tr, ...)                               \
   LUA_MLM_BEGIN                                                            \
   if (Tr::Is((LB).L, (LB).idx + 2))                                        \
@@ -1609,7 +1596,7 @@ NUMBER_VECTOR_DEFN(linearRand, glm::linearRand, LAYOUT_BINARY)
 TRAITS_DEFN(ballRand, glm::ballRand, gRandValue)
 TRAITS_DEFN(circularRand, glm::circularRand, gRandValue)
 TRAITS_DEFN(diskRand, glm::diskRand, gRandValue)
-TRAITS_LAYOUT_DEFN(gaussRand, glm::gaussRand, LAYOUT_BINARY, gRandValue)
+TRAITS_DEFN(gaussRand, glm::gaussRand, gRandValue, gRandValue)
 TRAITS_DEFN(sphericalRand, glm::sphericalRand, gRandValue)
 #if defined(_DEBUG)  // Temporary; see gLuaBase documentation
 GLM_BINDING_QUALIFIER(srand) {
@@ -1672,7 +1659,7 @@ TRAITS_DEFN(rgbColor, glm::rgbColor, gLuaVec3<>)
 GLM_BINDING_QUALIFIER(saturation) {
   GLM_BINDING_BEGIN
   const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
-  if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloatOnly);
+  if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaCNum);
   else if (ttisvector3(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec3<>::fast);
   else if (ttisvector4(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec4<>::fast);
   return GLM_TYPE_ERROR(LB.L, LB.idx + 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR);
@@ -1721,23 +1708,23 @@ INTEGER_NUMBER_VECTOR_DEFN(compMul, glm::compMul, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(compNormalize, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm_Integer)
 NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
 /* glm::compNormalize/glm::compScale for different types, e.g., u8, i8, u16, i16 */
-//INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
-//INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
-//INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
-//INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
-//NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
-//NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
-//NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
-//NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
+// INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
+// INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
+// INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
+// INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
+// NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
+// NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
+// NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
+// NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_EASING_HPP)
 // @GLMAssert: assert(a >= zero<genType>());
 // @GLMAssert: assert(a <= one<genType>());
 using gEasingValue = gLuaBoundedBetween<gLuaNumber>;
-TRAITS_LAYOUT_DEFN(backEaseIn, glm::backEaseIn, LAYOUT_UNARY_OR_BINARY, gEasingValue)
-TRAITS_LAYOUT_DEFN(backEaseInOut, glm::backEaseInOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
-TRAITS_LAYOUT_DEFN(backEaseOut, glm::backEaseOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
+LAYOUT_DEFN(backEaseIn, glm::backEaseIn, LAYOUT_UNARY_OR_BINARY, gEasingValue)
+LAYOUT_DEFN(backEaseInOut, glm::backEaseInOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
+LAYOUT_DEFN(backEaseOut, glm::backEaseOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
 TRAITS_DEFN(bounceEaseIn, glm::bounceEaseIn, gEasingValue)
 TRAITS_DEFN(bounceEaseInOut, glm::bounceEaseInOut, gEasingValue)
 TRAITS_DEFN(bounceEaseOut, glm::bounceEaseOut, gEasingValue)
@@ -1801,26 +1788,27 @@ NUMBER_VECTOR_DEFN(wrapAngle, glm::wrapAngle, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_FUNCTIONS_HPP)
-#define LAYOUT_SMOOTH_DAMP(LB, F, Tr, ...)             \
-  LUA_MLM_BEGIN                                        \
-  const Tr::type c = Tr::Next(LB);                     \
-  const Tr::safe::type t = Tr::safe::Next(LB);         \
-  Tr::safe::type cv = Tr::safe::Next(LB);              \
-  const Tr::value_type st = Tr::value_trait::Next(LB); \
-  const Tr::value_type ms = Tr::value_trait::Next(LB); \
-  const Tr::value_type dt = Tr::value_trait::Next(LB); \
-  const Tr::type result = F(c, t, cv, st, ms, dt);     \
-  TRAITS_PUSH(LB, result, cv);                         \
+#define LAYOUT_SMOOTH_DAMP(LB, F, Tr, ...)                           \
+  LUA_MLM_BEGIN                                                      \
+  const Tr::type c = Tr::Next((LB).L, (LB).idx);                     \
+  const Tr::safe::type t = Tr::safe::Next((LB).L, (LB).idx);         \
+  Tr::safe::type cv = Tr::safe::Next((LB).L, (LB).idx);              \
+  const Tr::value_type st = Tr::value_trait::Next((LB).L, (LB).idx); \
+  const Tr::value_type ms = Tr::value_trait::Next((LB).L, (LB).idx); \
+  const Tr::value_type dt = Tr::value_trait::Next((LB).L, (LB).idx); \
+  const Tr::type result = F(c, t, cv, st, ms, dt);                   \
+  TRAITS_PUSH(LB, result, cv);                                       \
   LUA_MLM_END
 
-TRAITS_BINARY_LAYOUT_DEFN(gauss, glm::gauss, LAYOUT_TERNARY, gLuaNumber, gLuaVec2<>::fast)
+BINARY_LAYOUT_DEFN(gauss, glm::gauss, LAYOUT_TERNARY, gLuaNumber, gLuaVec2<>::fast)
 NUMBER_VECTOR_DEFN(smoothDamp, glm::smoothDamp, LAYOUT_SMOOTH_DAMP)  // LUA_VECTOR_EXTENSIONS
 NUMBER_VECTOR_DEFN(moveTowards, glm::moveTowards, LAYOUT_TERNARY_SCALAR)
 GLM_BINDING_QUALIFIER(rotateTowards) {
   GLM_BINDING_BEGIN
   if (gLuaQuat<>::fast::Is(LB.L, LB.idx))
     BIND_FUNC(LB, glm::rotateTowards, gLuaQuat<>::fast, gLuaQuat<>, gLuaFloat);
-  BIND_FUNC(LB, glm::rotateTowards, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat);
+  else
+    BIND_FUNC(LB, glm::rotateTowards, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat);
   GLM_BINDING_END
 }
 #if GLM_HAS_CXX11_STL
@@ -1832,13 +1820,13 @@ NUMBER_VECTOR_DEFN(tgamma, glm::tgamma, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_GRADIENT_PAINT_HPP)
-TRAITS_LAYOUT_DEFN(linearGradient, glm::linearGradient, LAYOUT_TERNARY, gLuaVec2<>)
+TRAITS_DEFN(linearGradient, glm::linearGradient, gLuaVec2<>, gLuaVec2<>, gLuaVec2<>)
 TRAITS_DEFN(radialGradient, glm::radialGradient, gLuaVec2<>, gLuaFloat, gLuaVec2<>, gLuaVec2<>)
 #endif
 
 #if defined(GTX_HANDED_COORDINATE_SPACE_HPP)
-TRAITS_LAYOUT_DEFN(leftHanded, glm::leftHanded, LAYOUT_TERNARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(rightHanded, glm::rightHanded, LAYOUT_TERNARY, gLuaVec3<>)
+TRAITS_DEFN(leftHanded, glm::leftHanded, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
+TRAITS_DEFN(rightHanded, glm::rightHanded, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
 #endif
 
 #if defined(GTX_INTEGER_HPP)
@@ -1847,43 +1835,43 @@ TRAITS_DEFN(nlz, glm::nlz, gLuaTrait<unsigned>)
 #endif
 
 #if defined(GTX_INTERSECT_HPP)
-#define LAYOUT_INTERSECT_LINE_SPHERE(LB, F, Tr, ...)            \
-  LUA_MLM_BEGIN                                                 \
-  Tr::type v5, v6, v7, v8;                                      \
-  const Tr::type v1 = Tr::Next(LB);                             \
-  const Tr::safe::type v2 = Tr::safe::Next(LB);                 \
-  const Tr::safe::type v3 = Tr::safe::Next(LB);                 \
-  const Tr::value_type v4 = Tr::value_trait::Next(LB);          \
-  if (glm::intersectLineSphere(v1, v2, v3, v4, v5, v6, v7, v8)) \
-    TRAITS_PUSH(LB, true, v5, v6, v7, v8);                      \
-  else                                                          \
-    TRAITS_PUSH(LB, false);                                     \
+#define LAYOUT_INTERSECT_LINE_SPHERE(LB, F, Tr, ...)                 \
+  LUA_MLM_BEGIN                                                      \
+  Tr::type v5, v6, v7, v8;                                           \
+  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                    \
+  const Tr::safe::type v2 = Tr::safe::Next((LB).L, (LB).idx);        \
+  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);        \
+  const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx); \
+  if (glm::intersectLineSphere(v1, v2, v3, v4, v5, v6, v7, v8))      \
+    TRAITS_PUSH(LB, true, v5, v6, v7, v8);                           \
+  else                                                               \
+    TRAITS_PUSH(LB, false);                                          \
   LUA_MLM_END
 
-#define LAYOUT_INTERSECT_RAY_PLANE(LB, F, Tr, ...)                    \
-  LUA_MLM_BEGIN                                                       \
-  Tr::value_type v5;                                                  \
-  const Tr::type v1 = Tr::Next(LB);                                   \
-  const Tr::safe::type v2 = glm_drift_compensate(Tr::safe::Next(LB)); \
-  const Tr::safe::type v3 = Tr::safe::Next(LB);                       \
-  const Tr::safe::type v4 = Tr::safe::Next(LB);                       \
-  if (glm::intersectRayPlane(v1, v2, v3, v4, v5))                     \
-    TRAITS_PUSH(LB, true, v5);                                        \
-  else                                                                \
-    TRAITS_PUSH(LB, false);                                           \
+#define LAYOUT_INTERSECT_RAY_PLANE(LB, F, Tr, ...)                                 \
+  LUA_MLM_BEGIN                                                                    \
+  Tr::value_type v5;                                                               \
+  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                                  \
+  const Tr::safe::type v2 = glm_trait_normalize(Tr::safe::Next((LB).L, (LB).idx)); \
+  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);                      \
+  const Tr::safe::type v4 = Tr::safe::Next((LB).L, (LB).idx);                      \
+  if (glm::intersectRayPlane(v1, v2, v3, v4, v5))                                  \
+    TRAITS_PUSH(LB, true, v5);                                                     \
+  else                                                                             \
+    TRAITS_PUSH(LB, false);                                                        \
   LUA_MLM_END
 
-#define LAYOUT_INTERSECT_RAY_SPHERE(LB, F, Tr, ...)                   \
-  LUA_MLM_BEGIN                                                       \
-  Tr::type v5, v6;                                                    \
-  const Tr::type v1 = Tr::Next(LB);                                   \
-  const Tr::safe::type v2 = glm_drift_compensate(Tr::safe::Next(LB)); \
-  const Tr::safe::type v3 = Tr::safe::Next(LB);                       \
-  const Tr::value_type v4 = Tr::value_trait::Next(LB);                \
-  if (glm::intersectRaySphere(v1, v2, v3, v4, v5, v6))                \
-    TRAITS_PUSH(LB, true, v5, v6);                                    \
-  else                                                                \
-    TRAITS_PUSH(LB, false);                                           \
+#define LAYOUT_INTERSECT_RAY_SPHERE(LB, F, Tr, ...)                                \
+  LUA_MLM_BEGIN                                                                    \
+  Tr::type v5, v6;                                                                 \
+  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                                  \
+  const Tr::safe::type v2 = glm_trait_normalize(Tr::safe::Next((LB).L, (LB).idx)); \
+  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);                      \
+  const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx);               \
+  if (glm::intersectRaySphere(v1, v2, v3, v4, v5, v6))                             \
+    TRAITS_PUSH(LB, true, v5, v6);                                                 \
+  else                                                                             \
+    TRAITS_PUSH(LB, false);                                                        \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(intersectLineSphere, glm::intersectLineSphere, LAYOUT_INTERSECT_LINE_SPHERE)
@@ -1892,11 +1880,11 @@ NUMBER_VECTOR_DEFN(intersectRaySphere, glm::intersectRaySphere, LAYOUT_INTERSECT
 GLM_BINDING_QUALIFIER(intersectLineTriangle) {
   GLM_BINDING_BEGIN
   gLuaVec3<float>::type v6;
-  const gLuaVec3<float>::type v1 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<float>::type v2 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<float>::type v3 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<float>::type v4 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<float>::type v5 = gLuaVec3<>::Next(LB);
+  const gLuaVec3<float>::type v1 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<float>::type v2 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<float>::type v3 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<float>::type v4 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<float>::type v5 = gLuaVec3<>::Next(LB.L, LB.idx);
   if (glm::intersectLineTriangle(v1, v2, v3, v4, v5, v6))
     TRAITS_PUSH(LB, true, v6);
   else
@@ -1908,11 +1896,11 @@ GLM_BINDING_QUALIFIER(intersectRayTriangle) {
   GLM_BINDING_BEGIN
   gLuaVec2<>::type baryPosition;
   gLuaVec3<>::value_type distance;
-  const gLuaVec3<>::type orig = gLuaVec3<>::Next(LB);
-  const gLuaVec3<>::type dir = gLuaVec3<>::Next(LB);
-  const gLuaVec3<>::type v0 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<>::type v1 = gLuaVec3<>::Next(LB);
-  const gLuaVec3<>::type v2 = gLuaVec3<>::Next(LB);
+  const gLuaVec3<>::type orig = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<>::type dir = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<>::type v0 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<>::type v1 = gLuaVec3<>::Next(LB.L, LB.idx);
+  const gLuaVec3<>::type v2 = gLuaVec3<>::Next(LB.L, LB.idx);
   if (glm::intersectRayTriangle(orig, dir, v0, v1, v2, baryPosition, distance))
     TRAITS_PUSH(LB, true, baryPosition, distance);
   else
@@ -1922,22 +1910,22 @@ GLM_BINDING_QUALIFIER(intersectRayTriangle) {
 #endif
 
 #if defined(GTX_MIXED_PRODUCT_HPP)
-TRAITS_LAYOUT_DEFN(mixedProduct, glm::mixedProduct, LAYOUT_TERNARY, gLuaVec3<>)
+TRAITS_DEFN(mixedProduct, glm::mixedProduct, gLuaVec3<>, gLuaVec3<>, gLuaVec3<>)
 #endif
 
 #if defined(GTX_NORM_HPP)
 NUMBER_VECTOR_DEFN(distance2, glm::distance2, LAYOUT_BINARY)
-TRAITS_LAYOUT_DEFN(l1Norm, glm::l1Norm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(l2Norm, glm::l2Norm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
+LAYOUT_DEFN(l1Norm, glm::l1Norm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
+LAYOUT_DEFN(l2Norm, glm::l2Norm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
 NUMBER_VECTOR_DEFN(length2, glm::length2, LAYOUT_UNARY) /* glm/gtx/quaternion.hpp */
 #if GLM_VERSION >= 996  // @COMPAT: Added in 0.9.9.6
-TRAITS_LAYOUT_DEFN(lMaxNorm, glm::lMaxNorm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
+LAYOUT_DEFN(lMaxNorm, glm::lMaxNorm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>)
 #endif
-TRAITS_LAYOUT_DEFN(lxNorm, glm::lxNorm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>, gLuaTrait<unsigned>)
+LAYOUT_DEFN(lxNorm, glm::lxNorm, LAYOUT_UNARY_OR_BINARY, gLuaVec3<>, gLuaTrait<unsigned>)
 #endif
 
 #if defined(GTX_NORMAL_HPP)
-TRAITS_LAYOUT_DEFN(triangleNormal, glm::triangleNormal, LAYOUT_TERNARY, gLuaVec3<>)
+TRAITS_DEFN(triangleNormal, glm::triangleNormal, gLuaVec3<>, gLuaVec3<>, gLuaVec3<>)
 #endif
 
 #if defined(GTX_NORMAL_HPP) || defined(GTX_NORMALIZE_DOT_HPP)
@@ -1968,10 +1956,10 @@ GLM_BINDING_QUALIFIER(orthonormalize) {
 
 GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
   GLM_BINDING_BEGIN
-  gLuaVec3<>::type x = gLuaVec3<>::Next(LB);
-  gLuaVec3<>::type y = gLuaVec3<>::Next(LB);
+  gLuaVec3<>::type x = gLuaVec3<>::Next(LB.L, LB.idx);
+  gLuaVec3<>::type y = gLuaVec3<>::Next(LB.L, LB.idx);
   if (gLuaVec3<>::fast::Is(LB.L, LB.idx)) {
-    gLuaVec3<>::fast::type z = gLuaVec3<>::fast::Next(LB);
+    gLuaVec3<>::fast::type z = gLuaVec3<>::fast::Next(LB.L, LB.idx);
     glm::orthonormalize3(x, y, z);
     TRAITS_PUSH(LB, x, y, z);
   }
@@ -1984,20 +1972,19 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
 #endif
 
 #if defined(GTX_PERPENDICULAR_HPP)
-/* Layout for decomposing a vector into two basis vectors */
 #define LAYOUT_PERPBASIS(LB, F, Tr, ...) \
   LUA_MLM_BEGIN                          \
   Tr::type u, v;                         \
-  F(Tr::Next(LB), u, v);                 \
+  F(Tr::Next((LB).L, (LB).idx), u, v);   \
   TRAITS_PUSH(LB, u, v);                 \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(perp, glm::perp, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(isPerpendicular, glm::isPerpendicular, LAYOUT_BINARY)  // LUA_VECTOR_EXTENSIONS
-TRAITS_LAYOUT_DEFN(perpendicular, glm::perpendicular, LAYOUT_UNARY_OR_TERNARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(perpendicular2, glm::perpendicular2, LAYOUT_UNARY_OR_TERNARY, gLuaVec3<>)
-TRAITS_LAYOUT_DEFN(perpendicularBasis, glm::perpendicularBasis, LAYOUT_PERPBASIS, gLuaVec3<>)
-TRAITS_BINARY_LAYOUT_DEFN(perpendicularFast, glm::perpendicularFast, LAYOUT_UNARY, gLuaVec3<>::fast, gLuaVec2<>::fast)
+LAYOUT_DEFN(perpendicular, glm::perpendicular, LAYOUT_UNARY_OR_TERNARY, gLuaDir3<>)
+LAYOUT_DEFN(perpendicular2, glm::perpendicular2, LAYOUT_UNARY_OR_TERNARY, gLuaDir3<>)
+LAYOUT_DEFN(perpendicularBasis, glm::perpendicularBasis, LAYOUT_PERPBASIS, gLuaDir3<>)
+BINARY_LAYOUT_DEFN(perpendicularFast, glm::perpendicularFast, LAYOUT_UNARY, gLuaVec3<>::fast, gLuaVec2<>::fast)
 #endif
 
 #if defined(GTX_POLAR_COORDINATES_HPP)
@@ -2006,13 +1993,13 @@ TRAITS_DEFN(polar, glm::polar, gLuaVec3<>)
 #endif
 
 #if defined(GTX_PROJECTION_HPP)
-#define LAYOUT_DECOMPOSE(LB, F, Tr, ...) \
-  LUA_MLM_BEGIN                          \
-  Tr::type q, r;                         \
-  const Tr::type p = Tr::Next(LB);       \
-  const Tr::type d = Tr::safe::Next(LB); \
-  F(p, d, q, r);                         \
-  TRAITS_PUSH(LB, q, r);                 \
+#define LAYOUT_DECOMPOSE(LB, F, Tr, ...)               \
+  LUA_MLM_BEGIN                                        \
+  Tr::type q, r;                                       \
+  const Tr::type p = Tr::Next((LB).L, (LB).idx);       \
+  const Tr::type d = Tr::safe::Next((LB).L, (LB).idx); \
+  F(p, d, q, r);                                       \
+  TRAITS_PUSH(LB, q, r);                               \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(proj, glm::proj, LAYOUT_BINARY)
@@ -2043,10 +2030,10 @@ GLM_BINDING_QUALIFIER(components) {  // An optimized variant of glm::components
 #endif
 
 #if defined(GTX_ROTATE_VECTOR_HPP)
-TRAITS_LAYOUT_DEFN(orientation, glm::orientation, LAYOUT_BINARY, gLuaDir3<>)
-TRAITS_BINARY_LAYOUT_DEFN(rotateX, glm::rotateX, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
-TRAITS_BINARY_LAYOUT_DEFN(rotateY, glm::rotateY, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
-TRAITS_BINARY_LAYOUT_DEFN(rotateZ, glm::rotateZ, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
+TRAITS_DEFN(orientation, glm::orientation, gLuaDir3<>, gLuaDir3<>)
+BINARY_LAYOUT_DEFN(rotateX, glm::rotateX, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
+BINARY_LAYOUT_DEFN(rotateY, glm::rotateY, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
+BINARY_LAYOUT_DEFN(rotateZ, glm::rotateZ, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast, gLuaVec4<>::fast)
 #endif
 
 #if defined(GTX_ROTATE_VECTOR_HPP) || defined(EXT_QUATERNION_COMMON_HPP)
@@ -2111,9 +2098,9 @@ GLM_BINDING_QUALIFIER(rotate) {
   GLM_BINDING_END
 }
 
-//TRAITS_DEFN(rotate_slow, glm::rotate_slow, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
-TRAITS_LAYOUT_DEFN(rotateFromTo, glm::rotateFromTo, LAYOUT_BINARY, gLuaVec3<>)  // LUA_QUATERNION_EXTENSIONS
-QUAT_DEFN(shortest_equivalent, glm::shortest_equivalent, LAYOUT_UNARY)
+// TRAITS_DEFN(rotate_slow, glm::rotate_slow, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
+TRAITS_DEFN(rotateFromTo, glm::rotateFromTo, gLuaVec3<>, gLuaVec3<>)  // LUA_QUATERNION_EXTENSIONS
+TRAITS_DEFN(shortest_equivalent, glm::shortest_equivalent, gLuaQuat<>)
 ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
 ROTATION_MATRIX_DEFN(transformPos, glm::transformPos, LAYOUT_UNARY, gLuaVec3<>)
 TRAITS_DEFN(transformPosPerspective, glm::transformPosPerspective, gLuaMat4x4<>, gLuaVec3<>)
@@ -2138,7 +2125,7 @@ GLM_BINDING_QUALIFIER(scale) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
   switch (ttypetag(_tv)) {
-  case LUA_VVECTOR3: BIND_FUNC(LB, glm::scale, gLuaVec3<>::fast); break;
+    case LUA_VVECTOR3: BIND_FUNC(LB, glm::scale, gLuaVec3<>::fast); break;
     case LUA_VMATRIX: {
       switch (mvalue_dims(_tv)) {
         case LUAGLM_MATRIX_3x3: BIND_FUNC(LB, glm::scale, gLuaMat3x3<>::fast, gLuaVec2<>); break;
@@ -2157,7 +2144,7 @@ GLM_BINDING_QUALIFIER(scale) {
   GLM_BINDING_END
 }
 
-//TRAITS_DEFN(scale_slow, glm::scale_slow, gLuaMat4x4<>, gLuaVec3<>)
+// TRAITS_DEFN(scale_slow, glm::scale_slow, gLuaMat4x4<>, gLuaVec3<>)
 GLM_BINDING_QUALIFIER(translate) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
@@ -2212,7 +2199,7 @@ NUMBER_VECTOR_QUAT_DEFNS(angle, glm::angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT
 ORIENTED_ANGLE_DEFN(orientedAngle, glm::orientedAngle)
 NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // LUA_VECTOR_EXTENSIONS
 ORIENTED_ANGLE_DEFN(orientedAngle_atan, glm::__orientedAngle)
-TRAITS_DEFN(fromAngle, glm::fromAngle, gLuaFloatOnly)  // LUA_VECTOR_EXTENSIONS
+TRAITS_DEFN(fromAngle, glm::fromAngle, gLuaCNum)  // LUA_VECTOR_EXTENSIONS
 #endif
 
 #if defined(GTX_VECTOR_QUERY_HPP)
@@ -2228,7 +2215,8 @@ GLM_BINDING_QUALIFIER(isNormalized) {
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_MATRIX(LB, mvalue_dims(o), glm::_isNormalized, LAYOUT_BINARY_EPS);
-  PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNormalized, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
+  else
+    PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNormalized, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
   GLM_BINDING_END
 }
 
@@ -2237,7 +2225,8 @@ GLM_BINDING_QUALIFIER(isNull) {
   const TValue *o = glm_i2v(LB.L, LB.idx);
   if (ttismatrix(o))
     PARSE_MATRIX(LB, mvalue_dims(o), glm::_isNull, LAYOUT_BINARY_EPS);
-  PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNull, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
+  else
+    PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNull, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
   GLM_BINDING_END
 }
 
@@ -2248,7 +2237,7 @@ NUMBER_VECTOR_DEFN(isUniform, glm::isUniform, LAYOUT_UNARY)  // LUA_VECTOR_EXTEN
 NUMBER_VECTOR_DEFN(mirrorClamp, glm::mirrorClamp, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(mirrorRepeat, glm::mirrorRepeat, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(repeat, glm::repeat, LAYOUT_UNARY)
-TRAITS_LAYOUT_DEFN(deltaAngle, glm::deltaAngle, LAYOUT_BINARY, gLuaFloatOnly)  // LUA_VECTOR_EXTENSIONS
+TRAITS_DEFN(deltaAngle, glm::deltaAngle, gLuaNumber, gLuaNumber)  // LUA_VECTOR_EXTENSIONS
 NUMBER_VECTOR_DEFN(loopRepeat, glm::loopRepeat, LAYOUT_BINARY_OPTIONAL)
 NUMBER_VECTOR_DEFN(pingPong, glm::pingPong, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
