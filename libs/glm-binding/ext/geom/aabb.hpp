@@ -4,7 +4,6 @@
 #ifndef EXT_GEOM_AABB_HPP
 #define EXT_GEOM_AABB_HPP
 
-#include <vector>
 #include <iterator>
 
 #include "setup.hpp"
@@ -142,7 +141,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(AABB<L, T, Q> const &x, AABB<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(AABB<L, T, Q> const &x, AABB<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.minPoint, y.minPoint, eps) && all_equal(x.maxPoint, y.maxPoint, eps);
   }
 
@@ -162,7 +161,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(AABB<L, T, Q> const &x, AABB<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(AABB<L, T, Q> const &x, AABB<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.minPoint, y.minPoint, eps) || any_notequal(x.maxPoint, y.maxPoint, eps);
   }
 
@@ -846,6 +845,7 @@ namespace glm {
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const Line<L, T, Q> &line, T &dNear, T &dFar) {
+    GLM_GEOM_ASSERT(lessThanEqual(dNear, dFar));
     return intersectLineAABB(aabb, line, dNear, dFar);
   }
 
@@ -861,6 +861,8 @@ namespace glm {
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const Ray<L, T, Q> &ray, T &dNear, T &dFar) {
+    GLM_GEOM_ASSERT(lessThanEqual(dNear, dFar));
+    GLM_GEOM_ASSERT(greaterThanEqual(dNear, -epsilon<T>()));
     return intersectLineAABB(aabb, toLine(ray), dNear, dFar);
   }
 
@@ -873,6 +875,8 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const LineSegment<L, T, Q> &lineSegment, T &dNear, T &dFar) {
+    GLM_GEOM_ASSERT(lessThanEqual(dNear, dFar));
+    GLM_GEOM_ASSERT(greaterThanEqual(dNear, -epsilon<T>()) && lessThanEqual(dFar, T(1) + epsilon<T>()));
     const vec<L, T, Q> dir = lineSegment.dir2();
     const T len = length(dir);
     if (len <= epsilon<T>()) {  // Degenerate line segment
@@ -902,7 +906,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const Sphere<L, T, Q> &sphere) {
     const vec<L, T, Q> pt = closestPoint(aabb, sphere.pos);
-    return distance2(sphere.pos, pt) <= sphere.r * sphere.r;  // + epsilon<T>() ?
+    return distance2(sphere.pos, pt) <= sphere.r * sphere.r;  // @TODO: + epsilon<T>() ?
   }
 
   template<length_t L, typename T, qualifier Q>

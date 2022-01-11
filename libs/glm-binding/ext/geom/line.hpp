@@ -46,12 +46,12 @@ namespace glm {
 
     Line(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
       : pos(position), dir(normalize(direction)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir));
+      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
     }
 
     Line(const Line<L, T, Q> &line)
       : pos(line.pos), dir(line.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir));
+      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
     }
   };
 
@@ -106,7 +106,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Line<L, T, Q> const &x, Line<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Line<L, T, Q> const &x, Line<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.pos, y.pos, eps) && all_equal(x.dir, y.dir, eps);
   }
 
@@ -126,7 +126,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Line<L, T, Q> const &x, Line<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Line<L, T, Q> const &x, Line<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.pos, y.pos, eps) || any_notequal(x.dir, y.dir, eps);
   }
 
@@ -270,18 +270,18 @@ namespace glm {
   // Tests if the given object is fully contained on the line.
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const vec<L, T, Q> &point, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const vec<L, T, Q> &point, const T eps = epsilon<T>()) {
     T d(0);
     return distance2(closestPoint(line, point, d), point) <= eps;
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const Ray<L, T, Q> &ray, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const Ray<L, T, Q> &ray, const T eps = epsilon<T>()) {
     return contains(line, ray.pos, eps) && all(epsilonEqual(line.dir, ray.dir, eps));
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const LineSegment<L, T, Q> &lineSegment, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Line<L, T, Q> &line, const LineSegment<L, T, Q> &lineSegment, const T eps = epsilon<T>()) {
     return contains(line, lineSegment.a, eps) && contains(line, lineSegment.b, eps);
   }
 

@@ -358,12 +358,12 @@ namespace hash {
   /// </summary>
   template<typename T>
   struct lglm_hash {
-    GLM_FUNC_DECL size_t operator()(const T& n) const;
+    GLM_FUNC_DECL size_t operator()(const T &n) const;
   };
 
   template<>
   struct lglm_hash<double> {
-    GLM_FUNC_QUALIFIER size_t operator()(const double& n) const {
+    GLM_FUNC_QUALIFIER size_t operator()(const double &n) const {
       union { double __t; size_t __a; } __scalar_hash;
       __scalar_hash.__a = 0;
       __scalar_hash.__t = n;
@@ -373,7 +373,7 @@ namespace hash {
 
   template<>
   struct lglm_hash<float> {
-    GLM_FUNC_QUALIFIER size_t operator()(const float& n) const {
+    GLM_FUNC_QUALIFIER size_t operator()(const float &n) const {
       union { float __t; size_t __a; } __scalar_hash;
       __scalar_hash.__a = 0;
       __scalar_hash.__t = n;

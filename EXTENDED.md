@@ -1521,14 +1521,14 @@ result = aabb2d.intersectsSphere(..., spherePos --[[ vec2 ]], sphereRad --[[ num
 
 result = aabb.intersectsPlane(..., planeNormal --[[ vec3 ]], planeOffset --[[ number]])
 
-result,dNear,dFar = aabb.intersectsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]], [dNear, dFar])
-result,dNear,dFar = aabb2d.intersectsLine(..., linePos --[[ vec2 ]], lineDir --[[ vec2 ]], [dNear, dFar])
+result,dNear,dFar = aabb.intersectsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]], [dNear[, dFar]])
+result,dNear,dFar = aabb2d.intersectsLine(..., linePos --[[ vec2 ]], lineDir --[[ vec2 ]], [dNear[, dFar]])
 
-result,dNear,dFar = aabb.intersectsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]], [dNear, dFar])
-result,dNear,dFar = aabb2d.intersectsRay(..., rayPos --[[ vec2 ]], rayDir --[[ vec2 ]], [dNear, dFar])
+result,dNear,dFar = aabb.intersectsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]], [dNear[, dFar]])
+result,dNear,dFar = aabb2d.intersectsRay(..., rayPos --[[ vec2 ]], rayDir --[[ vec2 ]], [dNear[, dFar]])
 
-result,dNear,dFar = aabb.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], [dNear, dFar])
-result,dNear,dFar = aabb2d.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]], [dNear, dFar])
+result,dNear,dFar = aabb.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], [dNear[, dFar]])
+result,dNear,dFar = aabb2d.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]], [dNear[, dFar]])
 ```
 
 ### aabb.intersection
@@ -1693,9 +1693,9 @@ bool = line.intersectsPlane(..., planeNormal --[[ vec3 ]], planeOffset --[[ numb
 --           : passed as an optional parameter: a limit to the intersection
 --           : test, e.g., absolute distances (-100, 100) for lines/rays and
 --           : relative distances (0.25, 0.75) for segments.
-bool,dNear,dFar = line.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]], [dNear, dFar])
+bool,dNear,dFar = line.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]], [dNear[, dFar]])
 bool,dNear,u,v = line.intersectsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]])
-count,dNear,dFar = line.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]], [dNear, dFar])
+count,dNear,dFar = line.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]])
 ```
 
 ## Ray
@@ -1844,10 +1844,10 @@ dist = ray.distanceSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]])
 --           : passed as an optional parameter: a limit to the intersection
 --           : test, e.g., absolute distances (-100, 100) for lines/rays and
 --           : relative distances (0.25, 0.75) for segments.
-bool,dNear,dFar = ray.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]], [dNear, dFar])
-bool,dNear = ray.intersectsPlane(..., planeNormal --[[ vec3 ]], planeOffset --[[ number ]], [dNear, dFar])
+bool,dNear,dFar = ray.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]], [dNear[, dFar]])
+bool,dNear = ray.intersectsPlane(..., planeNormal --[[ vec3 ]], planeOffset --[[ number ]])
 bool,dNear,u,v = line.intersectsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]])
-count,dNear,dFar = ray.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]], [dNear, dFar])
+count,dNear,dFar = ray.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]])
 ```
 
 ## Segment
@@ -2330,14 +2330,14 @@ bool = sphere.intersectsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ 
 --           : passed as an optional parameter: a limit to the intersection
 --           : test, e.g., absolute distances (-100, 100) for lines/rays and
 --           : relative distances (0.25, 0.75) for segments.
-count,dNear,dFar = sphere.intersectsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]], [dNear, dFar])
-count,dNear,dFar = circle.intersectsLine(..., linePos --[[ vec2 ]], lineDir --[[ vec2 ]], [dNear, dFar])
+count,dNear,dFar = sphere.intersectsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]])
+count,dNear,dFar = circle.intersectsLine(..., linePos --[[ vec2 ]], lineDir --[[ vec2 ]])
 
-count,dNear,dFar = sphere.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], [dNear, dFar])
-count,dNear,dFar = circle.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]], [dNear, dFar])
+count,dNear,dFar = sphere.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
+count,dNear,dFar = circle.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]])
 
-count,dNear,dFar = sphere.intersectsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]], [dNear, dFar])
-count,dNear,dFar = circle.intersectsRay(..., rayPos --[[ vec2 ]], rayDir --[[ vec2 ]], [dNear, dFar])
+count,dNear,dFar = sphere.intersectsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]])
+count,dNear,dFar = circle.intersectsRay(..., rayPos --[[ vec2 ]], rayDir --[[ vec2 ]])
 ```
 
 ## Plane

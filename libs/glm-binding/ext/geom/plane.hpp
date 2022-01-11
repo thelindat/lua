@@ -49,17 +49,17 @@ namespace glm {
 
     Plane(const point_type &direction, T offset)
       : normal(direction), d(offset) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal));
+      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
     }
 
     Plane(const point_type &point, const point_type &normal_)
       : normal(normal_), d(dot(point, normal)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal));
+      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
     }
 
     Plane(const Plane<L, T, Q> &plane)
       : normal(plane.normal), d(plane.d) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal));
+      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
     }
 
     Plane<L, T, Q> &operator=(const Plane<L, T, Q> &plane) {
@@ -119,7 +119,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Plane<L, T, Q> const &x, Plane<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Plane<L, T, Q> const &x, Plane<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.normal, y.normal, eps) && equal(x.d, y.d, eps);
   }
 
@@ -139,7 +139,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Plane<L, T, Q> const &x, Plane<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Plane<L, T, Q> const &x, Plane<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.normal, y.normal, eps) || notEqual(x.d, y.d, eps);
   }
 
@@ -239,7 +239,7 @@ namespace glm {
   /// Return true if two planes are parallel.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool isParallel(const Plane<L, T, Q> &plane, const Plane<L, T, Q> &other, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool isParallel(const Plane<L, T, Q> &plane, const Plane<L, T, Q> &other, const T eps = epsilon<T>()) {
     return all(epsilonEqual(plane.normal, other.normal, eps));
   }
 
@@ -247,7 +247,7 @@ namespace glm {
   /// Return true if the plane contains/passes-through the origin (i.e., T(0)).
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool passesThroughOrigin(const Plane<L, T, Q> &plane, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool passesThroughOrigin(const Plane<L, T, Q> &plane, const T eps = epsilon<T>()) {
     return abs(plane.d) <= eps;
   }
 
@@ -548,7 +548,7 @@ namespace glm {
   ///   0 - If the triangle intersects the plane.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER int examineSide(const Plane<L, T, Q> &plane, const Triangle<L, T, Q> &triangle, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER int examineSide(const Plane<L, T, Q> &plane, const Triangle<L, T, Q> &triangle, const T eps = epsilon<T>()) {
     const T a = signedDistance(plane, triangle.a);
     const T b = signedDistance(plane, triangle.b);
     const T c = signedDistance(plane, triangle.c);
@@ -671,22 +671,22 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Line<L, T, Q> &line, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Line<L, T, Q> &line, const T eps = epsilon<T>()) {
     return contains(plane, line.pos, eps) && isPerpendicular(line.dir, plane.normal, eps);
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Ray<L, T, Q> &ray, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Ray<L, T, Q> &ray, const T eps = epsilon<T>()) {
     return contains(plane, ray.pos, eps) && isPerpendicular(ray.dir, plane.normal, eps);
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const LineSegment<L, T, Q> &line, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const LineSegment<L, T, Q> &line, const T eps = epsilon<T>()) {
     return contains(plane, line.a, eps) && contains(plane, line.b, eps);
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Triangle<L, T, Q> &triangle, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Plane<L, T, Q> &plane, const Triangle<L, T, Q> &triangle, const T eps = epsilon<T>()) {
     return contains(plane, triangle.a, eps)
            && contains(plane, triangle.b, eps)
            && contains(plane, triangle.c, eps);
@@ -752,7 +752,7 @@ namespace glm {
     for (length_t i = 0; i < L; ++i)
       r += e[i] * abs(plane.normal[i]);
 
-    return abs(dot(plane.normal, c) - plane.d) <= r;
+    return abs(dot(plane.normal, c) - plane.d) <= r;  // @TODO: + epsilon<T>() ?
   }
 
   template<length_t L, typename T, qualifier Q>

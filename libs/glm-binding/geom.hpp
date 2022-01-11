@@ -25,91 +25,17 @@
 #include "ext/geom/plane.hpp"
 #include "ext/geom/polygon.hpp"
 
-/* All geometric objects adhere to the glm::equal/glm::notEqual API. */
-#define GEOM_EQUALS(LB, F, Tr, ...) \
-  LAYOUT_GENERIC_EQUAL(LB, F, Tr, Tr::point_trait::fast)
-
 /*
-** Generic distance definition: returning the distance between a geometric
-** object and point-of-interest along with the parametric distances of intersection
+** {==================================================================
+** Traits
+** ===================================================================
 */
-#define GEOM_DISTANCE(LB, F, A, B)             \
-  LUA_MLM_BEGIN                                \
-  const A::type a = A::Next((LB).L, (LB).idx); \
-  const B::type b = B::Next((LB).L, (LB).idx); \
-  A::value_type t(0);                          \
-  TRAITS_PUSH(LB, F(a, b, t), t);              \
-  LUA_MLM_END
-
-/*
-** Generic intersects definition where the line/ray/segment is the first
-** parameter being tested against the structure passed as the second parameter.
-** Returning the point of intersection and relative location along each object.
-*/
-#define GEOM_INTERSECTS(LB, F, A, B)                   \
-  LUA_MLM_BEGIN                                        \
-  const A::type a = A::Next((LB).L, (LB).idx);         \
-  const B::type b = B::Next((LB).L, (LB).idx);         \
-  A::zero_trait::type n = A::safe::zero_trait::zero(); \
-  A::one_trait::type f = A::safe::one_trait::zero();   \
-  TRAITS_PUSH(LB, F(a, b, n, f), n, f);                \
-  LUA_MLM_END
-
-/*
-** The line/ray/segment is the second parameter being tested against the
-** structure passed as the first parameter.
-*/
-#define GEOM_INTERSECTS_RH(LB, F, A, B)                \
-  LUA_MLM_BEGIN                                        \
-  const A::type a = A::Next((LB).L, (LB).idx);         \
-  const B::type b = B::Next((LB).L, (LB).idx);         \
-  B::zero_trait::type n = B::safe::zero_trait::zero(); \
-  B::one_trait::type f = B::safe::one_trait::zero();   \
-  TRAITS_PUSH(LB, F(a, b, n, f), n, f);                \
-  LUA_MLM_END
-
-/*
-** Intersection test with a result (e.g., boolean), UV coordinates, and a
-** distance along the object
-*/
-#define GEOM_INTERSECTS_UV(LB, F, A, B)        \
-  LUA_MLM_BEGIN                                \
-  const A::type a = A::Next((LB).L, (LB).idx); \
-  const B::type b = B::Next((LB).L, (LB).idx); \
-  A::value_type x(0), y(0), z(0);              \
-  TRAITS_PUSH(LB, F(a, b, x, y, z), x, y, z);  \
-  LUA_MLM_END
-
-/*
-** Intersection test with a result (e.g., boolean) and a single intersection
-** object that may also be returned.
-*/
-#define GEOM_INTERSECTS_PT(LB, F, A, B)             \
-  LUA_MLM_BEGIN                                     \
-  A::point_trait::type pt = A::point_trait::zero(); \
-  const A::type a = A::Next((LB).L, (LB).idx);      \
-  const B::type b = B::Next((LB).L, (LB).idx);      \
-  TRAITS_PUSH(LB, F(a, b, pt), pt);                 \
-  LUA_MLM_END
-
-/*
-** Generic project-to-axis definition; returning the parametric min & max of the
-** axis projection.
-*/
-#define GEOM_PROJECTION(LB, F, A, B)           \
-  LUA_MLM_BEGIN                                \
-  const A::type a = A::Next((LB).L, (LB).idx); \
-  const B::type b = B::Next((LB).L, (LB).idx); \
-  A::value_type outMin(0), outMax(0);          \
-  F(a, b, outMin, outMax);                     \
-  TRAITS_PUSH(LB, outMin, outMax);             \
-  LUA_MLM_END
 
 /// <summary>
 /// Relative position along a line, segment, ray for casting.
 /// </summary>
 template<bool isNear, bool isRelative, typename T = glm_Float>
-struct gLuaRelativePosition : gLuaTrait<T> {
+struct gParametricPosition : gLuaAbstractTrait<T, T> {
   static GLM_CONSTEXPR const char *Label() {
     return "RelativePosition";
   }
@@ -178,13 +104,13 @@ struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T>> {
   /// @RelativeZero: Lua type trait representing the relative negative-inf/zero
   /// coordinate of the object.
   /// </summary>
-  using zero_trait = gLuaRelativePosition<true, false, T>;
+  using zero_trait = gParametricPosition<true, false, T>;
 
   /// <summary>
   /// @RelativeOne: Lua type trait representing the relative inf/one coordinate
   /// of the object.
   /// </summary>
-  using one_trait = gLuaRelativePosition<false, false, T>;
+  using one_trait = gParametricPosition<false, false, T>;
 
   static GLM_CONSTEXPR const char *Label() {
     return "Line";
@@ -213,8 +139,8 @@ struct gLuaSegment : gLuaAbstractTrait<glm::LineSegment<L, T>> {
   using safe = gLuaSegment;  // @SafeBinding
   using fast = gLuaSegment;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::LineSegment<L, T>::point_type>;  // @PointBinding
-  using zero_trait = gLuaRelativePosition<true, true, T>;  // @RelativeZero
-  using one_trait = gLuaRelativePosition<false, true, T>;  // @RelativeOne
+  using zero_trait = gParametricPosition<true, true, T>;  // @RelativeZero
+  using one_trait = gParametricPosition<false, true, T>;  // @RelativeOne
 
   static GLM_CONSTEXPR const char *Label() {
     return "Segment";
@@ -243,8 +169,8 @@ struct gLuaRay : gLuaAbstractTrait<glm::Ray<L, T>> {
   using safe = gLuaRay;  // @SafeBinding
   using fast = gLuaRay;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Ray<L, T>::point_type>;  // @PointBinding
-  using zero_trait = gLuaRelativePosition<true, true, T>;  // @RelativeZero
-  using one_trait = gLuaRelativePosition<false, false, T>;  // @RelativeOne
+  using zero_trait = gParametricPosition<true, true, T>;  // @RelativeZero
+  using one_trait = gParametricPosition<false, false, T>;  // @RelativeOne
 
   static GLM_CONSTEXPR const char *Label() {
     return "Ray";
@@ -283,9 +209,7 @@ struct gLuaTriangle : gLuaAbstractTrait<glm::Triangle<L, T>> {
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx)
-           && point_trait::Is(L_, idx + 1)
-           && point_trait::Is(L_, idx + 2);
+    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1) && point_trait::Is(L_, idx + 2);
   }
 
   LUA_TRAIT_QUALIFIER glm::Triangle<L, T> Next(lua_State *L_, int &idx) {
@@ -401,6 +325,108 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
   }
 };
 
+/* }================================================================== */
+
+/*
+** {==================================================================
+** Trait Layouts
+** ===================================================================
+*/
+
+/* All geometric objects adhere to the glm::equal/glm::notEqual API. */
+#define GEOM_EQUALS(LB, F, Tr, ...) \
+  LAYOUT_GENERIC_EQUAL(LB, F, Tr, Tr::point_trait::fast)
+
+/*
+** Generic project-to-axis definition; returning the parametric min & max of the
+** axis projection.
+*/
+#define GEOM_PROJECTION(LB, F, A, B)           \
+  LUA_MLM_BEGIN                                \
+  const A::type a = A::Next((LB).L, (LB).idx); \
+  const B::type b = B::Next((LB).L, (LB).idx); \
+  A::value_type outMin(0), outMax(0);          \
+  F(a, b, outMin, outMax);                     \
+  TRAITS_PUSH(LB, outMin, outMax);             \
+  LUA_MLM_END
+
+/* Single parametric output */
+#define LAYOUT_GEOM_PARAMETRIC_U(LB, F, A, B, U) \
+  LUA_MLM_BEGIN                                  \
+  U::type t = U::zero();                         \
+  const A::type a = A::Next((LB).L, (LB).idx);   \
+  const B::type b = B::Next((LB).L, (LB).idx);   \
+  TRAITS_PUSH(LB, F(a, b, t), t);                \
+  LUA_MLM_END
+
+/* Multiple parametric outputs */
+#define LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, U, V) \
+  LUA_MLM_BEGIN                                      \
+  U::type n = U::zero();                             \
+  V::type f = V::zero();                             \
+  const A::type a = A::Next((LB).L, (LB).idx);       \
+  const B::type b = B::Next((LB).L, (LB).idx);       \
+  TRAITS_PUSH(LB, F(a, b, n, f), n, f);              \
+  LUA_MLM_END
+
+/* Multiple parametric inputs & outputs */
+#define LAYOUT_GEOM_PARAMETRIC_UV_ARGS(LB, F, A, B, U, V) \
+  LUA_MLM_BEGIN                                           \
+  const A::type a = A::Next((LB).L, (LB).idx);            \
+  const B::type b = B::Next((LB).L, (LB).idx);            \
+  U::type n = U::Next((LB).L, (LB).idx);                  \
+  V::type f = V::Next((LB).L, (LB).idx);                  \
+  TRAITS_PUSH(LB, F(a, b, n, f), n, f);                   \
+  LUA_MLM_END
+
+/* Multiple parametric outputs */
+#define LAYOUT_GEOM_PARAMETRIC_UVW(LB, F, A, B, U, V, W) \
+  LUA_MLM_BEGIN                                          \
+  U::type u = U::zero();                                 \
+  V::type v = V::zero();                                 \
+  W::type w = W::zero();                                 \
+  const A::type a = A::Next((LB).L, (LB).idx);           \
+  const B::type b = B::Next((LB).L, (LB).idx);           \
+  TRAITS_PUSH(LB, F(a, b, u, v, w), u, v, w);            \
+  LUA_MLM_END
+
+/*
+** Generic distance definition: returning the distance between a geometric
+** object and point-of-interest along with the parametric distances of intersection
+*/
+#define GEOM_DISTANCE(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_U(LB, F, A, B, A::value_trait)
+
+/* Generic near + far glm::distance definition */
+#define GEOM_DISTANCE_UV(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, A::value_trait, A::value_trait)
+
+/*
+** Generic intersects definition where the line/ray/segment is the first
+** parameter being tested against the structure passed as the second parameter.
+** Returning the point of intersection and relative location along each object.
+*/
+#define GEOM_INTERSECTS(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, A::value_trait, A::value_trait)
+
+/*
+** The line/ray/segment is the left-hand or right-hand parameter being tested
+** against the AABB passed as the first opposite.
+*/
+#define GEOM_INTERSECTS_AABB_LH(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UV_ARGS(LB, F, A, B, A::zero_trait, A::one_trait)
+#define GEOM_INTERSECTS_AABB_RH(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UV_ARGS(LB, F, A, B, B::zero_trait, B::one_trait)
+
+/*
+** Intersection test with a result (e.g., boolean), UV coordinates, and a
+** distance along the object
+*/
+#define GEOM_INTERSECTS_TRIANGLE(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UVW(LB, F, A, B, A::value_trait, A::value_trait, A::value_trait)
+
+/* Generic glm::closestPoint definition */
+#define GEOM_CLOSEST(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, A::value_trait, A::value_trait)
+
+/* Generic glm::closestPoint definition */
+#define GEOM_CLOSEST_TRIANGLE(LB, F, A, B) LAYOUT_GEOM_PARAMETRIC_UVW(LB, F, A, B, A::value_trait, A::value_trait, A::value_trait)
+
+/* }================================================================== */
+
 /*
 ** {==================================================================
 ** AABB
@@ -472,9 +498,9 @@ TRAITS_DEFN(aabb_intersectsAABB, glm::intersects, gLuaAABB<>, gLuaAABB<>)
 TRAITS_DEFN(aabb_intersectsSphere, glm::intersects, gLuaAABB<>, gLuaSphere<>)
 TRAITS_DEFN(aabb_intersectsPlane, glm::intersects, gLuaAABB<>, gLuaPlane<>)
 // TRAITS_DEFN(aabb_intersectsTriangle, glm::intersects, gLuaAABB<>, gLuaTriangle<>)
-LAYOUT_DEFN(aabb_intersectsLine, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaLine<>)
-LAYOUT_DEFN(aabb_intersectsSegment, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaSegment<>)
-LAYOUT_DEFN(aabb_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<>, gLuaRay<>)
+LAYOUT_DEFN(aabb_intersectsLine, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<>, gLuaLine<>)
+LAYOUT_DEFN(aabb_intersectsSegment, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<>, gLuaSegment<>)
+LAYOUT_DEFN(aabb_intersectsRay, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<>, gLuaRay<>)
 TRAITS_DEFN(aabb_intersection, glm::intersection, gLuaAABB<>, gLuaAABB<>)
 TRAITS_DEFN(aabb_slabs, glm::slabs, gLuaAABB<>, gLuaRay<>)
 LAYOUT_DEFN(aabb_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaAABB<>, gLuaAABB<>::point_trait)
@@ -643,9 +669,9 @@ TRAITS_DEFN(aabb2d_encloseSphere, glm::enclose, gLuaAABB<2>, gLuaSphere<2>)
 TRAITS_DEFN(aabb2d_encloseAABB, glm::enclose, gLuaAABB<2>, gLuaAABB<2>)
 TRAITS_DEFN(aabb2d_intersection, glm::intersection, gLuaAABB<2>, gLuaAABB<2>)
 TRAITS_DEFN(aabb2d_intersectsAABB, glm::intersects, gLuaAABB<2>, gLuaAABB<2>)
-LAYOUT_DEFN(aabb2d_intersectsLine, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<2>, gLuaLine<2>)
-LAYOUT_DEFN(aabb2d_intersectsSegment, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<2>, gLuaSegment<2>)
-LAYOUT_DEFN(aabb2d_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gLuaAABB<2>, gLuaRay<2>)
+LAYOUT_DEFN(aabb2d_intersectsLine, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<2>, gLuaLine<2>)
+LAYOUT_DEFN(aabb2d_intersectsSegment, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<2>, gLuaSegment<2>)
+LAYOUT_DEFN(aabb2d_intersectsRay, glm::intersects, GEOM_INTERSECTS_AABB_RH, gLuaAABB<2>, gLuaRay<2>)
 LAYOUT_DEFN(aabb2d_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaAABB<2>, gLuaAABB<2>::point_trait)
 
 static const luaL_Reg luaglm_aabb2dlib[] = {
@@ -723,22 +749,22 @@ TRAITS_DEFN(line_isnan, glm::isnan, gLuaLine<>)
 TRAITS_DEFN(line_isfinite, glm::isfinite, gLuaLine<>)
 TRAITS_DEFN(line_getpoint, glm::getPoint, gLuaLine<>, gLuaLine<>::value_trait)
 LAYOUT_DEFN(line_closest, glm::closestPoint, GEOM_DISTANCE, gLuaLine<>, gLuaLine<>::point_trait)
-LAYOUT_DEFN(line_closestRay, glm::closestPoint, GEOM_INTERSECTS, gLuaLine<>, gLuaRay<>)
-LAYOUT_DEFN(line_closestLine, glm::closestPoint, GEOM_INTERSECTS, gLuaLine<>, gLuaLine<>)
-LAYOUT_DEFN(line_closestSegment, glm::closestPoint, GEOM_INTERSECTS, gLuaLine<>, gLuaSegment<>)
-LAYOUT_DEFN(line_closestTriangle, glm::closestPoint, GEOM_INTERSECTS_UV, gLuaLine<>, gLuaTriangle<>)
+LAYOUT_DEFN(line_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaRay<>)
+LAYOUT_DEFN(line_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaLine<>)
+LAYOUT_DEFN(line_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaSegment<>)
+LAYOUT_DEFN(line_closestTriangle, glm::closestPoint, GEOM_CLOSEST_TRIANGLE, gLuaLine<>, gLuaTriangle<>)
 TRAITS_DEFN(line_contains, glm::contains, gLuaLine<>, gLuaLine<>::point_trait, gLuaLine<>::eps_trait)
 TRAITS_DEFN(line_containsRay, glm::contains, gLuaLine<>, gLuaRay<>, gLuaLine<>::eps_trait)
 TRAITS_DEFN(line_containsSegment, glm::contains, gLuaLine<>, gLuaSegment<>, gLuaLine<>::eps_trait)
 LAYOUT_DEFN(line_distance, glm::distance, GEOM_DISTANCE, gLuaLine<>, gLuaLine<>::point_trait)
-LAYOUT_DEFN(line_distanceRay, glm::distance, GEOM_INTERSECTS, gLuaLine<>, gLuaRay<>)
-LAYOUT_DEFN(line_distanceLine, glm::distance, GEOM_INTERSECTS, gLuaLine<>, gLuaLine<>)
-LAYOUT_DEFN(line_distanceSegment, glm::distance, GEOM_INTERSECTS, gLuaLine<>, gLuaSegment<>)
+LAYOUT_DEFN(line_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaLine<>, gLuaRay<>)
+LAYOUT_DEFN(line_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaLine<>, gLuaLine<>)
+LAYOUT_DEFN(line_distanceSegment, glm::distance, GEOM_DISTANCE_UV, gLuaLine<>, gLuaSegment<>)
 TRAITS_DEFN(line_distanceSphere, glm::distance, gLuaLine<>, gLuaSphere<>)
-LAYOUT_DEFN(line_intersectsAABB, glm::intersects, GEOM_INTERSECTS, gLuaLine<>, gLuaAABB<>)
+LAYOUT_DEFN(line_intersectsAABB, glm::intersects, GEOM_INTERSECTS_AABB_LH, gLuaLine<>, gLuaAABB<>)
 LAYOUT_DEFN(line_intersectsSphere, glm::intersects, GEOM_INTERSECTS, gLuaLine<>, gLuaSphere<>)
 LAYOUT_DEFN(line_intersectsPlane, glm::intersects, GEOM_DISTANCE, gLuaLine<>, gLuaPlane<>)
-LAYOUT_DEFN(line_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV, gLuaLine<>, gLuaTriangle<>)
+LAYOUT_DEFN(line_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaLine<>, gLuaTriangle<>)
 LAYOUT_DEFN(line_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaLine<>, gLuaLine<>::point_trait)
 
 static const luaL_Reg luaglm_linelib[] = {
@@ -800,20 +826,20 @@ TRAITS_DEFN(ray_isnan, glm::isnan, gLuaRay<>)
 TRAITS_DEFN(ray_isfinite, glm::isfinite, gLuaRay<>)
 TRAITS_DEFN(ray_getPoint, glm::getPoint, gLuaRay<>, gLuaRay<>::value_trait)
 LAYOUT_DEFN(ray_closest, glm::closestPoint, GEOM_DISTANCE, gLuaRay<>, gLuaRay<>::point_trait)
-LAYOUT_DEFN(ray_closestRay, glm::closestPoint, GEOM_INTERSECTS, gLuaRay<>, gLuaRay<>)
-LAYOUT_DEFN(ray_closestLine, glm::closestPoint, GEOM_INTERSECTS, gLuaRay<>, gLuaLine<>)
-LAYOUT_DEFN(ray_closestSegment, glm::closestPoint, GEOM_INTERSECTS, gLuaRay<>, gLuaSegment<>)
+LAYOUT_DEFN(ray_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaRay<>)
+LAYOUT_DEFN(ray_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaLine<>)
+LAYOUT_DEFN(ray_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaSegment<>)
 TRAITS_DEFN(ray_contains, glm::contains, gLuaRay<>, gLuaRay<>::point_trait, gLuaRay<>::eps_trait)
 TRAITS_DEFN(ray_containsSegment, glm::contains, gLuaRay<>, gLuaSegment<>, gLuaRay<>::eps_trait)
 LAYOUT_DEFN(ray_distance, glm::distance, GEOM_DISTANCE, gLuaRay<>, gLuaRay<>::point_trait)
-LAYOUT_DEFN(ray_distanceRay, glm::distance, GEOM_INTERSECTS, gLuaRay<>, gLuaRay<>)
-LAYOUT_DEFN(ray_distanceLine, glm::distance, GEOM_INTERSECTS, gLuaRay<>, gLuaLine<>)
-LAYOUT_DEFN(ray_distanceSegment, glm::distance, GEOM_INTERSECTS, gLuaRay<>, gLuaSegment<>)
+LAYOUT_DEFN(ray_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaRay<>, gLuaRay<>)
+LAYOUT_DEFN(ray_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaRay<>, gLuaLine<>)
+LAYOUT_DEFN(ray_distanceSegment, glm::distance, GEOM_DISTANCE_UV, gLuaRay<>, gLuaSegment<>)
 TRAITS_DEFN(ray_distanceSphere, glm::distance, gLuaRay<>, gLuaSphere<>)
 LAYOUT_DEFN(ray_intersectsSphere, glm::intersects, GEOM_INTERSECTS, gLuaRay<>, gLuaSphere<>)
-LAYOUT_DEFN(ray_intersectsAABB, glm::intersects, GEOM_INTERSECTS, gLuaRay<>, gLuaAABB<>)
+LAYOUT_DEFN(ray_intersectsAABB, glm::intersects, GEOM_INTERSECTS_AABB_LH, gLuaRay<>, gLuaAABB<>)
 LAYOUT_DEFN(ray_intersectsPlane, glm::intersects, GEOM_DISTANCE, gLuaRay<>, gLuaPlane<>)
-LAYOUT_DEFN(ray_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV, gLuaRay<>, gLuaTriangle<>)
+LAYOUT_DEFN(ray_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaRay<>, gLuaTriangle<>)
 LAYOUT_DEFN(ray_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaRay<>, gLuaRay<>::point_trait)
 
 static const luaL_Reg luaglm_raylib[] = {
@@ -876,24 +902,24 @@ TRAITS_DEFN(segment_reverse, glm::reverse, gLuaSegment<>)
 TRAITS_DEFN(segment_dir, glm::dir, gLuaSegment<>)
 TRAITS_DEFN(segment_extremePoint, glm::extremePoint, gLuaSegment<>, gLuaSegment<>::point_trait)
 LAYOUT_DEFN(segment_closestPoint, glm::closestPoint, GEOM_DISTANCE, gLuaSegment<>, gLuaSegment<>::point_trait)
-LAYOUT_DEFN(segment_closestRay, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<>, gLuaRay<>)
-LAYOUT_DEFN(segment_closestLine, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<>, gLuaLine<>)
-LAYOUT_DEFN(segment_closestSegment, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<>, gLuaSegment<>)
-LAYOUT_DEFN(segment_closestTriangle, glm::closestPoint, GEOM_INTERSECTS_UV, gLuaSegment<>, gLuaTriangle<>)
+LAYOUT_DEFN(segment_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, gLuaRay<>)
+LAYOUT_DEFN(segment_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, gLuaLine<>)
+LAYOUT_DEFN(segment_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, gLuaSegment<>)
+LAYOUT_DEFN(segment_closestTriangle, glm::closestPoint, GEOM_INTERSECTS_TRIANGLE, gLuaSegment<>, gLuaTriangle<>)
 TRAITS_DEFN(segment_containsPoint, glm::contains, gLuaSegment<>, gLuaSegment<>::point_trait, gLuaSegment<>::eps_trait)
 TRAITS_DEFN(segment_containsSegment, glm::contains, gLuaSegment<>, gLuaSegment<>, gLuaSegment<>::eps_trait)
 LAYOUT_DEFN(segment_distance2, glm::distance2, GEOM_DISTANCE, gLuaSegment<>, gLuaSegment<>::point_trait)
-LAYOUT_DEFN(segment_distanceSegment2, glm::distance2, GEOM_INTERSECTS, gLuaSegment<>, gLuaSegment<>)
+LAYOUT_DEFN(segment_distanceSegment2, glm::distance2, GEOM_DISTANCE_UV, gLuaSegment<>, gLuaSegment<>)
 LAYOUT_DEFN(segment_distance, glm::distance, GEOM_DISTANCE, gLuaSegment<>, gLuaSegment<>::point_trait)
-LAYOUT_DEFN(segment_distanceRay, glm::distance, GEOM_INTERSECTS, gLuaSegment<>, gLuaRay<>)
-LAYOUT_DEFN(segment_distanceLine, glm::distance, GEOM_INTERSECTS, gLuaSegment<>, gLuaLine<>)
-LAYOUT_DEFN(segment_distanceSegment, glm::distance, GEOM_INTERSECTS, gLuaSegment<>, gLuaSegment<>)
+LAYOUT_DEFN(segment_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<>, gLuaRay<>)
+LAYOUT_DEFN(segment_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<>, gLuaLine<>)
+LAYOUT_DEFN(segment_distanceSegment, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<>, gLuaSegment<>)
 TRAITS_DEFN(segment_distancePlane, glm::distance, gLuaSegment<>, gLuaPlane<>)
 LAYOUT_DEFN(segment_intersectsSphere, glm::intersects, GEOM_INTERSECTS, gLuaSegment<>, gLuaSphere<>)
-LAYOUT_DEFN(segment_intersectsAABB, glm::intersects, GEOM_INTERSECTS, gLuaSegment<>, gLuaAABB<>)
+LAYOUT_DEFN(segment_intersectsAABB, glm::intersects, GEOM_INTERSECTS_AABB_LH, gLuaSegment<>, gLuaAABB<>)
 TRAITS_DEFN(segment_intersectsPlane, glm::intersects, gLuaSegment<>, gLuaPlane<>)
 LAYOUT_DEFN(segment_intersectsSegment, glm::intersects, GEOM_INTERSECTS, gLuaSegment<>, gLuaSegment<>)
-LAYOUT_DEFN(segment_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_UV, gLuaSegment<>, gLuaTriangle<>)
+LAYOUT_DEFN(segment_intersectsTriangle, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaSegment<>, gLuaTriangle<>)
 
 static const luaL_Reg luaglm_segmentlib[] = {
   { "operator_negate", GLM_NAME(segment_operator_negate) },
@@ -958,19 +984,19 @@ TRAITS_DEFN(segment2d_reverse, glm::reverse, gLuaSegment<2>)
 TRAITS_DEFN(segment2d_dir, glm::dir, gLuaSegment<2>)
 TRAITS_DEFN(segment2d_extremePoint, glm::extremePoint, gLuaSegment<2>, gLuaSegment<2>::point_trait)
 LAYOUT_DEFN(segment2d_closestPoint, glm::closestPoint, GEOM_DISTANCE, gLuaSegment<2>, gLuaSegment<2>::point_trait)
-LAYOUT_DEFN(segment2d_closestRay, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<2>, gLuaRay<2>)
-LAYOUT_DEFN(segment2d_closestLine, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<2>, gLuaLine<2>)
-LAYOUT_DEFN(segment2d_closestSegment, glm::closestPoint, GEOM_INTERSECTS, gLuaSegment<2>, gLuaSegment<2>)
+LAYOUT_DEFN(segment2d_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaRay<2>)
+LAYOUT_DEFN(segment2d_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaLine<2>)
+LAYOUT_DEFN(segment2d_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaSegment<2>)
 TRAITS_DEFN(segment2d_containsPoint, glm::contains, gLuaSegment<2>, gLuaSegment<2>::point_trait, gLuaSegment<2>::eps_trait)
 TRAITS_DEFN(segment2d_containsSegment, glm::contains, gLuaSegment<2>, gLuaSegment<2>, gLuaSegment<2>::eps_trait)
 LAYOUT_DEFN(segment2d_distance2, glm::distance2, GEOM_DISTANCE, gLuaSegment<2>, gLuaSegment<2>::point_trait)
-LAYOUT_DEFN(segment2d_distanceSegment2, glm::distance2, GEOM_INTERSECTS, gLuaSegment<2>, gLuaSegment<2>)
+LAYOUT_DEFN(segment2d_distanceSegment2, glm::distance2, GEOM_DISTANCE_UV, gLuaSegment<2>, gLuaSegment<2>)
 LAYOUT_DEFN(segment2d_distance, glm::distance, GEOM_DISTANCE, gLuaSegment<2>, gLuaSegment<2>::point_trait)
-LAYOUT_DEFN(segment2d_distanceRay, glm::distance, GEOM_INTERSECTS, gLuaSegment<2>, gLuaRay<2>)
-LAYOUT_DEFN(segment2d_distanceLine, glm::distance, GEOM_INTERSECTS, gLuaSegment<2>, gLuaLine<2>)
-LAYOUT_DEFN(segment2d_distanceSegment, glm::distance, GEOM_INTERSECTS, gLuaSegment<2>, gLuaSegment<2>)
+LAYOUT_DEFN(segment2d_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<2>, gLuaRay<2>)
+LAYOUT_DEFN(segment2d_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<2>, gLuaLine<2>)
+LAYOUT_DEFN(segment2d_distanceSegment, glm::distance, GEOM_DISTANCE_UV, gLuaSegment<2>, gLuaSegment<2>)
 TRAITS_DEFN(segment2d_distancePlane, glm::distance, gLuaSegment<2>, gLuaPlane<2>)
-LAYOUT_DEFN(segment2d_intersectsAABB, glm::intersects, GEOM_INTERSECTS, gLuaSegment<2>, gLuaAABB<2>)
+LAYOUT_DEFN(segment2d_intersectsAABB, glm::intersects, GEOM_INTERSECTS_AABB_LH, gLuaSegment<2>, gLuaAABB<2>)
 LAYOUT_DEFN(segment2d_intersectsSegment, glm::intersects, GEOM_INTERSECTS, gLuaSegment<2>, gLuaSegment<2>)
 
 static const luaL_Reg luaglm_segment2dlib[] = {
@@ -1048,16 +1074,16 @@ TRAITS_DEFN(triangle_contains, glm::contains, gLuaTriangle<>, gLuaTriangle<>::po
 TRAITS_DEFN(triangle_containsSegment, glm::contains, gLuaTriangle<>, gLuaSegment<>, gLuaTriangle<>::eps_trait)
 TRAITS_DEFN(triangle_containsTriangle, glm::contains, gLuaTriangle<>, gLuaTriangle<>, gLuaTriangle<>::eps_trait)
 TRAITS_DEFN(triangle_closestPoint, glm::closestPoint, gLuaTriangle<>, gLuaTriangle<>::point_trait)
-LAYOUT_DEFN(triangle_closestSegment, glm::closestPoint, GEOM_INTERSECTS_PT, gLuaTriangle<>, gLuaSegment<>)
-LAYOUT_DEFN(triangle_closestLine, glm::closestPoint, GEOM_INTERSECTS_PT, gLuaTriangle<>, gLuaLine<>)
+LAYOUT_DEFN(triangle_closestSegment, glm::closestPoint, GEOM_DISTANCE, gLuaTriangle<>, gLuaSegment<>)
+LAYOUT_DEFN(triangle_closestLine, glm::closestPoint, GEOM_DISTANCE, gLuaTriangle<>, gLuaLine<>)
 TRAITS_DEFN(triangle_distance, glm::distance, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 TRAITS_DEFN(triangle_distanceSphere, glm::distance, gLuaTriangle<>, gLuaSphere<>)
 // TRAITS_DEFN(triangle_intersectsAABB, glm::intersects, gLuaTriangle<>, gLuaAABB<>)
-LAYOUT_DEFN(triangle_intersectsRay, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaRay<>)
-LAYOUT_DEFN(triangle_intersectsLine, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaLine<>)
-LAYOUT_DEFN(triangle_intersectsSegment, glm::intersects, GEOM_INTERSECTS_UV, gLuaTriangle<>, gLuaSegment<>)
+LAYOUT_DEFN(triangle_intersectsRay, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaTriangle<>, gLuaRay<>)
+LAYOUT_DEFN(triangle_intersectsLine, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaTriangle<>, gLuaLine<>)
+LAYOUT_DEFN(triangle_intersectsSegment, glm::intersects, GEOM_INTERSECTS_TRIANGLE, gLuaTriangle<>, gLuaSegment<>)
 TRAITS_DEFN(triangle_intersectsPlane, glm::intersects, gLuaTriangle<>, gLuaPlane<>)
-LAYOUT_DEFN(triangle_intersectsSphere, glm::intersects, GEOM_INTERSECTS_PT, gLuaTriangle<>, gLuaSphere<>)
+TRAITS_DEFN(triangle_intersectsSphere, glm::intersects, gLuaTriangle<>, gLuaSphere<>)
 
 static const luaL_Reg luaglm_trianglelib[] = {
   { "operator_negate", GLM_NAME(triangle_operator_negate) },
@@ -1178,9 +1204,9 @@ TRAITS_DEFN(sphere_intersectsSphere, glm::intersects, gLuaSphere<>, gLuaSphere<>
 TRAITS_DEFN(sphere_intersectsAABB, glm::intersects, gLuaSphere<>, gLuaAABB<>)
 TRAITS_DEFN(sphere_intersectsPlane, glm::intersects, gLuaSphere<>, gLuaPlane<>)
 TRAITS_DEFN(sphere_intersectsTriangle, glm::intersects, gLuaSphere<>, gLuaTriangle<>)
-LAYOUT_DEFN(sphere_intersectsLine, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<>, gLuaLine<>)
-LAYOUT_DEFN(sphere_intersectsSegment, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<>, gLuaSegment<>)
-LAYOUT_DEFN(sphere_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<>, gLuaRay<>)
+LAYOUT_DEFN(sphere_intersectsLine, glm::intersects, GEOM_INTERSECTS, gLuaSphere<>, gLuaLine<>)
+LAYOUT_DEFN(sphere_intersectsSegment, glm::intersects, GEOM_INTERSECTS, gLuaSphere<>, gLuaSegment<>)
+LAYOUT_DEFN(sphere_intersectsRay, glm::intersects, GEOM_INTERSECTS, gLuaSphere<>, gLuaRay<>)
 TRAITS_DEFN(sphere_enclose, glm::enclose, gLuaSphere<>, gLuaSphere<>::point_trait)
 TRAITS_DEFN(sphere_encloseSegment, glm::enclose, gLuaSphere<>, gLuaSegment<>)
 TRAITS_DEFN(sphere_encloseSphere, glm::enclose, gLuaSphere<>, gLuaSphere<>)
@@ -1290,9 +1316,9 @@ TRAITS_DEFN(circle_closestPoint, glm::closestPoint, gLuaSphere<2>, gLuaSphere<2>
 TRAITS_DEFN(circle_intersectsCircle, glm::intersects, gLuaSphere<2>, gLuaSphere<2>)
 TRAITS_DEFN(circle_intersectsAABB, glm::intersects, gLuaSphere<2>, gLuaAABB<2>)
 TRAITS_DEFN(circle_intersectsPlane, glm::intersects, gLuaSphere<2>, gLuaPlane<2>)
-LAYOUT_DEFN(circle_intersectsLine, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<2>, gLuaLine<2>)
-LAYOUT_DEFN(circle_intersectsSegment, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<2>, gLuaSegment<2>)
-LAYOUT_DEFN(circle_intersectsRay, glm::intersects, GEOM_INTERSECTS_RH, gLuaSphere<2>, gLuaRay<2>)
+LAYOUT_DEFN(circle_intersectsLine, glm::intersects, GEOM_INTERSECTS, gLuaSphere<2>, gLuaLine<2>)
+LAYOUT_DEFN(circle_intersectsSegment, glm::intersects, GEOM_INTERSECTS, gLuaSphere<2>, gLuaSegment<2>)
+LAYOUT_DEFN(circle_intersectsRay, glm::intersects, GEOM_INTERSECTS, gLuaSphere<2>, gLuaRay<2>)
 TRAITS_DEFN(circle_enclose, glm::enclose, gLuaSphere<2>, gLuaSphere<2>::point_trait)
 TRAITS_DEFN(circle_encloseSegment, glm::enclose, gLuaSphere<2>, gLuaSegment<2>)
 TRAITS_DEFN(circle_encloseSphere, glm::enclose, gLuaSphere<2>, gLuaSphere<2>)

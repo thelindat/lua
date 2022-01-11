@@ -6,8 +6,6 @@
 #ifndef EXT_GEOM_SETUP_HPP
 #define EXT_GEOM_SETUP_HPP
 
-#include <vector>
-
 #include <glm/glm.hpp>
 #include <glm/common.hpp>
 #include <glm/gtx/compatibility.hpp>

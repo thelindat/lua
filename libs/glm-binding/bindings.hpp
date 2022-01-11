@@ -771,7 +771,7 @@ struct gLuaAbstractTrait : glm::type<T> {
   /// Given a current stack state, create a GLM object corresponding to the
   /// "type" this trait is capturing.
   /// </summary>
-  /// LUA_TRAIT_QUALIFIER T Next(lua_State *L, int& idx)
+  /// LUA_TRAIT_QUALIFIER T Next(lua_State *L, int &idx)
 };
 
 /// <summary>

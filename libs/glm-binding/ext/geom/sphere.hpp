@@ -68,7 +68,7 @@ namespace glm {
       r = std::numeric_limits<T>::quiet_NaN();
     }
 
-    void enclose(const point_type &point, T eps = T(0)) {
+    void enclose(const point_type &point, const T eps = T(0)) {
       const point_type d = point - pos;
       const T dist2 = length2(d);
       if (dist2 + eps > r * r) {
@@ -76,7 +76,7 @@ namespace glm {
         const T halfDist = (dist - r) * T(0.5);
 
         pos += d * halfDist / dist;
-        r += halfDist + epsilon<T>();  // deliberately use a fixed epsilon
+        r += halfDist + epsilon<T>();  // deliberately use a fixed epsilon; see logic in optimalEnclosingSphere
       }
     }
   };
@@ -129,7 +129,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Sphere<L, T, Q> const &x, Sphere<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Sphere<L, T, Q> const &x, Sphere<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.pos, y.pos, eps) && equal(x.r, y.r, eps);
   }
 
@@ -149,7 +149,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Sphere<L, T, Q> const &x, Sphere<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Sphere<L, T, Q> const &x, Sphere<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.pos, y.pos, eps) || notEqual(x.r, y.r, eps);
   }
 
@@ -276,7 +276,7 @@ namespace glm {
   // Tests if the given object is fully contained within the sphere.
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, const T eps = epsilon<T>()) {
     return distance2(sphere.pos, point) <= sphere.r * sphere.r + eps;
   }
 
@@ -291,7 +291,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &a, const Sphere<L, T, Q> &b, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &a, const Sphere<L, T, Q> &b, const T eps = epsilon<T>()) {
     return distance2(a.pos, b.pos) + b.r - a.r <= eps;
   }
 
@@ -305,7 +305,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &sphere, const Triangle<L, T, Q> &triangle, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Sphere<L, T, Q> &sphere, const Triangle<L, T, Q> &triangle, const T eps = epsilon<T>()) {
     return contains(sphere, triangle.a, eps)
            && contains(sphere, triangle.b, eps)
            && contains(sphere, triangle.c, eps);
@@ -361,17 +361,17 @@ namespace glm {
   /// <returns>The number of intersection points, 0, 1, or 2.</returns>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER int intersectLine(const Line<L, T, Q> &line, const Sphere<L, T, Q> &sphere, T &d1, T &d2) {
-    d1 = std::numeric_limits<T>::infinity();
-    d2 = -std::numeric_limits<T>::infinity();
-
     const vec<L, T, Q> a = line.pos - sphere.pos;
     const T radSq = sphere.r * sphere.r;
     const T C = dot(a, a) - radSq;
     const T B = T(2) * dot(a, line.dir);
 
     T D = B * B - T(4) * C;
-    if (D < T(0))  // No intersections.
+    if (D < T(0)) {  // No intersections.
+      d1 = std::numeric_limits<T>::infinity();
+      d2 = -std::numeric_limits<T>::infinity();
       return 0;
+    }
     else if (D < epsilon<T>()) {  // tangent to sphere
       d1 = d2 = -B * T(0.5);
       return 1;
@@ -386,7 +386,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const Sphere<L, T, Q> &sphere, const Sphere<L, T, Q> &other) {
-    return distance2(sphere.pos, other.pos) <= ((sphere.r + other.r) * (sphere.r + other.r));
+    return distance2(sphere.pos, other.pos) <= ((sphere.r + other.r) * (sphere.r + other.r));  // @TODO: + epsilon<T>() ?
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -491,7 +491,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER Sphere<L, T, Q> enclose(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER Sphere<L, T, Q> enclose(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, const T eps = epsilon<T>()) {
     Sphere<L, T, Q> result(sphere);
     result.enclose(point, eps);
     return result;
@@ -534,7 +534,7 @@ namespace glm {
   /// Expand the radius of the sphere until it encloses the given point.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER Sphere<L, T, Q> extendRadiusToContain(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER Sphere<L, T, Q> extendRadiusToContain(const Sphere<L, T, Q> &sphere, const vec<L, T, Q> &point, const T eps = epsilon<T>()) {
     const T requiredRadius = distance(sphere.pos, point) + eps;
     return Sphere<L, T, Q>(sphere.pos, max(sphere.r, requiredRadius));
   }
@@ -543,7 +543,7 @@ namespace glm {
   /// Expand the radius of the sphere until it encloses the given sphere.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER Sphere<L, T, Q> extendRadiusToContain(const Sphere<L, T, Q> &sphere, const Sphere<L, T, Q> &other, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER Sphere<L, T, Q> extendRadiusToContain(const Sphere<L, T, Q> &sphere, const Sphere<L, T, Q> &other, const T eps = epsilon<T>()) {
     const T requiredRadius = distance(sphere.pos, other.pos) + other.r + eps;
     return Sphere<L, T, Q>(sphere.pos, max(sphere.r, requiredRadius));
   }
@@ -565,13 +565,13 @@ namespace glm {
     const T bc = dot(ab, ac);
 
     T denom = bb * cc - bc * bc;
-    if (epsilonEqual(denom, T(0), epsilon<T>()))
-      return false;
-
-    denom = T(0.5) / denom;
-    s = (cc * bb - bc * cc) * denom;
-    t = (cc * bb - bc * bb) * denom;
-    return true;
+    if (!epsilonEqual(denom, T(0), epsilon<T>())) {
+      denom = T(0.5) / denom;
+      s = (cc * bb - bc * cc) * denom;
+      t = (cc * bb - bc * bb) * denom;
+      return true;
+    }
+    return false;
   }
 
   /// <summary>
@@ -663,21 +663,23 @@ namespace glm {
   /// <summary>
   /// Compute the minimal bounding sphere for two points, i.e., the smallest
   /// volume sphere that contains the provided points.
+  /// <param name="eps">Expand radius by a small eps for numerical stability</param>
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const T eps = epsilon<T>()) {
     const vec<3, T, Q> pos = (a + b) * T(0.5);
     if (all(isfinite(pos)))
-      return Sphere<3, T, Q>(pos, length(b - pos) + epsilon<T>());
+      return Sphere<3, T, Q>(pos, length(b - pos) + eps);
     return Sphere<3, T, Q>(vec<3, T, Q>(T(0)), T(0));
   }
 
   /// <summary>
   /// Compute the minimal bounding sphere for three points, i.e., the smallest
   /// volume sphere that contains the provided points.
+  /// <param name="eps">Expand radius by a small eps for numerical stability</param>
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const T eps = epsilon<T>()) {
     Sphere<3, T, Q> sphere;
     const vec<3, T, Q> ab = b - a;
     const vec<3, T, Q> ac = c - a;
@@ -710,16 +712,17 @@ namespace glm {
       sphere.r = sqrt(max(distance2(sphere.pos, a), max(distance2(sphere.pos, b), distance2(sphere.pos, c))));
     }
 
-    sphere.r += T(2) * epsilon<T>();  // Expand radius by a small eps for numerical stability.
+    sphere.r += T(2) * eps;
     return sphere;
   }
 
   /// <summary>
   /// Compute the minimal bounding sphere for four points, i.e., the smallest
   /// volume sphere that contains the provided points.
+  /// <param name="eps">Expand radius by a small eps for numerical stability</param>
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d, const T eps = epsilon<T>()) {
     T s(0), t(0), u(0);
     Sphere<3, T, Q> sphere;
 
@@ -729,14 +732,14 @@ namespace glm {
 
     bool success = fitSphereThroughPoints(ab, ac, ad, s, t, u);
     if (!success || s < T(0) || t < T(0) || u < T(0) || s + t + u > T(1)) {
-      sphere = optimalEnclosingSphere(a, b, c);
+      sphere = optimalEnclosingSphere(a, b, c, eps);
       if (!contains(sphere, d)) {
-        sphere = optimalEnclosingSphere(a, b, d);
+        sphere = optimalEnclosingSphere(a, b, d, eps);
         if (!contains(sphere, c)) {
-          sphere = optimalEnclosingSphere(a, c, d);
+          sphere = optimalEnclosingSphere(a, c, d, eps);
           if (!contains(sphere, b)) {
-            sphere = optimalEnclosingSphere(b, c, d);
-            sphere.r = max(sphere.r, distance(a, sphere.pos) + epsilon<T>());
+            sphere = optimalEnclosingSphere(b, c, d, eps);
+            sphere.r = max(sphere.r, distance(a, sphere.pos) + eps);
           }
         }
       }
@@ -748,7 +751,7 @@ namespace glm {
       max(distance2(sphere.pos, b), max(distance2(sphere.pos, c), distance2(sphere.pos, d)))));
     }
 
-    sphere.r += T(2) * epsilon<T>();
+    sphere.r += T(2) * eps;
     return sphere;
   }
 
@@ -760,44 +763,44 @@ namespace glm {
   /// Therefore, at least one of the points is considered redundant (or
   /// unnecessary).
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d, const vec<3, T, Q> &e, int &redundantPoint) {
-    Sphere<3, T, Q> s = optimalEnclosingSphere(b, c, d, e);
-    if (contains(s, a, epsilon<T>())) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d, const vec<3, T, Q> &e, int &redundantPoint, const T eps = epsilon<T>()) {
+    Sphere<3, T, Q> s = optimalEnclosingSphere(b, c, d, e, eps);
+    if (contains(s, a, eps)) {
       redundantPoint = 0;
       return s;
     }
 
-    s = optimalEnclosingSphere(a, c, d, e);
-    if (contains(s, b, epsilon<T>())) {
+    s = optimalEnclosingSphere(a, c, d, e, eps);
+    if (contains(s, b, eps)) {
       redundantPoint = 1;
       return s;
     }
 
-    s = optimalEnclosingSphere(a, b, d, e);
-    if (contains(s, c, epsilon<T>())) {
+    s = optimalEnclosingSphere(a, b, d, e, eps);
+    if (contains(s, c, eps)) {
       redundantPoint = 2;
       return s;
     }
 
-    s = optimalEnclosingSphere(a, b, c, e);
-    if (contains(s, d, epsilon<T>())) {
+    s = optimalEnclosingSphere(a, b, c, e, eps);
+    if (contains(s, d, eps)) {
       redundantPoint = 3;
       return s;
     }
 
-    s = optimalEnclosingSphere(a, b, c, d);
+    s = optimalEnclosingSphere(a, b, c, d, eps);
     redundantPoint = 4;
     return s;
   }
 
   template<typename T, qualifier Q, class Vector>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const Vector &pts) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const Vector &pts, const T eps = epsilon<T>()) {
     switch (pts.size()) {
       case 0: return Sphere<3, T, Q>();
       case 1: return Sphere<3, T, Q>(pts[0], T(0));
-      case 2: return optimalEnclosingSphere<T, Q>(pts[0], pts[1]);
-      case 3: return optimalEnclosingSphere<T, Q>(pts[0], pts[1], pts[2]);
-      case 4: return optimalEnclosingSphere<T, Q>(pts[0], pts[1], pts[2], pts[3]);
+      case 2: return optimalEnclosingSphere<T, Q>(pts[0], pts[1], eps);
+      case 3: return optimalEnclosingSphere<T, Q>(pts[0], pts[1], pts[2], eps);
+      case 4: return optimalEnclosingSphere<T, Q>(pts[0], pts[1], pts[2], pts[3], eps);
       default: {
         break;
       }
@@ -807,8 +810,8 @@ namespace glm {
     typename Vector::size_type sp[4] = { 0, 1, 2, 3 };
     bool expendable[4] = { true, true, true, true };
 
-    Sphere<3, T, Q> s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]]);
-    T rSq = s.r * s.r + epsilon<T>();
+    Sphere<3, T, Q> s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]], eps);
+    T rSq = s.r * s.r + eps;
     for (typename Vector::size_type i = 4; i < pts.size(); ++i) {
       if (i == sp[0] || i == sp[1] || i == sp[2] || i == sp[3])
         continue;
@@ -817,8 +820,8 @@ namespace glm {
       // sphere, compute a new minimal sphere that also contains pts[i].
       if (distance2(pts[i], s.pos) > rSq) {
         int redundant = 0;
-        s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]], pts[i], redundant);
-        rSq = s.r * s.r + epsilon<T>();
+        s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]], pts[i], redundant, eps);
+        rSq = s.r * s.r + eps;
 
         // A sphere is uniquely defined by four points, so one of the five
         // points passed in above is now redundant, and can be removed from the

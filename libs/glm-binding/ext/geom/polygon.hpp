@@ -4,8 +4,6 @@
 #ifndef EXT_GEOM_POLYGON_HPP
 #define EXT_GEOM_POLYGON_HPP
 
-#include <vector>
-
 #include "setup.hpp"
 #include "allocator.hpp"
 
@@ -448,7 +446,7 @@ namespace glm {
   /// plane.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE bool isPlanar(const Polygon<L, T, Q> &polygon, T epsSq = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE bool isPlanar(const Polygon<L, T, Q> &polygon, const T epsSq = epsilon<T>()) {
     if (polygon.size() == 0)
       return false;
     else if (polygon.size() <= 3)
@@ -516,7 +514,7 @@ namespace glm {
   ///   2. its surface area is less or equal than a given epsilon
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool isDegenerate(const Polygon<L, T, Q> &polygon, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool isDegenerate(const Polygon<L, T, Q> &polygon, const T eps = epsilon<T>()) {
     return polygon.size() < 3 || area(polygon) <= eps;
   }
 
@@ -670,7 +668,7 @@ namespace glm {
   // Tests if the given object (worldspace) is fully contained inside the polygon.
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE bool contains(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpacePoint, PolyContains type, T thickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE bool contains(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpacePoint, PolyContains type, const T thickness = epsilon<T>()) {
     if (polygon.size() < 3)
       return false;
 
@@ -734,17 +732,17 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE bool contains(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE bool contains(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, const T polygonThickness = epsilon<T>()) {
     return contains(polygon, worldSpace, PolyContains::Unidirectional, polygonThickness);
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE bool containsAbove(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE bool containsAbove(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, const T polygonThickness = epsilon<T>()) {
     return contains(polygon, worldSpace, PolyContains::Positive, polygonThickness);
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE bool containsBelow(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE bool containsBelow(const Polygon<3, T, Q> &polygon, const vec<3, T, Q> &worldSpace, const T polygonThickness = epsilon<T>()) {
     return contains(polygon, worldSpace, PolyContains::Negative, polygonThickness);
   }
 
@@ -770,7 +768,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Polygon<L, T, Q> &polygon, const Polygon<L, T, Q> &worldSpacePolygon, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Polygon<L, T, Q> &polygon, const Polygon<L, T, Q> &worldSpacePolygon, const T polygonThickness = epsilon<T>()) {
     if (polygon.size() == 0)
       return false;
 
@@ -782,7 +780,7 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Polygon<3, T, Q> &polygon, const LineSegment<3, T, Q> &worldSpaceLineSegment, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Polygon<3, T, Q> &polygon, const LineSegment<3, T, Q> &worldSpaceLineSegment, const T polygonThickness = epsilon<T>()) {
     if (polygon.size() < 3)
       return false;
 
@@ -805,7 +803,7 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Polygon<3, T, Q> &polygon, const Triangle<3, T, Q> &worldSpaceTriangle, T polygonThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Polygon<3, T, Q> &polygon, const Triangle<3, T, Q> &worldSpaceTriangle, const T polygonThickness = epsilon<T>()) {
     return contains(polygon, edge(worldSpaceTriangle, 0), polygonThickness)
            && contains(polygon, edge(worldSpaceTriangle, 1), polygonThickness)
            && contains(polygon, edge(worldSpaceTriangle, 2), polygonThickness);

@@ -115,7 +115,7 @@ namespace glm {
   // all+equal
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Triangle<L, T, Q> const &x, Triangle<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Triangle<L, T, Q> const &x, Triangle<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.a, y.a, eps) && all_equal(x.b, y.b, eps) && all_equal(x.c, y.c, eps);
   }
 
@@ -135,7 +135,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Triangle<L, T, Q> const &x, Triangle<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Triangle<L, T, Q> const &x, Triangle<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.a, y.a, eps) || any_notequal(x.b, y.b, eps) || any_notequal(x.c, y.c, eps);
   }
 
@@ -172,8 +172,8 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool isDegenerate(Triangle<L, T, Q> const &t, T Epsilon = epsilon<T>()) {
-    return all_equal(t.a, t.b, Epsilon) || all_equal(t.a, t.c, Epsilon) || all_equal(t.b, t.c, Epsilon);
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool isDegenerate(Triangle<L, T, Q> const &t, const T eps = epsilon<T>()) {
+    return all_equal(t.a, t.b, eps) || all_equal(t.a, t.c, eps) || all_equal(t.b, t.c, eps);
   }
 
   /// <summary>
@@ -327,12 +327,12 @@ namespace glm {
   /// i.e., each uvw value is between 0.0 and 1.0 and whose total sum is 1.0
   /// </summary>
   template<typename T>
-  GLM_GEOM_QUALIFIER bool barycentricInsideTriangle(T u, T v, T w, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool barycentricInsideTriangle(T u, T v, T w, const T eps = epsilon<T>()) {
     return u >= T(0) && v >= T(0) && w >= T(0) && equal(u + v + w, T(1), eps);
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool barycentricInsideTriangle(const vec<3, T, Q> &uvw, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool barycentricInsideTriangle(const vec<3, T, Q> &uvw, const T eps = epsilon<T>()) {
     return barycentricInsideTriangle(uvw.x, uvw.y, uvw.z, eps);
   }
 
@@ -465,7 +465,7 @@ namespace glm {
   /// Return true if the given point is contained within the triangle.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const vec<3, T, Q> &point, T sqThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const vec<3, T, Q> &point, const T sqThickness = epsilon<T>()) {
     const vec<3, T, Q> normal = cross(t.b - t.a, t.c - t.a);
     const T d = dot(normal, t.b - point);
     if (d * d <= sqThickness * length2(normal)) {
@@ -479,7 +479,7 @@ namespace glm {
   /// Return true if the given line-segment is fully contained within the triangle.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const LineSegment<3, T, Q> &segment, T sqThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const LineSegment<3, T, Q> &segment, const T sqThickness = epsilon<T>()) {
     return contains(t, segment.a, sqThickness) && contains(t, segment.b, sqThickness);
   }
 
@@ -487,7 +487,7 @@ namespace glm {
   /// Return true if the given triangle is fully contained within the triangle.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const Triangle<3, T, Q> &other, T sqThickness = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const Triangle<3, T, Q> &t, const Triangle<3, T, Q> &other, const T sqThickness = epsilon<T>()) {
     return contains(t, other.a, sqThickness)
            && contains(t, other.b, sqThickness)
            && contains(t, other.c, sqThickness);
@@ -671,24 +671,18 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<L, T, Q> closestPoint(const Triangle<L, T, Q> &t, const LineSegment<L, T, Q> &line, vec<L, T, Q> &linePt) {
-    T u, v, d(0);
-    const vec<L, T, Q> result = closestPointTriangleSegment<L, T, Q, LineSegment<L, T, Q>>(t, line, u, v, d);
-    linePt = getPoint(line, d);
-    return result;
+  GLM_GEOM_QUALIFIER vec<L, T, Q> closestPoint(const Triangle<L, T, Q> &t, const LineSegment<L, T, Q> &line, T &d) {
+    T u, v;
+    return closestPointTriangleSegment<L, T, Q, LineSegment<L, T, Q>>(t, line, u, v, d);
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<L, T, Q> closestPoint(const Triangle<L, T, Q> &t, const Line<L, T, Q> &line, vec<L, T, Q> &linePt) {
-    T u, v, d = intersectTriangleLine(t, line, u, v);
-    if (isfinite(d)) {
-      linePt = barycentricPoint(t, u, v);
-      return linePt;
-    }
-
-    const vec<3, T, Q> result = closestPointTriangleLine<3, T, Q, Line<3, T, Q>>(t, line, u, v, d);
-    linePt = getPoint(line, d);
-    return result;
+  GLM_GEOM_QUALIFIER vec<L, T, Q> closestPoint(const Triangle<L, T, Q> &t, const Line<L, T, Q> &line, T &d) {
+    T u, v;
+    d = intersectTriangleLine(t, line, u, v);
+    if (isfinite(d))
+      return barycentricPoint(t, u, v);
+    return closestPointTriangleLine<3, T, Q, Line<3, T, Q>>(t, line, u, v, d);
   }
 
   /// <summary>

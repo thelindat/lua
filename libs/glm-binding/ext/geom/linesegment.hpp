@@ -124,7 +124,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(LineSegment<L, T, Q> const &x, LineSegment<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(LineSegment<L, T, Q> const &x, LineSegment<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.a, y.a, eps) && all_equal(x.b, y.b, eps);
   }
 
@@ -144,7 +144,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(LineSegment<L, T, Q> const &x, LineSegment<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(LineSegment<L, T, Q> const &x, LineSegment<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.a, y.a, eps) || any_notequal(x.b, y.b, eps);
   }
 
@@ -339,13 +339,13 @@ namespace glm {
   // Tests if the given object is fully contained on the segment.
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const LineSegment<L, T, Q> &line, const vec<L, T, Q> &point, T distanceThreshold = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const LineSegment<L, T, Q> &line, const vec<L, T, Q> &point, const T distanceThreshold = epsilon<T>()) {
     T d(0);
     return distance2(closestPoint(line, point, d), point) <= distanceThreshold;
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool contains(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &rhs, T distanceThreshold = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool contains(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &rhs, const T distanceThreshold = epsilon<T>()) {
     return contains(line, rhs.a, distanceThreshold) && contains(line, rhs.b, distanceThreshold);
   }
 
@@ -459,7 +459,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool intersects(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &other, T &d1, T &d2, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool intersects(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &other, T &d1, T &d2, const T eps = epsilon<T>()) {
     return distance(line, other, d1, d2) <= eps;
   }
 
@@ -481,7 +481,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER bool intersects(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &other, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER bool intersects(const LineSegment<L, T, Q> &line, const LineSegment<L, T, Q> &other, const T eps = epsilon<T>()) {
     T d1(0), d2(0);
     return distance(line, other, d1, d2) <= eps;
   }

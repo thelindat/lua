@@ -399,7 +399,7 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
         case LUA_VVECTOR4: count = swizzle<4>(vvalue_(obj), str, out); break;
         case LUA_VQUAT: {
 #if LUAGLM_QUAT_WXYZ  // quaternion has WXYZ layout
-          const lua_Float4& v = vvalue_(obj);
+          const lua_Float4 &v = vvalue_(obj);
           const lua_Float4 swap = { { v.raw[1], v.raw[2], v.raw[3], v.raw[0] } };
           count = swizzle<4>(swap, str, out);
 #else
@@ -421,7 +421,7 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
           // Keep quaternion semantics.
           if (ttisquat(obj) && glm::isNormalized(glm_vec_boundary(&out).v4, glm::epsilon<glm_Float>())) {
 #if LUAGLM_QUAT_WXYZ  // quaternion has WXYZ layout
-            const lua_Float4& swap = out;
+            const lua_Float4 &swap = out;
             out = { { swap.raw[3], swap.raw[0], swap.raw[1], swap.raw[2] } };
 #endif
             setvvalue(s2v(res), out, LUA_VQUAT);
@@ -1299,7 +1299,7 @@ static glm::length_t PopulateVector(lua_State *L, int idx, glm::vec<4, T> &vec, 
 ///
 /// A "desired" or "expected" dimension may be specified within 'm'. Otherwise,
 /// this function will infer the dimensions of matrix according to supplied
-/// columns vectors and their dimensions.
+/// columns vectors and their dimensions. @TODO: Optimize.
 /// </summary>
 static bool PopulateMatrix(lua_State *L, int idx, int top, bool fixed_size, glmMatrix &m) {
   // Maximum number of stack values to parse from the starting "idx". Assume
@@ -1315,6 +1315,17 @@ static bool PopulateMatrix(lua_State *L, int idx, int top, bool fixed_size, glmM
   }
   else if (stack_count == 1 && ttisquat(o)) {
     m.m44 = glm::mat4_cast<glm_Float, glm::defaultp>(glm_qvalue(o));
+    return true;
+  }
+  else if (stack_count == 1 && ttisvector(o)) {
+    const lua_Float4 &v = vvalue(o);
+    const grit_length_t dims = glm_dimensions(ttypetag(o));
+    m.m44 = glm::mat<4, 4, glm_Float>(glm_Float(0));
+    m.m44[0][0] = v.raw[0];
+    m.m44[1][1] = v.raw[1];
+    m.m44[2][2] = (dims > 2) ? v.raw[2] : glm_Float(0);
+    m.m44[3][3] = (dims > 3) ? v.raw[3] : glm_Float(0);
+    m.dimensions = fixed_size ? m.dimensions : dims;
     return true;
   }
   else if (stack_count == 1 && ttismatrix(o)) {
@@ -1731,7 +1742,7 @@ static int glmH_tovector(lua_State *L, const TValue *o, glmVector *v) {
   static const char *const dims[] = { "x", "y", "z", "w" };
 
   int count = 0;
-  Table* t = hvalue(o);
+  Table *t = hvalue(o);
   for (int i = 0; i < 4; ++i) {
     TString *key = luaS_newlstr(L, dims[i], 1);  // luaS_newliteral
     const TValue *slot = luaH_getstr(t, key);

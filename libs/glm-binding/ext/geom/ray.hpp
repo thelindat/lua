@@ -49,17 +49,17 @@ namespace glm {
 
     Ray(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
       : pos(position), dir(normalize(direction)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir));
+      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
     }
 
     Ray(const Line<L, T, Q> &line)
       : pos(line.pos), dir(line.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir));
+      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
     }
 
     Ray(const Ray<L, T, Q> &ray)
       : pos(ray.pos), dir(ray.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir));
+      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
     }
 
     Ray<L, T, Q> &operator=(const Ray<L, T, Q> &ray) {
@@ -120,7 +120,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Ray<L, T, Q> const &x, Ray<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool equal(Ray<L, T, Q> const &x, Ray<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return all_equal(x.pos, y.pos, eps) && all_equal(x.dir, y.dir, eps);
   }
 
@@ -140,7 +140,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Ray<L, T, Q> const &x, Ray<L, T, Q> const &y, T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER GLM_CONSTEXPR bool notEqual(Ray<L, T, Q> const &x, Ray<L, T, Q> const &y, const T eps = epsilon<T>()) {
     return any_notequal(x.pos, y.pos, eps) || any_notequal(x.dir, y.dir, eps);
   }
 
