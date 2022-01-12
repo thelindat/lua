@@ -1429,6 +1429,7 @@ NUMBER_VECTOR_DEFN(inversesqrt, glm::inversesqrt, LAYOUT_UNARY)
 #if GLM_HAS_CXX11_STL
 NUMBER_VECTOR_DEFN(expm1, glm::expm1, LAYOUT_UNARY)
 #endif
+NUMBER_VECTOR_DEFN(logistic, glm::logistic, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
 #endif
 
 #if defined(EXPONENTIAL_HPP) || defined(EXT_QUATERNION_EXPONENTIAL_HPP) || defined(GTX_LOG_BASE_HPP)

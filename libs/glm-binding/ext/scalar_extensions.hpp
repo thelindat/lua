@@ -493,6 +493,23 @@ namespace glm {
   ** C++-11/C99 wrappers
   ** =======================================================
   */
+
+  /// <summary>
+  /// Logistic function with basic overflow handling; underflow to-be-determined.
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType logistic(genType x) {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'logistic' only accept floating-point inputs.");
+    const genType e = exp(min(x, genType(44.3614196)));  // exp(-44.3614196) ~ 2^{−64}
+    return e / (genType(1.0) + e);
+  }
+
+  template<>
+  GLM_FUNC_QUALIFIER float logistic(float x) {
+    const float e = exp(min(x, 16.6355324f));  // exp(−16.6355324) ~ 2^{−24}
+    return e / (1.0f + e);
+  }
+
 #if GLM_HAS_CXX11_STL
   template<typename genType>
   GLM_FUNC_QUALIFIER genType copysign(genType x, genType y) {

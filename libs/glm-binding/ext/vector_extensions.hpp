@@ -848,6 +848,12 @@ namespace glm {
   ** =======================================================
   */
 
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> logistic(vec<L, T, Q> const &v) {
+    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'logistic' only accept floating-point inputs.");
+    return detail::functor1<vec, L, T, T, Q>::call(logistic, v);  // @TODO: SIMD.
+  }
+
 #if GLM_HAS_CXX11_STL
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> copysign(vec<L, T, Q> const &v, vec<L, T, Q> const &v2) {

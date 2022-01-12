@@ -184,6 +184,8 @@ GLM_LUA_REG(inversesqrt),
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(expm1),
 #endif
+GLM_LUA_REG(logistic),  // LUA_VECTOR_EXTENSIONS
+//{ "sigmoid", GLM_NAME(logistic) },
 #endif
 
 #if defined(EXPONENTIAL_HPP) || defined(EXT_QUATERNION_EXPONENTIAL_HPP) || defined(GTX_LOG_BASE_HPP)
