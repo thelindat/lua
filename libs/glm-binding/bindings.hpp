@@ -700,8 +700,8 @@ struct gLuaBase {
 /// <summary>
 /// Forward declaration of the epsion_value_trait
 /// </summary>
-template<typename T, bool FastPath = false>
-struct gLuaEpsilonTrait;
+template<typename T, bool FastPath = false, bool Zero = false>
+struct gLuaEpsilon;
 
 /// <summary>
 /// Shared functions for parsing types from the Lua stack.
@@ -728,7 +728,7 @@ struct gLuaAbstractTrait : glm::type<T> {
   /// <summary>
   /// Epsilon of value_type.
   /// </summary>
-  using eps_trait = gLuaEpsilonTrait<value_type>;
+  using eps_trait = gLuaEpsilon<value_type>;
 
   /// <summary>
   /// @CastBinding: Cast this trait to a new primitive.
@@ -1187,10 +1187,11 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T>>;
 /// <summary>
 /// Specialization for floating point epsilon arguments (and/or default arguments).
 /// </summary>
-template<typename T, bool FastPath>
-struct gLuaEpsilonTrait : gLuaTrait<T, FastPath> {
-  using safe = gLuaEpsilonTrait<T, false>;  // @SafeBinding
-  using fast = gLuaEpsilonTrait<T, true>;  // @UnsafeBinding
+template<typename T, bool FastPath, bool Zero>
+struct gLuaEpsilon : gLuaTrait<T, FastPath> {
+  using safe = gLuaEpsilon<T, false, Zero>;  // @SafeBinding
+  using fast = gLuaEpsilon<T, true, Zero>;  // @UnsafeBinding
+  using zero = gLuaEpsilon<T, true, true>;  // @UnsafeBinding
 
   static GLM_CONSTEXPR const char *Label() { return "epsilon"; }
 
@@ -1203,7 +1204,7 @@ struct gLuaEpsilonTrait : gLuaTrait<T, FastPath> {
     const TValue *o = glm_i2v(L, idx);
     if (!_isvalid(L, o)) {
       idx++;  // Skip the argument
-      return glm::epsilon<T>();
+      return Zero ? T(0) : glm::epsilon<T>();
     }
     return gLuaTrait<T, FastPath>::Next(L, idx);
   }

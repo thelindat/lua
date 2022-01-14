@@ -244,7 +244,7 @@ public:
 
 private:
   /// <summary>
-  /// Cached array length. @TODO: method to invalidate if table is mutated.
+  /// Cached array length.
   /// </summary>
   size_type m_arraySize = 0;
 
@@ -252,12 +252,20 @@ public:
   glmLuaArray(lua_State *L_, int idx_ = 1)
     : glmLuaContainer<Tr>(L_, idx_) {
 
-    // assert(lua_istable(L_, idx_));
+    //assert(lua_istable(L_, idx_));
     m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
   }
 
   bool valid() const {
     return lua_istable(gLuaBase::L, gLuaBase::idx);
+  }
+
+  /// <summary>
+  /// Update the array state and ensure its size is still (cache) coherent.
+  /// </summary>
+  void validate() {
+    //assert(lua_istable(gLuaBase::L, gLuaBase::idx));
+    m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
   }
 
   inline size_type size() const {

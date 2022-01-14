@@ -58,14 +58,12 @@ vec3(1.000000, 2.000000, 3.000000)
 ```lua
 -- Generic matrix population/construction function. Iterate over the current Lua
 -- stack and produce a matrix type according to the rules:
---   1. If the first and only object is a number: populate the diagonal of a matrix.
+--   1. If the first and only object is a number or vector: populate the diagonal of a matrix.
 --   2. If the first and only object is a quaternion: cast it to the arbitrarily
 --      sized matrix. This logic follows glm::toMat3 and glm::toMat4 and uses
 --      constructors to down/up-cast the matrix.
 --   3. If the first object (second if recycling matrices) is a matrix: down/up-cast it.
 --   4. Otherwise, expect a column vector for each dimension of the matrix.
---
--- Note: This function will call vec(...) for each column.
 matrix = mat(...)
 
 -- Matrix constructor that recycles r_mat.
@@ -384,6 +382,13 @@ ivecN = fpclassify(x --[[ vecN ]])
 - `signbit = sign`
 
 ## glm/exponential.hpp
+
+### logistic
+
+```lua
+-- Returns exp(v) / (exp(v) + 1)
+vecN = logistic(v --[[ vecN ]])
+```
 
 ### expm1
 

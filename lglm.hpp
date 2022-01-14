@@ -78,10 +78,10 @@
 #endif
 
 /* Floating point glm-operation type */
-typedef GLM_FLOAT_TYPE glm_Float;
+typedef LUAGLM_FLOAT_TYPE glm_Float;
 
 /* Integer glm-operation type */
-typedef GLM_INT_TYPE glm_Integer;
+typedef LUAGLM_INT_TYPE glm_Integer;
 
 /*
 ** GLM specific lua_Number (re)definition to avoid the usage of long double

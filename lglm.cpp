@@ -326,13 +326,9 @@ int glmVec_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
   return result;
 }
 
-// As this function interfaces with 'lua_getfield'. The length of 'k' must be
-// (re-)computed.
-//
-// @TODO: Instead of calculating the length of the string just ensure the
-// second element is '\0': (k != GLM_NULLPTR && k[0] != '\0' && k[1] == '\0');
+#define SINGLE_CHAR(K) ((K) != GLM_NULLPTR && (K)[0] != '\0' && (K)[1] == '\0')
 int glmVec_rawgets(const TValue *obj, const char *k, StkId res) {
-  const int result = strlen(k) == 1 ? vecgets(obj, k, res) : LUA_TNONE;
+  const int result = SINGLE_CHAR(k) ? vecgets(obj, k, res) : LUA_TNONE;
   if (result == LUA_TNONE) {
     setnilvalue(s2v(res));
     return LUA_TNIL;
@@ -1037,9 +1033,6 @@ namespace glm {
   }
 }
 
-/// <summary>
-/// @TODO: Compile-time hash algorithm configuration (algorithm, 32-bit, 64-bit, etc).
-/// </summary>
 lua_Integer luaO_HashString(const char *string, size_t length, int ignore_case) {
   unsigned int hash = 0;
   for (size_t i = 0; i < length; ++i) {
@@ -1289,8 +1282,8 @@ static glm::length_t PopulateVector(lua_State *L, int idx, glm::vec<4, T> &vec, 
 /// <summary>
 /// Generic matrix population/construction function. Iterate over the current
 /// Lua stack and produce a matrix type according to the rules:
-///   1. If the first and only object is a number: populate the diagonal of a
-///     matrix.
+///   1. If the first and only object is a number or vector: populate the
+///     diagonal of a matrix.
 ///   2. If the first and only object is a quaternion: cast it to the
 ///     arbitrarily sized matrix. This logic follows glm::toMat3 and glm::toMat4
 ///     and uses constructors to down/up-cast the matrix.
@@ -1990,8 +1983,6 @@ LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
 
 /*
 ** Operations on integer vectors (or floating-point vectors that are int-casted).
-**
-** @TODO: Once int-vectors become natively supported, this will require a rewrite
 */
 #define INT_VECTOR_OPERATION(F, res, v, p2, t1, t2)                                                 \
   LUA_MLM_BEGIN                                                                                     \

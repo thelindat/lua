@@ -67,7 +67,7 @@ struct LuaCrtAllocator {
   /// library, e.g., a memory profiler, replaces the allocator then l_alloc and
   /// l_ud to have the potential to reference invalid data.
   /// </summary>
-  LUA_INLINE LuaCrtAllocator &Validate(lua_State *L) const {
+  LUA_INLINE LuaCrtAllocator &validate(lua_State *L) const {
     l_alloc = lua_getallocf(L, &l_ud);
     return *const_cast<LuaCrtAllocator *>(this);
   }
@@ -311,9 +311,9 @@ public:
   ///   1. Update the internal allocator to ensure its allocation function and
   ///   opaque pointer are still (cache) coherent.
   /// </summary>
-  void Validate(lua_State *L) LUA_ALLOC_NOEXCEPT {
+  void validate(lua_State *L) LUA_ALLOC_NOEXCEPT {
     m_state = L;
-    m_alloc.Validate(L);
+    m_alloc.validate(L);
   }
 
   /* Capacity */

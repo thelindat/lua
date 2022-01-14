@@ -315,7 +315,7 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
     if ((ptr = luaL_checkudata(L_, idx++, Metatable())) != GLM_NULLPTR) {
       glm::Polygon<3, T> result = *(static_cast<glm::Polygon<3, T> *>(ptr));
       result.stack_idx = idx - 1;
-      result.p->Validate(L_);
+      result.p->validate(L_);
       return result;
     }
     else {
@@ -1705,7 +1705,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
 GLM_BINDING_QUALIFIER(polygon_to_string) {
   gLuaPolygon<>::type *ud = static_cast<gLuaPolygon<>::type *>(luaL_checkudata(L, 1, gLuaPolygon<>::Metatable()));
   if (l_likely(ud->p != GLM_NULLPTR)) {
-    ud->p->Validate(L);
+    ud->p->validate(L);
     lua_pushfstring(L, "Polygon<%I>", ud->p->size());
     return 1;
   }
@@ -1720,7 +1720,7 @@ GLM_BINDING_QUALIFIER(polygon_gc) {
   gLuaPolygon<>::type *ud = static_cast<gLuaPolygon<>::type *>(luaL_checkudata(L, 1, gLuaPolygon<>::Metatable()));
   if (l_likely(ud->p != GLM_NULLPTR)) {
     LuaCrtAllocator<void> allocator(L);
-    ud->p->Validate(L);
+    ud->p->validate(L);
     ud->p->~LuaVector();  // Invoke destructor.
     allocator.realloc(ud->p, sizeof(glm::List<gLuaPolygon<>::point_trait::type>), 0);  // Free allocation
     ud->p = GLM_NULLPTR;
@@ -1777,7 +1777,7 @@ GLM_BINDING_QUALIFIER(polygon_newindex) {
     const size_t index = gLuaTrait<size_t>::Next(LB.L, LB.idx);
     const gLuaPolygon<>::point_trait::type value = gLuaPolygon<>::point_trait::Next(LB.L, LB.idx);
 
-    poly.p->Validate(LB.L);
+    poly.p->validate(LB.L);
     if (index >= 1 && index <= poly.size())
       poly[index - 1] = value;
     else if (index == poly.size() + 1)

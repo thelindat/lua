@@ -190,7 +190,7 @@ namespace glm {
   /// row differs (up to an epsilon) of [0, 0, 0, 1].
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool containsProjection(const mat<4, 4, T, Q> &m, T eps = epsilon<T>()) {
+  GLM_FUNC_QUALIFIER bool containsProjection(const mat<4, 4, T, Q> &m, const T eps = epsilon<T>()) {
     const vec<4, T, Q> v = row(m, 3);
     return all(epsilonEqual(v, vec<4, T, Q>(T(0), T(0), T(0), T(1)), eps));
   }
@@ -200,13 +200,13 @@ namespace glm {
   /// epsilon).
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool hasUniformScale(const mat<C, R, T, Q> &m, T eps = epsilon<T>()) {
+  GLM_FUNC_QUALIFIER bool hasUniformScale(const mat<C, R, T, Q> &m, const T eps = epsilon<T>()) {
     const vec<3, T, Q> scale = extractScale(m);
     return epsilonEqual(scale.x, scale.y, eps) && epsilonEqual(scale.x, scale.z, eps);
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool hasUniformScale(const qua<T, Q> &q, T eps = epsilon<T>()) {
+  GLM_FUNC_QUALIFIER bool hasUniformScale(const qua<T, Q> &q, const T eps = epsilon<T>()) {
     return hasUniformScale(toMat3(q), eps);
   }
 
@@ -214,7 +214,7 @@ namespace glm {
   /// Test if the matrix has an inverse (up to a given epsilon).
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool invertible(const mat<C, R, T, Q> &m, T eps = epsilon<T>()) {
+  GLM_FUNC_QUALIFIER bool invertible(const mat<C, R, T, Q> &m, const T eps = epsilon<T>()) {
     GLM_STATIC_ASSERT(C == R, "Symmetric Matrices");
     return epsilonNotEqual(determinant(m), T(0), eps);
   }
@@ -739,7 +739,7 @@ namespace glm {
   /// @GLMFix: corrected glm::isNull implementation
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool _isNull(mat<C, R, T, Q> const &m, T eps = epsilon<T>) {
+  GLM_FUNC_QUALIFIER bool _isNull(mat<C, R, T, Q> const &m, const T eps = epsilon<T>()) {
     bool result = true;
     for (length_t i = 0; i < C; ++i)
       result &= isNull(m[i], eps);
@@ -750,7 +750,7 @@ namespace glm {
   /// @GLMFix: corrected glm::isNormalized implementation
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool _isNormalized(mat<C, R, T, Q> const &m, T eps = epsilon<T>) {
+  GLM_FUNC_QUALIFIER bool _isNormalized(mat<C, R, T, Q> const &m, const T eps = epsilon<T>()) {
     bool result = true;
     for (length_t i = 0; i < C; ++i)
       result &= isNormalized(m[i], eps);
@@ -769,7 +769,7 @@ namespace glm {
   /// @GLMFix: Generalized implementation.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool _isIdentity(mat<C, R, T, Q> const &m, T eps = epsilon<T>) {
+  GLM_FUNC_QUALIFIER bool _isIdentity(mat<C, R, T, Q> const &m, const T eps = epsilon<T>()) {
     bool result = true;
     for (length_t i = 0; i < C; ++i) {
       for (length_t j = 0; j < R; ++j) {

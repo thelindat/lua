@@ -877,13 +877,13 @@
 #if defined(LUAGLM_NUMBER_TYPE) && LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE
   #define LUA_VEC_TYPE LUA_FLOAT_TYPE
   #define LUA_VEC_NUMBER LUA_NUMBER
-  #define GLM_FLOAT_TYPE LUA_NUMBER
-  #define GLM_INT_TYPE LUA_INTEGER
+  #define LUAGLM_FLOAT_TYPE LUA_NUMBER
+  #define LUAGLM_INT_TYPE LUA_INTEGER
 #else
   #define LUA_VEC_TYPE LUA_FLOAT_FLOAT
   #define LUA_VEC_NUMBER float
-  #define GLM_FLOAT_TYPE float
-  #define GLM_INT_TYPE int
+  #define LUAGLM_FLOAT_TYPE float
+  #define LUAGLM_INT_TYPE int
 #endif
 
 /*

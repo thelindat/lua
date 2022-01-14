@@ -336,7 +336,7 @@ namespace glm {
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool isPerpendicular(genType x, genType y, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool isPerpendicular(genType x, genType y, const genType eps = epsilon<genType>()) {
     return isPerpendicular(vec<1, genType>(x), vec<1, genType>(y), eps);
   }
 
@@ -737,7 +737,7 @@ namespace glm {
   /* Missing implicit genType support. */
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<1, bool, Q> isCompNull(vec<1, T, Q> const &v, T eps = epsilon<T>) {
+  GLM_FUNC_QUALIFIER vec<1, bool, Q> isCompNull(vec<1, T, Q> const &v, const T eps = epsilon<T>()) {
     return vec<1, bool, Q>(abs(v.x) < eps);
   }
 
@@ -759,7 +759,7 @@ namespace glm {
   */
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool areCollinear(vec<1, T, Q> const &v0, vec<1, T, Q> const &v1, T eps = epsilon<T>) {
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool areCollinear(vec<1, T, Q> const &v0, vec<1, T, Q> const &v1, const T eps = epsilon<T>()) {
     ((void)v0);
     ((void)v1);
     ((void)eps);
@@ -767,7 +767,7 @@ namespace glm {
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool areCollinear(genType v0, genType v1, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool areCollinear(genType v0, genType v1, const genType eps = epsilon<genType>()) {
     ((void)v0);
     ((void)v1);
     ((void)eps);

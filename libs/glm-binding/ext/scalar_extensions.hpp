@@ -366,27 +366,27 @@ namespace glm {
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool isNormalized(genType x, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool isNormalized(genType x, const genType eps = epsilon<genType>()) {
     return isNormalized(vec<1, genType>(x), eps);
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool isNull(genType x, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool isNull(genType x, const genType eps = epsilon<genType>()) {
     return isNull(vec<1, genType>(x), eps);
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool isCompNull(genType v, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool isCompNull(genType v, const genType eps = epsilon<genType>()) {
     return abs(v) < eps;
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool areOrthonormal(genType v0, genType v1, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool areOrthonormal(genType v0, genType v1, const genType eps = epsilon<genType>()) {
     return areOrthonormal(vec<1, genType>(v0), vec<1, genType>(v1), eps);
   }
 
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool areOrthogonal(genType v0, genType v1, genType eps = epsilon<genType>()) {
+  GLM_FUNC_QUALIFIER bool areOrthogonal(genType v0, genType v1, const genType eps = epsilon<genType>()) {
     return areOrthogonal(vec<1, genType>(v0), vec<1, genType>(v1), eps);
   }
 
