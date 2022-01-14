@@ -147,6 +147,7 @@
     #error "GLM_ENABLE_EXPERIMENTAL not enabled!"
   #endif
 
+  #define GTX_ASSOCIATED_MIN_MAX_HPP
   #define GTX_BIT_HPP
   #define GTX_CLOSEST_POINT_HPP
   #define GTX_COLOR_ENCODING_HPP
@@ -1635,6 +1636,19 @@ NUMBER_VECTOR_DEFN(convertSRGBToLinear, glm::convertSRGBToLinear, LAYOUT_UNARY_O
 #if defined(GTC_NOISE_HPP)
 NUMBER_VECTOR_DEFN(perlin, glm::perlin, LAYOUT_UNARY_OR_BINARY)
 NUMBER_VECTOR_DEFN(simplex, glm::simplex, LAYOUT_UNARY)
+#endif
+
+#if defined(GTX_ASSOCIATED_MIN_MAX_HPP)
+#define LAYOUT_ASSOCIATED_OPTIONAL(LB, F, Tr, ...) /* F(x, a, y, b) */                        \
+  LUA_MLM_BEGIN                                                                               \
+  if (Tr::value_trait::Is((LB).L, (LB).idx + 1))                                              \
+    VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, Tr::safe, Tr::value_trait, ##__VA_ARGS__); \
+  else                                                                                        \
+    VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::safe, Tr::safe, ##__VA_ARGS__);               \
+  LUA_MLM_END
+
+NUMBER_VECTOR_DEFN(associatedMin, glm::associatedMin, LAYOUT_ASSOCIATED_OPTIONAL)
+NUMBER_VECTOR_DEFN(associatedMax, glm::associatedMax, LAYOUT_ASSOCIATED_OPTIONAL)
 #endif
 
 #if defined(GTX_CLOSEST_POINT_HPP)

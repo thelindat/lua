@@ -640,6 +640,16 @@ namespace glm {
   */
 
   /// <summary>
+  /// @GLMFix: Inconsistent template arguments in associatedMin; see max:
+  ///   template<typename T, typename U>
+  ///   GLM_FUNC_DECL U associatedMax(T x, U a, T y, U b);
+  /// </summary>
+  template<typename T, typename U>
+  GLM_FUNC_QUALIFIER U associatedMin(T x, U a, T y, U b) {
+    return x < y ? a : b;
+  }
+
+  /// <summary>
   /// @GLMFix: -Werror when using bitfieldFillOne and bitfieldFillZero:
   ///
   /// libs/glm/glm/./gtc/bitfield.inl:229:29: warning: comparison of integer expressions of different signedness: ‘int’ and ‘long unsigned int’ [-Wsign-compare]

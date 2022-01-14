@@ -455,6 +455,11 @@ GLM_LUA_REG(lowestBitValue),
 /* powerOfTwoNearest */  // Deprecated
 #endif
 
+#if defined(GTX_ASSOCIATED_MIN_MAX_HPP)
+GLM_LUA_REG(associatedMin),
+GLM_LUA_REG(associatedMax),
+#endif
+
 #if defined(GTX_CLOSEST_POINT_HPP)
 GLM_LUA_REG(closestPointOnLine),
 #endif
