@@ -1639,12 +1639,19 @@ NUMBER_VECTOR_DEFN(simplex, glm::simplex, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_ASSOCIATED_MIN_MAX_HPP)
-#define LAYOUT_ASSOCIATED_OPTIONAL(LB, F, Tr, ...) /* F(x, a, y, b) */                        \
-  LUA_MLM_BEGIN                                                                               \
-  if (Tr::value_trait::Is((LB).L, (LB).idx + 1))                                              \
-    VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, Tr::safe, Tr::value_trait, ##__VA_ARGS__); \
-  else                                                                                        \
-    VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::safe, Tr::safe, ##__VA_ARGS__);               \
+#define LAYOUT_ASSOCIATED_OPTIONAL(LB, F, Tr, ...)                                     \
+  LUA_MLM_BEGIN                                                                        \
+  using S = Tr::safe;                                                                  \
+  if (Tr::Is((LB).L, (LB).idx + 6)) /* f(x,a,y,b,z,c,w,d) */                           \
+    VA_CALL(BIND_FUNC, LB, F, Tr, S, S, S, S, S, S, S, ##__VA_ARGS__);                 \
+  else if (Tr::Is((LB).L, (LB).idx + 4)) /* f(x,a,y,b,z,c) */                          \
+    VA_CALL(BIND_FUNC, LB, F, Tr, S, S, S, S, S, ##__VA_ARGS__);                       \
+  else if (gLuaTrait<bool>::Is(((LB)).L, ((LB)).idx + 1)) /* f(x,a,y,b) */             \
+    VA_CALL(BIND_FUNC, LB, F, Tr, gLuaTrait<bool>, S, gLuaTrait<bool>, ##__VA_ARGS__); \
+  else if (Tr::value_trait::Is(((LB)).L, ((LB)).idx + 1))                              \
+    VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, S, Tr::value_trait, ##__VA_ARGS__); \
+  else                                                                                 \
+    VA_CALL(BIND_FUNC, LB, F, Tr, S, S, S, ##__VA_ARGS__);                             \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(associatedMin, glm::associatedMin, LAYOUT_ASSOCIATED_OPTIONAL)

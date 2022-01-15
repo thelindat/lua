@@ -300,7 +300,7 @@ Modules/functions not bound to LuaGLM due to usefulness or complexity:
 
 * glm/detail/func\_common.hpp: `step(T edge, vec<L, T, Q> const& x)` TODO.
 * glm/detail/\_swizzle\_func.hpp: Unnecessary bloat.
-* glm/gtx/associated\_min\_max.hpp: only `(x, a, y, b)` supported.
+* glm/gtx/associated\_min\_max.hpp: `(T x, vec<L, U, Q> const& a, ...)` not supported.
 * glm/gtx/range.hpp: `begin`, `end`: useless in Lua context.
 * glm/gtx/bit.hpp: `powerOfTwoAbove`, `powerOfTwoBelow`, `powerOfTwoNearest`: deprecated, use GTC\_ROUND\_HPP instead.
 * glm/ext/vector\_relational.hpp: `equal(..., vec<L, int, Q> const& ULPs)`, as the current Lua binding cannot differentiate between it and `(..., vec<L, T, Q> const& epsilon)`.

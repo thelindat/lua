@@ -458,6 +458,12 @@ GLM_LUA_REG(lowestBitValue),
 #if defined(GTX_ASSOCIATED_MIN_MAX_HPP)
 GLM_LUA_REG(associatedMin),
 GLM_LUA_REG(associatedMax),
+#if defined(LUAGLM_ALIASES_O3DE)
+//{ "GetSelect", GLM_NAME() }, // @TODO; (vR = (vCmp==0) ? vA : vB).
+//{ "CreateSelectCmpEqual", GLM_NAME() }, // @TODO
+//{ "CreateSelectCmpGreaterEqual", GLM_NAME() }, // @TODO
+//{ "CreateSelectCmpGreater", GLM_NAME() }, // @TODO
+#endif
 #endif
 
 #if defined(GTX_CLOSEST_POINT_HPP)

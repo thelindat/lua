@@ -990,6 +990,56 @@ namespace glm {
   */
 
   /// <summary>
+  /// @GLMFix: Incorrect 'vec<2, U, Q> associatedMin' declaration.
+  /// </summary>
+  template<length_t L, typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, U, Q> __associatedMin(vec<L, T, Q> const &x, vec<L, U, Q> const &a, vec<L, T, Q> const &y, vec<L, U, Q> const &b) {
+    vec<L, U, Q> Result;
+    for (length_t i = 0, n = Result.length(); i < n; ++i)
+      Result[i] = x[i] < y[i] ? a[i] : b[i];
+    return Result;
+  }
+
+  /// <summary>
+  /// @GLMFix: Incorrect 'vec<2, U, Q> associatedMax' declaration.
+  /// </summary>
+  template<length_t L, typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, U, Q> __associatedMax(vec<L, T, Q> const &x, vec<L, U, Q> const &a, vec<L, T, Q> const &y, vec<L, U, Q> const &b) {
+    vec<L, U, Q> Result;
+    for (length_t i = 0, n = Result.length(); i < n; ++i)
+      Result[i] = x[i] > y[i] ? a[i] : b[i];
+    return Result;
+  }
+
+  // Specialize incorrect GLM functions to use the functions above
+
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<2, U, Q> associatedMin(vec<2, T, Q> const &x, vec<2, U, Q> const &a, vec<2, T, Q> const &y, vec<2, U, Q> const &b) {
+    return __associatedMin(x, a, y, b);
+  }
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, U, Q> associatedMin(vec<3, T, Q> const &x, vec<3, U, Q> const &a, vec<3, T, Q> const &y, vec<3, U, Q> const &b) {
+    return __associatedMin(x, a, y, b);
+  }
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<4, U, Q> associatedMin(vec<4, T, Q> const &x, vec<4, U, Q> const &a, vec<4, T, Q> const &y, vec<4, U, Q> const &b) {
+    return __associatedMin(x, a, y, b);
+  }
+
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<2, U, Q> associatedMax(vec<2, T, Q> const &x, vec<2, U, Q> const &a, vec<2, T, Q> const &y, vec<2, U, Q> const &b) {
+    return __associatedMax(x, a, y, b);
+  }
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, U, Q> associatedMax(vec<3, T, Q> const &x, vec<3, U, Q> const &a, vec<3, T, Q> const &y, vec<3, U, Q> const &b) {
+    return __associatedMax(x, a, y, b);
+  }
+  template<typename T, typename U, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<4, U, Q> associatedMax(vec<4, T, Q> const &x, vec<4, U, Q> const &a, vec<4, T, Q> const &y, vec<4, U, Q> const &b) {
+    return __associatedMax(x, a, y, b);
+  }
+
+  /// <summary>
   /// @GLMFix: Generalized closestPointOnLine implementation
   /// </summary>
   template<length_t L, typename T, qualifier Q>
