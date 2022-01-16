@@ -729,7 +729,6 @@ l_sinline int auxgetstr (lua_State *L, const TValue *t, const char *k) {
 
 LUA_API int lua_getglobal (lua_State *L, const char *name) {
   int result = LUA_TNONE;
-
   const TValue *G;
   lua_lock(L);
   G = getGtable(L);
@@ -740,8 +739,8 @@ LUA_API int lua_getglobal (lua_State *L, const char *name) {
 
 
 LUA_API int lua_gettable (lua_State *L, int idx) {
-  const TValue *slot;
   TValue *t;
+  const TValue *slot;
   lua_lock(L);
   t = index2value(L, idx);
   if (luaV_fastget(L, t, s2v(L->top - 1), slot, luaH_get)) {
@@ -760,7 +759,6 @@ LUA_API int lua_gettable (lua_State *L, int idx) {
 
 LUA_API int lua_getfield (lua_State *L, int idx, const char *k) {
   int result = LUA_TNONE;
-
   TValue *v;
   lua_lock(L);
   v = index2value(L, idx);
@@ -777,22 +775,20 @@ LUA_API int lua_getfield (lua_State *L, int idx, const char *k) {
 
 LUA_API int lua_geti (lua_State *L, int idx, lua_Integer n) {
   TValue *t;
+  const TValue *slot;
   lua_lock(L);
   t = index2value(L, idx);
-  if (ttisvector(t))
+  if (luaV_fastgeti(L, t, n, slot)) {
+    setobj2s(L, L->top, slot);
+  }
+  else if (ttisvector(t))
     glmVec_geti(L, t, n, L->top);
   else if (ttismatrix(t))
     glmMat_rawgeti(t, n, L->top);
   else {
-    const TValue *slot;
-    if (luaV_fastgeti(L, t, n, slot)) {
-      setobj2s(L, L->top, slot);
-    }
-    else {
-      TValue aux;
-      setivalue(&aux, n);
-      luaV_finishget(L, t, &aux, L->top, slot);
-    }
+    TValue aux;
+    setivalue(&aux, n);
+    luaV_finishget(L, t, &aux, L->top, slot);
   }
   api_incr_top(L);
   lua_unlock(L);
@@ -818,7 +814,6 @@ static Table *ensuretable (lua_State *L, const TValue *t) {
 
 LUA_API int lua_rawget (lua_State *L, int idx) {
   int result = LUA_TNONE;
-
   const TValue *o;
   lua_lock(L);
   api_checknelems(L, 1);
@@ -840,7 +835,6 @@ LUA_API int lua_rawget (lua_State *L, int idx) {
 
 LUA_API int lua_rawgeti (lua_State *L, int idx, lua_Integer n) {
   int result = LUA_TNONE;
-
   const TValue *o;
   lua_lock(L);
   o = index2value(L, idx);
@@ -863,7 +857,6 @@ LUA_API int lua_rawgeti (lua_State *L, int idx, lua_Integer n) {
 
 LUA_API int lua_rawgetp (lua_State *L, int idx, const void *p) {
   int result = LUA_TNONE;
-
   TValue *t;
   TValue k;
   lua_lock(L);
@@ -1045,22 +1038,20 @@ LUA_API void lua_setglobal (lua_State *L, const char *name) {
 
 LUA_API void lua_settable (lua_State *L, int idx) {
   TValue *t;
+  const TValue *slot;
   lua_lock(L);
   api_checknelems(L, 2);
   t = index2value(L, idx);
-  if (ttismatrix(t))
-    glmMat_set(L, t, s2v(L->top - 2), s2v(L->top - 1));
-  else {
-    const TValue *slot;
-    if (luaV_fastget(L, t, s2v(L->top - 2), slot, luaH_get)) {
+  if (luaV_fastget(L, t, s2v(L->top - 2), slot, luaH_get)) {
 #if defined(LUAGLM_EXT_READONLY)
-      readonly_api_check(L, hvalue(t));
+    readonly_api_check(L, hvalue(t));
 #endif
-      luaV_finishfastset(L, t, slot, s2v(L->top - 1));
-    }
-    else
-      luaV_finishset(L, t, s2v(L->top - 2), s2v(L->top - 1), slot);
+    luaV_finishfastset(L, t, slot, s2v(L->top - 1));
   }
+  else if (ttismatrix(t))
+    glmMat_set(L, t, s2v(L->top - 2), s2v(L->top - 1));
+  else
+    luaV_finishset(L, t, s2v(L->top - 2), s2v(L->top - 1), slot);
   L->top -= 2;  /* pop index and value */
   lua_unlock(L);
 }
@@ -1074,25 +1065,22 @@ LUA_API void lua_setfield (lua_State *L, int idx, const char *k) {
 
 LUA_API void lua_seti (lua_State *L, int idx, lua_Integer n) {
   TValue *t;
+  const TValue *slot;
   lua_lock(L);
   api_checknelems(L, 1);
   t = index2value(L, idx);
-  if (ttismatrix(t)) {
-    TValue aux;
-    setivalue(&aux, n);
-    glmMat_set(L, t, &aux, s2v(L->top - 1));
+  if (luaV_fastgeti(L, t, n, slot)) {
+#if defined(LUAGLM_EXT_READONLY)
+    readonly_api_check(L, hvalue(t));
+#endif
+    luaV_finishfastset(L, t, slot, s2v(L->top - 1));
   }
   else {
-    const TValue *slot;
-    if (luaV_fastgeti(L, t, n, slot)) {
-#if defined(LUAGLM_EXT_READONLY)
-      readonly_api_check(L, hvalue(t));
-#endif
-      luaV_finishfastset(L, t, slot, s2v(L->top - 1));
-    }
+    TValue aux;
+    setivalue(&aux, n);
+    if (ttismatrix(t))
+      glmMat_set(L, t, &aux, s2v(L->top - 1));
     else {
-      TValue aux;
-      setivalue(&aux, n);
       luaV_finishset(L, t, &aux, s2v(L->top - 1), slot);
     }
   }
@@ -1105,7 +1093,6 @@ static void aux_rawset (lua_State *L, int idx, TValue *key, int n) {
   TValue *v;
   lua_lock(L);
   api_checknelems(L, n);
-
   v = index2value(L, idx);
   if (ttismatrix(v))
     glmMat_rawset(L, v, key, s2v(L->top - 1));
