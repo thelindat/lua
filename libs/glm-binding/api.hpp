@@ -668,13 +668,13 @@ TRAITS_DEFN(packUint2x32, glm::packUint2x32, gLuaVec2<glm::u32>)
 TRAITS_DEFN(unpackUint2x32, glm::unpackUint2x32, gLuaTrait<glm::uint64>)
 #endif
 
-#if defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP)
+#if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
 #if GLM_VERSION >= 993  // @COMPAT: float_distance incorrectly declared until 0.9.9.3
 NUMBER_VECTOR_DEFN(float_distance, glm::float_distance, LAYOUT_BINARY)
 #endif
 #endif
 
-#if defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)
+#if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
 #define LAYOUT_NEXT_FLOAT(LB, F, Tr, ...) /* @GLMAssert: assert(ULPs >= 0); */        \
   LUA_MLM_BEGIN                                                                       \
   if (lua_isnoneornil((LB).L, (LB).idx + 1))                                          \

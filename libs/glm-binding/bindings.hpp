@@ -141,6 +141,12 @@ extern LUA_API_LINKAGE {
   #endif
 #endif
 
+/*
+@@ LUAGLM_INCLUDE_IEEE Include IEEE-754 specific bindings; otherwise presume
+** long double operations are enabled.
+*/
+#define LUAGLM_INCLUDE_IEEE (LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE)
+
 /* Macro for implicitly handling floating point drift where possible */
 #if defined(LUAGLM_DRIFT)
   #define glm_trait_normalize(x) glm::normalize((x))
@@ -869,7 +875,7 @@ template<bool FastPath> struct gLuaTrait<unsigned long int, FastPath> : gLuaPrim
 template<bool FastPath> struct gLuaTrait<unsigned long long int, FastPath> : gLuaPrimitive<unsigned long long int, FastPath> { };
 template<bool FastPath> struct gLuaTrait<float, FastPath> : gLuaPrimitive<float, FastPath> { };
 template<bool FastPath> struct gLuaTrait<double, FastPath> : gLuaPrimitive<double, FastPath> { };
-#if 0 && LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
 template<bool FastPath> struct gLuaTrait<long double, FastPath> : gLuaPrimitive<long double, FastPath> { };
 #endif
 
@@ -1859,7 +1865,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 */
 
 /* @COMPAT: max ULPs parameters for scalar numbers introduced in 0.9.9.3 */
-#if GLM_VERSION >= 993
+#if LUAGLM_INCLUDE_IEEE && GLM_VERSION >= 993
   #define LAYOUT_EQUAL_ULPS(LB, F, A, B, Val)                                                 \
     else if (ttisinteger(Val)) {                                                              \
       return gLuaBase::Push((LB), F((A), (B), gLuaTrait<int>::fast::Next((LB).L, (LB).idx))); \

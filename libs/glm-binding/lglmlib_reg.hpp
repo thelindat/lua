@@ -1044,14 +1044,14 @@ GLM_LUA_REG(packUint2x32),
 GLM_LUA_REG(unpackUint2x32),
 #endif
 
-#if defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP)
+#if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
 #if GLM_VERSION >= 993  // @COMPAT: float_distance incorrectly declared until 0.9.9.3
 GLM_LUA_REG(float_distance),
 { "floatDistance", GLM_NAME(float_distance) },  // scalar_ulp.hpp
 #endif
 #endif
 
-#if defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)
+#if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
 GLM_LUA_REG(next_float),
 GLM_LUA_REG(prev_float),
 { "nextFloat", GLM_NAME(next_float) },  // scalar_ulp.hpp

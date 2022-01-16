@@ -895,8 +895,8 @@
 */
 #if !defined(RC_INVOKED)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
-  #if LUA_VEC_TYPE == LUA_FLOAT_DOUBLE
-    #error "__m256 advanced vector extnesions are not supported!"
+  #if LUA_VEC_TYPE != LUA_FLOAT_FLOAT
+    #error "__m256/__m512 advanced vector extensions are not supported!"
   #else
     #define LUAGLM_ALIGN LUA_ALIGNED_(16)
   #endif

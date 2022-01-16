@@ -66,6 +66,9 @@ namespace detail {
   /// </summary>
   template<typename T> struct lglmcast { typedef T value_type; };
   template<> struct lglmcast<float> { typedef double value_type; };
+#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+  template<> struct lglmcast<long double> { typedef double value_type; };
+#endif
 
   /// <summary>
   /// string_cast.inl: literal without the dependency
@@ -86,6 +89,9 @@ namespace detail {
   template<typename T> struct lglmprefix{};
   template<> struct lglmprefix<float> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };
   template<> struct lglmprefix<double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } }; // Changed for LuaGLM
+#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+  template<> struct lglmprefix<long double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };
+#endif
   template<> struct lglmprefix<bool> { GLM_FUNC_QUALIFIER static char const *value() { return "b"; } };
   template<> struct lglmprefix<uint8_t> { GLM_FUNC_QUALIFIER static char const *value() { return "u8"; } };
   template<> struct lglmprefix<int8_t> { GLM_FUNC_QUALIFIER static char const *value() { return "i8"; } };
@@ -380,6 +386,33 @@ namespace hash {
       return (n == 0.f) ? 0 : __scalar_hash.__a;  // -/+ 0.0 should return same hash.
     }
   };
+
+#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+    /// <summary>
+    /// Not the most robust solution; see libcxx's implementation.
+    /// </summary>
+    template<>
+    struct lglm_hash<long double> {
+      GLM_FUNC_QUALIFIER size_t operator()(const long double &n) const {
+        using T = long double;  // -/+ 0.0 should return same hash.
+  #if defined(__i386__) || (defined(__x86_64__) && defined(__ILP32__))
+        union { T t; struct { size_t a, b, c, d; } s; } u;
+        u.s.a = 0;
+        u.s.b = 0;
+        u.s.c = 0;
+        u.s.d = 0;
+        u.t = n;
+        return (n == T(0)) ? 0 : (u.s.a ^ u.s.b ^ u.s.c ^ u.s.d);
+  #else
+        union { T t; struct { size_t a; size_t b; } s; } u;
+        u.s.a = 0;
+        u.s.b = 0;
+        u.t = n;
+        return (n == T(0)) ? 0 : (u.s.a ^ u.s.b);
+  #endif
+      }
+    };
+#endif
 
   /// <summary>
   /// glm::detail::hash_combine

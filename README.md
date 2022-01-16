@@ -615,7 +615,7 @@ same instructions apply:
 └> git submodule update --init
 
 # Build for the linux platform target, linked with readline;
-└> make linux-readline
+└> make linux-one
 
 # Compile the glm binding library;
 └> make lib-glm
@@ -640,7 +640,7 @@ the complete list of build options.
 
 # Compile with icc: -DCMAKE_C_COMPILER=icc -DCMAKE_CXX_COMPILER=icpc
 # Ensure LD_LIBRARY_PATH contains a reference to: libimf.a
-└> cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+└> cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DONE_LUA=ON ..
 
 # Build
 └> make
@@ -766,6 +766,7 @@ Ordered by priority.
 1. Cleanup TODO annotations that have accumulated over time; many are outdated.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
+1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
 1. Initial support for frustums (both orthographic and perspective) and OBBs, or, at minimum, the more computationally complex parts of these structures.
 1. [binding](libs/glm-binding): Complete O3DE AzCore/Math (behaviorContext) aliasing (... where possible).
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
@@ -773,7 +774,6 @@ Ordered by priority.
 1. [ext](libs/glm-binding/ext): Allow configurable epsilon values for the variety of intersection functions.
 1. [ext](libs/glm-binding/ext): Improve SIMD support.
 1. [geom](libs/glm-binding/ext/geom): Support for two-dimensional structures: Ray2D, Line2D, Plane2D.
-1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
 1. Modify implementation to follow updated "Avoid taking the address of a 'TValue' field" (or reference) convention.
 1. `glmMat_set` support for tables, e.g., `mat[i] = { ... }`, by using `glmH_tovector`.
 

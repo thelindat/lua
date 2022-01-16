@@ -1074,6 +1074,52 @@ namespace glm {
     };
   }
 
+#if (GLM_ARCH & GLM_ARCH_SSE2_BIT) && (GLM_CONFIG_SIMD == GLM_ENABLE)
+  /// <summary>
+  /// @GLMFix: glm/glm/detail/func_integer_simd.inl:42:32: error: could not convert ‘add0’ from ‘const __m128i’ to ‘glm::vec<4, unsigned int, glm::aligned_highp>’
+  /// </summary>
+  namespace detail {
+    template<>
+    struct compute_bitfieldBitCountStep<4, uint, glm::aligned_highp, true, true> {
+      GLM_FUNC_QUALIFIER static vec<4, uint, glm::aligned_highp> call(vec<4, uint, glm::aligned_highp> const &v, uint Mask, uint Shift) {
+        __m128i const set0 = v.data;
+
+        __m128i const set1 = _mm_set1_epi32(static_cast<int>(Mask));
+        __m128i const and0 = _mm_and_si128(set0, set1);
+        __m128i const sft0 = _mm_slli_epi32(set0, Shift);
+        __m128i const and1 = _mm_and_si128(sft0, set1);
+        __m128i const add0 = _mm_add_epi32(and0, and1);
+
+        vec<4, uint, glm::aligned_highp> Result;
+        Result.data = add0;
+        return Result;
+      }
+    };
+
+    /// <summary>
+    /// @GLMFix: Similar to above
+    /// </summary>
+    template<>
+    struct compute_bitfieldReverseStep<4, uint, glm::aligned_highp, true, true> {
+      GLM_FUNC_QUALIFIER static vec<4, uint, glm::aligned_highp> call(vec<4, uint, glm::aligned_highp> const &v, uint Mask, uint Shift) {
+        __m128i const set0 = v.data;
+
+        __m128i const set1 = _mm_set1_epi32(static_cast<int>(Mask));
+        __m128i const and1 = _mm_and_si128(set0, set1);
+        __m128i const sft1 = _mm_slli_epi32(and1, Shift);
+        __m128i const set2 = _mm_andnot_si128(set0, _mm_set1_epi32(-1));
+        __m128i const and2 = _mm_and_si128(set0, set2);
+        __m128i const sft2 = _mm_srai_epi32(and2, Shift);
+        __m128i const or0 = _mm_or_si128(sft1, sft2);
+
+        vec<4, uint, glm::aligned_highp> Result;
+        Result.data = or0;
+        return Result;
+      }
+    };
+  }
+#endif
+
   /// <summary>
   /// @GLMFix: A implementation of glm::angle that's numerically stable at all angles.
   /// </summary>

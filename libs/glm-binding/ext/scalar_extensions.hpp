@@ -660,6 +660,22 @@ namespace glm {
     return detail::mask(Bits);  // Use alternate/duplicate mask implementation
   }
 
+  /// <summary>
+  /// @GLMFix: missing long double support
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER bool epsilonEqual(genType const &x, genType const &y, genType const &epsilon) {
+    return abs(x - y) < epsilon;
+  }
+
+  /// <summary>
+  /// @GLMFix: missing long double support
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER bool epsilonNotEqual(genType const &x, genType const &y, genType const &epsilon) {
+    return abs(x - y) >= epsilon;
+  }
+
   /* }====================================================== */
 
 }
