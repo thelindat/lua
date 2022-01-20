@@ -763,7 +763,6 @@ these added features.
 Ordered by priority.
 
 1. Cleanup testing scripts/environment and publish.
-1. Cleanup TODO annotations that have accumulated over time; many are outdated.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
@@ -775,7 +774,7 @@ Ordered by priority.
 1. [ext](libs/glm-binding/ext): Improve SIMD support.
 1. [geom](libs/glm-binding/ext/geom): Support for two-dimensional structures: Ray2D, Line2D, Plane2D.
 1. Modify implementation to follow updated "Avoid taking the address of a 'TValue' field" (or reference) convention.
-1. `glmMat_set` support for tables, e.g., `mat[i] = { ... }`, by using `glmH_tovector`.
+1. Dust off emscripten patches.
 
 ### Planned Features
 

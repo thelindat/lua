@@ -8,8 +8,6 @@
 **  3. Functions emulated/ported from other popular vector-math libraries.
 **
 ** See Copyright Notice in lua.h
-**
-** @TODO: SIMD support for some of the quatEulerAngle functions
 */
 #ifndef EXT_EXTENSION_QUAT_HPP
 #define EXT_EXTENSION_QUAT_HPP

@@ -76,7 +76,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Plane<L, T, Q> &p1, const Plane<L, T, Q> &p2) {
-    return p1.normal == p2.normal && p1.d == p2.d;  // @TODO: equal(p1.d, p2.d, epsilon<T>());
+    return p1.normal == p2.normal && p1.d == p2.d;
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -194,7 +194,7 @@ namespace glm {
   }
 
   /// <summary>
-  /// Construct a plane by specifying three points on the plane; @TODO: Triangle<3, T, Q>
+  /// Construct a plane by specifying three points on the plane.
   /// </summary>
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER Plane<3, T, Q> planeFrom(const vec<3, T, Q> &v1, const vec<3, T, Q> &v2, const vec<3, T, Q> &v3) {
@@ -752,7 +752,7 @@ namespace glm {
     for (length_t i = 0; i < L; ++i)
       r += e[i] * abs(plane.normal[i]);
 
-    return abs(dot(plane.normal, c) - plane.d) <= r;  // @TODO: + epsilon<T>() ?
+    return abs(dot(plane.normal, c) - plane.d) <= r;
   }
 
   template<length_t L, typename T, qualifier Q>

@@ -223,10 +223,10 @@ namespace glm {
   /// Return true if all vector elements are identical/equal.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool isUniform(vec<L, T, Q> const &v) {
+  GLM_FUNC_QUALIFIER bool isUniform(vec<L, T, Q> const &v, const T eps = epsilon<T>()) {
     bool result = true;
     for (length_t i = 1; i < L; ++i)
-      result &= (v[i] == v[0]);  // @TODO: equal(v[i], v[0], epsilon<T>())
+      result &= equal(v[i], v[0], eps);
     return result;
   }
 
@@ -292,6 +292,22 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType scaleLength(genType x, genType newLength) {
     return scaleLength(vec<1, genType>(x), newLength).x;
+  }
+
+  /// <summary>
+  /// Returns the homogenized vector: divides all components by w.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, T, Q> homogenize(const vec<4, T, Q> &v) {
+    return vec<3, T, Q>(v.x / v.w, v.y / v.w, v.z / v.w);
+  }
+
+  /// <summary>
+  /// Dot product of two vectors using only the x,y,z components.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER T dot(const vec<4, T, Q> &x, const vec<3, T, Q> &y) {
+    return dot(vec<3, T, Q>(x.x, x.y, x.z), y);
   }
 
   /* Cross product with specific axis */
@@ -484,6 +500,24 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType barycentric(genType value1, genType value2, genType value3, genType amount1, genType amount2) {
     return barycentric(vec<1, genType>(value1), vec<1, genType>(value2), vec<1, genType>(value3), amount1, amount2).x;
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> wrap(const vec<L, T, Q> &x, const vec<L, T, Q> &maxValue) {
+    vec<L, T, Q> Result(T(0));
+    for (length_t i = 0; i < L; ++i)
+      Result[i] = wrap<T>(x[i], maxValue[i]);
+    return Result;
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> wrap(const vec<L, T, Q> &x, T maxValue) {
+    return wrap(x, vec<L, T, Q>(maxValue));
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<L, T, Q> wrapAngle2(vec<L, T, Q> const &x) {
+    return detail::functor1<vec, L, T, T, Q>::call(wrapAngle2, x);
   }
 
   /// <summary>
@@ -851,7 +885,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> logistic(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'logistic' only accept floating-point inputs.");
-    return detail::functor1<vec, L, T, T, Q>::call(logistic, v);  // @TODO: SIMD.
+    return detail::functor1<vec, L, T, T, Q>::call(logistic, v);
   }
 
 #if GLM_HAS_CXX11_STL

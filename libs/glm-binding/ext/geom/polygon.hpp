@@ -37,7 +37,6 @@ namespace glm {
   /// <summary>
   /// A two-dimensional closed surface in three-dimensional space.
   ///
-  /// @TODO: size_t -> List<point_type>::size_type
   /// @NOTE: This polygon implementation is tailored specifically to the Lua
   ///   binding. The "glm::List" pointer is owned by the userdata bound to the
   ///   garbage collector.

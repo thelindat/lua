@@ -1,7 +1,5 @@
 /// <summary>
 /// See Copyright Notice in setup.hpp
-///
-/// @TODO: Triangle2D support.
 /// </summary>
 #ifndef EXT_GEOM_TRIANGLE_HPP
 #define EXT_GEOM_TRIANGLE_HPP

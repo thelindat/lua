@@ -25,9 +25,8 @@
   #define LUA_ALLOC_NULLPTR NULL
 #endif
 
-/* @TODO: Piggyback of GLMs usage for now. */
-#if defined(GLM_IF_CONSTEXPR)
-  #define LUA_ALLOC_IF_CONSTEXPR GLM_IF_CONSTEXPR
+#if __cplusplus >= 201703L
+  #define LUA_ALLOC_IF_CONSTEXPR if constexpr
 #else
   #define LUA_ALLOC_IF_CONSTEXPR if
 #endif

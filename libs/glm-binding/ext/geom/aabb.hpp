@@ -755,6 +755,19 @@ namespace glm {
     return enclose(aabb, minimalEnclosingAABB(polygon));
   }
 
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER AABB<L, T, Q> expand(const AABB<L, T, Q> &aabb, const vec<L, T, Q> &delta) {
+    return AABB<L, T, Q>(aabb.minPoint - delta, aabb.maxPoint + delta);
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER AABB<L, T, Q> clamp(const AABB<L, T, Q> &aabb, const AABB<L, T, Q> &other) {
+    return AABB<L, T, Q>(
+      clamp(aabb.minPoint, other.minPoint, other.maxPoint),
+      clamp(aabb.maxPoint, other.minPoint, other.maxPoint)
+    );
+  }
+
   /// <summary>
   /// Generalized compute the intersection of a line (or ray) and the AABB.
   /// </summary>
@@ -906,7 +919,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const Sphere<L, T, Q> &sphere) {
     const vec<L, T, Q> pt = closestPoint(aabb, sphere.pos);
-    return distance2(sphere.pos, pt) <= sphere.r * sphere.r;  // @TODO: + epsilon<T>() ?
+    return distance2(sphere.pos, pt) <= sphere.r * sphere.r;
   }
 
   template<length_t L, typename T, qualifier Q>

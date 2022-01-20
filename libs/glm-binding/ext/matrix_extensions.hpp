@@ -159,7 +159,8 @@ namespace glm {
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> extractScale(const qua<T, Q> &q) {
-    return extractScale(toMat3(q));
+    ((void)(q));
+    return vec<3, T, Q>(T(1));
   }
 
   template<typename T, qualifier Q>

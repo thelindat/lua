@@ -163,8 +163,9 @@ namespace glm {
 
   /* Numeric extensions */
   template<typename genType>
-  GLM_FUNC_QUALIFIER bool isUniform(genType v) {
+  GLM_FUNC_QUALIFIER bool isUniform(genType v, const genType eps = epsilon<genType>()) {
     ((void)v);
+    ((void)eps);
     return true;
   }
 
@@ -192,7 +193,34 @@ namespace glm {
   }
 
   /// <summary>
+  /// Wraps [0, maxValue].
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType wrap(genType value, genType maxValue) {
+    return fmod(value, maxValue) + ((value < genType(0.0)) ? maxValue : genType(0.0));
+  }
+
+  /// <summary>
+  /// Wraps [minValue, maxValue].
+  /// </summary>
+  //template<typename genType>
+  //GLM_FUNC_QUALIFIER genType wrap(genType value, genType minValue, genType maxValue) {
+  //  return wrap(value - minValue, maxValue - minValue) + minValue;
+  //}
+
+  /// <summary>
+  /// glm::wrapAngle defined over [-pi, pi].
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType wrapAngle2(genType value) {
+    if (value >= genType(0))
+      return fmod(value + glm::pi<genType>(), glm::two_pi<genType>()) - glm::pi<genType>();
+    return fmod(value - glm::pi<genType>(), glm::two_pi<genType>()) + glm::pi<genType>();
+  }
+
+  /// <summary>
   /// Loops "t", so that it is never greater than "length" and less than zero.
+  /// @TODO: Replace with wrap
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType loopRepeat(genType t, genType length) {
@@ -362,17 +390,20 @@ namespace glm {
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType normalize(genType x) {
-    return normalize(vec<1, genType>(x)).x;
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'normalize' accepts only floating-point inputs");
+    return x < genType(0) ? genType(-1) : genType(1);
   }
 
   template<typename genType>
   GLM_FUNC_QUALIFIER bool isNormalized(genType x, const genType eps = epsilon<genType>()) {
-    return isNormalized(vec<1, genType>(x), eps);
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'isNormalized' only accept floating-point inputs");
+    return abs(x - static_cast<genType>(1)) <= static_cast<genType>(2) * eps;
   }
 
   template<typename genType>
   GLM_FUNC_QUALIFIER bool isNull(genType x, const genType eps = epsilon<genType>()) {
-    return isNull(vec<1, genType>(x), eps);
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'isNull' only accept floating-point inputs");
+    return x <= eps;
   }
 
   template<typename genType>
@@ -382,7 +413,7 @@ namespace glm {
 
   template<typename genType>
   GLM_FUNC_QUALIFIER bool areOrthonormal(genType v0, genType v1, const genType eps = epsilon<genType>()) {
-    return areOrthonormal(vec<1, genType>(v0), vec<1, genType>(v1), eps);
+    return isNormalized(v0, eps) && isNormalized(v1, eps) && (abs(dot(v0, v1)) <= eps);
   }
 
   template<typename genType>

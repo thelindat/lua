@@ -358,9 +358,9 @@ namespace glm {
 namespace hash {
 
   /// <summary>
-  /// @TODO: Temporary solution as the previous implementation was slow. A
-  /// variety of 'spatial hashing' algorithms exist for vector-type structures
-  /// and should be considered.
+  /// Temporary solution as the previous implementation was slow. A variety of
+  /// 'spatial hashing' algorithms exist for vector-type structures and should
+  /// be considered.
   /// </summary>
   template<typename T>
   struct lglm_hash {

@@ -88,7 +88,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Sphere<L, T, Q> &s1, const Sphere<L, T, Q> &s2) {
-    return s1.pos == s2.pos && s1.r == s2.r;  // @TODO: equal(s1.r, s2.r, epsilon<T>());
+    return s1.pos == s2.pos && s1.r == s2.r;
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -386,7 +386,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const Sphere<L, T, Q> &sphere, const Sphere<L, T, Q> &other) {
-    return distance2(sphere.pos, other.pos) <= ((sphere.r + other.r) * (sphere.r + other.r));  // @TODO: + epsilon<T>() ?
+    return distance2(sphere.pos, other.pos) <= ((sphere.r + other.r) * (sphere.r + other.r));
   }
 
   template<length_t L, typename T, qualifier Q>

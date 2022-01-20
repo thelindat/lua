@@ -109,7 +109,6 @@ struct lua_longjmp {
 ** =======================================================
 */
 #if defined(__cplusplus) && defined(LUA_CPP_EXCEPTIONS)
-
 #if defined(LUA_CPP_STD_EXCEPTIONS)
   #include <exception>
 #endif
@@ -124,8 +123,8 @@ struct lua_longjmp {
 
 class LuaException {
 private:
-  lua_State *const L;
-  lua_longjmp *const errorJmp;
+  const lua_State *L;
+  const lua_longjmp *errorJmp;
   mutable bool anchored;
 
   LuaException &operator=(const LuaException &other) = delete;  /* prevent */
@@ -144,7 +143,7 @@ public:
   ** Ensure the error message is anchored on the Lua stack well after the
   ** lifetime of the exception.
   **
-  ** @NOTE: This function should only be called by luaD_rawrunprotected.
+  ** This function should only be called by luaD_rawrunprotected.
   */
   void anchor() const {
     anchored = true;
@@ -239,7 +238,7 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   catch (LuaException &lua_e) {
     lua_e.anchor();
     if (lj.status == 0)
-      lj.status = -1;  /* @TODO: Ensure this is correct. */
+      lj.status = -1;
   }
   /*
   ** Original implementation uses throw(lua_longjmp) + ellipses capture. For
@@ -262,7 +261,7 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
     catch (LuaException &_lua_e) {
       _lua_e.anchor();
       if (lj.status == 0)
-        lj.status = -1;  /* @TODO: Ensure this is correct. */
+        lj.status = -1;
     }
   }
 #endif

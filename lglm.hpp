@@ -97,9 +97,6 @@ typedef lua_Number glm_Number;
 @@ LUAGLM_Q Specifies how vector, quat, and matrix types are qualified in terms
 ** of alignment and precision by the runtime/API. In practice, this is used to
 ** allow libraries to use different GLM alignment configurations.
-**
-** @TODO: @ICCAlign: Improve compiler warnings/errors for when GLM_CONFIG_ALIGNED_GENTYPES
-** is disabled.
 */
 #if !defined(LUAGLM_Q)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
@@ -298,8 +295,6 @@ union glmVector {
 
 /// <summary>
 /// Internal matrix definition.
-///
-/// @TODO: Name the anonymous union in glmMatrix similar to lua_Mat4.
 /// </summary>
 LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
   union {

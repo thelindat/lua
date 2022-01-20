@@ -70,13 +70,13 @@ GLM_LUA_REG(mat_sub),
 GLM_LUA_REG(mat_mul),
 GLM_LUA_REG(mat_negate),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "Clone", GLM_NAME() }, // @TODO
-//{ "Add", GLM_NAME() }, // @TODO
-//{ "Subtract", GLM_NAME() }, // @TODO
-//{ "Unary", GLM_NAME() }, // @TODO
-//{ "GetElement", GLM_NAME() }, // @TODO
-//{ "SetElement", GLM_NAME() }, // @TODO
-// @TODO: DivideFloat, MultiplyFloat, MultiplyVectorX, MultiplyQuaternion
+//{ "Clone", GLM_NAME() }, // @O3DEAlias: @TODO for O3DE library aliasing; added on as-needed basis.
+//{ "Add", GLM_NAME() }, // @O3DEAlias
+//{ "Subtract", GLM_NAME() }, // @O3DEAlias
+//{ "Unary", GLM_NAME() }, // @O3DEAlias
+//{ "GetElement", GLM_NAME() }, // @O3DEAlias
+//{ "SetElement", GLM_NAME() }, // @O3DEAlias
+// @O3DEAlias: DivideFloat, MultiplyFloat, MultiplyVectorX, MultiplyQuaternion
 #endif
 
 #if defined(COMMON_HPP)
@@ -110,6 +110,9 @@ GLM_LUA_REG(isnormal),
 GLM_LUA_REG(isunordered),
 GLM_LUA_REG(nearbyint),
 GLM_LUA_REG(nextafter),
+#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+GLM_LUA_REG(nexttoward),
+#endif
 GLM_LUA_REG(remainder),
 GLM_LUA_REG(scalbn),
 { "remquo", GLM_NAME(remainder) },  // c99, ignore quot
@@ -122,9 +125,9 @@ GLM_LUA_REG(toint),
 { "Ceil", GLM_NAME(ceil) },
 { "Floor", GLM_NAME(floor) },
 { "Round", GLM_NAME(round) },
-//{ "CeilToInt", GLM_NAME() }, // @TODO
-//{ "FloorToInt", GLM_NAME() }, // @TODO
-//{ "RoundToInt", GLM_NAME() }, // @TODO
+//{ "CeilToInt", GLM_NAME() }, // @UnityAlias: @TODO for Unity library aliasing; added on as-needed basis.
+//{ "FloorToInt", GLM_NAME() }, // @UnityAlias
+//{ "RoundToInt", GLM_NAME() }, // @UnityAlias
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetAbs", GLM_NAME(abs) },
@@ -132,7 +135,6 @@ GLM_LUA_REG(toint),
 { "GetCeil", GLM_NAME(ceil) },
 { "GetRound", GLM_NAME(round) },
 { "GetMod", GLM_NAME(mod) },
-//{ "Wrap", GLM_NAME() }, // @TODO
 #endif
 #endif
 
@@ -174,7 +176,7 @@ GLM_LUA_REG(fpclassify),
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetSign", GLM_NAME(sign) },
-//{ "GetSelect", GLM_NAME() }, // Select; @TODO
+//{ "GetSelect", GLM_NAME() }, // Select; @O3DEAlias
 #endif
 #endif
 
@@ -257,6 +259,7 @@ GLM_LUA_REG(normalize),
 GLM_LUA_REG(clampLength),  // LUA_VECTOR_EXTENSIONS
 GLM_LUA_REG(scaleLength),
 GLM_LUA_REG(direction),
+GLM_LUA_REG(homogenize),
 { "norm", GLM_NAME(normalize) },
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "magnitude", GLM_NAME(length) },
@@ -274,17 +277,16 @@ GLM_LUA_REG(direction),
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetNormalized", GLM_NAME(normalize) },
-//{ "GetNormalizedSafe", GLM_NAME() }, // @TODO
+{ "GetNormalizedEstimate", GLM_NAME(normalize) },  // @O3DEAlias: NormalizeEstimate
+//{ "GetNormalizedSafe", GLM_NAME() }, // @O3DEAlias
 { "SetLength", GLM_NAME(scaleLength) },
-{ "GetNormalizedEstimate", GLM_NAME(normalize) },  // Doesn't matter in this context
 { "SetLengthEstimate", GLM_NAME(scaleLength) },
-{ "NormalizeEstimate", GLM_NAME(normalize) },
-//{ "Dot3", GLM_NAME() }, // @TODO
-//{ "Homogenize", GLM_NAME() }, // @TODO
-//{ "NormalizeWithLength", GLM_NAME() }, // @TODO
-//{ "NormalizeWithLengthEstimate", GLM_NAME() }, // @TODO
-//{ "NormalizeSafe", GLM_NAME() }, // @TODO
-//{ "NormalizeSafeWithLength", GLM_NAME() }, // @TODO
+{ "Dot3", GLM_NAME(dot3) },
+{ "GetHomogenized", GLM_NAME(homogenize) }, // @O3DEAlias: Homogenize
+//{ "NormalizeWithLength", GLM_NAME() }, // @O3DEAlias
+//{ "NormalizeWithLengthEstimate", GLM_NAME() }, // @O3DEAlias
+//{ "NormalizeSafe", GLM_NAME() }, // @O3DEAlias
+//{ "NormalizeSafeWithLength", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -365,8 +367,8 @@ GLM_LUA_REG(prevMultiple),
 GLM_LUA_REG(prevPowerOfTwo),
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "IsEven", GLM_NAME() }, // @TODO
-//{ "IsOdd", GLM_NAME() }, // @TODO
+//{ "IsEven", GLM_NAME() }, // @O3DEAlias
+//{ "IsOdd", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -424,8 +426,8 @@ GLM_LUA_REG(roundMultiple),
 GLM_LUA_REG(roundPowerOfTwo),
 GLM_LUA_REG(snap),  // LUA_VECTOR_EXTENSIONS
 #if defined(LUAGLM_ALIASES_UNITY)
-//{ "RoundToMultipleOf", GLM_NAME() }, // @TODO
-//{ "GetClosestPowerOfTen", GLM_NAME() }, // @TODO
+{ "RoundToMultipleOf", GLM_NAME(roundMultiple) },
+//{ "GetClosestPowerOfTen", GLM_NAME() }, // @UnityAlias
 #endif
 #endif
 
@@ -433,10 +435,10 @@ GLM_LUA_REG(snap),  // LUA_VECTOR_EXTENSIONS
 GLM_LUA_REG(convertLinearToSRGB),
 GLM_LUA_REG(convertSRGBToLinear),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "ToU32", GLM_NAME() }, // @TODO
-//{ "FromU32", GLM_NAME() }, // @TODO
-//{ "ToU32LinearToGamma", GLM_NAME() }, // @TODO
-//{ "FromU32GammaToLinear", GLM_NAME() }, // @TODO
+//{ "ToU32", GLM_NAME() }, // @O3DEAlias
+//{ "FromU32", GLM_NAME() }, // @O3DEAlias
+//{ "ToU32LinearToGamma", GLM_NAME() }, // @O3DEAlias
+//{ "FromU32GammaToLinear", GLM_NAME() }, // @O3DEAlias
 { "LinearToGamma", GLM_NAME(convertLinearToSRGB) },
 { "GammaToLinear", GLM_NAME(convertSRGBToLinear) },
 #endif
@@ -459,10 +461,10 @@ GLM_LUA_REG(lowestBitValue),
 GLM_LUA_REG(associatedMin),
 GLM_LUA_REG(associatedMax),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "GetSelect", GLM_NAME() }, // @TODO; (vR = (vCmp==0) ? vA : vB).
-//{ "CreateSelectCmpEqual", GLM_NAME() }, // @TODO
-//{ "CreateSelectCmpGreaterEqual", GLM_NAME() }, // @TODO
-//{ "CreateSelectCmpGreater", GLM_NAME() }, // @TODO
+//{ "GetSelect", GLM_NAME() }, // @O3DEAlias; (vR = (vCmp==0) ? vA : vB).
+//{ "CreateSelectCmpEqual", GLM_NAME() }, // @O3DEAlias
+//{ "CreateSelectCmpGreaterEqual", GLM_NAME() }, // @O3DEAlias
+//{ "CreateSelectCmpGreater", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -483,7 +485,7 @@ GLM_LUA_REG(luminosity),
 GLM_LUA_REG(rgbColor),
 GLM_LUA_REG(saturation),
 #if defined(LUAGLM_ALIASES_UNITY)
-{ "FromHSVRadians", GLM_NAME(hsvColor) },  // @TODO: SetFromHSVRadians with float pars
+{ "FromHSVRadians", GLM_NAME(hsvColor) },  // @UnityAlias: SetFromHSVRadians with float parameters
 #endif
 #endif
 
@@ -521,10 +523,10 @@ GLM_LUA_REG(nlerp),
 { "Lerp", GLM_NAME(lerp) },
 #endif
 #if defined(LUAGLM_ALIASES_UNITY)
-//{ "LerpUnclamped", GLM_NAME() }, // @TODO
+//{ "LerpUnclamped", GLM_NAME() }, // @UnityAlias
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "GetImaginary", GLM_NAME() }, // @TODO
+//{ "GetImaginary", GLM_NAME() }, // @O3DEAlias
 { "LerpInverse", GLM_NAME(lerpinverse) },
 { "Nlerp", GLM_NAME(nlerp) },
 #endif
@@ -546,7 +548,7 @@ GLM_LUA_REG(compScale),
 //GLM_LUA_REG(compScale_i16),
 //GLM_LUA_REG(compScale_u16),
 #if defined(LUAGLM_ALIASES_UNITY)
-//{ "Scale", GLM_NAME() }, // @TODO
+//{ "Scale", GLM_NAME() }, // @UnityAlias
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetMaxElement", GLM_NAME(compMax) },
@@ -618,6 +620,10 @@ GLM_LUA_REG(fastCos),
 GLM_LUA_REG(fastSin),
 GLM_LUA_REG(fastTan),
 GLM_LUA_REG(wrapAngle),
+GLM_LUA_REG(wrapAngle2),  // LUA_VECTOR_EXTENSIONS
+#if defined(LUAGLM_ALIASES_O3DE)
+{ "GetAngleMod", GLM_NAME(wrapAngle2) },
+#endif
 #endif
 
 #if defined(GTX_FUNCTIONS_HPP)
@@ -638,7 +644,7 @@ GLM_LUA_REG(tgamma),
 { "MoveTowards", GLM_NAME(moveTowards) },
 { "SmoothDamp", GLM_NAME(smoothDamp) },
 { "RotateTowards", GLM_NAME(rotateTowards) },
-//{ "Gamma", GLM_NAME() }, // @TODO
+{ "Gamma", GLM_NAME(tgamma) },
 #endif
 #endif
 
@@ -664,8 +670,8 @@ GLM_LUA_REG(intersectRayPlane),
 GLM_LUA_REG(intersectRaySphere),
 GLM_LUA_REG(intersectRayTriangle),
 #if defined(LUAGLM_ALIASES_UNITY)
-//{ "LineIntersection", GLM_NAME() }, // @TODO
-//{ "LineSegmentIntersection", GLM_NAME() }, // @TODO
+//{ "LineIntersection", GLM_NAME() }, // @UnityAlias; use geom.hpp
+//{ "LineSegmentIntersection", GLM_NAME() }, // @UnityAlias; use geom.hpp
 #endif
 #endif
 
@@ -698,8 +704,8 @@ GLM_LUA_REG(lMaxNorm),
 { "GetLengthSq", GLM_NAME(length2) },
 { "GetDistanceSq", GLM_NAME(distance2) },
 { "GetLengthEstimate", GLM_NAME(length2) },  // Doesn't matter in this context
-//{ "GetLengthReciprocal", GLM_NAME() }, // @TODO
-//{ "GetLengthReciprocalEstimate", GLM_NAME() }, // @TODO
+//{ "GetLengthReciprocal", GLM_NAME() }, // @O3DEAlias
+//{ "GetLengthReciprocalEstimate", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -725,7 +731,7 @@ GLM_LUA_REG(pow4),
 GLM_LUA_REG(orthonormalize),
 GLM_LUA_REG(orthonormalize3),  // LUA_VECTOR_EXTENSIONS
 #if defined(LUAGLM_ALIASES_O3DE)
-{ "GetOrthogonalized", GLM_NAME(orthonormalize) },  // @TODO; Orthogonalize
+{ "GetOrthogonalized", GLM_NAME(orthonormalize) },  // @O3DEAlias; Orthogonalize
 #endif
 #endif
 
@@ -743,7 +749,7 @@ GLM_LUA_REG(perpendicularFast),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "IsPerpendicular", GLM_NAME(isPerpendicular) },
 { "GetPerpendicular", GLM_NAME(perpendicularFast) },
-//{ "GetOrthogonalVector", GLM_NAME() }, // @TODO
+//{ "GetOrthogonalVector", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -762,12 +768,12 @@ GLM_LUA_REG(projDecompose),
 #endif
 #if defined(LUAGLM_ALIASES_UNITY)
 { "ProjectOnPlane", GLM_NAME(projPlane) },
-//{ "Exclude", GLM_NAME() }, // @TODO: ProjectOnPlane should be used instead
+//{ "Exclude", GLM_NAME() }, // @UnityAlias: ProjectOnPlane should be used instead
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "ProjectOnNormal", GLM_NAME(projNorm) },
 { "GetProjected", GLM_NAME(projDecompose) },
-//{ "GetProjectedOnNormal", GLM_NAME() }, // @TODO
+//{ "GetProjectedOnNormal", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -788,7 +794,7 @@ GLM_LUA_REG(rotateZ),
 GLM_LUA_REG(slerp),
 GLM_LUA_REG(barycentric),  // LUA_VECTOR_EXTENSIONS
 #if defined(LUAGLM_ALIASES_UNITY)
-//{ "SlerpUnclamped", GLM_NAME() }, // @TODO
+//{ "SlerpUnclamped", GLM_NAME() }, // @UnityAlias
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "Slerp", GLM_NAME(slerp) },
@@ -808,8 +814,8 @@ GLM_LUA_REG(rotate_mat3),
 GLM_LUA_REG(rotate_mat4),
 #endif
 #if defined(LUAGLM_ALIASES_UNITY)
-{ "MultiplyPoint", GLM_NAME(transformPos) },
-//{ "MultiplyPoint3x4", GLM_NAME() }, // @TODO
+{ "MultiplyPoint", GLM_NAME(transformPosPerspective) },
+{ "MultiplyPoint3x4", GLM_NAME(transformPos) },
 { "MultiplyVector", GLM_NAME(transformDir) },
 { "Rotate", GLM_NAME(rotate) },
 #endif
@@ -846,7 +852,7 @@ GLM_LUA_REG(scale_mat4),
 { "Translate", GLM_NAME(translate) },
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "SetRotationPartFromQuaternion", GLM_NAME() }, // @TODO
+//{ "SetRotationPartFromQuaternion", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -869,9 +875,9 @@ GLM_LUA_REG(fromAngle),
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
 { "CreateFromAngle", GLM_NAME(fromAngle) },
-//{ "AngleDeg", GLM_NAME() }, // @TODO
-//{ "AngleSafe", GLM_NAME() }, // @TODO
-//{ "AngleSafeDeg", GLM_NAME() }, // @TODO
+//{ "AngleDeg", GLM_NAME() }, // @O3DEAlias
+//{ "AngleSafe", GLM_NAME() }, // @O3DEAlias
+//{ "AngleSafeDeg", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -900,20 +906,19 @@ GLM_LUA_REG(isUniform),  // LUA_VECTOR_EXTENSIONS
 #if defined(GTX_WRAP_HPP) || defined(EXT_SCALAR_COMMON_HPP)
 GLM_LUA_REG(mirrorClamp),
 GLM_LUA_REG(mirrorRepeat),
-GLM_LUA_REG(repeat),  // @TODO: Alias, reserved Lua keyword
+GLM_LUA_REG(repeat),  // Reserved Lua keyword
 GLM_LUA_REG(deltaAngle),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(wrap),
 GLM_LUA_REG(loopRepeat),
 GLM_LUA_REG(pingPong),
 GLM_LUA_REG(lerpAngle),
 #if defined(LUAGLM_ALIASES_UNITY)
+{ "Wrap", GLM_NAME(wrap) },
 { "AngleBetween", GLM_NAME(deltaAngle) },
 { "DeltaAngle", GLM_NAME(deltaAngle) },
 { "LerpAngle", GLM_NAME(lerpAngle) },
 { "Repeat", GLM_NAME(repeat) },
 { "PingPong", GLM_NAME(pingPong) },
-#endif
-#if defined(LUAGLM_ALIASES_O3DE)
-//{ "GetAngleMod", GLM_NAME() }, // @TODO
 #endif
 #endif
 
@@ -1063,7 +1068,7 @@ GLM_LUA_REG(prev_float),
 GLM_LUA_REG(conjugate),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetConjugate", GLM_NAME(conjugate) },
-{ "GetInverseFast", GLM_NAME(conjugate) }, // @TODO: InvertFast; matrices
+{ "GetInverseFast", GLM_NAME(conjugate) }, // @O3DEAlias: InvertFast; matrices
 #endif
 #endif
 
@@ -1071,12 +1076,11 @@ GLM_LUA_REG(conjugate),
 GLM_LUA_REG(inverse),
 GLM_LUA_REG(invertible),  // LUA_MATRIX_EXTENSIONS
 GLM_LUA_REG(inverse_transform),
-//{ "SetRotationPartFromQuaternion", GLM_NAME() }, // @TODO
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetReciprocal", GLM_NAME(inverse) },
 { "GetReciprocalEstimate", GLM_NAME(inverse) },
-{ "GetInverseFull", GLM_NAME(inverse) }, // @TODO; InvertFull; InvertFast
-{ "GetInverseTransform", GLM_NAME(inverse_transform) }, // @TODO: InvertTransform
+{ "GetInverseFull", GLM_NAME(inverse) }, // @O3DEAlias; InvertFull; InvertFast
+{ "GetInverseTransform", GLM_NAME(inverse_transform) }, // @O3DEAlias: InvertTransform
 #endif
 #endif
 
@@ -1111,7 +1115,8 @@ GLM_LUA_REG(quatFromBasis),
 { "LookRotation", GLM_NAME(quatLookAt) },
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-{ "GetEulerRadians", GLM_NAME(eulerAngles) },  // @TODO: Missing matrix equivalent
+//{ "SetRotationPartFromQuaternion", GLM_NAME() }, // @O3DEAlias
+{ "GetEulerRadians", GLM_NAME(eulerAngles) },  // @O3DEAlias: Missing matrix equivalent
 #endif
 #endif
 
@@ -1228,7 +1233,7 @@ GLM_LUA_REG(row),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "SetColumn", GLM_NAME(column) },
 { "SetRow", GLM_NAME(row) },
-// @TODO: GetBasisX, GetBasisY, GetBasisZ, and GetBasisW, BuildTangentBasis
+// @O3DEAlias: GetBasisX, GetBasisY, GetBasisZ, and GetBasisW, BuildTangentBasis
 #endif
 #endif
 
@@ -1344,7 +1349,7 @@ GLM_LUA_REG(flipud),
 GLM_LUA_REG(qr_decompose),
 GLM_LUA_REG(rq_decompose),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "GetPolarDecomposition", GLM_NAME() }, // @TODO
+//{ "GetPolarDecomposition", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 
@@ -1394,7 +1399,7 @@ GLM_LUA_REG(hasUniformScale),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "IsOrthogonal", GLM_NAME(isOrthogonal) },
 { "RetrieveScale", GLM_NAME(extractScale) },
-//{ "RetrieveScaleSq", GLM_NAME() }, // @TODO
+//{ "RetrieveScaleSq", GLM_NAME() }, // @O3DEAlias
 #endif
 #endif
 

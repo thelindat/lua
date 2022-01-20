@@ -128,7 +128,6 @@ extern LUA_API_LINKAGE {
 @@ LUAGLM_REALIGN: A mark denoting the alignment requirements of the Lua runtime
 ** and binding library are different. Therefore, vectors, quats, and matrices
 ** require explicit load/stores when being parsed-from/pushed-to the Lua stack.
-** Also, see @ICCAlign.
 */
 #undef LUAGLM_REALIGN
 #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
@@ -256,8 +255,6 @@ static LUA_INLINE const TValue *glm_i2v(const lua_State *L, int idx) {
 ** Override GLM_INLINE for the 'heavier' interfacing functions. tointegerx and
 ** tonumberx are quite heavy (used everywhere) due the requirement that the
 ** binding can be a complete superset of lmathlib.
-**
-** #define LUA_TRAIT_QUALIFIER_NIL static GLM_INLINE
 */
 #define LUA_TRAIT_QUALIFIER_NIL static GLM_NEVER_INLINE
 
@@ -1143,6 +1140,7 @@ struct gLuaTrait<glm::mat<C, R, T>, FastPath> : gLuaAbstractTrait<glm::mat<C, R,
 using gLuaFloat = gLuaTrait<glm_Float>;
 using gLuaNumber = gLuaTrait<glm_Number>;
 using gLuaInteger = gLuaTrait<lua_Integer>;
+using gLuaRawNum = gLuaTrait<lua_Number>;
 
 /// <summary>
 /// gLuaNumberCompileTime; See @LUAGLM_NUMBER_ARGS.
@@ -1177,9 +1175,8 @@ template<glm::length_t L, typename T, bool FastPath>
 struct gLuaDir : gLuaTrait<glm::vec<L, T>, FastPath> {
   using safe = gLuaDir<L, T, false>;  // @SafeBinding
   using fast = gLuaDir<L, T, true>;  // @UnsafeBinding
-
-  LUA_TRAIT_QUALIFIER glm::vec<L, T> Next(lua_State *L, int &idx) {
-    const glm::vec<L, T> result = gLuaTrait<glm::vec<L, T>, FastPath>::Next(L, idx);
+  LUA_TRAIT_QUALIFIER glm::vec<L, T> Next(lua_State *L_, int &idx) {
+    const glm::vec<L, T> result = gLuaTrait<glm::vec<L, T>, FastPath>::Next(L_, idx);
     return glm_trait_normalize(result);
   }
 };
@@ -1315,7 +1312,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 #define BIND_FUNC(...) VA_CALL(BIND_FUNC, __VA_ARGS__)
 
 /* fail */
-#define BIND_FUNC1(LB, F) \
+#define BIND_FUNC1(LB) \
   return gLuaBase::Push(LB)
 
 /* F() */
@@ -1498,6 +1495,10 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 #define LAYOUT_BINARY_SCALAR(LB, F, Tr, ...) \
   VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, ##__VA_ARGS__)
 
+/* trait + trait<int> op */
+#define LAYOUT_BINARY_AS_INT(LB, F, Tr, ...) \
+  VA_CALL(BIND_FUNC, LB, F, Tr, Tr::as_type<int>, ##__VA_ARGS__)
+
 /* trait + trait + eps op */
 #define LAYOUT_TERNARY_EPS(LB, F, Tr, ...) \
   VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::eps_trait, ##__VA_ARGS__)
@@ -1509,10 +1510,6 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 /* trait + trait + trait + trait + trait::value_trait op */
 #define LAYOUT_QUINARY_SCALAR(LB, F, Tr, ...) \
   VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::safe, Tr::safe, Tr::value_trait, ##__VA_ARGS__)
-
-/* trait + trait<int> op */
-#define LAYOUT_VECTOR_INT(LB, F, Tr, ...) \
-  VA_CALL(BIND_FUNC, LB, F, Tr, Tr::as_type<int>, ##__VA_ARGS__)
 
 /* trait + trait + trait + trait::value_trait + trait::value_trait op */
 #define LAYOUT_BARYCENTRIC(LB, F, Tr, ...) \
@@ -1752,7 +1749,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 #endif
 
 /* GLM function that corresponds to one unique set of function parameters */
-#define TRAITS_DEFN(Name, F, ...)             \
+#define BIND_DEFN(Name, F, ...)               \
   GLM_BINDING_QUALIFIER(Name) {               \
     GLM_BINDING_BEGIN                         \
     VA_CALL(BIND_FUNC, LB, F, ##__VA_ARGS__); \
