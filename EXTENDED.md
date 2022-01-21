@@ -490,6 +490,20 @@ vecN = clampLength(v --[[ vecN ]], maxLength --[[ number ]])
 vecN = scaleLength(v --[[ vecN ]], newLength --[[ number ]])
 ```
 
+### homogenize
+
+```lua
+-- Homogenizes the vector, i.e., divides all components by w.
+vec4 = homogenize(v --[[ vec4 ]],
+```
+
+### dot3
+
+```lua
+-- Return the product of two vectors using only the x,y,z components.
+number = dot3(x --[[ vec4 ]], y --[[ vec4 ]])
+```
+
 ### Aliases
 
 - `norm = normalize`
@@ -718,6 +732,13 @@ rads = angle2(x --[[ quat ]], y --[[ quat ]])
 
 ## glm/ext/scalar\_common.hpp
 
+### wrap
+
+```lua
+-- Wraps 'v' to [0, maxValue].
+vecN = loopRepeat(v --[[ vecN ]], maxValue --[[ vecN ]])
+```
+
 ### deltaAngle
 
 ```lua
@@ -822,6 +843,13 @@ quat = quatbillboard(
 - `quatlookRotation = glm_quatLookAtLH`
 - `quatlookRotationRH = glm_quatLookAtLH`
 - `quatlookRotationLH = glm_quatLookAtLH`
+
+## glm/gtx/fast\_trigonometry.hpp
+
+```lua
+-- Wrap an angle to [-pi, pi]
+vecN = wrapAngle2(v --[[ vecN ]])
+```
 
 ## glm/gtx/matrix\_query.hpp
 
@@ -985,6 +1013,13 @@ rads = angle2(x --[[ vecN ]], y --[[ vecN ]])
 - `signedAngle = orientedAngle`
 
 ## glm/gtx/vector\_query.hpp
+
+### isUniform
+
+```lua
+-- Check whether all components are nearly equal.
+bool = isUniform(v --[[ vecN ]], epsilon --[[ number ]])
+```
 
 ### Aliases
 
@@ -1507,6 +1542,20 @@ aabbMin,aabbMax = aabb2d.enclose(..., point --[[ vec2 ]])
 aabbMin,aabbMax = aabb2d.encloseSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]])
 aabbMin,aabbMax = aabb2d.encloseSphere(..., spherePos --[[ vec2 ]], sphereRad --[[ number ]])
 aabbMin,aabbMax = aabb2d.encloseAABB(..., otherMin --[[ vec2 ]], otherMax --[[ vec2 ]])
+```
+
+### aabb.enclose
+
+```lua
+-- Expand all dimensions by delta
+aabbMin,aabbMax = aabb.enclose(..., delta --[[ vec3 ]])
+```
+
+### aabb.clamp
+
+```lua
+-- Clamp the AABB to be contained within the specified (other) AABB.
+aabbMin,aabbMax = aabb.clamp(..., otherMin --[[ vec3 ]], otherMax --[[ vec3 ]])
 ```
 
 ### aabb.intersects
