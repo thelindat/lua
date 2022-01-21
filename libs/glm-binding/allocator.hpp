@@ -9,6 +9,7 @@
 
 #include <cstring>
 #include <new>
+#include <iterator>
 #if defined(LUA_ALLOC_DEBUG)
   #include <iostream>
 #endif

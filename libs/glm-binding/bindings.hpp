@@ -351,9 +351,9 @@ struct gLuaBase {
     lua_checkstack(L, 2);
     lua_pushvalue(L, lua_upvalueindex(1));  // [..., rand_func]
     if (lua_isfunction(L, -1)) {
-      lua_pushunsigned(L, max());  // [..., rand_func, upper limit]
+      lua_pushinteger(L, static_cast<lua_Integer>(max()));  // [..., rand_func, upper limit]
       lua_call(L, 1, 1);  // [..., result]
-      result = static_cast<result_type>(lua_tounsigned(L, -1));
+      result = static_cast<result_type>(lua_tointegerx(L, -1, GLM_NULLPTR));
     }
     else { // Otherwise, fallback to std::rand if lmathlib has not been cached.
       result = static_cast<result_type>(cast_num(max()) * (cast_num(std::rand()) / cast_num(RAND_MAX)));

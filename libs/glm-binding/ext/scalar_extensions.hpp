@@ -13,7 +13,7 @@
 #include <glm/gtx/spline.hpp>
 #if GLM_VERSION < 998  // @COMPAT: ext/scalar_common.hpp introduced in 0.9.9.8
   #include <glm/gtx/extended_min_max.hpp>
-#elif GLM_VERSION == 998
+#else
   #include <glm/ext/scalar_common.hpp>
 #endif
 

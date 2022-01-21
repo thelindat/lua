@@ -935,8 +935,7 @@
 **
 @@ LUAGLM_MATRIX_COLS Unpack the number of matrix columns for a given type.
 @@ LUAGLM_MATRIX_ROWS Unpack the number of matrix rows for a given type.
-@@ LUAGLM_MATRIX_TYPE Utility macro for packing column/row dimensions into
-**  a single value. Type-casting related to this macro should be considered.
+@@ LUAGLM_MATRIX_TYPE Pack column/row dimensions into a single value.
 **
 ** @NOTE: Previous definition:
 **  #define LUAGLM_MATRIX_TYPE(C, R) ((C) | ((R) << 8))

@@ -193,7 +193,7 @@ static int str_trim (lua_State *L) {
 static int str_split (lua_State *L) {
   const char *delimiter = luaL_checkstring(L, 1);
   const char *str = luaL_checkstring(L, 2);
-  int limit = luaL_optint(L, 3, 0);
+  const lua_Integer limit = luaL_optinteger(L, 3, 0);
   int count = 0;
 
   lua_settop(L, 0); /* clear new slots */
@@ -215,7 +215,7 @@ static int str_split (lua_State *L) {
 
         ++count;
         str = end + 1;
-        if (count == (limit - 1)) {
+        if ((lua_Integer)count == (limit - 1)) {
           break;
         }
       }

@@ -12,8 +12,8 @@
 #		./etc/minify.sh ${PWD} minilua.hpp
 #
 # 	minilua: minilua.hpp
-#		echo "#define LUA_IMPLEMENTATION\n#define MAKE_LUA\n#define LUA_INCLUDE_LIBGLM\n#include \"minilua.hpp\"" | \
-#		$(CPP) $(CFLAGS) $(CPERF_FLAGS) -DLUA_USE_READLINE -o lua -x c++ - -Wl,-E -ldl -lreadline
+#		echo "#define LUA_IMPLEMENTATION\n#define MAKE_LUA\n#include \"minilua.hpp\"" | \
+#		$(CPP) $(CFLAGS) $(CPERF_FLAGS) $(LUA_LINKAGE) -DLUA_USE_READLINE -o lua -x c++ - -Wl,-E -ldl -lreadline
 #
 # 	miniluac: minilua.hpp
 #		echo "#define LUA_IMPLEMENTATION\n#define MAKE_LUAC\n#include \"minilua.hpp\"" | \
@@ -44,7 +44,6 @@ cat << EOF >> ${OUTFILE}
 **
 ** See Copyright Notice at the end of this file
 */
-#undef LUA_C_LINKAGE
 #if !defined(__cplusplus)
   #error "LuaGLM must be compiled with cplusplus for GLM integration"
 #endif
@@ -200,28 +199,29 @@ echo "#if defined(LUA_IMPLEMENTATION)" >> ${OUTFILE}
   cat ${LUA_DIR}/lauxlib.c >> ${OUTFILE}
 
   echo "#if !defined(MAKE_LUAC)" >> ${OUTFILE}
-    echo "#if defined(LUA_INCLUDE_LIBGLM)" >> ${OUTFILE} # GLM Binding: WIP
-      cat ${LUA_DIR}/libs/glm-binding/ext/vector_extensions.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/matrix_extensions.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/quat_extensions.hpp >> ${OUTFILE}
+    # echo "#if defined(LUA_INCLUDE_LIBGLM)" >> ${OUTFILE} # GLM Binding: WIP
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/scalar_extensions.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/vector_extensions.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/matrix_extensions.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/quat_extensions.hpp >> ${OUTFILE}
 
-      cat ${LUA_DIR}/libs/glm-binding/allocator.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/setup.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/aabb.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/triangle.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/line.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/linesegment.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/plane.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/polygon.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/ray.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/ext/geom/sphere.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/allocator.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/setup.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/aabb.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/triangle.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/line.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/linesegment.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/plane.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/polygon.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/ray.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/ext/geom/sphere.hpp >> ${OUTFILE}
 
-      cat ${LUA_DIR}/libs/glm-binding/bindings.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/iterators.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/api.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/geom.hpp >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/lglmlib.hpp >> ${OUTFILE}
-    echo "#endif /* LUA_INCLUDE_LIBGLM */" >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/bindings.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/iterators.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/api.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/geom.hpp >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/lglmlib.hpp >> ${OUTFILE}
+    # echo "#endif /* LUA_INCLUDE_LIBGLM */" >> ${OUTFILE}
 
     echo "/* standard library  -- not used by luac */" >> ${OUTFILE}
     cat ${LUA_DIR}/lbaselib.c >> ${OUTFILE}
@@ -234,9 +234,9 @@ echo "#if defined(LUA_IMPLEMENTATION)" >> ${OUTFILE}
     cat ${LUA_DIR}/lstrlib.c >> ${OUTFILE}
     cat ${LUA_DIR}/ltablib.c >> ${OUTFILE}
     cat ${LUA_DIR}/lutf8lib.c >> ${OUTFILE}
-    echo "#if defined(LUA_INCLUDE_LIBGLM)" >> ${OUTFILE}
-      cat ${LUA_DIR}/libs/glm-binding/lglmlib.cpp >> ${OUTFILE}
-    echo "#endif /* LUA_INCLUDE_LIBGLM */" >> ${OUTFILE}
+    # echo "#if defined(LUA_INCLUDE_LIBGLM)" >> ${OUTFILE}
+    #   cat ${LUA_DIR}/libs/glm-binding/lglmlib.cpp >> ${OUTFILE}
+    # echo "#endif /* LUA_INCLUDE_LIBGLM */" >> ${OUTFILE}
     cat ${LUA_DIR}/linit.c >> ${OUTFILE}
   echo "#endif /* MAKE_LUAC */" >> ${OUTFILE}
 echo "#endif /* LUA_IMPLEMENTATION */" >> ${OUTFILE}
@@ -258,13 +258,12 @@ echo "#endif /* MAKE_LUAC */" >> ${OUTFILE}
 #   - All other includes are prepended prior to any other code.
 ################################################################################
 
-sed -i \
-  -e "/#include \"ljumptab.h\"/r ${LUA_DIR}/ljumptab.h" \
-  -e "/#include \"lglmlib_reg.hpp\"/r ${LUA_DIR}/libs/glm-binding/lglmlib_reg.hpp" \
-  -e 's/#include <lua.hpp>/\/\*#include <lua.hpp>\*\//' \
-  -e 's/#include <lglm.hpp>/\/\*#include <lglm.hpp>\*\//' \
-  -e 's/#include <lglm_string.hpp>/\/\*#include <lglm_string.hpp>\*\//' \
-  -e 's/#include "\([^"]*\)"/\/\*#include "\1"\*\//' ${OUTFILE}
+sed -i -e "/#include \"ljumptab.h\"/r ${LUA_DIR}/ljumptab.h" ${OUTFILE}
+sed -i -e "/#include \"lglmlib_reg.hpp\"/r ${LUA_DIR}/libs/glm-binding/lglmlib_reg.hpp" ${OUTFILE}
+sed -i -e "s/#include <lua.hpp>/\/\*#include <lua.hpp>\*\//; \
+  s/#include <lglm.hpp>/\/\*#include <lglm.hpp>\*\//; \
+  s/#include <lglm_string.hpp>/\/\*#include <lglm_string.hpp>\*\//; \
+  s/#include \"\([^\"]*\)\"/\/\*#include \"\1\"\*\//" ${OUTFILE}
 
 ################################################################################
 # Licensing
