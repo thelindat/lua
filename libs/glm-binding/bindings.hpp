@@ -1222,10 +1222,9 @@ struct gLuaEpsilon : gLuaTrait<T, FastPath> {
 /// shortcut.
 /// </summary>
 template<class Tr, bool Inclusive = true, bool IncludeEps = false>
-struct gLuaBoundedBelow : gLuaTrait<typename Tr::type, false> {
-  using safe = gLuaBoundedBelow<typename Tr::safe, Inclusive, IncludeEps>;  // @SafeBinding
-  using fast = gLuaBoundedBelow<typename Tr::fast, Inclusive, IncludeEps>;  // @UnsafeBinding
-
+struct gPositiveConstraint : gLuaTrait<typename Tr::type, false> {
+  using safe = gPositiveConstraint<typename Tr::safe, Inclusive, IncludeEps>;  // @SafeBinding
+  using fast = gPositiveConstraint<typename Tr::fast, Inclusive, IncludeEps>;  // @UnsafeBinding
   static GLM_CONSTEXPR const char *Label() { return Tr::Label(); }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR typename Tr::type zero() { return Tr::zero(); }
@@ -1235,7 +1234,8 @@ struct gLuaBoundedBelow : gLuaTrait<typename Tr::type, false> {
     const T min = T(0) + (IncludeEps ? std::numeric_limits<typename Tr::value_type>::epsilon() : 0);
 
     const T value = Tr::Next(L, idx);
-    if ((Inclusive && !glm::all(glm::lessThanEqual(min, value))) || (!Inclusive && !glm::all(glm::lessThan(min, value))))
+    const auto minValue = Inclusive ? glm::lessThanEqual(min, value) : glm::lessThan(min, value);
+    if (!glm::all(minValue))
       gLuaBase::argerror(L, idx - 1, "argument not in range");
     return value;
   }
@@ -1244,17 +1244,20 @@ struct gLuaBoundedBelow : gLuaTrait<typename Tr::type, false> {
 /// <summary>
 /// @GLMAssert: Specialization for arguments between zero and one.
 /// </summary>
-template<class Tr>
-struct gLuaBoundedBetween : gLuaTrait<typename Tr::type, false> {
-  using safe = gLuaBoundedBetween<typename Tr::safe>;  // @SafeBinding
-  using fast = gLuaBoundedBetween<typename Tr::fast>;  // @UnsafeBinding
+template<class Tr, bool MinInclusive = true, bool MaxInclusive = true>
+struct gRelativeConstraint : gLuaTrait<typename Tr::type, false> {
+  using safe = gRelativeConstraint<typename Tr::safe, MinInclusive, MaxInclusive>;  // @SafeBinding
+  using fast = gRelativeConstraint<typename Tr::fast, MinInclusive, MaxInclusive>;  // @UnsafeBinding
+  static GLM_CONSTEXPR const char *Label() { return Tr::Label(); }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR typename Tr::type zero() { return Tr::zero(); }
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_TRAIT_QUALIFIER typename Tr::type Next(lua_State *L, int &idx) {
     using T = typename Tr::type;
     const T value = Tr::Next(L, idx);
-    if (!glm::all(glm::lessThanEqual(T(0), value)) || !glm::all(glm::greaterThanEqual(T(1), value)))
+    const auto minValue = MinInclusive ? glm::lessThanEqual(T(0), value) : glm::lessThan(T(0), value);
+    const auto maxValue = MaxInclusive ? glm::greaterThanEqual(T(1), value) : glm::greaterThan(T(1), value);
+    if (!glm::all(minValue) || !glm::all(maxValue))
       gLuaBase::argerror(L, idx - 1, "argument not in range");
     return value;
   }
@@ -1264,9 +1267,10 @@ struct gLuaBoundedBetween : gLuaTrait<typename Tr::type, false> {
 /// @GLMAssert: Specialization that ensures values cannot be zero (fmod)
 /// </summary>
 template<class Tr>
-struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
-  using safe = gLuaNotZero<typename Tr::safe>;  // @SafeBinding
-  using fast = gLuaNotZero<typename Tr::fast>;  // @UnsafeBinding
+struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
+  using safe = gZeroConstraint<typename Tr::safe>;  // @SafeBinding
+  using fast = gZeroConstraint<typename Tr::fast>;  // @UnsafeBinding
+  static GLM_CONSTEXPR const char *Label() { return Tr::Label(); }
 
   LUA_TRAIT_QUALIFIER GLM_CONSTEXPR typename Tr::type zero() { return Tr::zero(); }
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
@@ -1561,12 +1565,12 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
   LUA_MLM_END
 
 /* A binary integer layout that sanitizes the second argument (division/modulo zero) */
-#define LAYOUT_MODULO(LB, F, Tr, ...)                                           \
-  LUA_MLM_BEGIN                                                                 \
-  if (Tr::value_trait::Is((LB).L, (LB).idx + 1))                                \
-    VA_CALL(BIND_FUNC, LB, F, Tr, gLuaNotZero<Tr::value_trait>, ##__VA_ARGS__); \
-  else                                                                          \
-    VA_CALL(BIND_FUNC, LB, F, Tr, gLuaNotZero<Tr::safe>, ##__VA_ARGS__);        \
+#define LAYOUT_MODULO(LB, F, Tr, ...)                                               \
+  LUA_MLM_BEGIN                                                                     \
+  if (Tr::value_trait::Is((LB).L, (LB).idx + 1))                                    \
+    VA_CALL(BIND_FUNC, LB, F, Tr, gZeroConstraint<Tr::value_trait>, ##__VA_ARGS__); \
+  else                                                                              \
+    VA_CALL(BIND_FUNC, LB, F, Tr, gZeroConstraint<Tr::safe>, ##__VA_ARGS__);        \
   LUA_MLM_END
 
 /* }================================================================== */
@@ -1769,7 +1773,7 @@ struct gLuaNotZero : gLuaTrait<typename Tr::type, false> {
 **
 ** Allows @UnsafeBinding when A/B are non-coerced types.
 */
-#define BINARY_LAYOUT_DEFN(Name, F, ArgLayout, A, B, ...)            \
+#define BINARY_LAYOUT_DEFN(Name, F, ArgLayout, A, B, ...)                   \
   GLM_BINDING_QUALIFIER(Name) {                                             \
     GLM_BINDING_BEGIN                                                       \
     if (A::Is((LB).L, (LB).idx))                                            \

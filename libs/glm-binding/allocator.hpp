@@ -9,7 +9,7 @@
 
 #include <cstring>
 #include <new>
-#include <iterator>
+#include <utility>
 #if defined(LUA_ALLOC_DEBUG)
   #include <iostream>
 #endif
@@ -154,7 +154,6 @@ public:
   using difference_type = ptrdiff_t;
 
   // Iterator Types
-  using iterator_category = std::forward_iterator_tag;
   using iterator = T *;
   using const_iterator = const T *;
 

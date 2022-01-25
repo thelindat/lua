@@ -9,7 +9,6 @@
 #define BINDING_ITERATORS_HPP
 
 #include <functional>
-#include <iterator>
 #include <lua.hpp>
 
 #include "bindings.hpp"
@@ -31,7 +30,6 @@ public:
   glmLuaIterator &operator=(glmLuaIterator &&) = default;
 
   // Iterator Traits
-  using iterator_category = std::forward_iterator_tag;
   using value_type = typename Trait::type;
   using difference_type = ptrdiff_t;
   using pointer = typename Trait::type *;

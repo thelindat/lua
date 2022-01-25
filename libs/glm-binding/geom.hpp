@@ -35,7 +35,7 @@
 /// Relative position along a line, segment, ray for casting.
 /// </summary>
 template<bool isNear, bool isRelative, typename T = glm_Float>
-struct gParametricPosition : gLuaAbstractTrait<T, T> {
+struct gLuaParametric : gLuaAbstractTrait<T, T> {
   static GLM_CONSTEXPR const char *Label() {
     return "RelativePosition";
   }
@@ -104,13 +104,13 @@ struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T>> {
   /// @RelativeZero: Lua type trait representing the relative negative-inf/zero
   /// coordinate of the object.
   /// </summary>
-  using zero_trait = gParametricPosition<true, false, T>;
+  using zero_trait = gLuaParametric<true, false, T>;
 
   /// <summary>
   /// @RelativeOne: Lua type trait representing the relative inf/one coordinate
   /// of the object.
   /// </summary>
-  using one_trait = gParametricPosition<false, false, T>;
+  using one_trait = gLuaParametric<false, false, T>;
 
   static GLM_CONSTEXPR const char *Label() {
     return "Line";
@@ -139,8 +139,8 @@ struct gLuaSegment : gLuaAbstractTrait<glm::LineSegment<L, T>> {
   using safe = gLuaSegment;  // @SafeBinding
   using fast = gLuaSegment;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::LineSegment<L, T>::point_type>;  // @PointBinding
-  using zero_trait = gParametricPosition<true, true, T>;  // @RelativeZero
-  using one_trait = gParametricPosition<false, true, T>;  // @RelativeOne
+  using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
+  using one_trait = gLuaParametric<false, true, T>;  // @RelativeOne
 
   static GLM_CONSTEXPR const char *Label() {
     return "Segment";
@@ -169,8 +169,8 @@ struct gLuaRay : gLuaAbstractTrait<glm::Ray<L, T>> {
   using safe = gLuaRay;  // @SafeBinding
   using fast = gLuaRay;  // @UnsafeBinding
   using point_trait = gLuaTrait<typename glm::Ray<L, T>::point_type>;  // @PointBinding
-  using zero_trait = gParametricPosition<true, true, T>;  // @RelativeZero
-  using one_trait = gParametricPosition<false, false, T>;  // @RelativeOne
+  using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
+  using one_trait = gLuaParametric<false, false, T>;  // @RelativeOne
 
   static GLM_CONSTEXPR const char *Label() {
     return "Ray";

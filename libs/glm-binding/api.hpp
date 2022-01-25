@@ -679,14 +679,14 @@ NUMBER_VECTOR_DEFN(float_distance, glm::float_distance, LAYOUT_BINARY)
 #endif
 
 #if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
-#define LAYOUT_NEXT_FLOAT(LB, F, Tr, ...) /* @GLMAssert: assert(ULPs >= 0); */        \
-  LUA_MLM_BEGIN                                                                       \
-  if (lua_isnoneornil((LB).L, (LB).idx + 1))                                          \
-    VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                                     \
-  else if (gLuaTrait<int>::Is((LB).L, (LB).idx + 1))                                  \
-    VA_CALL(BIND_FUNC, LB, F, Tr, gLuaBoundedBelow<gLuaTrait<int>>, ##__VA_ARGS__);   \
-  else                                                                                \
-    VA_CALL(BIND_FUNC, LB, F, Tr, gLuaBoundedBelow<Tr::as_type<int>>, ##__VA_ARGS__); \
+#define LAYOUT_NEXT_FLOAT(LB, F, Tr, ...) /* @GLMAssert: assert(ULPs >= 0); */           \
+  LUA_MLM_BEGIN                                                                          \
+  if (lua_isnoneornil((LB).L, (LB).idx + 1))                                             \
+    VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                                        \
+  else if (gLuaTrait<int>::Is((LB).L, (LB).idx + 1))                                     \
+    VA_CALL(BIND_FUNC, LB, F, Tr, gPositiveConstraint<gLuaTrait<int>>, ##__VA_ARGS__);   \
+  else                                                                                   \
+    VA_CALL(BIND_FUNC, LB, F, Tr, gPositiveConstraint<Tr::as_type<int>>, ##__VA_ARGS__); \
   LUA_MLM_END
 
 #if GLM_VERSION >= 993  // @COMPAT: vector support added in 0.9.9.3
@@ -813,8 +813,8 @@ GLM_BINDING_QUALIFIER(outerProduct) {
 #endif
 
 #if defined(EXT_MATRIX_CLIP_SPACE_HPP)
-using gAspect = gLuaBoundedBelow<gLuaCNum, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
-using gFov = gLuaBoundedBelow<gLuaCNum, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
+using gAspect = gPositiveConstraint<gLuaCNum, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
+using gFov = gPositiveConstraint<gLuaCNum, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
 using gHeight = gFov;  // @GLMAssert: assert(height > static_cast<T>(0));
 using gWidth = gFov;  // @GLMAssert: assert(width > static_cast<T>(0));
 BIND_DEFN(frustum, glm::frustum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
@@ -862,14 +862,7 @@ BIND_DEFN(perspectiveFovRH, glm::perspectiveFovRH, gFov, gWidth, gHeight, gLuaCN
 BIND_DEFN(perspectiveFovRH_NO, glm::perspectiveFovRH_NO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
 BIND_DEFN(perspectiveFovRH_ZO, glm::perspectiveFovRH_ZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
 BIND_DEFN(perspectiveFovZO, glm::perspectiveFovZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-GLM_BINDING_QUALIFIER(tweakedInfinitePerspective) {
-  GLM_BINDING_BEGIN
-  if (gLuaCNum::Is(LB.L, LB.idx + 3))
-    BIND_FUNC(LB, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
-  else
-    BIND_FUNC(LB, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum);
-  GLM_BINDING_END
-}
+BIND_DEFN(tweakedInfinitePerspective, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum::eps_trait)
 #endif
 
 #if defined(EXT_MATRIX_TRANSFORM_HPP) || defined(GTX_MATRIX_TRANSFORM_2D_HPP)
@@ -909,7 +902,7 @@ BIND_DEFN(billboardLH, glm::billboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLu
 #if defined(EXT_MATRIX_PROJECTION_HPP)
 // @GLMAssert: assert(delta.x > static_cast<T>(0) && delta.y > static_cast<T>(0));
 // glm::pickMatrix also sanitizes the parameters without asserts; a bit redundant.
-using gPickDeltaValue = gLuaBoundedBelow<gLuaVec2<>, false>;
+using gPickDeltaValue = gPositiveConstraint<gLuaVec2<>, false>;
 BIND_DEFN(pickMatrix, glm::pickMatrix, gLuaVec2<>, gPickDeltaValue, gLuaVec4<>)
 BIND_DEFN(project, glm::project, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
 BIND_DEFN(projectNO, glm::projectNO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
@@ -1598,13 +1591,13 @@ NUMBER_VECTOR_DEFN(epsilonNotEqual, glm::epsilonNotEqual, LAYOUT_EPSILON_EQUAL)
 // @GLMAssert: assert(static_cast<genType>(0.0) <= x);
 // @GLMAssert: assert(all(lessThanEqual(vec<L, T, Q>(0), x)));
 #define LAYOUT_ROUND_BOUNDED(LB, F, Tr, ...) \
-  VA_CALL(BIND_FUNC, LB, F, gLuaBoundedBelow<Tr>, ##__VA_ARGS__)
+  VA_CALL(BIND_FUNC, LB, F, gPositiveConstraint<Tr>, ##__VA_ARGS__)
 NUMBER_VECTOR_DEFN(iround, glm::iround, LAYOUT_ROUND_BOUNDED)
 NUMBER_VECTOR_DEFN(uround, glm::uround, LAYOUT_ROUND_BOUNDED)
 #endif
 
 #if defined(GTC_RANDOM_HPP)
-using gRandValue = gLuaBoundedBelow<gLuaNumber, false>;  // @GLMAssert: assert(Radius > static_cast<T>(0));
+using gRandValue = gPositiveConstraint<gLuaNumber, false>;  // @GLMAssert: assert(Radius > static_cast<T>(0));
 NUMBER_VECTOR_DEFN(linearRand, glm::linearRand, LAYOUT_BINARY)
 BIND_DEFN(ballRand, glm::ballRand, gRandValue)
 BIND_DEFN(circularRand, glm::circularRand, gRandValue)
@@ -1721,7 +1714,7 @@ NUMBER_VECTOR_DEFN(all_isfinite, glm::all_isfinite, LAYOUT_UNARY)
 // @GLMAssert: assert(a >= static_cast<T>(0));
 // @GLMAssert: assert(a <= static_cast<T>(1));
 #define LAYOUT_QUAT_LERP(LB, F, Tr, ...) \
-  VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, gLuaBoundedBetween<Tr::value_trait>, ##__VA_ARGS__)
+  VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, gRelativeConstraint<Tr::value_trait>, ##__VA_ARGS__)
 NUMBER_VECTOR_QUAT_DEFNS(lerp, glm::lerp, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_OPTIONAL, LAYOUT_QUAT_LERP)
 NUMBER_VECTOR_QUAT_DEFNS(nlerp, glm::nlerp, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_OPTIONAL, LAYOUT_TERNARY_SCALAR)
 NUMBER_VECTOR_DEFN(lerpinverse, glm::lerpinverse, LAYOUT_TERNARY_OPTIONAL)
@@ -1748,7 +1741,7 @@ NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
 #if defined(GTX_EASING_HPP)
 // @GLMAssert: assert(a >= zero<genType>());
 // @GLMAssert: assert(a <= one<genType>());
-using gEasingValue = gLuaBoundedBetween<gLuaNumber>;
+using gEasingValue = gRelativeConstraint<gLuaNumber, true, true>;
 LAYOUT_DEFN(backEaseIn, glm::backEaseIn, LAYOUT_UNARY_OR_BINARY, gEasingValue)
 LAYOUT_DEFN(backEaseInOut, glm::backEaseInOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
 LAYOUT_DEFN(backEaseOut, glm::backEaseOut, LAYOUT_UNARY_OR_BINARY, gEasingValue)
@@ -2268,42 +2261,48 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
 #define RANDOM_DEVICE(...) VA_CALL(RANDOM_DEVICE, __VA_ARGS__) /* Mapping to <random> structures */
 #define RANDOM_DEVICE1(LB) return gLuaBase::Push(LB, 0) /* zero */
 #define RANDOM_DEVICE2(LB, F) return gLuaBase::Push(LB, F()(LB)) /* std::rand_func<>()(LB) */
-
-/* std::rand_func<>(a)(LB) */
-#define RANDOM_DEVICE3(LB, F, A)                                 \
-  LUA_MLM_BEGIN                                                  \
-  if (A::Is((LB).L, (LB).idx))                                   \
-    return gLuaBase::Push(LB, F(A::Next((LB).L, (LB).idx))(LB)); \
-  return gLuaBase::Push(LB, F()(LB));                            \
+#define RANDOM_DEVICE3(LB, F, A)                  \
+  LUA_MLM_BEGIN                                   \
+  if ((LB).top() > 0) {                           \
+    const A::type _a = A::Next((LB).L, (LB).idx); \
+    return gLuaBase::Push(LB, F(_a)(LB));         \
+  }                                               \
+  return gLuaBase::Push(LB, F()(LB));             \
   LUA_MLM_END
 
-/* std::rand_func<>(a, b)(LB) */
-#define RANDOM_DEVICE4(LB, F, A, B)                                  \
-  LUA_MLM_BEGIN                                                      \
-  if (A::Is((LB).L, (LB).idx) && B::Is((LB).L, (LB).idx + 1)) {      \
-    const A::type _a = A::Next((LB).L, (LB).idx);                    \
-    return gLuaBase::Push(LB, F(_a, B::Next((LB).L, (LB).idx))(LB)); \
-  }                                                                  \
-  return gLuaBase::Push(LB, F()(LB));                                \
+#define RANDOM_DEVICE4(LB, F, A, B)               \
+  LUA_MLM_BEGIN                                   \
+  if ((LB).top() > 0) {                           \
+    const A::type _a = A::Next((LB).L, (LB).idx); \
+    const B::type _b = B::Next((LB).L, (LB).idx); \
+    return gLuaBase::Push(LB, F(_a, _b)(LB));     \
+  }                                               \
+  return gLuaBase::Push(LB, F()(LB));             \
   LUA_MLM_END
 
-LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaInteger)
-LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, gLuaTrait<double>)
-LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaTrait<double>)
-LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaTrait<double>)
-LAYOUT_DEFN(geometric, std::geometric_distribution<lua_Integer>, RAND_TRAIT, gLuaTrait<double>)
-LAYOUT_DEFN(poisson, std::poisson_distribution<lua_Integer>, RAND_TRAIT, gLuaTrait<double>)
-LAYOUT_DEFN(exponential, std::exponential_distribution<lua_Number>, RAND_TRAIT, gLuaRawNum)
-LAYOUT_DEFN(gamma, std::gamma_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(weibull, std::weibull_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(extreme_value, std::extreme_value_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(normal, std::normal_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(lognormal, std::lognormal_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(chi_squared, std::chi_squared_distribution<lua_Number>, RAND_TRAIT, gLuaRawNum)
-LAYOUT_DEFN(cauchy, std::cauchy_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(fisher_f, std::fisher_f_distribution<lua_Number>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)
-LAYOUT_DEFN(student_t, std::student_t_distribution<lua_Number>, RAND_TRAIT, gLuaRawNum)
+using raNum = gLuaRawNum;
+template<typename T = raNum::type> using raAboveZero = gPositiveConstraint<gLuaTrait<T>, false>;  // 0.0 < _Ax0
+template<typename T = raNum::type> using raProbability = gRelativeConstraint<gLuaTrait<T>, true, true>;  // 0.0 <= _Ax0 && _Ax0 <= 1.0
+template<typename T = raNum::type> using raRelativeGeo = gRelativeConstraint<gLuaTrait<T>, false, false>;  // 0.0 < _Ax0 && _Ax0 < 1.0
+template<typename T = raNum::type> using raNegativeBinorm = gRelativeConstraint<gLuaTrait<T>, false, true>;  // 0.0 < _Ax0 && _Ax0 <= 1.0
+
+LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaInteger)  // @TODO: _Min0 <= _Max0
+LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)  // @TODO: _Min0 <= _Max0 && (0 <= _Min0 || _Max0 <= _Min0 + (numeric_limits<_Ty>::max) ()
+LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, raProbability<double>)
+LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gPositiveConstraint<gLuaTrait<lua_Integer>>, raProbability<double>)
+LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, raAboveZero<lua_Integer>, raNegativeBinorm<double>)
+LAYOUT_DEFN(geometric, std::geometric_distribution<lua_Integer>, RAND_TRAIT, raRelativeGeo<double>)
+LAYOUT_DEFN(poisson, std::poisson_distribution<lua_Integer>, RAND_TRAIT, raAboveZero<double>)
+LAYOUT_DEFN(exponential, std::exponential_distribution<raNum::type>, RAND_TRAIT, raAboveZero<>)
+LAYOUT_DEFN(gamma, std::gamma_distribution<raNum::type>, RANDOM_DEVICE, raAboveZero<>, raAboveZero<>)
+LAYOUT_DEFN(weibull, std::weibull_distribution<raNum::type>, RANDOM_DEVICE, raAboveZero<>, raAboveZero<>)
+LAYOUT_DEFN(extreme_value, std::extreme_value_distribution<raNum::type>, RANDOM_DEVICE, raNum, raAboveZero<>)
+LAYOUT_DEFN(normal, std::normal_distribution<raNum::type>, RANDOM_DEVICE, raNum, raAboveZero<>)
+LAYOUT_DEFN(lognormal, std::lognormal_distribution<raNum::type>, RANDOM_DEVICE, raNum, raAboveZero<>)
+LAYOUT_DEFN(chi_squared, std::chi_squared_distribution<raNum::type>, RAND_TRAIT, raAboveZero<>)
+LAYOUT_DEFN(cauchy, std::cauchy_distribution<raNum::type>, RANDOM_DEVICE, raNum, raAboveZero<>)
+LAYOUT_DEFN(fisher_f, std::fisher_f_distribution<raNum::type>, RANDOM_DEVICE, raAboveZero<>, raAboveZero<>)
+LAYOUT_DEFN(student_t, std::student_t_distribution<raNum::type>, RAND_TRAIT, raAboveZero<>)
 // discrete
 // piecewise_constant_distribution
 // piecewise_linear_distribution

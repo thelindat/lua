@@ -213,7 +213,7 @@ integer = hash(m --[[ matNxM ]])
 string,...,string = to_string(...)
 ```
 
-### all_equal
+### all\_equal
 
 ```lua
 -- glm.all(glm.equal(...)) shorthand
@@ -234,7 +234,7 @@ bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
 bool = all_equal(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
 ```
 
-### any_notequal
+### any\_notequal
 
 ```lua
 -- glm.any(glm.notEqual(...)) shorthand
@@ -3100,6 +3100,7 @@ arguments are resolved at call-time when parsing values from the Lua stack.
 * **TRIGONOMETRIC_HPP**
 * **VECTOR_RELATIONAL_HPP**
 * **PACKING_HPP**
+* **STD_RANDOM**
 
 ## LUAGLM\_INCLUDE\_EXT
 
