@@ -721,7 +721,7 @@ namespace glm {
   /// <summary>
   /// @GLMFix: glm::scaleBias that ensures the matrix is initialized.
   /// </summary>
-  template<typename T, qualifier Q>
+  template<typename T, qualifier Q = glm::qualifier::defaultp>
   GLM_FUNC_QUALIFIER mat<4, 4, T, Q> __scaleBias(T scale, T bias) {
     mat<4, 4, T, Q> result(0);
     result[3] = vec<4, T, Q>(vec<3, T, Q>(bias), static_cast<T>(1));

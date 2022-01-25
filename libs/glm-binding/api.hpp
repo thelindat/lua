@@ -101,7 +101,7 @@
 #define VECTOR_RELATIONAL_HPP
 #if defined(LUAGLM_INCLUDE_ALL)
   #define PACKING_HPP
-  //#define STD_RANDOM
+  #define STD_RANDOM
 #endif
 
 #if defined(LUAGLM_INCLUDE_ALL) || defined(LUAGLM_INCLUDE_EXT)
@@ -831,7 +831,7 @@ BIND_DEFN(infinitePerspectiveLH, glm::infinitePerspectiveLH, gLuaCNum, gLuaCNum,
 BIND_DEFN(infinitePerspectiveRH, glm::infinitePerspectiveRH, gLuaCNum, gLuaCNum, gLuaCNum)
 GLM_BINDING_QUALIFIER(ortho) {
   GLM_BINDING_BEGIN
-  if (gLuaCNum::Is(LB.L, LB.idx + 4))
+  if (LB.top() > 4)
     BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
   BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
   GLM_BINDING_END
@@ -1142,10 +1142,8 @@ GLM_BINDING_QUALIFIER(scaleBias) {
   GLM_BINDING_BEGIN
   if (gLuaMat4x4<>::fast::Is(LB.L, LB.idx))
     BIND_FUNC(LB, glm::__scaleBias, gLuaMat4x4<>::fast, gLuaFloat, gLuaFloat);
-
-  const gLuaCNum::type a = gLuaCNum::Next(LB.L, LB.idx);
-  const gLuaCNum::type b = gLuaCNum::Next(LB.L, LB.idx);
-  return gLuaBase::Push(LB, glm::__scaleBias<typename gLuaCNum::type, glm::qualifier::defaultp>(a, b));
+  else
+    BIND_FUNC(LB, glm::__scaleBias, gLuaCNum, gLuaCNum);
   GLM_BINDING_END
 }
 #endif
@@ -1308,19 +1306,17 @@ GLM_BINDING_QUALIFIER(toint) {
 
 #if defined(COMMON_HPP) || defined(EXT_SCALAR_COMMON_HPP) || defined(EXT_VECTOR_COMMON_HPP)
 /* Accumulation for min/max functions, where arguments can be Tr or a primitive */
-#define LAYOUT_MINMAX(LB, F, Tr, ...)                                                        \
-  LUA_MLM_BEGIN                                                                              \
-  const int _n = (LB).top();                                                                 \
-  Tr::type base = Tr::Next((LB).L, (LB).idx);                                                \
-  while ((LB).idx <= _n) {                                                                   \
-    if (Tr::safe::Is((LB).L, (LB).idx))                                                      \
-      base = F(base, Tr::safe::Next((LB).L, (LB).idx));                                      \
-    else if (Tr::value_trait::Is((LB).L, (LB).idx))                                          \
-      base = F(base, Tr::value_trait::Next((LB).L, (LB).idx));                               \
-    else                                                                                     \
-      return luaL_error((LB).L, "%s or %s expected", Tr::Label(), Tr::value_trait::Label()); \
-  }                                                                                          \
-  return gLuaBase::Push(LB, base);                                                           \
+#define LAYOUT_MINMAX(LB, F, Tr, ...)                          \
+  LUA_MLM_BEGIN                                                \
+  const int _n = (LB).top();                                   \
+  Tr::type base = Tr::Next((LB).L, (LB).idx);                  \
+  while ((LB).idx <= _n) {                                     \
+    if (Tr::value_trait::Is((LB).L, (LB).idx))                 \
+      base = F(base, Tr::value_trait::Next((LB).L, (LB).idx)); \
+    else                                                       \
+      base = F(base, Tr::safe::Next((LB).L, (LB).idx));        \
+  }                                                            \
+  return gLuaBase::Push(LB, base);                             \
   LUA_MLM_END
 
 /* glm::clamp */
@@ -1340,10 +1336,10 @@ NUMBER_VECTOR_DEFN(fclamp, glm::fclamp, LAYOUT_CLAMP)
 GLM_BINDING_QUALIFIER(clamp) {
   GLM_BINDING_BEGIN
   if (gLuaInteger::Is(LB.L, LB.idx)) { /* support int-only values */
-    if (gLuaInteger::Is(LB.L, LB.idx + 1) && gLuaInteger::Is(LB.L, LB.idx + 2))
-      BIND_FUNC(LB, glm::clamp, gLuaInteger, gLuaInteger, gLuaInteger);
-    else if (lua_isnoneornil(LB.L, LB.idx + 1) && lua_isnoneornil(LB.L, LB.idx + 2))
+    if (LB.top() == 1)
       BIND_FUNC(LB, glm::clamp, gLuaInteger);
+    else if (gLuaInteger::Is(LB.L, LB.idx + 1) && gLuaInteger::Is(LB.L, LB.idx + 2))
+      BIND_FUNC(LB, glm::clamp, gLuaInteger, gLuaInteger, gLuaInteger);
   }
   PARSE_NUMBER_VECTOR(LB, glm::clamp, LAYOUT_CLAMP, LAYOUT_CLAMP);
   GLM_BINDING_END
@@ -2252,8 +2248,6 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
 ** <random>
 ** ===================================================================
 */
-// @TODO: sanitize arguments, e.g., uniform_real_distribution requires:
-//  min <= max && (0 <= min || max <= min + (numeric_limits<T>::max)()
 #if defined(STD_RANDOM) && GLM_HAS_CXX11_STL
 #include <random>
 
@@ -2280,14 +2274,28 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
   return gLuaBase::Push(LB, F()(LB));             \
   LUA_MLM_END
 
+/* std::rand_func<>(a, b)(LB) | a <= b */
+#define RANDOM_UNIFORM(LB, F, A, B, ...)                                         \
+  LUA_MLM_BEGIN                                                                  \
+  if ((LB).top() > 0) {                                                          \
+    const A::type _a = A::Next((LB).L, (LB).idx);                                \
+    const B::type _b = B::Next((LB).L, (LB).idx);                                \
+    if (_a <= _b && (0 <= _a || _b <= _a + std::numeric_limits<A::type>::max())) \
+      return gLuaBase::Push(LB, F(_a, _b)(LB));                                  \
+    return luaL_error(LB.L, "invalid uniform_dist arguments");                   \
+  }                                                                              \
+  return gLuaBase::Push(LB, F()(LB));                                            \
+  LUA_MLM_END
+
 using raNum = gLuaRawNum;
 template<typename T = raNum::type> using raAboveZero = gPositiveConstraint<gLuaTrait<T>, false>;  // 0.0 < _Ax0
+template<typename T = raNum::type> using raAboveZeroInc = gPositiveConstraint<gLuaTrait<T>, true>;  // 0.0 <= _Ax0
 template<typename T = raNum::type> using raProbability = gRelativeConstraint<gLuaTrait<T>, true, true>;  // 0.0 <= _Ax0 && _Ax0 <= 1.0
 template<typename T = raNum::type> using raRelativeGeo = gRelativeConstraint<gLuaTrait<T>, false, false>;  // 0.0 < _Ax0 && _Ax0 < 1.0
 template<typename T = raNum::type> using raNegativeBinorm = gRelativeConstraint<gLuaTrait<T>, false, true>;  // 0.0 < _Ax0 && _Ax0 <= 1.0
 
-LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_DEVICE, gLuaInteger, gLuaInteger)  // @TODO: _Min0 <= _Max0
-LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_DEVICE, gLuaRawNum, gLuaRawNum)  // @TODO: _Min0 <= _Max0 && (0 <= _Min0 || _Max0 <= _Min0 + (numeric_limits<_Ty>::max) ()
+LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_UNIFORM, gLuaInteger, gLuaInteger)
+LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_UNIFORM, raAboveZeroInc<>, gLuaRawNum)
 LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, raProbability<double>)
 LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gPositiveConstraint<gLuaTrait<lua_Integer>>, raProbability<double>)
 LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, raAboveZero<lua_Integer>, raNegativeBinorm<double>)

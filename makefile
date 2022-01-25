@@ -250,7 +250,7 @@ SunOS solaris:
 # lua-glm binding
 GLM_A = glm.so
 LIBGLM_ALIGN := -DGLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-LIBGLM_FLAGS := $(CFLAGS) $(CPERF_FLAGS) $(TESTS) $(LIBGLM_ALIGN) -fno-exceptions -fPIC -I. -Ilibs/glm-binding -shared
+LIBGLM_FLAGS := $(CFLAGS) $(CPERF_FLAGS) $(TESTS) $(LIBGLM_ALIGN) -fno-exceptions -fno-asynchronous-unwind-tables -fPIC -I. -Ilibs/glm-binding -shared
 
 lib-glm:
 	$(CPP) $(LUA_LINKAGE) $(LIBGLM_FLAGS) -o $(GLM_A) libs/glm-binding/lglmlib.cpp $(LIBS)

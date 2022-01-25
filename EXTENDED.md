@@ -1198,6 +1198,144 @@ quat = quatEulerAngleZYZ(Z --[[ number ]], Y --[[ number ]], Z --[[ number ]])
 - `eulerZYX = eulerAngleZYX`
 - `eulerZYZ = eulerAngleZYZ`
 
+# Random Number Generation
+
+Bindings to [Pseudo-random number generation](https://en.cppreference.com/w/cpp/numeric/random)
+where [UniformRandomBitGenerator](https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator)
+is implemented using `math.random` (cached as a function upval on library loading).
+
+Accessed by `glm.distribution[name]`.
+
+## uniform_int
+
+```lua
+-- a: distribution minimum value (integer); a >= 0
+-- b: distribution maximum value (integer)
+value = uniform_int([a, b])
+```
+
+## uniform_real
+
+```lua
+-- a: distribution minimum value (number); a >= 0
+-- b: distribution maximum value (number)
+value = uniform_real([a, b])
+```
+
+## bernoulli
+
+```lua
+-- p: probability of generating true (number); 0.0 <= p && p <= 1.0
+value = bernoulli([p])
+```
+
+## binomial
+
+```lua
+-- t: number of trials (integer); t > 0
+-- p: probability of a trial generating true (number); 0.0 <= p && p <= 1.0
+value = binomial([t, p])
+```
+
+## negative_binomial
+
+```lua
+-- k: number of trial successes (integer); k > 0
+-- p: probability of a trial generating true (number); 0.0 < p && p <= 1.0
+value = negative_binomial([k, p])
+```
+
+## geometric
+
+```lua
+-- p: probability of a trial generating true (number); 0.0 < p && p < 1.0
+value = geometric([p])
+```
+
+## poisson
+
+```lua
+-- μ: the mean of the distribution (number); n > 0
+value = poisson([μ])
+```
+
+## exponential
+
+```lua
+-- λ: the rate parameter (number); n > 0
+value = exponential([λ])
+```
+
+## gamma
+
+```lua
+-- α: shape (number); n > 0
+-- β: scale (number); n > 0
+value = gamma([α, β])
+```
+
+## weibull
+
+```lua
+-- a: shape (number); n > 0
+-- b: scale (number); n > 0
+value = weibull([a, b])
+```
+
+## extreme_value
+
+```lua
+-- a: location (number)
+-- b: scale (number); n > 0
+value = extreme_value([a, b])
+```
+
+## normal
+
+```lua
+-- μ: mean (number)
+-- σ: standard deviation (number); n > 0
+value = normal([μ, σ])
+```
+
+## lognormal
+
+```lua
+-- m: log-scale (number)
+-- s: shape (number); n > 0
+value = lognormal([m, s])
+```
+
+## chi_squared
+
+```lua
+-- n: degrees of freedom (number); n > 0
+value = chi_squared([n])
+```
+
+## cauchy
+
+```lua
+-- a: location (number)
+-- b: scale (number); b > 0
+value = cauchy([a, b])
+```
+
+## fisher_f
+
+```lua
+-- m: degrees of freedom (number); m > 0
+-- n: degrees of freedom (number); n > 0
+value = fisher_f([m, n])
+```
+
+## student_t
+
+```lua
+-- n: degrees of freedom (number); n > 0
+value = student_t([n])
+```
+
 # Geometry API
 
 ## AABB
