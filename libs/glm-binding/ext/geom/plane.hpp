@@ -706,7 +706,7 @@ namespace glm {
       return true;
     }
 
-    if (denom != T(0)) {  // @TODO: notEqual(denom, T(0), epsilon<T>())
+    if (denom != T(0)) {
       d = (planeD - dot(planeNormal, linePos)) / denom;
       if (abs(d) < epsilon<T>()) {
         return true;

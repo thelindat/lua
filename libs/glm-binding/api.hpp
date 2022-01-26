@@ -306,7 +306,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
 }
 #endif
 
-// Generalized unpack operation; @TODO: table.unpack for LUA_VTABLE
+// Generalized unpack operation
 GLM_BINDING_QUALIFIER(unpack) {
   GLM_BINDING_BEGIN
   const int n = LB.top_for_recycle();

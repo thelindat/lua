@@ -715,7 +715,7 @@ namespace glm {
           ++numIntersections;
         else if (max(p0.x, p1.x) > T(0)) {
           const vec<2, T, Q> delta = p1 - p0;
-          if (delta.y != T(0)) {  // @TODO: notEqual(delta.y, T(0), epsilon<T>());
+          if (delta.y != T(0)) {
             const T t = -p0.y / delta.y;
             const T x = p0.x + t * delta.x;
             if (t >= T(0) && t <= T(1) && x > T(0)) {

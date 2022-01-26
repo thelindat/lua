@@ -63,16 +63,38 @@
 @@ LUA_CPP_EXCEPTIONS: If enabled, LUAI_THROW throws a checked exception instead
 ** of a lua_longjmp + ellipses-catch. This allows more flexibility when dealing
 ** with libraries compiled with C++ and properly maintaining the Lua stack.
-@@ LUA_CPP_STD_EXCEPTIONS: std::exceptions are also maintained by the runtime.
 */
 #if defined(LUA_CPP_EXCEPTIONS)
-#define LUAI_THROW(L,c)		throw(LuaException((L), (c)))
+#define LUAI_THROW(L, c)		throw(lua_Exception((L), (c)->status))
+#define LUAI_TRY(L, c, a)                               \
+  LUA_MLM_BEGIN                                         \
+  try {                                                 \
+    a                                                   \
+  }                                                     \
+  catch (const lua_Exception &e) {                      \
+    (c)->status = e.lj_status();                        \
+  }                                                     \
+  /* libraries should handle their own exceptions */    \
+  catch (const std::exception &e) {                     \
+    try {                                               \
+      lua_pushstring(L, e.what());                      \
+      (c)->status = LUA_ERRRUN;                         \
+    }                                                   \
+    catch (const lua_Exception &) {                     \
+      (c)->status = LUA_ERRMEM; /* pushstring failed */ \
+    }                                                   \
+  }                                                     \
+  catch (...) { /* force an explicit panic? */          \
+    if ((c)->status == 0)                               \
+      (c)->status = -1;                                 \
+  }                                                     \
+  LUA_MLM_END
 #else
 #define LUAI_THROW(L,c)		throw(c)
-#endif
-
 #define LUAI_TRY(L,c,a) \
 	try { a } catch(...) { if ((c)->status == 0) (c)->status = -1; }
+#endif
+
 #define luai_jmpbuf		int  /* dummy variable */
 
 #elif defined(LUA_USE_POSIX)				/* }{ */
@@ -108,65 +130,38 @@ struct lua_longjmp {
 ** C++ Exception Model
 ** =======================================================
 */
-#if defined(__cplusplus) && defined(LUA_CPP_EXCEPTIONS)
-#if defined(LUA_CPP_STD_EXCEPTIONS)
-  #include <exception>
-#endif
-
-#if !defined(LUA_NOEXCEPT)
-  #if __cplusplus >= 201103L
-    #define LUA_NOEXCEPT noexcept
-  #else
-    #define LUA_NOEXCEPT
-  #endif
-#endif
-
-class LuaException {
+#if defined(__cplusplus) && defined(LUA_CPP_EXCEPTIONS) && !defined(LUA_USE_LONGJMP)
+#include <exception>
+class lua_Exception : public std::exception {
 private:
-  const lua_State *L;
-  const lua_longjmp *errorJmp;
-  mutable bool anchored;
-
-  LuaException &operator=(const LuaException &other) = delete;  /* prevent */
+  lua_State *L;
+  int status;
 
 public:
-  LuaException(lua_State *L_, lua_longjmp *errorJmp_)
-    : L(L_), errorJmp(errorJmp_), anchored(false) {
+  lua_Exception(lua_State *L_, int status_)
+    : L(L_), status(status_) {
   }
 
-  LuaException(const LuaException &other)
-    : L(other.L), errorJmp(other.errorJmp), anchored(other.anchored) {
-    other.anchor();
+  inline int lj_status() const {
+    return status;
   }
 
-  /*
-  ** Ensure the error message is anchored on the Lua stack well after the
-  ** lifetime of the exception.
-  **
-  ** This function should only be called by luaD_rawrunprotected.
-  */
-  void anchor() const {
-    anchored = true;
-  }
-
-  /*
-  ** If the exception was caught and disposed-of before luaD_rawrunprotected has
-  ** processed it, revert the error state and pop the error message.
-  **
-  ** @TODO: Potentially restore status to its previous state
-  */
-  ~LuaException() {
-    if (!anchored) {
-      errorJmp->status = 0;
-      lua_pop(L, 1);
-    }
-  }
-
-  const char *what() const LUA_NOEXCEPT {
-    if (lua_gettop(L) > 0 && lua_isstring(L, -1))
+  const char* what() const noexcept override {
+    if ((status == LUA_ERRRUN || status == LUA_ERRSYNTAX)
+        && lua_gettop(L) > 0
+        && lua_isstring(L, -1)) {
       return lua_tostring(L, -1);
+    }
 
-    return "unknown Lua error";
+    switch (status) {
+      case LUA_ERRRUN: return "runtime error";
+      case LUA_ERRSYNTAX: return "syntax error";
+      case LUA_ERRMEM: return MEMERRMSG;
+      case LUA_ERRERR: return "error in error handling";
+      default: {
+        return "unexpected status";
+      }
+    }
   }
 };
 
@@ -227,67 +222,9 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   lj.status = LUA_OK;
   lj.previous = L->errorJmp;  /* chain new error handler */
   L->errorJmp = &lj;
-#if defined(__cplusplus) && defined(LUA_CPP_EXCEPTIONS)
-  try {
-    (*f)(L, ud);
-  }
-  /*
-  ** lua_error has been invoked w/ an error message placed on the stack. Anchor
-  ** the exception to ensure it does not pop the error message off the stack.
-  */
-  catch (LuaException &lua_e) {
-    lua_e.anchor();
-    if (lj.status == 0)
-      lj.status = -1;
-  }
-  /*
-  ** Original implementation uses throw(lua_longjmp) + ellipses capture. For
-  ** completeness handle catching longjmp even through it should never be thrown
-  */
-  catch (lua_longjmp *) {
-    if (lj.status == 0)
-      lj.status = -1;
-  }
-  /*
-  ** Handle STL exceptions as a stop-gap. Ideally, libraries should be handling
-  ** their own exceptions.
-  */
-#if defined(LUA_CPP_STD_EXCEPTIONS)
-  catch (const std::exception &stl_e) {
-    try {
-      lua_pushstring(L, stl_e.what());  // may LUAI_THROW
-      lua_error(L);
-    }
-    catch (LuaException &_lua_e) {
-      _lua_e.anchor();
-      if (lj.status == 0)
-        lj.status = -1;
-    }
-  }
-#endif
-  /*
-  ** Some library/submodule has thrown an unchecked exception that has made its
-  ** way back to rawrunprotected. For the time being, copy LUAI_TRY and presume
-  ** the Lua stack is now in an invalid state. The commented out solution forces
-  ** an explicit panic.
-  */
-  catch (...) {
-    if (lj.status == 0)
-      lj.status = -1;
-
-    /* Alternate solution:
-      if (g->panic) {  // panic function?
-        lua_unlock(L);
-        g->panic(L);  // call panic function (last chance to jump out)
-      }
-      abort();
-    */
-  }
-#else
   LUAI_TRY(L, &lj,
     (*f)(L, ud);
   );
-#endif
   L->errorJmp = lj.previous;  /* restore old error handler */
   L->nCcalls = oldnCcalls;
   return lj.status;

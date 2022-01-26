@@ -222,7 +222,7 @@ extern "C" {
     luaL_newlib(L, luaglm_aabb2dlib); lua_setfield(L, -2, "aabb2d");
     luaL_newlib(L, luaglm_segment2dlib); lua_setfield(L, -2, "segment2d");
     luaL_newlib(L, luaglm_circlelib); lua_setfield(L, -2, "circle");
-    // The "polygon" API is a reference to the polygon metatable stored in the registry.
+    // The "polygon" API doubles as the polygon metatable stored in the registry.
     glm_newmetatable(L, gLuaPolygon<>::Metatable(), "polygon", luaglm_polylib);
 #endif
 #if defined(CONSTANTS_HPP) || defined(EXT_SCALAR_CONSTANTS_HPP)

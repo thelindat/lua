@@ -109,7 +109,6 @@ static LUA_INLINE int vecgets (const TValue *obj, const char *k, StkId res) {
     }
   }
 
-  /* @TODO: Avoid taking the address of a 'TValue' field */
   if (l_likely(_n < glm_dimensions(ttypetag(obj)))) {
 #if LUAGLM_QUAT_WXYZ  /* quaternion has WXYZ layout */
     if (ttypetag(obj) == LUA_VQUAT) _n = ((_n + 1) % 4);

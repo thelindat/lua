@@ -318,9 +318,9 @@ ltable.o: ltable.c lprefix.h lua.h luaconf.h ldebug.h lstate.h lobject.h \
 ltablib.o: ltablib.c lprefix.h lua.h luaconf.h lauxlib.h lualib.h \
  lgrit_lib.h
 ltests.o: ltests.c lprefix.h lua.h luaconf.h lapi.h llimits.h lstate.h \
- lobject.h ltm.h lzio.h lmem.h lauxlib.h lcode.h llex.h lopcodes.h \
- lparser.h lctype.h ldebug.h ldo.h lfunc.h lopnames.h lstring.h lgc.h \
- ltable.h lualib.h
+ lobject.h ltm.h lzio.h lmem.h lauxlib.h lgrit_lib.h lcode.h llex.h \
+ lopcodes.h lparser.h lctype.h ldebug.h ldo.h lfunc.h lopnames.h \
+ lstring.h lgc.h ltable.h lualib.h
 ltm.o: ltm.c lprefix.h lua.h luaconf.h ldebug.h lstate.h lobject.h \
  llimits.h ltm.h lzio.h lmem.h ldo.h lgc.h lglm_core.h lstring.h ltable.h \
  lvm.h

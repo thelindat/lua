@@ -279,9 +279,6 @@ struct gLuaPlane : gLuaAbstractTrait<glm::Plane<L, T>> {
 
 /// <summary>
 /// An (explicitly three dimensional) polygon trait.
-///
-/// @TODO: More creative casting rules for generalized polygons, e.g., the
-/// userdata storing the dimensions to point.
 /// </summary>
 template<typename T = glm_Float>
 struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {

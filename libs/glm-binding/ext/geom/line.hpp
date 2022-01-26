@@ -425,12 +425,12 @@ namespace glm {
     }
 
     const T d33 = dot(v3, v3);
-    if (d33 != T(0)) {  // @TODO: notEqual(d33, T(0), epsilon<T>())
+    if (d33 != T(0)) {
       const vec<L, T, Q> v4 = v0 - v2;
       const T d43 = dot(v4, v3);
       const T d31 = dot(v3, v1);
       const T denom = dot(v1, v1) * d33 - d31 * d31;
-      d1 = (denom != T(0)) ? (d43 * d31 - dot(v4, v1) * d33) / denom : T(0);  // @TODO: notEqual(denom, T(0), epsilon<T>())
+      d1 = (denom != T(0)) ? (d43 * d31 - dot(v4, v1) * d33) / denom : T(0);
       d2 = (d43 + d1 * d31) / d33;
       return true;
     }

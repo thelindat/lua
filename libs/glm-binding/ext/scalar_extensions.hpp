@@ -274,7 +274,7 @@ namespace glm {
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType snap(const genType value, const genType step) {
-    if (step != genType(0))  // @TODO: notEqual(step, genType(0), epsilon<genType>())
+    if (step != genType(0))
       return floor((value / step) + genType(0.5)) * step;
     return value;
   }
