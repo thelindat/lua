@@ -233,6 +233,7 @@ end
 The binding library also extends GLM to:
 
 1. Add vector support for all functions declared in [cmath(C99/C++11)](http://www.cplusplus.com/reference/cmath/).
+1. Support C++11 [Pseudo-random number generation](https://en.cppreference.com/w/cpp/numeric/random) while [backed](https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator) by Lua's xoshiro256\*\* implementation.
 1. Alias (e.g., length vs. magnitude), emulate, and port useful and common functions from other popular vector-math libraries (listed in **Sources & Acknowledgments**).
 1. Be a complete superset of Lua's [lmathlib](https://www.lua.org/manual/5.4/manual.html#6.7). Meaning `_G.math` can be replaced by the binding library without compatibility concerns. Note, `math.random` and `math.randomseed` are copied from `lmathlib` when the library is loaded rather than extending/maintaining another pseudorandom-state (see `glm/gtc/random.hpp`).
 
@@ -304,7 +305,6 @@ Modules/functions not bound to LuaGLM due to usefulness or complexity:
 * glm/gtx/range.hpp: `begin`, `end`: useless in Lua context.
 * glm/gtx/bit.hpp: `powerOfTwoAbove`, `powerOfTwoBelow`, `powerOfTwoNearest`: deprecated, use GTC\_ROUND\_HPP instead.
 * glm/ext/vector\_relational.hpp: `equal(..., vec<L, int, Q> const& ULPs)`, as the current Lua binding cannot differentiate between it and `(..., vec<L, T, Q> const& epsilon)`.
-* glm/gtx/epsilon.hpp: `epsilon*Equal(qua<T, Q> const& x, qua<T, Q> const& y, T const& epsilon)`: not properly declared in header.
 * glm/gtx/pca.hpp: `sortEigenvalues`: Function incorrectly declared and manipulates the parameters in place.
 
 The general rule is that the result of a non-void function is placed first onto
@@ -767,7 +767,6 @@ Ordered by priority.
 1. Rewrite build scripts.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
 1. Initial support for frustums (both orthographic and perspective) and OBBs, or, at minimum, the more computationally complex parts of these structures.
-1. [binding](libs/glm-binding): Complete O3DE AzCore/Math (behaviorContext) aliasing (... where possible).
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. [ext](libs/glm-binding/ext): Allow configurable epsilon values for the variety of intersection functions.

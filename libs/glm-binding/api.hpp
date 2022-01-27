@@ -1579,8 +1579,8 @@ INTEGER_VECTOR_DEFN(prevPowerOfTwo, glm::prevPowerOfTwo, LAYOUT_UNARY, lua_Unsig
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::eps_trait, ##__VA_ARGS__); \
   LUA_MLM_END
 
-NUMBER_VECTOR_DEFN(epsilonEqual, glm::epsilonEqual, LAYOUT_EPSILON_EQUAL)
-NUMBER_VECTOR_DEFN(epsilonNotEqual, glm::epsilonNotEqual, LAYOUT_EPSILON_EQUAL)
+NUMBER_VECTOR_QUAT_DEFNS(epsilonEqual, glm::epsilonEqual, LAYOUT_TERNARY_EPS, LAYOUT_EPSILON_EQUAL, LAYOUT_TERNARY_EPS)
+NUMBER_VECTOR_QUAT_DEFNS(epsilonNotEqual, glm::epsilonNotEqual, LAYOUT_TERNARY_EPS, LAYOUT_EPSILON_EQUAL, LAYOUT_TERNARY_EPS)
 #endif
 
 #if defined(GTC_INTEGER_HPP)
