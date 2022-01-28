@@ -146,7 +146,6 @@
   #if !defined(GLM_ENABLE_EXPERIMENTAL)
     #error "GLM_ENABLE_EXPERIMENTAL not enabled!"
   #endif
-
   #define GTX_ASSOCIATED_MIN_MAX_HPP
   #define GTX_BIT_HPP
   #define GTX_CLOSEST_POINT_HPP
@@ -269,7 +268,7 @@ GLM_BINDING_QUALIFIER(to_string) {
 
 /* glm/ext/scalar_relational.hpp, glm/ext/vector_common.hpp, glm/ext/vector_relational.hpp, glm/ext/quaternion_relational.hpp, glm/ext/matrix_relational.hpp */
 EQUAL_DEFN(equal, glm::equal)
-EQUAL_DEFN(notEqual, glm::notEqual, )
+EQUAL_DEFN(notEqual, glm::notEqual)
 EQUAL_DEFN(all_equal, glm::all_equal)  // LUA_VECTOR_EXTENSIONS
 EQUAL_DEFN(any_notequal, glm::any_notequal)  // LUA_VECTOR_EXTENSIONS
 #if GLM_HAS_CXX11_STL

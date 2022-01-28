@@ -846,7 +846,7 @@ quat = quatbillboard(
 
 ## glm/gtx/component\_wise.hpp
 
-Specializations for compScale andcompNormalize;
+Specializations for compScale and compNormalize;
 
 ### compScale
 
