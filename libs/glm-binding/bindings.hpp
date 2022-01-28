@@ -1731,6 +1731,7 @@ struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
 **    LUA_USE_LONGJMP & LUA_CPP_EXCEPTIONS can change that functionality.
 */
 #if defined(LUAGLM_SAFELIB)
+  #include <exception>
   #define GLM_BINDING_BEGIN     \
     gLuaBase LB(L);             \
     const int _stop = LB.top(); \
@@ -1849,6 +1850,7 @@ struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
     GLM_BINDING_END                                         \
   }
 
+/* @TODO: Allow different specializations for lua_Number and vec2/3/4 */
 /* Generalized int16_t, int32_t, etc. function definition */
 #define INTEGER_VECTOR_DEFN(Name, F, ArgLayout, IType, ...)                                        \
   GLM_BINDING_QUALIFIER(Name) {                                                                    \

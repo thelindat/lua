@@ -1724,14 +1724,14 @@ INTEGER_NUMBER_VECTOR_DEFN(compMul, glm::compMul, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(compNormalize, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm_Integer)
 NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
 /* glm::compNormalize/glm::compScale for different types, e.g., u8, i8, u16, i16 */
-// INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
-// INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
-// INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
-// INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
-// NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
-// NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
-// NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
-// NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
+INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
+INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
+INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
+NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
+NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
+NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
+NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_EASING_HPP)
@@ -2207,26 +2207,18 @@ NUMBER_VECTOR_DEFN(isCompNull, glm::isCompNull, LAYOUT_BINARY_EPS)
 #endif
 
 #if defined(GTX_VECTOR_QUERY_HPP) || defined(GTX_MATRIX_QUERY_HPP)
-GLM_BINDING_QUALIFIER(isNormalized) {
-  GLM_BINDING_BEGIN  // Error message technically incorrect here.
-  const TValue *o = glm_i2v(LB.L, LB.idx);
-  if (ttismatrix(o))
-    PARSE_MATRIX(LB, mvalue_dims(o), glm::_isNormalized, LAYOUT_BINARY_EPS);
-  else
-    PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNormalized, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
-  GLM_BINDING_END
-}
+#define QUERY_DEFN(Name, F, FMat, ...) /* @GLMFix: use alternate definition for QUERY_HPP */  \
+  GLM_BINDING_QUALIFIER(Name) {                                                               \
+    GLM_BINDING_BEGIN /* Error message technically incorrect here. */                         \
+    const TValue *o = glm_i2v(LB.L, LB.idx);                                                  \
+    if (ttismatrix(o))                                                                        \
+      PARSE_MATRIX(LB, mvalue_dims(o), FMat, LAYOUT_BINARY_EPS);                              \
+    PARSE_NUMBER_VECTOR_QUAT(LB, F, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS); \
+    GLM_BINDING_END                                                                           \
+  }
 
-GLM_BINDING_QUALIFIER(isNull) {
-  GLM_BINDING_BEGIN  // Error message technically incorrect here.
-  const TValue *o = glm_i2v(LB.L, LB.idx);
-  if (ttismatrix(o))
-    PARSE_MATRIX(LB, mvalue_dims(o), glm::_isNull, LAYOUT_BINARY_EPS);
-  else
-    PARSE_NUMBER_VECTOR_QUAT(LB, glm::isNull, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS, LAYOUT_BINARY_EPS);
-  GLM_BINDING_END
-}
-
+QUERY_DEFN(isNormalized, glm::isNormalized, glm::_isNormalized)
+QUERY_DEFN(isNull, glm::isNull, glm::_isNull)
 NUMBER_VECTOR_DEFN(isUniform, glm::isUniform, LAYOUT_BINARY_EPS)  // LUA_VECTOR_EXTENSIONS
 #endif
 

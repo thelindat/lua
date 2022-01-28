@@ -844,6 +844,30 @@ quat = quatbillboard(
 - `quatlookRotationRH = glm_quatLookAtLH`
 - `quatlookRotationLH = glm_quatLookAtLH`
 
+## glm/gtx/component\_wise.hpp
+
+Specializations for compScale andcompNormalize;
+
+### compScale
+
+```lua
+-- Convert a normalized float vector to an integer vector.
+vecN = compScale_i8(v --[[ vecN ]])
+vecN = compScale_u8(v --[[ vecN ]])
+vecN = compScale_i16(v --[[ vecN ]])
+vecN = compScale_u16(v --[[ vecN ]])
+```
+
+### compNormalize
+
+```lua
+-- Convert an integer vector to a normalized float vector.
+vecN = compNormalize_i8(v --[[ vecN ]])
+vecN = compNormalize_u8(v --[[ vecN ]])
+vecN = compNormalize_i16(v --[[ vecN ]])
+vecN = compNormalize_u16(v --[[ vecN ]])
+```
+
 ## glm/gtx/fast\_trigonometry.hpp
 
 ```lua
