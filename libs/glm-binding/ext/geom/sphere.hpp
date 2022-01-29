@@ -88,7 +88,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Sphere<L, T, Q> &s1, const Sphere<L, T, Q> &s2) {
-    return s1.pos == s2.pos && s1.r == s2.r;
+    return s1.pos == s2.pos && glm::detail::equal_strict(s1.r, s2.r);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -464,7 +464,7 @@ namespace glm {
       vec<L, T, Q> point;
       T distance;
       bool operator<(const Tuple &rhs) const {
-        return (distance == rhs.distance) ? idx < rhs.idx : distance < rhs.distance;
+        return glm::detail::equal_strict(distance, rhs.distance) ? idx < rhs.idx : distance < rhs.distance;
       }
     };
 

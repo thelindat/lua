@@ -76,7 +76,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Plane<L, T, Q> &p1, const Plane<L, T, Q> &p2) {
-    return p1.normal == p2.normal && p1.d == p2.d;
+    return p1.normal == p2.normal && glm::detail::equal_strict(p1.d, p2.d);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -706,7 +706,7 @@ namespace glm {
       return true;
     }
 
-    if (denom != T(0)) {
+    if (!glm::detail::exactly_zero(denom)) {
       d = (planeD - dot(planeNormal, linePos)) / denom;
       if (abs(d) < epsilon<T>()) {
         return true;

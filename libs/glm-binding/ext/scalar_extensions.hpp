@@ -7,6 +7,7 @@
 #define EXT_EXTENSION_SCALAR_HPP
 
 #include <glm/glm.hpp>
+#include <glm/detail/compute_vector_relational.hpp>
 #include <glm/gtc/bitfield.hpp>
 #include <glm/gtc/packing.hpp>
 #include <glm/gtc/color_space.hpp>
@@ -22,6 +23,60 @@
 #endif
 
 namespace glm {
+
+  /// <summary>
+  /// Functions to suppress float-equal warnings and extension to compute_vector_relational.hpp
+  /// </summary>
+  namespace detail {
+    template<typename genType, typename otherType = genType>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal_strict(const genType &x, const otherType &y) {
+      return x == y;
+    }
+
+    template<typename genType, typename otherType = genType>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool not_equal_strict(const genType &x, const otherType &y) {
+      return x != y;
+    }
+
+#if GLM_HAS_CXX11_STL
+    template<>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal_strict(const float &x, const float &y) {
+      return std::equal_to<float>()(x, y);
+    }
+
+    template<>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal_strict(const double &x, const double &y) {
+      return std::equal_to<double>()(x, y);
+    }
+
+    template<>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool not_equal_strict(const float &x, const float &y) {
+      return std::not_equal_to<float>()(x, y);
+    }
+
+    template<>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool not_equal_strict(const double &x, const double &y) {
+      return std::not_equal_to<double>()(x, y);
+    }
+#endif
+
+    template<typename genType>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool exactly_zero(const genType &x) {
+      return equal_strict(x, genType(0));
+    }
+
+    template<typename genType>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool exactly_one(const genType &x) {
+      return equal_strict(x, genType(1));
+    }
+
+    template<typename T>
+    struct compute_equal<T, true> {
+      GLM_FUNC_QUALIFIER GLM_CONSTEXPR static bool call(T a, T b) {
+        return equal_strict(a, b);
+      }
+    };
+  }
 
   /* Function wrappers. */
 
@@ -61,7 +116,7 @@ namespace glm {
 
   template<typename genIUType>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal(genIUType x, genIUType y) {
-    return x == y;
+    return glm::detail::equal_strict(x, y);
   }
 
   template<typename T>
@@ -83,7 +138,7 @@ namespace glm {
 
   template<typename genIUType>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool notEqual(genIUType x, genIUType y) {
-    return x != y;
+    return glm::detail::not_equal_strict(x, y);
   }
 
   template<typename T>
@@ -203,10 +258,10 @@ namespace glm {
   /// <summary>
   /// Wraps [minValue, maxValue].
   /// </summary>
-  //template<typename genType>
-  //GLM_FUNC_QUALIFIER genType wrap(genType value, genType minValue, genType maxValue) {
-  //  return wrap(value - minValue, maxValue - minValue) + minValue;
-  //}
+  // template<typename genType>
+  // GLM_FUNC_QUALIFIER genType wrap(genType value, genType minValue, genType maxValue) {
+  //   return wrap(value - minValue, maxValue - minValue) + minValue;
+  // }
 
   /// <summary>
   /// glm::wrapAngle defined over [-pi, pi].
@@ -274,7 +329,7 @@ namespace glm {
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType snap(const genType value, const genType step) {
-    if (step != genType(0))
+    if (!glm::detail::exactly_zero(step))
       return floor((value / step) + genType(0.5)) * step;
     return value;
   }
