@@ -50,11 +50,11 @@ cat << EOF >> ${OUTFILE}
 
 /* default is to build the library; Note this deviates from onelua.c */
 #ifndef MAKE_LIB
-  #ifndef MAKE_LUAC
-    #ifndef MAKE_LUA
-      #define MAKE_LIB
-    #endif
-  #endif
+#ifndef MAKE_LUAC
+#ifndef MAKE_LUA
+#define MAKE_LIB
+#endif
+#endif
 #endif
 
 /* choose suitable platform-specific features */
@@ -241,13 +241,13 @@ echo "#if defined(LUA_IMPLEMENTATION)" >> ${OUTFILE}
   echo "#endif /* MAKE_LUAC */" >> ${OUTFILE}
 echo "#endif /* LUA_IMPLEMENTATION */" >> ${OUTFILE}
 
+echo "\n/* lua */" >> ${OUTFILE}
 echo "#if defined(MAKE_LUA)" >> ${OUTFILE}
-  echo "/* lua */" >> ${OUTFILE}
   cat ${LUA_DIR}/lua.c >> ${OUTFILE}
 echo "#endif /* MAKE_LUA */" >> ${OUTFILE}
 
+echo "\n/* luac */" >> ${OUTFILE}
 echo "#if defined(MAKE_LUAC)" >> ${OUTFILE}
-  echo "/* luac */" >> ${OUTFILE}
   cat ${LUA_DIR}/luac.c >> ${OUTFILE}
 echo "#endif /* MAKE_LUAC */" >> ${OUTFILE}
 

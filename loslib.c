@@ -212,7 +212,7 @@ static int os_microtime(lua_State *L) {
   return 1;
 }
 
-#if !LUA_32BITS
+#if LUA_32BITS == 0
 static int os_nanotime(lua_State *L) {
 #if defined(__cplusplus) && __cplusplus >= 201103L
   namespace sc = std::chrono;
@@ -273,6 +273,7 @@ static int os_rdtscp(lua_State *L) {
 /* }================================================================== */
 
 
+#if !defined(LUA_SANDBOX_OSLIB)  /* @TODO: Temporary; see LUA_SANDBOX */
 static int os_execute (lua_State *L) {
   const char *cmd = luaL_optstring(L, 1, NULL);
   int stat;
@@ -315,6 +316,7 @@ static int os_getenv (lua_State *L) {
   lua_pushstring(L, getenv(luaL_checkstring(L, 1)));  /* if NULL push nil */
   return 1;
 }
+#endif
 
 
 static int os_clock (lua_State *L) {
@@ -513,6 +515,7 @@ static int os_difftime (lua_State *L) {
 /* }====================================================== */
 
 
+#if !defined(LUA_SANDBOX_OSLIB)
 static int os_setlocale (lua_State *L) {
   static const int cat[] = {LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY,
                       LC_NUMERIC, LC_TIME};
@@ -536,32 +539,33 @@ static int os_exit (lua_State *L) {
   if (L) exit(status);  /* 'if' to avoid warnings for unreachable 'return' */
   return 0;
 }
+#endif
 
 
 static const luaL_Reg syslib[] = {
   {"clock",     os_clock},
   {"date",      os_date},
   {"difftime",  os_difftime},
+  {"time",      os_time},
+#if !defined(LUA_SANDBOX_OSLIB)
   {"execute",   os_execute},
   {"exit",      os_exit},
   {"getenv",    os_getenv},
   {"remove",    os_remove},
   {"rename",    os_rename},
   {"setlocale", os_setlocale},
-  {"time",      os_time},
   {"tmpname",   os_tmpname},
-#if defined(LUAGLM_EXT_CHRONO)
-  #if defined(LUA_SYS_CLOCK)
+#endif
+#if defined(LUA_SYS_CLOCK)
   { "deltatime", os_deltatime },
   { "microtime", os_microtime },
-  #if !LUA_32BITS
+  #if LUA_32BITS == 0
   { "nanotime", os_nanotime },
   #endif
-  #endif
-  #if defined(LUA_SYS_RDTSC)
+#endif
+#if defined(LUA_SYS_RDTSC)
   { "rdtsc", os_rdtsc },
   { "rdtscp", os_rdtscp },
-  #endif
 #endif
   {NULL, NULL}
 };

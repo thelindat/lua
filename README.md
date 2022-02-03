@@ -107,10 +107,9 @@ referenced by [lgrit\_lib.h](lgrit_lib.h).
 
 For performance reasons, most unary and binary operators have internal
 implementations that take precedence over any external metamethod.
-
 The following list corresponds to the reserved metamethods for unary and binary
 operators when the objects being operated on are either numbers, vectors,
-quaternions, or matrices. ... Formatting TBD.
+quaternions, or matrices.
 
 * **Number**: TM\_ADD, TM\_SUB, TM\_MUL, TM\_DIV.
 * **Vector**:
@@ -773,7 +772,6 @@ Ordered by priority.
 1. [ext](libs/glm-binding/ext): Improve SIMD support.
 1. [geom](libs/glm-binding/ext/geom): Support for two-dimensional structures: Ray2D, Line2D, Plane2D.
 1. Modify implementation to follow updated "Avoid taking the address of a 'TValue' field" (or reference) convention.
-1. Dust off emscripten patches.
 
 ### Planned Features
 
