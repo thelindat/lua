@@ -44,10 +44,14 @@
 */
 static const luaL_Reg loadedlibs[] = {
   {LUA_GNAME, luaopen_base},
+#if !defined(__EMSCRIPTEN__)
   {LUA_LOADLIBNAME, luaopen_package},
+#endif
   {LUA_COLIBNAME, luaopen_coroutine},
   {LUA_TABLIBNAME, luaopen_table},
+#if !defined(__EMSCRIPTEN__)
   {LUA_IOLIBNAME, luaopen_io},
+#endif
   {LUA_OSLIBNAME, luaopen_os},
   {LUA_STRLIBNAME, luaopen_string},
   {LUA_MATHLIBNAME, luaopen_math},

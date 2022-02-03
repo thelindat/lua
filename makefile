@@ -172,7 +172,7 @@ $(LUAC_T): $(LUAC_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS)
 
 clean:
-	$(RM) $(ALL_T) $(ALL_O) $(GLM_A) minilua.hpp onelua.o lua54.dll glm.dll lua.exe luac.exe
+	$(RM) $(ALL_T) $(ALL_O) $(GLM_A) minilua.hpp onelua.o lua54.dll glm.dll lua.exe luac.exe lua.js
 
 depend:
 	@$(CC) $(CFLAGS) -MM l*.c
@@ -225,6 +225,17 @@ linux-readline:
 LINUX_ONE_FLAGS := $(MYCFLAGS) $(CPERF_FLAGS) $(LUA_LINKAGE) -I. -Ilibs/glm-binding
 linux-one:
 	$(MAKE) linux-readline CC="$(CPP)" LUA_O="onelua.o" BASE_O="onelua.o" LUA_A="" CORE_O="" LIB_O="" LUAC_T="" MYCFLAGS="$(LINUX_ONE_FLAGS)"
+
+SYSEMFLAGS=
+LINUX_EM_CFLAGS:= -O3 -Wall -Wextra -Wno-deprecated -fno-exceptions -DNDEBUG -I. -Ilibs/glm-binding $(LUA_LINKAGE) $(SYSCFLAGS) $(MYCFLAGS) -DLUA_SANDBOX_OSLIB # -DLUA_INCLUDE_LIBGLM
+emscripten: makefile onelua.c
+	em++ $(LINUX_EM_CFLAGS) -sASSERTIONS=1 -sALLOW_MEMORY_GROWTH=1 $(SYSEMFLAGS) -sSUPPORT_LONGJMP=wasm -o lua.js onelua.c
+
+node.js: # node --experimental-wasm-eh lua.js
+	$(MAKE) emscripten SYSEMFLAGS="-DMAKE_LUA -sEXIT_RUNTIME=1 -sNODERAWFS=1"
+
+browser.js:
+	$(MAKE) emscripten SYSEMFLAGS="-DMAKE_LUA_WASM -sSINGLE_FILE=1 -sSUPPORT_LONGJMP=wasm -sEXPORTED_FUNCTIONS=['_lua_wasm_execute'] -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
 
 Darwin macos macosx:
 	$(MAKE) $(ALL) SYSCFLAGS="-DLUA_USE_MACOSX"

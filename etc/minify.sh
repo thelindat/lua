@@ -49,10 +49,12 @@ cat << EOF >> ${OUTFILE}
 #endif
 
 /* default is to build the library; Note this deviates from onelua.c */
+#ifndef MAKE_LUA_WASM
 #ifndef MAKE_LIB
 #ifndef MAKE_LUAC
 #ifndef MAKE_LUA
 #define MAKE_LIB
+#endif
 #endif
 #endif
 #endif
@@ -227,9 +229,11 @@ echo "#if defined(LUA_IMPLEMENTATION)" >> ${OUTFILE}
     cat ${LUA_DIR}/lbaselib.c >> ${OUTFILE}
     cat ${LUA_DIR}/lcorolib.c >> ${OUTFILE}
     cat ${LUA_DIR}/ldblib.c >> ${OUTFILE}
-    cat ${LUA_DIR}/liolib.c >> ${OUTFILE}
     cat ${LUA_DIR}/lmathlib.c >> ${OUTFILE}
-    cat ${LUA_DIR}/loadlib.c >> ${OUTFILE}
+    echo "#if !defined(__EMSCRIPTEN__)" >> ${OUTFILE}
+      cat ${LUA_DIR}/liolib.c >> ${OUTFILE}
+      cat ${LUA_DIR}/loadlib.c >> ${OUTFILE}
+    echo "#endif /* __EMSCRIPTEN__ */" >> ${OUTFILE}
     cat ${LUA_DIR}/loslib.c >> ${OUTFILE}
     cat ${LUA_DIR}/lstrlib.c >> ${OUTFILE}
     cat ${LUA_DIR}/ltablib.c >> ${OUTFILE}
@@ -250,6 +254,11 @@ echo "\n/* luac */" >> ${OUTFILE}
 echo "#if defined(MAKE_LUAC)" >> ${OUTFILE}
   cat ${LUA_DIR}/luac.c >> ${OUTFILE}
 echo "#endif /* MAKE_LUAC */" >> ${OUTFILE}
+
+echo "\n/* wasm */" >> ${OUTFILE}
+echo "#if defined(MAKE_LUA_WASM)" >> ${OUTFILE}
+  cat ${LUA_DIR}/lua_wasm.c >> ${OUTFILE}
+echo "#endif /* MAKE_LUA_WASM */" >> ${OUTFILE}
 
 ################################################################################
 # Ensure includes are corrected:

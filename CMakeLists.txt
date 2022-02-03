@@ -66,6 +66,11 @@ OPTION(GLM_FAST_MATH "Enable fast math optimizations" OFF)
 # Compilation flags specific to the luaglm object.
 SET(GLM_OPTIMIZATION_FLAGS "")
 
+# @TODO: Configure an emscripten build; pending rewrite of this mess...
+IF( "${_cmake_compiler_output}" MATCHES "[Ee]mscripten" )
+  # SET(LUA_EMSCRIPTEN ON)
+ENDIF()
+
 # Windows systems
 IF( MSVC )
   OPTION(LUA_USE_WINDOWS "Windows specific build" ON)

@@ -6,10 +6,12 @@
 #endif
 
 /* default is to build the full interpreter */
+#ifndef MAKE_LUA_WASM
 #ifndef MAKE_LIB
 #ifndef MAKE_LUAC
 #ifndef MAKE_LUA
 #define MAKE_LUA
+#endif
 #endif
 #endif
 #endif
@@ -102,9 +104,11 @@
 #include "lbaselib.c"
 #include "lcorolib.c"
 #include "ldblib.c"
-#include "liolib.c"
 #include "lmathlib.c"
+#if !defined(__EMSCRIPTEN__)
+#include "liolib.c"
 #include "loadlib.c"
+#endif
 #include "loslib.c"
 #include "lstrlib.c"
 #include "ltablib.c"
@@ -123,4 +127,9 @@
 /* luac */
 #ifdef MAKE_LUAC
 #include "luac.c"
+#endif
+
+/* wasm */
+#ifdef MAKE_LUA_WASM
+#include "lua_wasm.c"
 #endif
