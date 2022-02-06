@@ -107,7 +107,7 @@ public:
     typename Tr::type operator*() const {
       lua_State *L_ = gLuaBase::L;
 
-      typename Tr::type value = Tr::zero();
+      typename Tr::type value = Tr::Zero();
       if (!gLuaBase::Pull(L_, gLuaBase::idx, value)) {
         luaL_error(L_, "iterator: invalid %s structure", Tr::Label());
       }
@@ -152,7 +152,7 @@ public:
   }
 
   typename Tr::type operator[](size_type pos) const {
-    typename Tr::type value = Tr::zero();
+    typename Tr::type value = Tr::Zero();
     if (pos >= 0 && pos < size()) {
       if (!gLuaBase::Pull(gLuaBase::L, pos + 1, value)) {
         luaL_error(gLuaBase::L, "operator[]: invalid %s structure", Tr::Label());
@@ -224,7 +224,7 @@ public:
     }
 
     typename Tr::type operator*() const {
-      typename Tr::type value = Tr::zero();
+      typename Tr::type value = Tr::Zero();
 
       // Fetch the object within the array that *should* correspond to the trait.
       lua_State *L_ = gLuaBase::L;
@@ -276,7 +276,7 @@ public:
   /// to lua_geti and potential __index metamethod.
   /// </summary>
   typename Tr::type operator[](size_type pos) const {
-    typename Tr::type value = Tr::zero();
+    typename Tr::type value = Tr::Zero();
     if (pos >= 0 && pos < size()) {
       lua_State *L_ = gLuaBase::L;
       lua_rawgeti(L_, gLuaBase::idx, static_cast<lua_Integer>(pos + 1));  // [..., element]

@@ -9,8 +9,11 @@
 #include <glm/glm.hpp>
 #include <glm/detail/compute_vector_relational.hpp>
 #include <glm/gtc/bitfield.hpp>
-#include <glm/gtc/packing.hpp>
 #include <glm/gtc/color_space.hpp>
+#include <glm/gtc/packing.hpp>
+#include <glm/gtx/common.hpp>
+#include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/scalar_relational.hpp>
 #include <glm/gtx/spline.hpp>
 #if GLM_VERSION < 998  // @COMPAT: ext/scalar_common.hpp introduced in 0.9.9.8
   #include <glm/gtx/extended_min_max.hpp>
@@ -78,46 +81,7 @@ namespace glm {
     };
   }
 
-  /* Function wrappers. */
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any(bool b) {
-    return b;
-  }
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all(bool b) {
-    return b;
-  }
-
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool not_(bool b) {
-    return !b;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool lessThan(genIUType x, genIUType y) {
-    return x < y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool lessThanEqual(genIUType x, genIUType y) {
-    return x <= y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool greaterThan(genIUType x, genIUType y) {
-    return x > y;
-  }
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool greaterThanEqual(genIUType x, genIUType y) {
-    return x >= y;
-  }
-
   /* glm::all(glm::equal(...)) shorthand */
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal(genIUType x, genIUType y) {
-    return glm::detail::equal_strict(x, y);
-  }
 
   template<typename T>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool all_equal(T const &x, T const &y) {
@@ -135,11 +99,6 @@ namespace glm {
   }
 
   /* glm::any(glm::notEqual(...)) shorthand */
-
-  template<typename genIUType>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool notEqual(genIUType x, genIUType y) {
-    return glm::detail::not_equal_strict(x, y);
-  }
 
   template<typename T>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(T const &x, T const &y) {

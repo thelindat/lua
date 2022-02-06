@@ -98,6 +98,8 @@ extern LUA_API_LINKAGE {
 /*
 ** @GCCHack: Functions with C linkage should avoid SIMD functions that directly
 ** reference __builtin_*, e.g., _mm_shuffle_ps and ia32_shufps (avoid gxx_personality).
+** The intent is to avoid fno-exceptions when compiling this unit, however, that
+** *should* not be an issue anymore.
 **
 ** @QuatHack: workarounds for incorrect SIMD implementations:
 **    type_quat_simd.inl:180:31: error: ‘const struct glm::vec<4, float, glm::aligned_highp>’
@@ -1984,21 +1986,27 @@ LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
 /*
 ** Operations on integer vectors (or floating-point vectors that are int-casted).
 */
-#define INT_VECTOR_OPERATION(F, res, v, p2, t1, t2)                                                 \
-  LUA_MLM_BEGIN                                                                                     \
-  if ((t1) == (t2)) { /* @GLMIndependent */                                                         \
-    const glmVector &v2 = glm_vvalue(p2);                                                           \
-    glm_setvvalue2s(res, F(cast_vec4((v).v4, lua_Integer), cast_vec4((v2).v4, lua_Integer)), (t1)); \
-    return 1;                                                                                       \
-  }                                                                                                 \
-  else if ((t2) == LUA_VNUMINT) {                                                                   \
-    glm_setvvalue2s(res, F(cast_vec4((v).v4, lua_Integer), ivalue(p2)), (t1));                      \
-    return 1;                                                                                       \
-  }                                                                                                 \
+#define INT_VECTOR_OPERATION(F, res, v, p2, t1, t2) \
+  LUA_MLM_BEGIN                                     \
+  if ((t1) == (t2)) { /* @GLMIndependent */         \
+    const glmVector &v2 = glm_vvalue(p2);           \
+    glm_setvvalue2s(res, F(                         \
+      glm::vec<4, lua_Integer, LUAGLM_Q>((v).v4),   \
+      glm::vec<4, lua_Integer, LUAGLM_Q>((v2).v4)   \
+    ), (t1));                                       \
+    return 1;                                       \
+  }                                                 \
+  else if ((t2) == LUA_VNUMINT) {                   \
+    glm_setvvalue2s(res, F(                         \
+      glm::vec<4, lua_Integer, LUAGLM_Q>((v).v4),   \
+      ivalue(p2)                                    \
+    ), (t1));                                       \
+    return 1;                                       \
+  }                                                 \
   LUA_MLM_END
 
 /*
-@@ LUAGLM_MUL_DIRECTION: Define how the runtime handles: `TM_MUL(mat4x4, vec3)`,
+@@ LUAGLM_MUL_DIRECTION Define how the runtime handles: `TM_MUL(mat4x4, vec3)`,
 ** i.e., transform the vec3 as a 'direction' or a 'position'.
 */
 #if defined(LUAGLM_MUL_DIRECTION)
@@ -2275,7 +2283,7 @@ static int vec_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId 
       glm_setvvalue2s(res, operator-(v.v4), tt_p1);
       return 1;
     case TM_BNOT:  // @GLMIndependent
-      glm_setvvalue2s(res, operator~(cast_vec4(v.v4, lua_Integer)), tt_p1);
+      glm_setvvalue2s(res, operator~(glm::vec<4, lua_Integer, LUAGLM_Q>(v.v4)), tt_p1);
       return 1;
     default: {
       break;

@@ -681,7 +681,7 @@ namespace glm {
       + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2])
     );
 
-    mat<C, R, T, Q> Inverse;
+    mat<C, R, T, Q> Inverse(T(0));
     Inverse[0][0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]) * OneOverDeterminant;
     Inverse[1][0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]) * OneOverDeterminant;
     Inverse[2][0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]) * OneOverDeterminant;
@@ -691,13 +691,8 @@ namespace glm {
     Inverse[0][2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]) * OneOverDeterminant;
     Inverse[1][2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]) * OneOverDeterminant;
     Inverse[2][2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]) * OneOverDeterminant;
-    GLM_IF_CONSTEXPR(R > 3) {
-      Inverse[0][3] = T(0);
-      Inverse[1][3] = T(0);
-      Inverse[2][3] = T(0);
-      GLM_IF_CONSTEXPR(C > 3) {
-        Inverse[3][3] = T(1);
-      }
+    GLM_IF_CONSTEXPR(R > 3 && C > 3) {
+      Inverse[3][3] = T(1);
     }
     return Inverse;
   }
@@ -717,6 +712,16 @@ namespace glm {
   ** Fixes
   ** =======================================================
   */
+
+  /// <summary>
+  /// @GLMFix: genTypeTrait qualifier support
+  /// </summary>
+  namespace detail {
+    template<length_t C, length_t R, typename T, glm::qualifier Q>
+    struct genTypeTrait<mat<C, R, T, Q>> {
+      static const genTypeEnum GENTYPE = GENTYPE_MAT;
+    };
+  }
 
   /// <summary>
   /// @GLMFix: glm::scaleBias that ensures the matrix is initialized.

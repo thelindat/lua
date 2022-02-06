@@ -644,7 +644,9 @@ GLM_LUA_REG(tgamma),
 { "MoveTowards", GLM_NAME(moveTowards) },
 { "SmoothDamp", GLM_NAME(smoothDamp) },
 { "RotateTowards", GLM_NAME(rotateTowards) },
+#if GLM_HAS_CXX11_STL
 { "Gamma", GLM_NAME(tgamma) },
+#endif
 #endif
 #endif
 

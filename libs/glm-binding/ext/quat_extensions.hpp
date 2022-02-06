@@ -424,6 +424,16 @@ namespace glm {
   */
 
   /// <summary>
+  /// @GLMFix: genTypeTrait qualifier support
+  /// </summary>
+  namespace detail {
+    template<typename T, glm::qualifier Q>
+    struct genTypeTrait<qua<T, Q>> {
+      static const genTypeEnum GENTYPE = GENTYPE_QUAT;
+    };
+  }
+
+  /// <summary>
   /// API completeness for matrix_extensions.
   /// </summary>
   template<typename T, qualifier Q>
@@ -470,15 +480,13 @@ namespace glm {
     return slerp(x, y, a, k);
   }
 
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
   /// <summary>
-  /// non-aligned implementation
+  /// @GLMFix: force non-aligned implementation
   /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<4, T, Q> __rotate(qua<T, Q> const &q, vec<4, T, Q> const &v) {
     return detail::compute_quat_mul_vec4<T, Q, false>::call(q, v);
   }
-#endif
 
   /* }====================================================== */
 }

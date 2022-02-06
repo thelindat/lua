@@ -209,16 +209,6 @@ static LUA_INLINE glm::length_t glm_vector_length(lua_State *L, int idx) {
 ** ===================================================================
 */
 
-/*
-** Utility macros for casting vectors as integer/boolean vectors are not
-** supported for this iteration of LuaGLM.
-*/
-#define cast_vec1(V, T) glm::vec<1, T, LUAGLM_Q>(static_cast<T>((V).x))
-#define cast_vec2(V, T) glm::vec<2, T, LUAGLM_Q>(static_cast<T>((V).x), static_cast<T>((V).y))
-#define cast_vec3(V, T) glm::vec<3, T, LUAGLM_Q>(static_cast<T>((V).x), static_cast<T>((V).y), static_cast<T>((V).z))
-#define cast_vec4(V, T) glm::vec<4, T, LUAGLM_Q>(static_cast<T>((V).x), static_cast<T>((V).y), static_cast<T>((V).z), static_cast<T>((V).w))
-#define cast_quat(Q, T) glm::qua<T, LUAGLM_Q>(static_cast<T>((Q).w), static_cast<T>((Q).x), static_cast<T>((Q).y), static_cast<T>((Q).z))
-
 /// <summary>
 /// Internal vector definition
 /// </summary>
@@ -244,12 +234,6 @@ union glmVector {
   glmVector(const glm::vec<4, glm_Float, LUAGLM_Q> &_v) : v4(_v) { }
   glmVector(const glm::qua<glm_Float, LUAGLM_Q> &_q) : q(_q) { }
 
-  template<class T> glmVector(const glm::vec<1, T, LUAGLM_Q> &_v) : v1(cast_vec1(_v, glm_Float)) { }
-  template<class T> glmVector(const glm::vec<2, T, LUAGLM_Q> &_v) : v2(cast_vec2(_v, glm_Float)) { }
-  template<class T> glmVector(const glm::vec<3, T, LUAGLM_Q> &_v) : v3(cast_vec3(_v, glm_Float)) { }
-  template<class T> glmVector(const glm::vec<4, T, LUAGLM_Q> &_v) : v4(cast_vec4(_v, glm_Float)) { }
-  template<class T> glmVector(const glm::qua<T, LUAGLM_Q> &_q) : q(cast_quat(_q, glm_Float)) { }
-
   // Realignment Constructors
 
   template<glm::qualifier P> glmVector(const glm::vec<1, glm_Float, P> &_v) : v1(_v) { }
@@ -258,11 +242,11 @@ union glmVector {
   template<glm::qualifier P> glmVector(const glm::vec<4, glm_Float, P> &_v) : v4(_v) { }
   template<glm::qualifier P> glmVector(const glm::qua<glm_Float, P> &_q) : q(_q) { }
 
-  template<class T, glm::qualifier P> glmVector(const glm::vec<1, T, P> &_v) : v1(cast_vec1(_v, glm_Float)) { }
-  template<class T, glm::qualifier P> glmVector(const glm::vec<2, T, P> &_v) : v2(cast_vec2(_v, glm_Float)) { }
-  template<class T, glm::qualifier P> glmVector(const glm::vec<3, T, P> &_v) : v3(cast_vec3(_v, glm_Float)) { }
-  template<class T, glm::qualifier P> glmVector(const glm::vec<4, T, P> &_v) : v4(cast_vec4(_v, glm_Float)) { }
-  template<class T, glm::qualifier P> glmVector(const glm::qua<T, P> &_q) : q(cast_quat(_q, glm_Float)) { }
+  template<typename T, glm::qualifier P> glmVector(const glm::vec<1, T, P> &_v) : v1(_v) { }
+  template<typename T, glm::qualifier P> glmVector(const glm::vec<2, T, P> &_v) : v2(_v) { }
+  template<typename T, glm::qualifier P> glmVector(const glm::vec<3, T, P> &_v) : v3(_v) { }
+  template<typename T, glm::qualifier P> glmVector(const glm::vec<4, T, P> &_v) : v4(_v) { }
+  template<typename T, glm::qualifier P> glmVector(const glm::qua<T, P> &_q) : q(_q) { }
 
   // Assignment Operators
 
@@ -272,11 +256,11 @@ union glmVector {
   inline void operator=(const glm::vec<4, glm_Float, LUAGLM_Q> &_v) { v4 = _v; }
   inline void operator=(const glm::qua<glm_Float, LUAGLM_Q> &_q) { q = _q; }
 
-  template <typename T> inline void operator=(const glm::vec<1, T, LUAGLM_Q> &_v) { v1 = cast_vec1(_v, glm_Float); }
-  template <typename T> inline void operator=(const glm::vec<2, T, LUAGLM_Q> &_v) { v2 = cast_vec2(_v, glm_Float); }
-  template <typename T> inline void operator=(const glm::vec<3, T, LUAGLM_Q> &_v) { v3 = cast_vec3(_v, glm_Float); }
-  template <typename T> inline void operator=(const glm::vec<4, T, LUAGLM_Q> &_v) { v4 = cast_vec4(_v, glm_Float); }
-  template <typename T> inline void operator=(const glm::qua<T, LUAGLM_Q> &_q) { q = cast_quat(_q, glm_Float); }
+  template<typename T, glm::qualifier P> inline void operator=(const glm::vec<1, T, P> &_v) { v1 = glm::vec<1, glm_Float, LUAGLM_Q>(_v); }
+  template<typename T, glm::qualifier P> inline void operator=(const glm::vec<2, T, P> &_v) { v2 = glm::vec<2, glm_Float, LUAGLM_Q>(_v); }
+  template<typename T, glm::qualifier P> inline void operator=(const glm::vec<3, T, P> &_v) { v3 = glm::vec<3, glm_Float, LUAGLM_Q>(_v); }
+  template<typename T, glm::qualifier P> inline void operator=(const glm::vec<4, T, P> &_v) { v4 = glm::vec<4, glm_Float, LUAGLM_Q>(_v); }
+  template<typename T, glm::qualifier P> inline void operator=(const glm::qua<T, P> &_q) { q = glm::qua<glm_Float, LUAGLM_Q>(_q); }
 
   // Reassignment; glm::vec = glmVector.
 
@@ -286,11 +270,11 @@ union glmVector {
   inline int Get(glm::vec<4, glm_Float, LUAGLM_Q> &_v) const { _v = v4; return 1; }
   inline int Get(glm::qua<glm_Float, LUAGLM_Q> &_q) const { _q = q; return 1; }
 
-  template <typename T> inline int Get(glm::vec<1, T, LUAGLM_Q> &_v) const { _v = cast_vec1(v1, T); return 1; }
-  template <typename T> inline int Get(glm::vec<2, T, LUAGLM_Q> &_v) const { _v = cast_vec2(v2, T); return 1; }
-  template <typename T> inline int Get(glm::vec<3, T, LUAGLM_Q> &_v) const { _v = cast_vec3(v3, T); return 1; }
-  template <typename T> inline int Get(glm::vec<4, T, LUAGLM_Q> &_v) const { _v = cast_vec4(v4, T); return 1; }
-  template <typename T> inline int Get(glm::qua<T, LUAGLM_Q> &_q) const { _q = cast_quat(q, T); return 1; }
+  template<typename T, glm::qualifier P> inline int Get(glm::vec<1, T, P> &_v) const { _v = glm::vec<1, T, P>(v1); return 1; }
+  template<typename T, glm::qualifier P> inline int Get(glm::vec<2, T, P> &_v) const { _v = glm::vec<2, T, P>(v2); return 1; }
+  template<typename T, glm::qualifier P> inline int Get(glm::vec<3, T, P> &_v) const { _v = glm::vec<3, T, P>(v3); return 1; }
+  template<typename T, glm::qualifier P> inline int Get(glm::vec<4, T, P> &_v) const { _v = glm::vec<4, T, P>(v4); return 1; }
+  template<typename T, glm::qualifier P> inline int Get(glm::qua<T, P> &_q) const { _q = glm::qua<T, P>(q); return 1; }
 };
 
 /// <summary>

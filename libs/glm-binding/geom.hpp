@@ -36,12 +36,12 @@
 /// </summary>
 template<bool isNear, bool isRelative, typename T = glm_Float>
 struct gLuaParametric : gLuaAbstractTrait<T, T> {
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "RelativePosition";
   }
 
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR T zero() {
-    GLM_IF_CONSTEXPR(isNear)
+  LUA_TRAIT_QUALIFIER LUA_CONSTEXPR_STATEMENT T Zero() {
+    LUA_IF_CONSTEXPR(isNear)
       return isRelative ? T(0) : -std::numeric_limits<T>::infinity();
     return isRelative ? T(1) : std::numeric_limits<T>::infinity();
   }
@@ -53,52 +53,48 @@ struct gLuaParametric : gLuaAbstractTrait<T, T> {
   LUA_TRAIT_QUALIFIER T Next(lua_State *L, int &idx) {
     if (lua_isnoneornil(L, idx)) {
       idx++;  // Skip the argument
-      return zero();
+      return Zero();
     }
 
     return gLuaTrait<T>::Next(L, idx);
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaAABB : gLuaAbstractTrait<glm::AABB<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaAABB : gLuaAbstractTrait<glm::AABB<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaAABB<L, Type>;  // @CastBinding
+  using as_type = gLuaAABB<L, Type, Q>;  // @CastBinding
   using safe = gLuaAABB;  // @SafeBinding
   using fast = gLuaAABB;  // @UnsafeBinding
 
   /// <summary>
   /// @PointBinding: Type trait equivalent to glm::Structure::point_type
   /// </summary>
-  using point_trait = gLuaTrait<typename glm::AABB<L, T>::point_type>;
+  using point_trait = gLuaTrait<typename glm::AABB<L, T, Q>::point_type>;
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "AABB";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::AABB<L, T> zero() {
-    return glm::AABB<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::AABB<L, T> Next(lua_State *L_, int &idx) {
-    glm::AABB<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::AABB<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::AABB<L, T, Q> result;
     result.minPoint = point_trait::Next(L_, idx);
     result.maxPoint = point_trait::Next(L_, idx);
     return result;
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaLine<L, Type>;  // @CastBinding
+  using as_type = gLuaLine<L, Type, Q>;  // @CastBinding
   using safe = gLuaLine;  // @SafeBinding
   using fast = gLuaLine;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Line<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::Line<L, T, Q>::point_type>;  // @PointBinding
 
   /// <summary>
   /// @RelativeZero: Lua type trait representing the relative negative-inf/zero
@@ -112,108 +108,92 @@ struct gLuaLine : gLuaAbstractTrait<glm::Line<L, T>> {
   /// </summary>
   using one_trait = gLuaParametric<false, false, T>;
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Line";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Line<L, T> zero() {
-    return glm::Line<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Line<L, T> Next(lua_State *L_, int &idx) {
-    glm::Line<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::Line<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::Line<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.dir = point_trait::Next(L_, idx);
     return result;
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaSegment : gLuaAbstractTrait<glm::LineSegment<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaSegment : gLuaAbstractTrait<glm::LineSegment<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaSegment<L, Type>;  // @CastBinding
+  using as_type = gLuaSegment<L, Type, Q>;  // @CastBinding
   using safe = gLuaSegment;  // @SafeBinding
   using fast = gLuaSegment;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::LineSegment<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::LineSegment<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, true, T>;  // @RelativeOne
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Segment";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::LineSegment<L, T> zero() {
-    return glm::LineSegment<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::LineSegment<L, T> Next(lua_State *L_, int &idx) {
-    glm::LineSegment<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::LineSegment<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::LineSegment<L, T, Q> result;
     result.a = point_trait::Next(L_, idx);
     result.b = point_trait::Next(L_, idx);
     return result;
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaRay : gLuaAbstractTrait<glm::Ray<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaRay : gLuaAbstractTrait<glm::Ray<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaRay<L, Type>;  // @CastBinding
+  using as_type = gLuaRay<L, Type, Q>;  // @CastBinding
   using safe = gLuaRay;  // @SafeBinding
   using fast = gLuaRay;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Ray<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::Ray<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, false, T>;  // @RelativeOne
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Ray";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Ray<L, T> zero() {
-    return glm::Ray<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Ray<L, T> Next(lua_State *L_, int &idx) {
-    glm::Ray<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::Ray<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::Ray<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.dir = point_trait::Next(L_, idx);
     return result;
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaTriangle : gLuaAbstractTrait<glm::Triangle<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaTriangle : gLuaAbstractTrait<glm::Triangle<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaTriangle<L, Type>;  // @CastBinding
+  using as_type = gLuaTriangle<L, Type, Q>;  // @CastBinding
   using safe = gLuaTriangle;  // @SafeBinding
   using fast = gLuaTriangle;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Triangle<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::Triangle<L, T, Q>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Triangle";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Triangle<L, T> zero() {
-    return glm::Triangle<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1) && point_trait::Is(L_, idx + 2);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Triangle<L, T> Next(lua_State *L_, int &idx) {
-    glm::Triangle<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::Triangle<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::Triangle<L, T, Q> result;
     result.a = point_trait::Next(L_, idx);
     result.b = point_trait::Next(L_, idx);
     result.c = point_trait::Next(L_, idx);
@@ -221,56 +201,48 @@ struct gLuaTriangle : gLuaAbstractTrait<glm::Triangle<L, T>> {
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaSphere : gLuaAbstractTrait<glm::Sphere<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaSphere : gLuaAbstractTrait<glm::Sphere<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaSphere<L, Type>;  // @CastBinding
+  using as_type = gLuaSphere<L, Type, Q>;  // @CastBinding
   using safe = gLuaSphere;  // @SafeBinding
   using fast = gLuaSphere;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Sphere<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::Sphere<L, T, Q>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Sphere";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Plane<L, T> zero() {
-    return glm::Plane<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Sphere<L, T> Next(lua_State *L_, int &idx) {
-    glm::Sphere<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::Sphere<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::Sphere<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.r = gLuaSphere::value_trait::Next(L_, idx);
     return result;
   }
 };
 
-template<glm::length_t L = 3, typename T = glm_Float>
-struct gLuaPlane : gLuaAbstractTrait<glm::Plane<L, T>> {
+template<glm::length_t L = 3, typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaPlane : gLuaAbstractTrait<glm::Plane<L, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaPlane<L, Type>;  // @CastBinding
+  using as_type = gLuaPlane<L, Type, Q>;  // @CastBinding
   using safe = gLuaPlane;  // @SafeBinding
   using fast = gLuaPlane;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Plane<L, T>::point_type>;  // @PointBinding
+  using point_trait = gLuaTrait<typename glm::Plane<L, T, Q>::point_type>;  // @PointBinding
 
-  static GLM_CONSTEXPR const char *Label() {
+  static LUA_CONSTEXPR const char *Label() {
     return "Plane";
-  }
-
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Plane<L, T> zero() {
-    return glm::Plane<L, T>();
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Plane<L, T> Next(lua_State *L_, int &idx) {
-    glm::Plane<L, T> result;
+  LUA_TRAIT_QUALIFIER glm::Plane<L, T, Q> Next(lua_State *L_, int &idx) {
+    glm::Plane<L, T, Q> result;
     result.normal = point_trait::Next(L_, idx);
     result.d = gLuaPlane::value_trait::Next(L_, idx);
     return result;
@@ -280,37 +252,37 @@ struct gLuaPlane : gLuaAbstractTrait<glm::Plane<L, T>> {
 /// <summary>
 /// An (explicitly three dimensional) polygon trait.
 /// </summary>
-template<typename T = glm_Float>
-struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
+template<typename T = glm_Float, glm::qualifier Q = LUAGLM_BINDING_QUAL>
+struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T, Q>> {
   template<typename Type = T>
-  using as_type = gLuaPolygon<Type>;  // @CastBinding
+  using as_type = gLuaPolygon<Type, Q>;  // @CastBinding
   using safe = gLuaPolygon;  // @SafeBinding
   using fast = gLuaPolygon;  // @UnsafeBinding
-  using point_trait = gLuaTrait<typename glm::Polygon<3, T>::point_type>;  // @PointBinding
-
-  static GLM_CONSTEXPR const char *Label() {
-    return "Polygon";
-  }
+  using point_trait = gLuaTrait<typename glm::Polygon<3, T, Q>::point_type>;  // @PointBinding
 
   /// <summary>
   /// Global metatable name for Polygon userdata
   /// </summary>
-  static GLM_CONSTEXPR const char *Metatable() {
+  static LUA_CONSTEXPR const char *Metatable() {
     return "GLM_POLYGON";
   }
 
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Polygon<3, T> zero() {
-    return glm::Polygon<3, T>(GLM_NULLPTR);
+  static LUA_CONSTEXPR const char *Label() {
+    return "Polygon";
+  }
+
+  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Polygon<3, T, Q> Zero() {
+    return glm::Polygon<3, T, Q>(GLM_NULLPTR);
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) {
     return luaL_testudata(L, idx, Metatable()) != GLM_NULLPTR;
   }
 
-  LUA_TRAIT_QUALIFIER glm::Polygon<3, T> Next(lua_State *L_, int &idx) {
+  LUA_TRAIT_QUALIFIER glm::Polygon<3, T, Q> Next(lua_State *L_, int &idx) {
     void *ptr = GLM_NULLPTR;
     if ((ptr = luaL_checkudata(L_, idx++, Metatable())) != GLM_NULLPTR) {
-      glm::Polygon<3, T> result = *(static_cast<glm::Polygon<3, T> *>(ptr));
+      glm::Polygon<3, T, Q> result = *(static_cast<glm::Polygon<3, T, Q> *>(ptr));
       result.stack_idx = idx - 1;
       result.p->validate(L_);
       return result;
@@ -318,7 +290,7 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
     else {
       luaL_error(L_, "Invalid polygon userdata");
     }
-    return glm::Polygon<3, T>();
+    return glm::Polygon<3, T, Q>();
   }
 };
 
@@ -350,7 +322,7 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
 /* Single parametric output */
 #define LAYOUT_GEOM_PARAMETRIC_U(LB, F, A, B, U) \
   LUA_MLM_BEGIN                                  \
-  U::type t = U::zero();                         \
+  U::type t = U::Zero();                         \
   const A::type a = A::Next((LB).L, (LB).idx);   \
   const B::type b = B::Next((LB).L, (LB).idx);   \
   TRAITS_PUSH(LB, F(a, b, t), t);                \
@@ -359,8 +331,8 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
 /* Multiple parametric outputs */
 #define LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, U, V) \
   LUA_MLM_BEGIN                                      \
-  U::type n = U::zero();                             \
-  V::type f = V::zero();                             \
+  U::type n = U::Zero();                             \
+  V::type f = V::Zero();                             \
   const A::type a = A::Next((LB).L, (LB).idx);       \
   const B::type b = B::Next((LB).L, (LB).idx);       \
   TRAITS_PUSH(LB, F(a, b, n, f), n, f);              \
@@ -379,9 +351,9 @@ struct gLuaPolygon : gLuaAbstractTrait<glm::Polygon<3, T>> {
 /* Multiple parametric outputs */
 #define LAYOUT_GEOM_PARAMETRIC_UVW(LB, F, A, B, U, V, W) \
   LUA_MLM_BEGIN                                          \
-  U::type u = U::zero();                                 \
-  V::type v = V::zero();                                 \
-  W::type w = W::zero();                                 \
+  U::type u = U::Zero();                                 \
+  V::type v = V::Zero();                                 \
+  W::type w = W::Zero();                                 \
   const A::type a = A::Next((LB).L, (LB).idx);           \
   const B::type b = B::Next((LB).L, (LB).idx);           \
   TRAITS_PUSH(LB, F(a, b, u, v, w), u, v, w);            \
@@ -1168,7 +1140,7 @@ GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
 //    default: {
 //      luaL_checktype(L, LB.idx, LUA_TTABLE);
 //      glmLuaArray<point_trait> lArray(LB.L, LB.idx);
-//      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, glm::defaultp, glmLuaArray<point_trait>>(lArray));
+//      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, LUAGLM_BINDING_QUAL, glmLuaArray<point_trait>>(lArray));
 //    }
 //  }
 //  GLM_BINDING_END
@@ -1482,8 +1454,8 @@ GLM_BINDING_QUALIFIER(plane_clipTriangle) {
   GLM_BINDING_BEGIN
   const gLuaPlane<>::type plane = gLuaPlane<>::Next(LB.L, LB.idx);
   const gLuaTriangle<>::type line = gLuaTriangle<>::Next(LB.L, LB.idx);
-  gLuaTriangle<>::type t1 = gLuaTriangle<>::zero();
-  gLuaTriangle<>::type t2 = gLuaTriangle<>::zero();
+  gLuaTriangle<>::type t1 = gLuaTriangle<>::Zero();
+  gLuaTriangle<>::type t2 = gLuaTriangle<>::Zero();
   switch (clip(plane, line, t1, t1)) {
     case 1: TRAITS_PUSH(LB, t1); break;
     case 2: TRAITS_PUSH(LB, t1, t2); break;

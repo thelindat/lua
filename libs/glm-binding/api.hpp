@@ -61,14 +61,15 @@
 #include <glm/fwd.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtx/common.hpp>
-#include <glm/gtx/exterior_product.hpp>
 #include <glm/gtx/easing.hpp>
-#include <glm/gtx/matrix_transform_2d.hpp>
-#include <glm/gtx/vec_swizzle.hpp>
-#include <glm/gtx/texture.hpp>
-#include <glm/gtx/rotate_normalized_axis.hpp>
+#include <glm/gtx/exterior_product.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/matrix_factorisation.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/gtx/rotate_normalized_axis.hpp>
+#include <glm/gtx/scalar_relational.hpp>
+#include <glm/gtx/texture.hpp>
+#include <glm/gtx/vec_swizzle.hpp>
 #include <glm/detail/_vectorize.hpp>
 /* @COMPAT: introduced in 0.9.9.4 and missing from ext.hpp until 0.9.9.8 */
 #if GLM_VERSION >= 994 && GLM_VERSION <= 997
@@ -243,7 +244,7 @@
       }  LUAGLM_FALLTHROUGH;                                                                     \
       case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                       \
       case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                  \
-      case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaRawNum, gLuaRawNum); break;              \
+      case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaNumRaw, gLuaNumRaw); break;              \
       case LUA_VVECTOR2: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec2<>::fast, gLuaVec2<>::fast); break; \
       case LUA_VVECTOR3: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec3<>::fast, gLuaVec3<>::fast); break; \
       case LUA_VVECTOR4: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec4<>::fast, gLuaVec4<>::fast); break; \
@@ -289,7 +290,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VSHRSTR:
       case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
-      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaRawNum::fast); break;
+      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumRaw::fast); break;
       case LUA_VVECTOR2: LAYOUT_HASH(LB, std::hash, gLuaVec2<>::fast); break;
       case LUA_VVECTOR3: LAYOUT_HASH(LB, std::hash, gLuaVec3<>::fast); break;
       case LUA_VVECTOR4: LAYOUT_HASH(LB, std::hash, gLuaVec4<>::fast); break;
@@ -517,7 +518,7 @@ GLM_BINDING_QUALIFIER(mat_negate) {
   LUA_MLM_BEGIN                                        \
   const Tr::type a = Tr::Next((LB).L, (LB).idx);       \
   const Tr::type b = Tr::safe::Next((LB).L, (LB).idx); \
-  Tr::type carry = Tr::zero();                         \
+  Tr::type carry = Tr::Zero();                         \
   TRAITS_PUSH(LB, F(a, b, carry), carry);              \
   LUA_MLM_END
 
@@ -525,8 +526,8 @@ GLM_BINDING_QUALIFIER(mat_negate) {
   LUA_MLM_BEGIN                                        \
   const Tr::type a = Tr::Next((LB).L, (LB).idx);       \
   const Tr::type b = Tr::safe::Next((LB).L, (LB).idx); \
-  Tr::type lsb = Tr::zero();                           \
-  Tr::type msb = Tr::zero();                           \
+  Tr::type lsb = Tr::Zero();                           \
+  Tr::type msb = Tr::Zero();                           \
   F(a, b, lsb, msb);                                   \
   TRAITS_PUSH(LB, lsb, msb);                           \
   LUA_MLM_END
@@ -724,13 +725,11 @@ SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // LUA_MATRIX_
 ROTATION_MATRIX_DEFN(inverse_transform, glm::inverse_transform, LAYOUT_UNARY)
 #endif
 
-/* glm/ext/quaternion_trigonometric.hpp */
 #if defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
 BIND_DEFN(axis, glm::axis, gLuaQuat<>)
 BIND_DEFN(angleAxis, glm::angleAxis, gLuaVec3<>::value_trait, gLuaDir3<>)
 #endif
 
-/* glm/gtc/quaternion.hpp */
 #if defined(GTC_QUATERNION_HPP)
 BIND_DEFN(eulerAngles, glm::eulerAngles, gLuaQuat<>)
 BIND_DEFN(mat3_cast, glm::mat3_cast, gLuaQuat<>)
@@ -747,7 +746,6 @@ BIND_DEFN(quatbillboardLH, glm::quatbillboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir
 BIND_DEFN(quatFromBasis, glm::fromBasis, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
 #endif
 
-/* glm/gtx/quaternion.hpp */
 #if defined(GTX_QUATERNION_HPP)
 BIND_DEFN(extractRealComponent, glm::extractRealComponent, gLuaQuat<>)
 BIND_DEFN(fastMix, glm::fastMix, gLuaQuat<>, gLuaQuat<>, gLuaQuat<>::value_trait)
@@ -761,7 +759,6 @@ ROTATION_MATRIX_DEFN(quat_cast, glm::quat_cast, LAYOUT_UNARY)
 BIND_DEFN(quat_identity, glm::identity<gLuaQuat<>::type>)
 #endif
 
-/* glm/gtx/rotate_normalized_axis.hpp */
 #if defined(GTX_ROTATE_NORMALIZED_AXIS_HPP)
 ROTATION_MATRIX_DEFN(rotateNormalizedAxis, glm::rotateNormalizedAxis, LAYOUT_UNARY, gLuaFloat, gLuaDir3<>)
 #endif
@@ -789,11 +786,7 @@ ROTATION_MATRIX_DEFN(rotateNormalizedAxis, glm::rotateNormalizedAxis, LAYOUT_UNA
   LUA_MLM_END
 
 SYMMETRIC_MATRIX_DEFN(determinant, glm::determinant, LAYOUT_UNARY)
-#if defined(LUAGLM_ALIGNED)
-MATRIX_DEFN(matrixCompMult, glm::__matrixCompMult, LAYOUT_BINARY)
-#else
-MATRIX_DEFN(matrixCompMult, glm::matrixCompMult, LAYOUT_BINARY)
-#endif
+MATRIX_DEFN(matrixCompMult, glm::__matrixCompMult, LAYOUT_BINARY)  // @GLMFix
 MATRIX_DEFN(transpose, glm::transpose, LAYOUT_UNARY)
 GLM_BINDING_QUALIFIER(outerProduct) {
   GLM_BINDING_BEGIN
@@ -812,56 +805,56 @@ GLM_BINDING_QUALIFIER(outerProduct) {
 #endif
 
 #if defined(EXT_MATRIX_CLIP_SPACE_HPP)
-using gAspect = gPositiveConstraint<gLuaCNum, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
-using gFov = gPositiveConstraint<gLuaCNum, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
+using gAspect = gPositiveConstraint<gLuaNumCoT, false, true>;  // @GLMAssert: assert(abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
+using gFov = gPositiveConstraint<gLuaNumCoT, false, false>;  // @GLMAssert: assert(fov > static_cast<T>(0));
 using gHeight = gFov;  // @GLMAssert: assert(height > static_cast<T>(0));
 using gWidth = gFov;  // @GLMAssert: assert(width > static_cast<T>(0));
-BIND_DEFN(frustum, glm::frustum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumLH, glm::frustumLH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumLH_NO, glm::frustumLH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumLH_ZO, glm::frustumLH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumNO, glm::frustumNO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumRH, glm::frustumRH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumRH_NO, glm::frustumRH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumRH_ZO, glm::frustumRH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(frustumZO, glm::frustumZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(infinitePerspective, glm::infinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(infinitePerspectiveLH, glm::infinitePerspectiveLH, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(infinitePerspectiveRH, glm::infinitePerspectiveRH, gLuaCNum, gLuaCNum, gLuaCNum)
+BIND_DEFN(frustum, glm::frustum, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumLH, glm::frustumLH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumLH_NO, glm::frustumLH_NO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumLH_ZO, glm::frustumLH_ZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumNO, glm::frustumNO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumRH, glm::frustumRH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumRH_NO, glm::frustumRH_NO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumRH_ZO, glm::frustumRH_ZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(frustumZO, glm::frustumZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(infinitePerspective, glm::infinitePerspective, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(infinitePerspectiveLH, glm::infinitePerspectiveLH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(infinitePerspectiveRH, glm::infinitePerspectiveRH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
 GLM_BINDING_QUALIFIER(ortho) {
   GLM_BINDING_BEGIN
   if (LB.top() > 4)
-    BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
-  BIND_FUNC(LB, glm::ortho, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum);
+    BIND_FUNC(LB, glm::ortho, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT);
+  BIND_FUNC(LB, glm::ortho, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT);
   GLM_BINDING_END
 }
-BIND_DEFN(orthoLH, glm::orthoLH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoLH_NO, glm::orthoLH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoLH_ZO, glm::orthoLH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoNO, glm::orthoNO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoRH, glm::orthoRH, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoRH_NO, glm::orthoRH_NO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoRH_ZO, glm::orthoRH_ZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orthoZO, glm::orthoZO, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspective, glm::perspective, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveLH, glm::perspectiveLH, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveLH_NO, glm::perspectiveLH_NO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveLH_ZO, glm::perspectiveLH_ZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveNO, glm::perspectiveNO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveRH, glm::perspectiveRH, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveRH_NO, glm::perspectiveRH_NO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveRH_ZO, glm::perspectiveRH_ZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveZO, glm::perspectiveZO, gLuaCNum, gAspect, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFov, glm::perspectiveFov, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovLH, glm::perspectiveFovLH, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovLH_NO, glm::perspectiveFovLH_NO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovLH_ZO, glm::perspectiveFovLH_ZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovNO, glm::perspectiveFovNO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovRH, glm::perspectiveFovRH, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovRH_NO, glm::perspectiveFovRH_NO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovRH_ZO, glm::perspectiveFovRH_ZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(perspectiveFovZO, glm::perspectiveFovZO, gFov, gWidth, gHeight, gLuaCNum, gLuaCNum)
-BIND_DEFN(tweakedInfinitePerspective, glm::tweakedInfinitePerspective, gLuaCNum, gLuaCNum, gLuaCNum, gLuaCNum::eps_trait)
+BIND_DEFN(orthoLH, glm::orthoLH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoLH_NO, glm::orthoLH_NO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoLH_ZO, glm::orthoLH_ZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoNO, glm::orthoNO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoRH, glm::orthoRH, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoRH_NO, glm::orthoRH_NO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoRH_ZO, glm::orthoRH_ZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orthoZO, glm::orthoZO, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspective, glm::perspective, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveLH, glm::perspectiveLH, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveLH_NO, glm::perspectiveLH_NO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveLH_ZO, glm::perspectiveLH_ZO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveNO, glm::perspectiveNO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveRH, glm::perspectiveRH, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveRH_NO, glm::perspectiveRH_NO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveRH_ZO, glm::perspectiveRH_ZO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveZO, glm::perspectiveZO, gLuaNumCoT, gAspect, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFov, glm::perspectiveFov, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovLH, glm::perspectiveFovLH, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovLH_NO, glm::perspectiveFovLH_NO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovLH_ZO, glm::perspectiveFovLH_ZO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovNO, glm::perspectiveFovNO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovRH, glm::perspectiveFovRH, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovRH_NO, glm::perspectiveFovRH_NO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovRH_ZO, glm::perspectiveFovRH_ZO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(perspectiveFovZO, glm::perspectiveFovZO, gFov, gWidth, gHeight, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(tweakedInfinitePerspective, glm::tweakedInfinitePerspective, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT::eps_trait)
 #endif
 
 #if defined(EXT_MATRIX_TRANSFORM_HPP) || defined(GTX_MATRIX_TRANSFORM_2D_HPP)
@@ -918,10 +911,10 @@ BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<
   LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::col_type, Tr::row_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
 #define LAYOUT_MATRIX_ACCESS_ROW(LB, F, Tr, ...) \
   LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::row_type, Tr::col_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
-#define LAYOUT_MATRIX_ACCESS(LB, F, Tr, TrComp, TrDims, TrIdx, ...) \
+#define LAYOUT_MATRIX_ACCESS(LB, F, Tr, TrComp, TrDim, TrIdx, ...)  \
   LUA_MLM_BEGIN                                                     \
   const lua_Integer _idx = luaL_checkinteger((LB).L, (LB).idx + 1); \
-  if (_idx < 0 || _idx >= cast(lua_Integer, TrDims::length()))      \
+  if (_idx < 0 || _idx >= cast(lua_Integer, TrDim::type::length())) \
     return GLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");     \
   else if (TrComp::Is((LB).L, (LB).idx + 2)) /* Set */              \
     VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, TrComp, ##__VA_ARGS__);    \
@@ -947,34 +940,34 @@ SYMMETRIC_MATRIX_DEFN(inverseTranspose, glm::inverseTranspose, LAYOUT_UNARY)
   TRAITS_PUSH(LB, a, b, c);                    \
   LUA_MLM_END
 
-BIND_DEFN(derivedEulerAngleX, glm::derivedEulerAngleX, gLuaCNum, gLuaCNum)
-BIND_DEFN(derivedEulerAngleY, glm::derivedEulerAngleY, gLuaCNum, gLuaCNum)
-BIND_DEFN(derivedEulerAngleZ, glm::derivedEulerAngleZ, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleX, glm::eulerAngleX, gLuaCNum)
-BIND_DEFN(eulerAngleXY, glm::eulerAngleXY, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleXYX, glm::eulerAngleXYX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleXYZ, glm::eulerAngleXYZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleXZ, glm::eulerAngleXZ, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleXZX, glm::eulerAngleXZX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleXZY, glm::eulerAngleXZY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleY, glm::eulerAngleY, gLuaCNum)
-BIND_DEFN(eulerAngleYX, glm::eulerAngleYX, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleYXY, glm::eulerAngleYXY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleYXZ, glm::eulerAngleYXZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleYZ, glm::eulerAngleYZ, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleYZX, glm::eulerAngleYZX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleYZY, glm::eulerAngleYZY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZ, glm::eulerAngleZ, gLuaCNum)
-BIND_DEFN(eulerAngleZX, glm::eulerAngleZX, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZXY, glm::eulerAngleZXY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZXZ, glm::eulerAngleZXZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZY, glm::eulerAngleZY, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZYX, glm::eulerAngleZYX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(eulerAngleZYZ, glm::eulerAngleZYZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(orientate2, glm::orientate2, gLuaCNum)
+BIND_DEFN(derivedEulerAngleX, glm::derivedEulerAngleX, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(derivedEulerAngleY, glm::derivedEulerAngleY, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(derivedEulerAngleZ, glm::derivedEulerAngleZ, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleX, glm::eulerAngleX, gLuaNumCoT)
+BIND_DEFN(eulerAngleXY, glm::eulerAngleXY, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleXYX, glm::eulerAngleXYX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleXYZ, glm::eulerAngleXYZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleXZ, glm::eulerAngleXZ, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleXZX, glm::eulerAngleXZX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleXZY, glm::eulerAngleXZY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleY, glm::eulerAngleY, gLuaNumCoT)
+BIND_DEFN(eulerAngleYX, glm::eulerAngleYX, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleYXY, glm::eulerAngleYXY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleYXZ, glm::eulerAngleYXZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleYZ, glm::eulerAngleYZ, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleYZX, glm::eulerAngleYZX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleYZY, glm::eulerAngleYZY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZ, glm::eulerAngleZ, gLuaNumCoT)
+BIND_DEFN(eulerAngleZX, glm::eulerAngleZX, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZXY, glm::eulerAngleZXY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZXZ, glm::eulerAngleZXZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZY, glm::eulerAngleZY, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZYX, glm::eulerAngleZYX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(eulerAngleZYZ, glm::eulerAngleZYZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(orientate2, glm::orientate2, gLuaNumCoT)
 BINARY_LAYOUT_DEFN(orientate3, glm::orientate3, LAYOUT_UNARY, gLuaFloat, gLuaVec3<>::fast)
 BIND_DEFN(orientate4, glm::orientate4, gLuaVec3<>)
-BIND_DEFN(yawPitchRoll, glm::yawPitchRoll, gLuaCNum, gLuaCNum, gLuaCNum)
+BIND_DEFN(yawPitchRoll, glm::yawPitchRoll, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
 ROTATION_MATRIX_DEFN(extractEulerAngleXYX, glm::extractEulerAngleXYX, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleXYZ, glm::extractEulerAngleXYZ, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleXZX, glm::extractEulerAngleXZX, LAYOUT_EULER_DECOMPOSE)
@@ -987,27 +980,27 @@ ROTATION_MATRIX_DEFN(extractEulerAngleZXY, glm::extractEulerAngleZXY, LAYOUT_EUL
 ROTATION_MATRIX_DEFN(extractEulerAngleZXZ, glm::extractEulerAngleZXZ, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYX, glm::extractEulerAngleZYX, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYZ, glm::extractEulerAngleZYZ, LAYOUT_EULER_DECOMPOSE)
-BIND_DEFN(quatEulerAngleX, glm::quatEulerAngleX, gLuaCNum)  // LUA_QUATERNION_EXTENSIONS
-BIND_DEFN(quatEulerAngleXY, glm::quatEulerAngleXY, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleXYX, glm::quatEulerAngleXYX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleXYZ, glm::quatEulerAngleXYZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleXZ, glm::quatEulerAngleXZ, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleXZX, glm::quatEulerAngleXZX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleXZY, glm::quatEulerAngleXZY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleY, glm::quatEulerAngleY, gLuaCNum)
-BIND_DEFN(quatEulerAngleYX, glm::quatEulerAngleYX, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleYXY, glm::quatEulerAngleYXY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleYXZ, glm::quatEulerAngleYXZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleYZ, glm::quatEulerAngleYZ, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleYZX, glm::quatEulerAngleYZX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleYZY, glm::quatEulerAngleYZY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZ, glm::quatEulerAngleZ, gLuaCNum)
-BIND_DEFN(quatEulerAngleZX, glm::quatEulerAngleZX, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZXY, glm::quatEulerAngleZXY, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZXZ, glm::quatEulerAngleZXZ, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZY, glm::quatEulerAngleZY, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZYX, glm::quatEulerAngleZYX, gLuaCNum, gLuaCNum, gLuaCNum)
-BIND_DEFN(quatEulerAngleZYZ, glm::quatEulerAngleZYZ, gLuaCNum, gLuaCNum, gLuaCNum)
+BIND_DEFN(quatEulerAngleX, glm::quatEulerAngleX, gLuaNumCoT)  // LUA_QUATERNION_EXTENSIONS
+BIND_DEFN(quatEulerAngleXY, glm::quatEulerAngleXY, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleXYX, glm::quatEulerAngleXYX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleXYZ, glm::quatEulerAngleXYZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleXZ, glm::quatEulerAngleXZ, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleXZX, glm::quatEulerAngleXZX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleXZY, glm::quatEulerAngleXZY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleY, glm::quatEulerAngleY, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYX, glm::quatEulerAngleYX, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYXY, glm::quatEulerAngleYXY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYXZ, glm::quatEulerAngleYXZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYZ, glm::quatEulerAngleYZ, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYZX, glm::quatEulerAngleYZX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleYZY, glm::quatEulerAngleYZY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZ, glm::quatEulerAngleZ, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZX, glm::quatEulerAngleZX, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZXY, glm::quatEulerAngleZXY, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZXZ, glm::quatEulerAngleZXZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZY, glm::quatEulerAngleZY, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZYX, glm::quatEulerAngleZYX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
+BIND_DEFN(quatEulerAngleZYZ, glm::quatEulerAngleZYZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
 #endif
 
 #if defined(GTX_MATRIX_CROSS_PRODUCT_HPP)
@@ -1031,8 +1024,8 @@ GLM_BINDING_QUALIFIER(decompose) {
 #if defined(GTX_MATRIX_FACTORISATION_HPP)
 #define LAYOUT_QRDECOMPOSE(LB, F, Tr, ...) \
   LUA_MLM_BEGIN                            \
-  Tr::q_type::type q = Tr::q_type::zero(); \
-  Tr::r_type::type r = Tr::r_type::zero(); \
+  Tr::q_type::type q = Tr::q_type::Zero(); \
+  Tr::r_type::type r = Tr::r_type::Zero(); \
   F(Tr::Next((LB).L, (LB).idx), q, r);     \
   TRAITS_PUSH(LB, q, r);                   \
   LUA_MLM_END
@@ -1043,7 +1036,6 @@ MATRIX_DEFN(qr_decompose, glm::qr_decompose, LAYOUT_QRDECOMPOSE)
 MATRIX_DEFN(rq_decompose, glm::rq_decompose, LAYOUT_QRDECOMPOSE)
 #endif
 
-/* glm/gtx/matrix_interpolation.hpp */
 #if defined(GTX_MATRIX_INTERPOLATION_HPP)
 #define LAYOUT_AXIS_ANGLE(LB, F, Tr, ...)     \
   LUA_MLM_BEGIN                               \
@@ -1059,7 +1051,6 @@ BIND_DEFN(interpolate, glm::interpolate, gLuaMat4x4<>, gLuaMat4x4<>, gLuaFloat)
 ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
 #endif
 
-/* glm/gtx/matrix_major_storage.hpp */
 #if defined(GTX_MATRIX_MAJOR_STORAGE_HPP)
 #define MATRIX_MAJOR_DEFN(Name, F, ArgLayout, Tr)             \
   GLM_BINDING_QUALIFIER(Name) {                               \
@@ -1142,7 +1133,7 @@ GLM_BINDING_QUALIFIER(scaleBias) {
   if (gLuaMat4x4<>::fast::Is(LB.L, LB.idx))
     BIND_FUNC(LB, glm::__scaleBias, gLuaMat4x4<>::fast, gLuaFloat, gLuaFloat);
   else
-    BIND_FUNC(LB, glm::__scaleBias, gLuaCNum, gLuaCNum);
+    BIND_FUNC(LB, glm::__scaleBias, gLuaNumCoT, gLuaNumCoT);
   GLM_BINDING_END
 }
 #endif
@@ -1156,8 +1147,8 @@ BIND_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
 #include <glm/gtx/pca.hpp>
 #define LAYOUT_FIND_EIGEN(LB, F, Tr, ...)                                                    \
   LUA_MLM_BEGIN                                                                              \
-  Tr::type outVectors = Tr::zero();                                                          \
-  Tr::col_type::type outValues = Tr::col_type::zero();                                       \
+  Tr::type outVectors = Tr::Zero();                                                          \
+  Tr::col_type::type outValues = Tr::col_type::Zero();                                       \
   glm::length_t count = glm::length_t(F(Tr::Next((LB).L, (LB).idx), outValues, outVectors)); \
   if (outValues.length() == count)                                                           \
     glm::sortEigenvalues(outValues, outVectors);                                             \
@@ -1169,12 +1160,12 @@ BIND_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
   using Vec = Mat::col_type;                                           \
   glmLuaArray<Vec> lArray((LB).L, (LB).idx++);                         \
   if (Vec::fast::Is((LB).L, (LB).idx)) {                               \
-    return gLuaBase::Push(LB, F<Cols, Mat::value_type, glm::defaultp>( \
+    return gLuaBase::Push(LB, F<Cols, Mat::value_type, LUAGLM_BINDING_QUAL>( \
       lArray.begin(), lArray.end(), Vec::fast::Next((LB).L, (LB).idx)  \
     ));                                                                \
   }                                                                    \
   else {                                                               \
-    return gLuaBase::Push(LB, F<Cols, Mat::value_type, glm::defaultp>( \
+    return gLuaBase::Push(LB, F<Cols, Mat::value_type, LUAGLM_BINDING_QUAL>( \
       lArray.begin(), lArray.end()                                     \
     ));                                                                \
   }                                                                    \
@@ -1261,7 +1252,7 @@ NUMBER_VECTOR_DEFN(isunordered, glm::isunordered, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(nearbyint, glm::nearbyint, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(nextafter, glm::nextafter, LAYOUT_BINARY)
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
-BIND_DEFN(nexttoward, std::nexttoward, gLuaRawNum, gLuaTrait<long double>)
+BIND_DEFN(nexttoward, std::nexttoward, gLuaNumRaw, gLuaTrait<long double>)
 #endif
 NUMBER_VECTOR_DEFN(remainder, glm::remainder, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_BINARY_AS_INT)
@@ -1284,9 +1275,9 @@ GLM_BINDING_QUALIFIER(toint) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
   switch (ttypetag(_tv)) {
-    case LUA_VVECTOR2: return gLuaBase::Push(LB, cast_vec2(glm_v2value(_tv), glm_Integer));
-    case LUA_VVECTOR3: return gLuaBase::Push(LB, cast_vec3(glm_v3value(_tv), glm_Integer));
-    case LUA_VVECTOR4: return gLuaBase::Push(LB, cast_vec4(glm_v4value(_tv), glm_Integer));
+    case LUA_VVECTOR2: return gLuaBase::Push(LB, glm::vec<2, glm_Integer, LUAGLM_Q>(glm_v2value(_tv)));
+    case LUA_VVECTOR3: return gLuaBase::Push(LB, glm::vec<3, glm_Integer, LUAGLM_Q>(glm_v3value(_tv)));
+    case LUA_VVECTOR4: return gLuaBase::Push(LB, glm::vec<4, glm_Integer, LUAGLM_Q>(glm_v4value(_tv)));
     default: {
       int valid = 0;
       const lua_Integer n = lua_tointegerx(LB.L, LB.idx, &valid);
@@ -1505,7 +1496,6 @@ BIND_DEFN(dot3, glm::dot, gLuaVec4<>, gLuaVec3<>)
 #endif
 #endif
 
-/* glm/vector_relational.hpp */
 #if defined(VECTOR_RELATIONAL_HPP)
 INTEGER_VECTOR_DEFN(all, glm::all, LAYOUT_UNARY, bool)
 INTEGER_VECTOR_DEFN(any, glm::any, LAYOUT_UNARY, bool)
@@ -1674,7 +1664,7 @@ BIND_DEFN(rgbColor, glm::rgbColor, gLuaVec3<>)
 GLM_BINDING_QUALIFIER(saturation) {
   GLM_BINDING_BEGIN
   const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
-  if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaCNum);
+  if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaNumCoT);
   else if (ttisvector3(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec3<>::fast);
   else if (ttisvector4(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec4<>::fast);
   return GLM_TYPE_ERROR(LB.L, LB.idx + 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR);
@@ -1864,30 +1854,30 @@ BIND_DEFN(nlz, glm::nlz, gLuaTrait<unsigned>)
     TRAITS_PUSH(LB, false);                                          \
   LUA_MLM_END
 
-#define LAYOUT_INTERSECT_RAY_PLANE(LB, F, Tr, ...)                                 \
-  LUA_MLM_BEGIN                                                                    \
-  Tr::value_type v5;                                                               \
-  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                                  \
-  const Tr::safe::type v2 = glm_trait_normalize(Tr::safe::Next((LB).L, (LB).idx)); \
-  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);                      \
-  const Tr::safe::type v4 = Tr::safe::Next((LB).L, (LB).idx);                      \
-  if (glm::intersectRayPlane(v1, v2, v3, v4, v5))                                  \
-    TRAITS_PUSH(LB, true, v5);                                                     \
-  else                                                                             \
-    TRAITS_PUSH(LB, false);                                                        \
+#define LAYOUT_INTERSECT_RAY_PLANE(LB, F, Tr, ...)            \
+  LUA_MLM_BEGIN                                               \
+  Tr::value_type v5;                                          \
+  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);             \
+  const Tr::safe::type v2 = Tr::safe::Next((LB).L, (LB).idx); \
+  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx); \
+  const Tr::safe::type v4 = Tr::safe::Next((LB).L, (LB).idx); \
+  if (glm::intersectRayPlane(v1, v2, v3, v4, v5))             \
+    TRAITS_PUSH(LB, true, v5);                                \
+  else                                                        \
+    TRAITS_PUSH(LB, false);                                   \
   LUA_MLM_END
 
-#define LAYOUT_INTERSECT_RAY_SPHERE(LB, F, Tr, ...)                                \
-  LUA_MLM_BEGIN                                                                    \
-  Tr::type v5, v6;                                                                 \
-  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                                  \
-  const Tr::safe::type v2 = glm_trait_normalize(Tr::safe::Next((LB).L, (LB).idx)); \
-  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);                      \
-  const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx);               \
-  if (glm::intersectRaySphere(v1, v2, v3, v4, v5, v6))                             \
-    TRAITS_PUSH(LB, true, v5, v6);                                                 \
-  else                                                                             \
-    TRAITS_PUSH(LB, false);                                                        \
+#define LAYOUT_INTERSECT_RAY_SPHERE(LB, F, Tr, ...)                  \
+  LUA_MLM_BEGIN                                                      \
+  Tr::type v5, v6;                                                   \
+  const Tr::type v1 = Tr::Next((LB).L, (LB).idx);                    \
+  const Tr::safe::type v2 = Tr::safe::Next((LB).L, (LB).idx);        \
+  const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);        \
+  const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx); \
+  if (glm::intersectRaySphere(v1, v2, v3, v4, v5, v6))               \
+    TRAITS_PUSH(LB, true, v5, v6);                                   \
+  else                                                               \
+    TRAITS_PUSH(LB, false);                                          \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(intersectLineSphere, glm::intersectLineSphere, LAYOUT_INTERSECT_LINE_SPHERE)
@@ -2087,13 +2077,8 @@ GLM_BINDING_QUALIFIER(rotate) {
         BIND_FUNC(LB, glm::rotate, gLuaQuat<>::fast, gLuaFloat::fast, gLuaDir3<>); /* <quat, angle, axis> */
       else if (ttisvector3(_tv2)) /* glm/gtx/quaternion.hpp */
         BIND_FUNC(LB, glm::rotate, gLuaQuat<>::fast, gLuaVec3<>::fast);
-#if defined(LUAGLM_ALIGNED)
-      else if (ttisvector4(_tv2))
-        BIND_FUNC(LB, glm::__rotate, gLuaQuat<>::fast, gLuaVec4<>::fast);
-#else
       else if (ttisvector4(_tv2)) /* glm/gtx/quaternion.hpp */
-        BIND_FUNC(LB, glm::rotate, gLuaQuat<>::fast, gLuaVec4<>::fast);
-#endif
+        BIND_FUNC(LB, glm::__rotate, gLuaQuat<>::fast, gLuaVec4<>::fast);  // @GLMFix
       return luaL_error(LB.L, "quat-rotate expects: {quat, angle:radians, axis:vec3}, {quat, dir:vec3}, {quat, point:vec4}");
     }
     case LUA_VMATRIX: {
@@ -2195,7 +2180,7 @@ NUMBER_VECTOR_QUAT_DEFNS(angle, glm::angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT
 ORIENTED_ANGLE_DEFN(orientedAngle, glm::orientedAngle)
 NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // LUA_VECTOR_EXTENSIONS
 ORIENTED_ANGLE_DEFN(orientedAngle_atan, glm::__orientedAngle)
-BIND_DEFN(fromAngle, glm::fromAngle, gLuaCNum)
+BIND_DEFN(fromAngle, glm::fromAngle, gLuaNumCoT)
 #endif
 
 #if defined(GTX_VECTOR_QUERY_HPP)
@@ -2278,7 +2263,7 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
   return gLuaBase::Push(LB, F()(LB));                                            \
   LUA_MLM_END
 
-using raNum = gLuaRawNum;
+using raNum = gLuaNumRaw;
 template<typename T = raNum::type> using raAboveZero = gPositiveConstraint<gLuaTrait<T>, false>;  // 0.0 < _Ax0
 template<typename T = raNum::type> using raAboveZeroInc = gPositiveConstraint<gLuaTrait<T>, true>;  // 0.0 <= _Ax0
 template<typename T = raNum::type> using raProbability = gRelativeConstraint<gLuaTrait<T>, true, true>;  // 0.0 <= _Ax0 && _Ax0 <= 1.0
@@ -2286,7 +2271,7 @@ template<typename T = raNum::type> using raRelativeGeo = gRelativeConstraint<gLu
 template<typename T = raNum::type> using raNegativeBinorm = gRelativeConstraint<gLuaTrait<T>, false, true>;  // 0.0 < _Ax0 && _Ax0 <= 1.0
 
 LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_UNIFORM, gLuaInteger, gLuaInteger)
-LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_UNIFORM, raAboveZeroInc<>, gLuaRawNum)
+LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_UNIFORM, raAboveZeroInc<>, gLuaNumRaw)
 LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, raProbability<double>)
 LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gPositiveConstraint<gLuaTrait<lua_Integer>>, raProbability<double>)
 LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, raAboveZero<lua_Integer>, raNegativeBinorm<double>)
