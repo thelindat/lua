@@ -1853,10 +1853,10 @@ static struct X { int x; } x;
     }
     else if EQ ("pushvector") {
       lua_Float4 f4;
-      f4.x = cast(lua_VecF, getnum);
-      f4.y = cast(lua_VecF, getnum);
-      f4.z = cast(lua_VecF, getnum);
-      f4.w = cast(lua_VecF, getnum);
+      f4.raw[0] = cast(lua_VecF, getnum);
+      f4.raw[1] = cast(lua_VecF, getnum);
+      f4.raw[2] = cast(lua_VecF, getnum);
+      f4.raw[3] = cast(lua_VecF, getnum);
       lua_pushvector(L, f4, getnum);
     }
     else if EQ ("checkvector2") {
