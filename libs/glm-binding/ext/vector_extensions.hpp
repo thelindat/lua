@@ -1154,6 +1154,78 @@ namespace glm {
   }
 #endif
 
+#if GLM_CONFIG_SIMD == GLM_ENABLE
+#if GLM_ARCH & GLM_ARCH_NEON_BIT
+  namespace detail {
+    /// <summary>
+    /// @GLMFix: type_vec4_simd.inl:503:27: error: cannot convert ‘int32x4_t’ {aka ‘__vector(4) int’} to ‘glm::detail::storage<4, unsigned int, true>::type’ {aka ‘__vector(4) unsigned int’} in assignment
+    /// </summary>
+    template<>
+    struct compute_vec4_add<int, glm::aligned_highp, true> {
+      static vec<4, int, glm::aligned_highp> call(vec<4, int, glm::aligned_highp> const &a, vec<4, int, glm::aligned_highp> const &b) {
+        vec<4, int, glm::aligned_highp> Result;
+        Result.data = vaddq_s32(a.data, b.data);
+        return Result;
+      }
+    };
+
+    /// <summary>
+    /// @GLMFix: uint32x2_t cmpx2 = vpmin_u32(vget_low_f32(cmp), vget_high_f32(cmp));
+    /// </summary>
+    template<>
+    struct compute_vec4_equal<float, glm::aligned_highp, false, 32, true> {
+      static bool call(vec<4, float, glm::aligned_highp> const &v1, vec<4, float, glm::aligned_highp> const &v2) {
+        uint32x4_t cmp = vceqq_f32(v1.data, v2.data);
+    #if GLM_ARCH & GLM_ARCH_ARMV8_BIT
+        cmp = vpminq_u32(cmp, cmp);
+        cmp = vpminq_u32(cmp, cmp);
+        uint32_t r = cmp[0];
+    #else
+        uint32x2_t cmpx2 = vpmin_u32(vget_low_u32(cmp), vget_high_u32(cmp));
+        cmpx2 = vpmin_u32(cmpx2, cmpx2);
+        uint32_t r = cmpx2[0];
+    #endif
+        return r == ~0u;
+      }
+    };
+
+    template<>
+    struct compute_vec4_equal<uint, glm::aligned_highp, false, 32, true> {
+      static bool call(vec<4, uint, glm::aligned_highp> const &v1, vec<4, uint, glm::aligned_highp> const &v2) {
+        uint32x4_t cmp = vceqq_u32(v1.data, v2.data);
+    #if GLM_ARCH & GLM_ARCH_ARMV8_BIT
+        cmp = vpminq_u32(cmp, cmp);
+        cmp = vpminq_u32(cmp, cmp);
+        uint32_t r = cmp[0];
+    #else
+        uint32x2_t cmpx2 = vpmin_u32(vget_low_u32(cmp), vget_high_u32(cmp));
+        cmpx2 = vpmin_u32(cmpx2, cmpx2);
+        uint32_t r = cmpx2[0];
+    #endif
+        return r == ~0u;
+      }
+    };
+
+    template<>
+    struct compute_vec4_equal<int, glm::aligned_highp, false, 32, true> {
+      static bool call(vec<4, int, glm::aligned_highp> const &v1, vec<4, int, glm::aligned_highp> const &v2) {
+        uint32x4_t cmp = vceqq_s32(v1.data, v2.data);
+    #if GLM_ARCH & GLM_ARCH_ARMV8_BIT
+        cmp = vpminq_u32(cmp, cmp);
+        cmp = vpminq_u32(cmp, cmp);
+        uint32_t r = cmp[0];
+    #else
+        uint32x2_t cmpx2 = vpmin_u32(vget_low_u32(cmp), vget_high_u32(cmp));
+        cmpx2 = vpmin_u32(cmpx2, cmpx2);
+        uint32_t r = cmpx2[0];
+    #endif
+        return r == ~0u;
+      }
+    };
+  }
+#endif
+#endif
+
   /// <summary>
   /// @GLMFix: A implementation of glm::angle that's numerically stable at all angles.
   /// </summary>
