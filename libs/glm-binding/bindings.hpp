@@ -380,6 +380,7 @@ struct gLuaBase {
   }
 
   /* std::random_device analogue using math.random */
+
   using result_type = unsigned int;
 
   /// <summary>
@@ -632,8 +633,7 @@ struct gLuaBase {
       setfltvalue(s2v(LB.L->top), cast_num(v.x));
     }
     else {
-      LUAGLM_UNREACHABLE();  // should never be hit
-      setnilvalue(s2v(LB.L->top));
+      setnilvalue(s2v(LB.L->top));  // should never be hit
     }
     api_incr_top(LB.L);
     lua_unlock(LB.L);
@@ -894,9 +894,8 @@ struct gLuaAbstractVector : gLuaAbstractTrait<glm::vec<D, T, Q>> {
   }
 
   LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) {
-    static const LUA_CONSTEXPR lu_byte Tag = cast_byte(makevariant(LUA_TVECTOR, (D - 2) /* & 0x3 */));
     const TValue *o = glm_i2v(L, idx);
-    return checktag((o), Tag);
+    return checktag((o), glm_variant(D));
   }
 };
 
