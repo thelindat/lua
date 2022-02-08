@@ -658,7 +658,7 @@ struct gLuaBase {
     return 1;  // glm_pushvec_quat(LB.L, glmVector(q));
   }
 
-  template<glm::length_t L, typename T, glm::qualifier Q>
+  template<typename T, glm::qualifier Q>
   LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::qua<T, Q> &q) {
     return Push(LB, glm::qua<glm_Float, LUAGLM_Q>(q));
   }
