@@ -273,10 +273,10 @@ EQUAL_DEFN(notEqual, glm::notEqual)
 EQUAL_DEFN(all_equal, glm::all_equal)  // LUA_VECTOR_EXTENSIONS
 EQUAL_DEFN(any_notequal, glm::any_notequal)  // LUA_VECTOR_EXTENSIONS
 #if GLM_HAS_CXX11_STL
-#define LAYOUT_HASH(LB, F, Traits, ...)                     \
-  LUA_MLM_BEGIN                                             \
-  F<Traits::type> hash;                                     \
-  gLuaBase::Push(LB, hash(Traits::Next((LB).L, (LB).idx))); \
+#define LAYOUT_HASH(LB, F, Traits, ...)                              \
+  LUA_MLM_BEGIN                                                      \
+  const auto _r = F<Traits::type>()(Traits::Next((LB).L, (LB).idx)); \
+  BIND_PUSH_V(LB, _r);                                               \
   LUA_MLM_END
 
 GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
@@ -519,7 +519,8 @@ GLM_BINDING_QUALIFIER(mat_negate) {
   const Tr::type a = Tr::Next((LB).L, (LB).idx);       \
   const Tr::type b = Tr::safe::Next((LB).L, (LB).idx); \
   Tr::type carry = Tr::Zero();                         \
-  TRAITS_PUSH(LB, F(a, b, carry), carry);              \
+  const auto _r = F(a, b, carry);                      \
+  BIND_PUSH(LB, _r, carry);                            \
   LUA_MLM_END
 
 #define LAYOUT_MUL_EXTENDED(LB, F, Tr, ...)            \
@@ -529,7 +530,7 @@ GLM_BINDING_QUALIFIER(mat_negate) {
   Tr::type lsb = Tr::Zero();                           \
   Tr::type msb = Tr::Zero();                           \
   F(a, b, lsb, msb);                                   \
-  TRAITS_PUSH(LB, lsb, msb);                           \
+  BIND_PUSH(LB, lsb, msb);                             \
   LUA_MLM_END
 
 #if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
@@ -863,15 +864,15 @@ GLM_BINDING_QUALIFIER(identity) {
   const lua_Integer size = gLuaInteger::Next(LB.L, LB.idx);
   const lua_Integer secondary = gLuaInteger::Next(LB.L, LB.idx);
   switch (LUAGLM_MATRIX_TYPE(size, secondary)) {
-    case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, glm::identity<gLuaMat2x2<>::type>());
-    case LUAGLM_MATRIX_2x3: return gLuaBase::Push(LB, glm::identity<gLuaMat2x3<>::type>());
-    case LUAGLM_MATRIX_2x4: return gLuaBase::Push(LB, glm::identity<gLuaMat2x4<>::type>());
-    case LUAGLM_MATRIX_3x2: return gLuaBase::Push(LB, glm::identity<gLuaMat3x2<>::type>());
-    case LUAGLM_MATRIX_3x3: return gLuaBase::Push(LB, glm::identity<gLuaMat3x3<>::type>());
-    case LUAGLM_MATRIX_3x4: return gLuaBase::Push(LB, glm::identity<gLuaMat3x4<>::type>());
-    case LUAGLM_MATRIX_4x2: return gLuaBase::Push(LB, glm::identity<gLuaMat4x2<>::type>());
-    case LUAGLM_MATRIX_4x3: return gLuaBase::Push(LB, glm::identity<gLuaMat4x3<>::type>());
-    case LUAGLM_MATRIX_4x4: return gLuaBase::Push(LB, glm::identity<gLuaMat4x4<>::type>());
+    case LUAGLM_MATRIX_2x2: BIND_RESULT(LB, glm::identity<gLuaMat2x2<>::type>());
+    case LUAGLM_MATRIX_2x3: BIND_RESULT(LB, glm::identity<gLuaMat2x3<>::type>());
+    case LUAGLM_MATRIX_2x4: BIND_RESULT(LB, glm::identity<gLuaMat2x4<>::type>());
+    case LUAGLM_MATRIX_3x2: BIND_RESULT(LB, glm::identity<gLuaMat3x2<>::type>());
+    case LUAGLM_MATRIX_3x3: BIND_RESULT(LB, glm::identity<gLuaMat3x3<>::type>());
+    case LUAGLM_MATRIX_3x4: BIND_RESULT(LB, glm::identity<gLuaMat3x4<>::type>());
+    case LUAGLM_MATRIX_4x2: BIND_RESULT(LB, glm::identity<gLuaMat4x2<>::type>());
+    case LUAGLM_MATRIX_4x3: BIND_RESULT(LB, glm::identity<gLuaMat4x3<>::type>());
+    case LUAGLM_MATRIX_4x4: BIND_RESULT(LB, glm::identity<gLuaMat4x4<>::type>());
     default: {
       break;
     }
@@ -937,7 +938,7 @@ SYMMETRIC_MATRIX_DEFN(inverseTranspose, glm::inverseTranspose, LAYOUT_UNARY)
   LUA_MLM_BEGIN                                \
   Tr::value_type a, b, c;                      \
   F(Tr::Next((LB).L, (LB).idx), a, b, c);      \
-  TRAITS_PUSH(LB, a, b, c);                    \
+  BIND_PUSH(LB, a, b, c);                      \
   LUA_MLM_END
 
 BIND_DEFN(derivedEulerAngleX, glm::derivedEulerAngleX, gLuaNumCoT, gLuaNumCoT)
@@ -1015,7 +1016,7 @@ GLM_BINDING_QUALIFIER(decompose) {
   gLuaVec4<>::type perspective;
   gLuaVec3<>::type scale, translation, skew;
   if (glm::decompose(gLuaMat4x4<>::Next(LB.L, LB.idx), scale, orientation, translation, skew, perspective))
-    TRAITS_PUSH(LB, scale, orientation, translation, skew, perspective);
+    BIND_PUSH(LB, scale, orientation, translation, skew, perspective);
   return gLuaBase::Push(LB);
   GLM_BINDING_END
 }
@@ -1027,7 +1028,7 @@ GLM_BINDING_QUALIFIER(decompose) {
   Tr::q_type::type q = Tr::q_type::Zero(); \
   Tr::r_type::type r = Tr::r_type::Zero(); \
   F(Tr::Next((LB).L, (LB).idx), q, r);     \
-  TRAITS_PUSH(LB, q, r);                   \
+  BIND_PUSH(LB, q, r);                   \
   LUA_MLM_END
 
 MATRIX_DEFN(fliplr, glm::fliplr, LAYOUT_UNARY)
@@ -1042,7 +1043,7 @@ MATRIX_DEFN(rq_decompose, glm::rq_decompose, LAYOUT_QRDECOMPOSE)
   gLuaVec3<>::type axis;                      \
   gLuaVec3<>::value_type angle;               \
   F(Tr::Next((LB).L, (LB).idx), axis, angle); \
-  TRAITS_PUSH(LB, axis, angle);               \
+  BIND_PUSH(LB, axis, angle);                 \
   LUA_MLM_END
 
 BIND_DEFN(axisAngleMatrix, glm::axisAngleMatrix, gLuaDir3<>, gLuaFloat)
@@ -1052,39 +1053,39 @@ ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
 #endif
 
 #if defined(GTX_MATRIX_MAJOR_STORAGE_HPP)
-#define MATRIX_MAJOR_DEFN(Name, F, ArgLayout, Tr)             \
-  GLM_BINDING_QUALIFIER(Name) {                               \
-    GLM_BINDING_BEGIN                                         \
-    if (Tr::col_type::Is((LB).L, (LB).idx))                   \
-      ArgLayout(LB, F, Tr::col_type);                         \
-    return gLuaBase::Push(LB, F(Tr::Next((LB).L, (LB).idx))); \
-    GLM_BINDING_END                                           \
+#define MATRIX_MAJOR_DEFN(Name, F, ArgLayout, Tr)   \
+  GLM_BINDING_QUALIFIER(Name) {                     \
+    GLM_BINDING_BEGIN                               \
+    if (Tr::col_type::Is((LB).L, (LB).idx))         \
+      ArgLayout(LB, F, Tr::col_type);               \
+    BIND_RESULT(LB, F(Tr::Next((LB).L, (LB).idx))); \
+    GLM_BINDING_END                                 \
   }
 
 #define MAJOR(A, B) A##B
-#define MATRIX_GENERAL_MAJOR_DEFN(Name, F)                                                                            \
-  GLM_BINDING_QUALIFIER(Name) {                                                                                       \
-    GLM_BINDING_BEGIN                                                                                                 \
-    const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                                                    \
-    switch (ttypetag(_tv)) {                                                                                          \
-      case LUA_VVECTOR2: LAYOUT_BINARY(LB, MAJOR(F, 2), gLuaVec2<>::fast); break;                                     \
-      case LUA_VVECTOR3: LAYOUT_TERNARY(LB, MAJOR(F, 3), gLuaVec3<>::fast); break;                                    \
-      case LUA_VVECTOR4: LAYOUT_QUATERNARY(LB, MAJOR(F, 4), gLuaVec4<>::fast); break;                                 \
-      case LUA_VMATRIX: {                                                                                             \
-        switch (mvalue_dims(_tv)) {                                                                                   \
-          case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, MAJOR(F, 2)(gLuaMat2x2<>::fast::Next((LB).L, (LB).idx))); \
-          case LUAGLM_MATRIX_3x3: return gLuaBase::Push(LB, MAJOR(F, 3)(gLuaMat3x3<>::fast::Next((LB).L, (LB).idx))); \
-          case LUAGLM_MATRIX_4x4: return gLuaBase::Push(LB, MAJOR(F, 4)(gLuaMat4x4<>::fast::Next((LB).L, (LB).idx))); \
-          default:                                                                                                    \
-            break;                                                                                                    \
-        }                                                                                                             \
-        break;                                                                                                        \
-      }                                                                                                               \
-      default:                                                                                                        \
-        break;                                                                                                        \
-    }                                                                                                                 \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                              \
-    GLM_BINDING_END                                                                                                   \
+#define MATRIX_GENERAL_MAJOR_DEFN(Name, F)                                                                  \
+  GLM_BINDING_QUALIFIER(Name) {                                                                             \
+    GLM_BINDING_BEGIN                                                                                       \
+    const TValue *_tv = glm_i2v((LB).L, (LB).idx);                                                          \
+    switch (ttypetag(_tv)) {                                                                                \
+      case LUA_VVECTOR2: LAYOUT_BINARY(LB, MAJOR(F, 2), gLuaVec2<>::fast); break;                           \
+      case LUA_VVECTOR3: LAYOUT_TERNARY(LB, MAJOR(F, 3), gLuaVec3<>::fast); break;                          \
+      case LUA_VVECTOR4: LAYOUT_QUATERNARY(LB, MAJOR(F, 4), gLuaVec4<>::fast); break;                       \
+      case LUA_VMATRIX: {                                                                                   \
+        switch (mvalue_dims(_tv)) {                                                                         \
+          case LUAGLM_MATRIX_2x2: BIND_RESULT(LB, MAJOR(F, 2)(gLuaMat2x2<>::fast::Next((LB).L, (LB).idx))); \
+          case LUAGLM_MATRIX_3x3: BIND_RESULT(LB, MAJOR(F, 3)(gLuaMat3x3<>::fast::Next((LB).L, (LB).idx))); \
+          case LUAGLM_MATRIX_4x4: BIND_RESULT(LB, MAJOR(F, 4)(gLuaMat4x4<>::fast::Next((LB).L, (LB).idx))); \
+          default:                                                                                          \
+            break;                                                                                          \
+        }                                                                                                   \
+        break;                                                                                              \
+      }                                                                                                     \
+      default:                                                                                              \
+        break;                                                                                              \
+    }                                                                                                       \
+    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                    \
+    GLM_BINDING_END                                                                                         \
   }
 
 MATRIX_MAJOR_DEFN(colMajor2, glm::colMajor2, LAYOUT_BINARY, gLuaMat2x2<>)
@@ -1152,7 +1153,7 @@ BIND_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
   glm::length_t count = glm::length_t(F(Tr::Next((LB).L, (LB).idx), outValues, outVectors)); \
   if (outValues.length() == count)                                                           \
     glm::sortEigenvalues(outValues, outVectors);                                             \
-  TRAITS_PUSH(LB, count, outValues, outVectors);                                             \
+  BIND_PUSH(LB, count, outValues, outVectors);                                               \
   LUA_MLM_END
 
 #define LAYOUT_COMPUTE_COVARIANCE(LB, F, Mat, Cols, ...)               \
@@ -1205,7 +1206,7 @@ GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
   LUA_MLM_BEGIN                                          \
   Tr::as_type<int>::type v2;                             \
   const Tr::type v3 = F(Tr::Next((LB).L, (LB).idx), v2); \
-  TRAITS_PUSH(LB, v3, v2);                               \
+  BIND_PUSH(LB, v3, v2);                                 \
   LUA_MLM_END
 
 #define LAYOUT_MODF(LB, F, Tr, ...)                      \
@@ -1213,7 +1214,7 @@ GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
   Tr::type v2;                                           \
   const Tr::type v3 = F(Tr::Next((LB).L, (LB).idx), v2); \
   const int _a = gLuaBase::PushNumInt(LB, v2);           \
-  const int _b = gLuaBase::Push(LB, v3);                 \
+  const int _b = BIND_PUSH_V(LB, v3);                    \
   return _a + _b;                                        \
   LUA_MLM_END
 
@@ -1522,7 +1523,7 @@ NUMBER_VECTOR_QUAT_DEFN(all_lessThanEqual, glm::all_lessThanEqual, LAYOUT_BINARY
   LUA_MLM_BEGIN                        \
   Tr::type s, c;                       \
   F(Tr::Next((LB).L, (LB).idx), s, c); \
-  TRAITS_PUSH(LB, s, c);               \
+  BIND_PUSH(LB, s, c);                 \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(acos, glm::acos, LAYOUT_UNARY)
@@ -1803,7 +1804,7 @@ NUMBER_VECTOR_DEFN(wrapAngle2, glm::wrapAngle2, LAYOUT_UNARY)  // LUA_VECTOR_EXT
   const Tr::value_type ms = Tr::value_trait::Next((LB).L, (LB).idx); \
   const Tr::value_type dt = Tr::value_trait::Next((LB).L, (LB).idx); \
   const Tr::type result = F(c, t, cv, st, ms, dt);                   \
-  TRAITS_PUSH(LB, result, cv);                                       \
+  BIND_PUSH(LB, result, cv);                                         \
   LUA_MLM_END
 
 BINARY_LAYOUT_DEFN(gauss, glm::gauss, LAYOUT_TERNARY, gLuaNumber, gLuaVec2<>::fast)
@@ -1849,9 +1850,9 @@ BIND_DEFN(nlz, glm::nlz, gLuaTrait<unsigned>)
   const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);        \
   const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx); \
   if (glm::intersectLineSphere(v1, v2, v3, v4, v5, v6, v7, v8))      \
-    TRAITS_PUSH(LB, true, v5, v6, v7, v8);                           \
+    BIND_PUSH(LB, true, v5, v6, v7, v8);                             \
   else                                                               \
-    TRAITS_PUSH(LB, false);                                          \
+    BIND_PUSH(LB, false);                                            \
   LUA_MLM_END
 
 #define LAYOUT_INTERSECT_RAY_PLANE(LB, F, Tr, ...)            \
@@ -1862,9 +1863,9 @@ BIND_DEFN(nlz, glm::nlz, gLuaTrait<unsigned>)
   const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx); \
   const Tr::safe::type v4 = Tr::safe::Next((LB).L, (LB).idx); \
   if (glm::intersectRayPlane(v1, v2, v3, v4, v5))             \
-    TRAITS_PUSH(LB, true, v5);                                \
+    BIND_PUSH(LB, true, v5);                                  \
   else                                                        \
-    TRAITS_PUSH(LB, false);                                   \
+    BIND_PUSH(LB, false);                                     \
   LUA_MLM_END
 
 #define LAYOUT_INTERSECT_RAY_SPHERE(LB, F, Tr, ...)                  \
@@ -1875,9 +1876,9 @@ BIND_DEFN(nlz, glm::nlz, gLuaTrait<unsigned>)
   const Tr::safe::type v3 = Tr::safe::Next((LB).L, (LB).idx);        \
   const Tr::value_type v4 = Tr::value_trait::Next((LB).L, (LB).idx); \
   if (glm::intersectRaySphere(v1, v2, v3, v4, v5, v6))               \
-    TRAITS_PUSH(LB, true, v5, v6);                                   \
+    BIND_PUSH(LB, true, v5, v6);                                     \
   else                                                               \
-    TRAITS_PUSH(LB, false);                                          \
+    BIND_PUSH(LB, false);                                            \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(intersectLineSphere, glm::intersectLineSphere, LAYOUT_INTERSECT_LINE_SPHERE)
@@ -1892,9 +1893,9 @@ GLM_BINDING_QUALIFIER(intersectLineTriangle) {
   const gLuaVec3<float>::type v4 = gLuaVec3<>::Next(LB.L, LB.idx);
   const gLuaVec3<float>::type v5 = gLuaVec3<>::Next(LB.L, LB.idx);
   if (glm::intersectLineTriangle(v1, v2, v3, v4, v5, v6))
-    TRAITS_PUSH(LB, true, v6);
+    BIND_PUSH(LB, true, v6);
   else
-    TRAITS_PUSH(LB, false);
+    BIND_PUSH(LB, false);
   GLM_BINDING_END
 }
 
@@ -1908,9 +1909,9 @@ GLM_BINDING_QUALIFIER(intersectRayTriangle) {
   const gLuaVec3<>::type v1 = gLuaVec3<>::Next(LB.L, LB.idx);
   const gLuaVec3<>::type v2 = gLuaVec3<>::Next(LB.L, LB.idx);
   if (glm::intersectRayTriangle(orig, dir, v0, v1, v2, baryPosition, distance))
-    TRAITS_PUSH(LB, true, baryPosition, distance);
+    BIND_PUSH(LB, true, baryPosition, distance);
   else
-    TRAITS_PUSH(LB, false);
+    BIND_PUSH(LB, false);
   GLM_BINDING_END
 }
 #endif
@@ -1967,11 +1968,11 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
   if (gLuaVec3<>::fast::Is(LB.L, LB.idx)) {
     gLuaVec3<>::fast::type z = gLuaVec3<>::fast::Next(LB.L, LB.idx);
     glm::orthonormalize3(x, y, z);
-    TRAITS_PUSH(LB, x, y, z);
+    BIND_PUSH(LB, x, y, z);
   }
   else {
     glm::orthonormalize2(x, y);
-    TRAITS_PUSH(LB, x, y);
+    BIND_PUSH(LB, x, y);
   }
   GLM_BINDING_END
 }
@@ -1982,7 +1983,7 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
   LUA_MLM_BEGIN                          \
   Tr::type u, v;                         \
   F(Tr::Next((LB).L, (LB).idx), u, v);   \
-  TRAITS_PUSH(LB, u, v);                 \
+  BIND_PUSH(LB, u, v);                   \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(perp, glm::perp, LAYOUT_BINARY)
@@ -2005,7 +2006,7 @@ BIND_DEFN(polar, glm::polar, gLuaVec3<>)
   const Tr::type p = Tr::Next((LB).L, (LB).idx);       \
   const Tr::type d = Tr::safe::Next((LB).L, (LB).idx); \
   F(p, d, q, r);                                       \
-  TRAITS_PUSH(LB, q, r);                               \
+  BIND_PUSH(LB, q, r);                                 \
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(proj, glm::proj, LAYOUT_BINARY)
@@ -2021,14 +2022,14 @@ GLM_BINDING_QUALIFIER(components) {  // An optimized variant of glm::components
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
   switch (ttype(_tv)) {
-    case LUA_TVECTOR: return gLuaBase::Push(LB, glm_dimensions(ttypetag(_tv)));
+    case LUA_TVECTOR: BIND_RESULT(LB, glm_dimensions(ttypetag(_tv)));
     case LUA_TMATRIX: {
       gLuaBase::Push(LB, LUAGLM_MATRIX_COLS(mvalue_dims(_tv)));
       gLuaBase::Push(LB, LUAGLM_MATRIX_ROWS(mvalue_dims(_tv)));
       return 2;
     }
     default: {
-      return gLuaBase::Push(LB, 1);
+      BIND_RESULT(LB, 1);
     }
   }
   GLM_BINDING_END
@@ -2229,15 +2230,15 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
 
 #define RAND_TRAIT(LB, F, A, ...) RANDOM_DEVICE(LB, F, A) /* Avoid /Zc:preprocessor- headache */
 #define RANDOM_DEVICE(...) VA_CALL(RANDOM_DEVICE, __VA_ARGS__) /* Mapping to <random> structures */
-#define RANDOM_DEVICE1(LB) return gLuaBase::Push(LB, 0) /* zero */
-#define RANDOM_DEVICE2(LB, F) return gLuaBase::Push(LB, F()(LB)) /* std::rand_func<>()(LB) */
+#define RANDOM_DEVICE1(LB) BIND_RESULT(LB, 0) /* zero */
+#define RANDOM_DEVICE2(LB, F) BIND_RESULT(LB, F()(LB)) /* std::rand_func<>()(LB) */
 #define RANDOM_DEVICE3(LB, F, A)                  \
   LUA_MLM_BEGIN                                   \
   if ((LB).top() > 0) {                           \
     const A::type _a = A::Next((LB).L, (LB).idx); \
-    return gLuaBase::Push(LB, F(_a)(LB));         \
+    BIND_RESULT(LB, F(_a)(LB));                   \
   }                                               \
-  return gLuaBase::Push(LB, F()(LB));             \
+  BIND_RESULT(LB, F()(LB));                       \
   LUA_MLM_END
 
 #define RANDOM_DEVICE4(LB, F, A, B)               \
@@ -2245,9 +2246,9 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
   if ((LB).top() > 0) {                           \
     const A::type _a = A::Next((LB).L, (LB).idx); \
     const B::type _b = B::Next((LB).L, (LB).idx); \
-    return gLuaBase::Push(LB, F(_a, _b)(LB));     \
+    BIND_RESULT(LB, F(_a, _b)(LB));               \
   }                                               \
-  return gLuaBase::Push(LB, F()(LB));             \
+  BIND_RESULT(LB, F()(LB));                       \
   LUA_MLM_END
 
 /* std::rand_func<>(a, b)(LB) | a <= b */
@@ -2257,10 +2258,10 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
     const A::type _a = A::Next((LB).L, (LB).idx);                                \
     const B::type _b = B::Next((LB).L, (LB).idx);                                \
     if (_a <= _b && (0 <= _a || _b <= _a + std::numeric_limits<A::type>::max())) \
-      return gLuaBase::Push(LB, F(_a, _b)(LB));                                  \
+      BIND_RESULT(LB, F(_a, _b)(LB));                                            \
     return luaL_error(LB.L, "invalid uniform_dist arguments");                   \
   }                                                                              \
-  return gLuaBase::Push(LB, F()(LB));                                            \
+  BIND_RESULT(LB, F()(LB));                                                      \
   LUA_MLM_END
 
 using raNum = gLuaNumRaw;
