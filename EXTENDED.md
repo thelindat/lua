@@ -794,6 +794,13 @@ mat4x4 = trs(
 )
 ```
 
+### inverse\_world\_tensor
+
+```lua
+-- Return the inertia tensor in global coordinates
+mat3x3 = inverse_world_tensor(inverseTensor --[[ vec3 --]], localToWorld --[[ mat3x3 --]])
+```
+
 ## glm/gtc/epsilon.hpp
 
 ### Aliases

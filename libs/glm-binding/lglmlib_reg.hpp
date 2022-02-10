@@ -811,10 +811,6 @@ GLM_LUA_REG(transformPosPerspective),
 GLM_LUA_REG(transformDir),
 GLM_LUA_REG(rotateFromTo),  // LUA_QUATERNION_EXTENSIONS
 GLM_LUA_REG(shortest_equivalent),
-#if defined(LUAGLM_INLINED_TEMPLATES)
-GLM_LUA_REG(rotate_mat3),
-GLM_LUA_REG(rotate_mat4),
-#endif
 #if defined(LUAGLM_ALIASES_UNITY)
 { "MultiplyPoint", GLM_NAME(transformPosPerspective) },
 { "MultiplyPoint3x4", GLM_NAME(transformPos) },
@@ -841,14 +837,7 @@ GLM_LUA_REG(scale),
 // GLM_LUA_REG(scale_slow),  // @COMPAT: Defined in ext/matrix_transform.inl
 GLM_LUA_REG(translate),
 GLM_LUA_REG(trs),  // LUA_MATRIX_EXTENSIONS
-#if defined(LUAGLM_INLINED_TEMPLATES)
-GLM_LUA_REG(translate_vec3),
-GLM_LUA_REG(translate_mat3),
-GLM_LUA_REG(translate_mat4),
-GLM_LUA_REG(scale_vec3),
-GLM_LUA_REG(scale_mat3),
-GLM_LUA_REG(scale_mat4),
-#endif
+GLM_LUA_REG(inverse_world_tensor),
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Scale", GLM_NAME(scale) },
 { "Translate", GLM_NAME(translate) },

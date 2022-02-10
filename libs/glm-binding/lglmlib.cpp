@@ -150,6 +150,14 @@ static const luaL_Reg luaglm_lib[] = {
   { "zero", GLM_NULLPTR },
   { "epsilon", GLM_NULLPTR },
 #endif
+  /* Common unicode labels */
+  { "subscript_minus", GLM_NULLPTR },
+  { "subscript_one", GLM_NULLPTR },
+  { "subscript_two", GLM_NULLPTR },
+  { "subscript_three", GLM_NULLPTR },
+  { "interpunct", GLM_NULLPTR },
+  { "unit_velocity", GLM_NULLPTR },
+  { "unit_angular_velocity", GLM_NULLPTR },
   /* Metamethods */
   { "__index", GLM_NULLPTR },
   /* RNG API */
@@ -271,6 +279,15 @@ extern "C" {
     lua_pushinteger(L, FP_ZERO); lua_setfield(L, -2, "FP_ZERO");
     lua_pushinteger(L, FP_SUBNORMAL); lua_setfield(L, -2, "FP_SUBNORMAL");
     lua_pushinteger(L, FP_NORMAL); lua_setfield(L, -2, "FP_NORMAL");
+
+    /* Common unicode labels */
+    lua_pushliteral(L, "\xE2\x81\xBB"); lua_setfield(L, -2, "subscript_minus");
+    lua_pushliteral(L, "\xC2\xB9"); lua_setfield(L, -2, "subscript_one");
+    lua_pushliteral(L, "\xC2\xB2"); lua_setfield(L, -2, "subscript_two");
+    lua_pushliteral(L, "\xC2\xB3"); lua_setfield(L, -2, "subscript_three");
+    lua_pushliteral(L, "\xC2\xB7"); lua_setfield(L, -2, "interpunct");
+    lua_pushliteral(L, "m\xC2\xB7s\xE2\x81\xBB\xC2\xB9"); lua_setfield(L, -2, "unit_velocity");
+    lua_pushliteral(L, "rad\xC2\xB7s\xE2\x81\xBB\xC2\xB9"); lua_setfield(L, -2, "unit_angular_velocity");
 
     /* Metamethods that reference the library as an upvalue */
     lua_pushvalue(L, -1);

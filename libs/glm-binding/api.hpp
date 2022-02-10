@@ -49,9 +49,6 @@
 **    2. pushing result, e.g., glm::eulerAngleXYZ.
 @@ LUAGLM_DRIFT Implicitly normalize parameters that expect direction vectors
 **  and quaternions.
-@@ LUAGLM_INLINED_TEMPLATES Enable inlined-template resolution. Function names
-**  include object types to be parsed, e.g., F_P1P2, up to template resolution.
-**  @TODO: Include inlined binding examples using C++14-isms.
 */
 #include "bindings.hpp"
 #include "iterators.hpp"
@@ -2104,10 +2101,6 @@ BIND_DEFN(shortest_equivalent, glm::shortest_equivalent, gLuaQuat<>)
 ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
 ROTATION_MATRIX_DEFN(transformPos, glm::transformPos, LAYOUT_UNARY, gLuaVec3<>)
 BIND_DEFN(transformPosPerspective, glm::transformPosPerspective, gLuaMat4x4<>, gLuaVec3<>)
-#if defined(LUAGLM_INLINED_TEMPLATES)
-BIND_DEFN(rotate_mat3, glm::rotate, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
-BIND_DEFN(rotate_mat4, glm::rotate, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
-#endif
 #endif
 
 #if defined(GTX_SPLINE_HPP)
@@ -2149,14 +2142,7 @@ MATRIX_TRANSFORM_DEFN(scale, glm::scale)
 // BIND_DEFN(scale_slow, glm::scale_slow, gLuaMat4x4<>, gLuaVec3<>)
 MATRIX_TRANSFORM_DEFN(translate, glm::translate)
 BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
-#if defined(LUAGLM_INLINED_TEMPLATES)
-BIND_DEFN(translate_vec3, glm::translate, gLuaVec3<>)
-BIND_DEFN(translate_mat3, glm::translate, gLuaMat3x3<>, gLuaVec2<>)
-BIND_DEFN(translate_mat4, glm::translate, gLuaMat4x4<>, gLuaVec3<>)
-BIND_DEFN(scale_vec3, glm::scale, gLuaVec3<>)
-BIND_DEFN(scale_mat3, glm::scale, gLuaMat3x3<>, gLuaVec2<>)
-BIND_DEFN(scale_mat4, glm::scale, gLuaMat4x4<>, gLuaVec3<>)
-#endif
+BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x3<>)
 #endif
 
 #if defined(GTX_VECTOR_ANGLE_HPP) || defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)

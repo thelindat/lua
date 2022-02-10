@@ -707,6 +707,11 @@ namespace glm {
     return inverse(m);
   }
 
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverse_world_tensor(const vec<3, T, Q> &inverseTensor, const mat<3, 3, T, Q> &localToWorld) {
+    return localToWorld * diagonal3x3(inverseTensor) * transpose(localToWorld);
+  }
+
   /*
   ** {======================================================
   ** Fixes
