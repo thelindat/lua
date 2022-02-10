@@ -627,7 +627,6 @@ OPTION(LUAGLM_ALIASES_SIMPLE "Include simple function aliases, e.g., length vs. 
 OPTION(LUAGLM_ALIASES_UNITY "Include Unity Scripting API aliases" OFF)
 OPTION(LUAGLM_ALIASES_O3DE "Include O3DE Lua API aliases" OFF)
 OPTION(LUAGLM_TYPE_COERCION "Enable string-to-number type coercion when parsing arguments from the Lua stack" ON)
-OPTION(LUAGLM_REPLACE_MATH "Replace the global math library on library initialization" OFF)
 OPTION(LUAGLM_INCLUDE_GEOM "Extend geometry API" ON)
 OPTION(LUAGLM_RECYCLE "Recycle trailing (unused) function parameters" ON)
 OPTION(LUAGLM_FORCED_RECYCLE
@@ -731,10 +730,6 @@ ENDIF()
 
 IF( LUAGLM_TYPE_COERCION )
   ADD_COMPILE_DEFINITIONS(LUAGLM_TYPE_COERCION)
-ENDIF()
-
-IF( LUAGLM_REPLACE_MATH )
-  ADD_COMPILE_DEFINITIONS(LUAGLM_REPLACE_MATH)
 ENDIF()
 
 IF( LUAGLM_INCLUDE_GEOM )

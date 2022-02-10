@@ -724,7 +724,6 @@ For all GLM preprocessor, see the [GLM manual](https://github.com/g-truc/glm/blo
 * **LUAGLM_ALIASES_O3DE**: Include O3DE Lua API aliases.
 * **LUAGLM_SAFELIB**: Enable a general try/catch wrapper for all binding functions.
 * **LUAGLM_TYPE_COERCION**: Enable string-to-number type coercion when parsing arguments from the Lua stack.
-* **LUAGLM_REPLACE_MATH**: Replace the global math table with the glm binding library on loading.
 * **LUAGLM_RECYCLE**: Treat all trailing and unused values on the Lua stack (but passed as parameters to the `CClosure`) as a 'cache' of recyclable structures.
 * **LUAGLM_FORCED_RECYCLE**: Disable this library from allocating memory, i.e., force usage of LUAGLM\_RECYCLE.
 * **LUAGLM_DRIFT**: Experimental: Implicitly normalize all direction vector parameters (to avoid floating-point drift).

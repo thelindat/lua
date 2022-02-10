@@ -222,7 +222,7 @@ linux-noreadline:
 linux-readline:
 	$(MAKE) $(ALL) SYSCFLAGS="-DLUA_USE_LINUX -DLUA_USE_READLINE" SYSLIBS="-Wl,-E -ldl -lreadline"
 
-LINUX_ONE_FLAGS := $(MYCFLAGS) $(CPERF_FLAGS) $(LUA_LINKAGE) -I. -Ilibs/glm-binding
+LINUX_ONE_FLAGS := $(MYCFLAGS) $(CPERF_FLAGS) $(LUA_LINKAGE) -I. -Ilibs/glm-binding # -DLUA_INCLUDE_LIBGLM
 linux-one:
 	$(MAKE) linux-readline CC="$(CPP)" LUA_O="onelua.o" BASE_O="onelua.o" LUA_A="" CORE_O="" LIB_O="" LUAC_T="" MYCFLAGS="$(LINUX_ONE_FLAGS)"
 

@@ -36,21 +36,21 @@
 /// </summary>
 template<bool isNear, bool isRelative, typename T = glm_Float>
 struct gLuaParametric : gLuaAbstractTrait<T, T> {
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "RelativePosition";
   }
 
-  LUA_TRAIT_QUALIFIER LUA_CONSTEXPR_STATEMENT T Zero() {
+  LUA_BIND_QUALIFIER LUA_CONSTEXPR_STATEMENT T Zero() {
     LUA_IF_CONSTEXPR(isNear)
       return isRelative ? T(0) : -std::numeric_limits<T>::infinity();
     return isRelative ? T(1) : std::numeric_limits<T>::infinity();
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return lua_isnoneornil(L_, idx) || gLuaTrait<T>::Is(L_, idx);
   }
 
-  LUA_TRAIT_QUALIFIER T Next(lua_State *L, int &idx) {
+  LUA_BIND_QUALIFIER T Next(lua_State *L, int &idx) {
     if (lua_isnoneornil(L, idx)) {
       idx++;  // Skip the argument
       return Zero();
@@ -70,22 +70,22 @@ struct gLuaTrait<glm::AABB<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::AABB<L, 
   /// </summary>
   using point_trait = gLuaTrait<typename glm::AABB<L, T, Q>::point_type>;
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "AABB";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::AABB<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::AABB<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::AABB<L, T, Q> result;
     result.minPoint = point_trait::Next(L_, idx);
     result.maxPoint = point_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::AABB<L, T, Q> &v) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::AABB<L, T, Q> &v) {
     point_trait::Push(LB, v.minPoint);
     point_trait::Push(LB, v.maxPoint);
     return 2;
@@ -110,22 +110,22 @@ struct gLuaTrait<glm::Line<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Line<L, 
   /// </summary>
   using one_trait = gLuaParametric<false, false, T>;
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Line";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Line<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Line<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::Line<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.dir = point_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Line<L, T, Q> &l) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Line<L, T, Q> &l) {
     point_trait::Push(LB, l.pos);
     point_trait::Push(LB, l.dir);
     return 2;
@@ -140,22 +140,22 @@ struct gLuaTrait<glm::LineSegment<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::L
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, true, T>;  // @RelativeOne
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Segment";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::LineSegment<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::LineSegment<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::LineSegment<L, T, Q> result;
     result.a = point_trait::Next(L_, idx);
     result.b = point_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::LineSegment<L, T, Q> &l) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::LineSegment<L, T, Q> &l) {
     point_trait::Push(LB, l.a);
     point_trait::Push(LB, l.b);
     return 2;
@@ -170,22 +170,22 @@ struct gLuaTrait<glm::Ray<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Ray<L, T,
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, false, T>;  // @RelativeOne
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Ray";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Ray<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Ray<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::Ray<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.dir = point_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Ray<L, T, Q> &r) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Ray<L, T, Q> &r) {
     point_trait::Push(LB, r.pos);
     point_trait::Push(LB, r.dir);
     return 2;
@@ -198,15 +198,15 @@ struct gLuaTrait<glm::Triangle<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Tria
   using as_type = gLuaTrait<glm::Triangle<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Triangle<L, T, Q>::point_type>;  // @PointBinding
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Triangle";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1) && point_trait::Is(L_, idx + 2);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Triangle<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Triangle<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::Triangle<L, T, Q> result;
     result.a = point_trait::Next(L_, idx);
     result.b = point_trait::Next(L_, idx);
@@ -214,7 +214,7 @@ struct gLuaTrait<glm::Triangle<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Tria
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Triangle<L, T, Q> &t) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Triangle<L, T, Q> &t) {
     point_trait::Push(LB, t.a);
     point_trait::Push(LB, t.b);
     point_trait::Push(LB, t.c);
@@ -228,22 +228,22 @@ struct gLuaTrait<glm::Sphere<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Sphere
   using as_type = gLuaTrait<glm::Sphere<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Sphere<L, T, Q>::point_type>;  // @PointBinding
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Sphere";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Sphere<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Sphere<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::Sphere<L, T, Q> result;
     result.pos = point_trait::Next(L_, idx);
     result.r = point_trait::value_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Sphere<L, T, Q> &s) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Sphere<L, T, Q> &s) {
     point_trait::Push(LB, s.pos);
     point_trait::value_trait::Push(LB, s.r);
     return 2;
@@ -256,22 +256,22 @@ struct gLuaTrait<glm::Plane<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Plane<L
   using as_type = gLuaTrait<glm::Plane<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Plane<L, T, Q>::point_type>;  // @PointBinding
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Plane";
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L_, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
     return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
   }
 
-  LUA_TRAIT_QUALIFIER glm::Plane<L, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Plane<L, T, Q> Next(lua_State *L_, int &idx) {
     glm::Plane<L, T, Q> result;
     result.normal = point_trait::Next(L_, idx);
     result.d = point_trait::value_trait::Next(L_, idx);
     return result;
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Plane<L, T, Q> &p) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Plane<L, T, Q> &p) {
     point_trait::Push(LB, p.normal);
     point_trait::value_trait::Push(LB, p.d);
     return 2;
@@ -294,19 +294,19 @@ struct gLuaTrait<glm::Polygon<3, T, Q>, FastPath> : gLuaAbstractTrait<glm::Polyg
     return "GLM_POLYGON";
   }
 
-  LUA_TRAIT_IBASE LUA_CONSTEXPR const char *Label() {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Polygon";
   }
 
-  LUA_TRAIT_QUALIFIER GLM_CONSTEXPR glm::Polygon<3, T, Q> Zero() {
+  LUA_BIND_QUALIFIER GLM_CONSTEXPR glm::Polygon<3, T, Q> Zero() {
     return glm::Polygon<3, T, Q>(GLM_NULLPTR);
   }
 
-  LUA_TRAIT_QUALIFIER bool Is(lua_State *L, int idx) {
+  LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
     return luaL_testudata(L, idx, Metatable()) != GLM_NULLPTR;
   }
 
-  LUA_TRAIT_QUALIFIER glm::Polygon<3, T, Q> Next(lua_State *L_, int &idx) {
+  LUA_BIND_QUALIFIER glm::Polygon<3, T, Q> Next(lua_State *L_, int &idx) {
     void *ptr = GLM_NULLPTR;
     if ((ptr = luaL_checkudata(L_, idx++, Metatable())) != GLM_NULLPTR) {
       glm::Polygon<3, T, Q> result = *(static_cast<glm::Polygon<3, T, Q> *>(ptr));
@@ -320,7 +320,7 @@ struct gLuaTrait<glm::Polygon<3, T, Q>, FastPath> : gLuaAbstractTrait<glm::Polyg
     return glm::Polygon<3, T, Q>();
   }
 
-  LUA_TRAIT_QUALIFIER int Push(const gLuaBase &LB, const glm::Polygon<3, T, Q> &p) {
+  LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::Polygon<3, T, Q> &p) {
     // All operations mutate the referenced Polygon userdata; push it back onto
     // the Lua stack.
     if (l_likely(p.stack_idx >= 1)) {

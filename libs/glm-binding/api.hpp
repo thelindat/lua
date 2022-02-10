@@ -34,11 +34,10 @@
 @@ LUAGLM_TYPE_COERCION Enable string-to-number type coercion when parsing
 **  arguments from the Lua stack. For this binding library to be a superset of
 **  lmathlib, e.g., math = require('glm'), this flag must be enabled.
-@@ LUAGLM_REPLACE_MATH Force replace _G.math with the binding library on open.
 @@ LUAGLM_RECYCLE Enable object recycling: trailing/unused parameters in a
 **  function call, e.g., matrix objects, are used as a result store.
 @@ LUAGLM_FORCED_RECYCLE Disable this library from allocating memory, i.e.,
-**  force usage of LUAGLM_RECYCLE. Note, polygons other geom/ structures ignore
+**  force use of LUAGLM_RECYCLE. Note, polygons other geom/ structures ignore
 **  this flag (this may change).
 @@ LUAGLM_SAFELIB Enable a general try/catch wrapper for API/binding functions.
 **  This should not be enabled.
@@ -241,7 +240,7 @@
       case LUA_VNUMINT: {                                                                        \
         if (gLuaInteger::Is(LB.L, LB.idx + 1))                                                   \
           VA_CALL(BIND_FUNC, LB, F, gLuaInteger::fast, gLuaInteger);                             \
-      }  LUAGLM_FALLTHROUGH;                                                                     \
+      }  LUA_FALLTHROUGH;                                                                        \
       case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                       \
       case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                  \
       case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaNumRaw, gLuaNumRaw); break;              \
@@ -932,7 +931,6 @@ BINARY_LAYOUT_DEFN(affineInverse, glm::affineInverse, LAYOUT_UNARY, gLuaMat3x3<>
 SYMMETRIC_MATRIX_DEFN(inverseTranspose, glm::inverseTranspose, LAYOUT_UNARY)
 #endif
 
-// The GLM implementation of extractEuler is not particularly complete.
 #if defined(GTX_EULER_ANGLES_HPP)
 #define LAYOUT_EULER_DECOMPOSE(LB, F, Tr, ...) \
   LUA_MLM_BEGIN                                \
@@ -1028,7 +1026,7 @@ GLM_BINDING_QUALIFIER(decompose) {
   Tr::q_type::type q = Tr::q_type::Zero(); \
   Tr::r_type::type r = Tr::r_type::Zero(); \
   F(Tr::Next((LB).L, (LB).idx), q, r);     \
-  BIND_PUSH(LB, q, r);                   \
+  BIND_PUSH(LB, q, r);                     \
   LUA_MLM_END
 
 MATRIX_DEFN(fliplr, glm::fliplr, LAYOUT_UNARY)

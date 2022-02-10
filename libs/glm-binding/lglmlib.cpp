@@ -309,12 +309,6 @@ extern "C" {
     }
     lua_pop(L, 1);
 
-    /* If enabled, replace _G.math with the binding library */
-#if defined(LUAGLM_REPLACE_MATH)
-    lua_pushvalue(L, -1);
-    lua_setglobal(L, LUA_MATHLIBNAME);
-#endif
-
     /* Setup default metatables */
 #if defined(LUAGLM_INSTALL_METATABLES)
     lua_lock(L);
