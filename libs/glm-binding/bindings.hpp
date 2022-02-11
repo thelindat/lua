@@ -298,6 +298,23 @@ static LUA_INLINE const TValue *glm_i2v(const lua_State *L, int idx) {
   return (o < L->top) ? s2v(o) : &G(L)->nilvalue;
 }
 
+/// <summary>
+/// RAII for lua_lock/lua_unlock
+/// </summary>
+class lua_LockScope {
+private:
+  lua_State *L;
+public:
+  lua_LockScope(lua_State *L_) : L(L_) { lua_lock(L); }
+  ~lua_LockScope() { Unlock(); }
+  inline void Unlock() {
+    if (L != nullptr) {
+      lua_unlock(L);
+      L = nullptr;
+    }
+  }
+};
+
 /* }================================================================== */
 
 /*
@@ -465,9 +482,17 @@ struct gLuaBase {
   /* Binding Helpers */
 
   /// <summary>
+  /// lua_isnoneornil
+  /// </summary>
+  LUA_BIND_QUALIFIER bool isnoneornil(lua_State *L_, int idx_) {
+    const TValue *o = glm_i2v(L_, idx_);
+    return !_isvalid(L_, o);
+  }
+
+  /// <summary>
   /// lua_tointeger with additional rules for casting booleans.
   /// </summary>
-  template<typename T>
+  template<typename T = lua_Integer>
   LUA_BIND_QUALIFIER_NIL T tointegerx(lua_State *L_, int idx_) {
     const TValue *o = glm_i2v(L_, idx_);
     switch (ttypetag(o)) {
@@ -493,7 +518,7 @@ struct gLuaBase {
   /// As much of the luaL_checknumber logic is redundant, and could be
   /// optimized. However, luaV_tonumber_ is not an exported function.
   /// </summary>
-  template<typename T>
+  template<typename T = lua_Number>
   LUA_BIND_QUALIFIER_NIL T tonumberx(lua_State *L_, int idx_) {
     const TValue *o = glm_i2v(L_, idx_);
     switch (ttypetag(o)) {
@@ -695,7 +720,7 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
       LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return static_cast<T>(fltvalue(o));
     }
     else {
-      LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) return static_cast<T>(lua_toboolean(L, idx++));
+      LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) { const TValue *o = glm_i2v(L, idx++); return !l_isfalse(o); }
       LUA_IF_CONSTEXPR(std::is_integral<T>::value) return gLuaBase::tointegerx<T>(L, idx++);
       LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return gLuaBase::tonumberx<T>(L, idx++);
     }
@@ -704,20 +729,26 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   }
 
   template<typename U>
-  LUA_BIND_DECL typename std::enable_if<std::is_integral<U>::value && !std::is_same<U, bool>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
-    lua_pushinteger(LB.L, static_cast<lua_Integer>(v));
-    return 1;
+  LUA_BIND_QUALIFIER_NIL typename std::enable_if<std::is_integral<U>::value && !std::is_same<U, bool>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
+    lua_LockScope _lock(LB.L);
+    setivalue(s2v(LB.L->top), static_cast<lua_Integer>(v));
+    api_incr_top(LB.L);
+    return 1;  // lua_pushinteger(LB.L, static_cast<lua_Integer>(v));
   }
 
   template<typename U>
-  LUA_BIND_DECL typename std::enable_if<std::is_floating_point<U>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
-    lua_pushnumber(LB.L, static_cast<lua_Number>(v));
-    return 1;
+  LUA_BIND_QUALIFIER_NIL typename std::enable_if<std::is_floating_point<U>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
+    lua_LockScope _lock(LB.L);
+    setfltvalue(s2v(LB.L->top), static_cast<lua_Number>(v));
+    api_incr_top(LB.L);
+    return 1;  // lua_pushnumber(LB.L, static_cast<lua_Number>(v));
   }
 
-  LUA_BIND_DECL int PushPrimitive(const gLuaBase &LB, bool b) {
-    lua_pushboolean(LB.L, b);
-    return 1;
+  LUA_BIND_QUALIFIER_NIL int PushPrimitive(const gLuaBase &LB, bool b) {
+    lua_LockScope _lock(LB.L);
+    settt_(s2v(LB.L->top), b ? LUA_VTRUE : LUA_VFALSE);
+    api_incr_top(LB.L);
+    return 1;  // lua_pushboolean(LB.L, b);
   }
 
   /// <summary>
@@ -763,12 +794,11 @@ struct gLuaAbstractVector : gLuaAbstractTrait<glm::vec<D, T, Q>> {
   /// </summary>
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::vec<D, T, Q> &v) {
     //GLM_STATIC_ASSERT(D >= 2 && D <= 4, "invalid vector specialization");
-    lua_lock(LB.L);
+    lua_LockScope _lock(LB.L);
     TValue *o = s2v(LB.L->top);
     glm_vec_boundary(&vvalue_(o)) = v;  // May use explicit copy constructor
     settt_(o, glm_variant(D));
     api_incr_top(LB.L);
-    lua_unlock(LB.L);
     return 1;
   }
 };
@@ -835,7 +865,7 @@ struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const
 };
 
 /// <summary>
-/// glm::vec<1, T, Q> type trait.
+/// @ImplicitVec glm::vec<1, T, Q> type trait
 /// </summary>
 template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::vec<1, T, Q>, FastPath> : gLuaAbstractVector<1, T, Q> {
@@ -933,18 +963,21 @@ struct gLuaTrait<glm::qua<T, Q>, FastPath> : gLuaAbstractTrait<glm::qua<T, Q>> {
   }
 
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::qua<T, Q> &q) {
-    lua_lock(LB.L);
+    lua_LockScope _lock(LB.L);
     TValue *io = s2v(LB.L->top);
     glm_vec_boundary(&vvalue_(io)) = q;  // May use explicit copy constructor
     settt_(io, LUA_VQUAT);
     api_incr_top(LB.L);
-    lua_unlock(LB.L);
     return 1;
   }
 };
 
 /// <summary>
 /// Trait for glm::mat<C, R, T, Q> types.
+///
+/// @TODO: As matrix objects are mutable: column-vectors may be added/removed,
+/// the matrix object being recycled, etc., lua_LockScope stubs *should* be
+/// placed around all matrix object use.
 /// </summary>
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C, R, T, Q>> {
@@ -992,11 +1025,13 @@ struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C,
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
+    lua_LockScope _lock(L);
     const TValue *o = glm_i2v(L, idx);
     return ttismatrix(o) && mvalue_dims(o) == LUAGLM_MATRIX_TYPE(C, R);
   }
 
   LUA_BIND_DECL glm::mat<C, R, T, Q> Next(lua_State *L, int &idx) {
+    lua_LockScope _lock(L);
     const TValue *o = glm_i2v(L, idx++);
     if (FastPath || l_likely(ttismatrix(o))) {
       // @TODO: LUA_IF_CONSTEXPR(std::is_same<T, glm_Float>::value && Q == LUAGLM_Q)
@@ -1015,6 +1050,7 @@ struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C,
         LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x4) return glm_mat_cast(mat.m44, C, R, T, Q);
       }
     }
+    _lock.Unlock();
     gLuaBase::typeerror(L, idx - 1, Label());
     return glm::mat<C, R, T, Q>();
   }
@@ -1025,18 +1061,14 @@ struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C,
   template<bool ConsistentAlignment>
   LUA_BIND_DECL typename std::enable_if<ConsistentAlignment, int>::type PushAligned(gLuaBase &LB, const glm::mat<C, R, T, Q> &m) {
     if (LB.can_recycle()) {
-      lua_State *L_ = LB.L;
-
-      lua_lock(L_);
-      const TValue *o = glm_i2v(L_, LB.idx++);
+      lua_LockScope _lock(LB.L);
+      const TValue *o = glm_i2v(LB.L, LB.idx++);
       if (l_likely(ttismatrix(o))) {  // lua_pushvalue
         glm_mat_boundary(mvalue_ref(o)) = m;
-        setobj2s(L_, L_->top, o);
-        api_incr_top(L_);
-        lua_unlock(L_);
+        setobj2s(LB.L, LB.L->top, o);
+        api_incr_top(LB.L);
         return 1;
       }
-      lua_unlock(L_);
     }
 
 #if defined(LUAGLM_FORCED_RECYCLE)  // This library allocating memory is verboten!
@@ -1449,7 +1481,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 /* trait + {nil || trait::value_trait} op */
 #define LAYOUT_UNARY_OPTIONAL(LB, F, Tr, ...)                      \
   LUA_MLM_BEGIN                                                    \
-  if (lua_isnoneornil((LB).L, (LB).idx + 1))                       \
+  if (gLuaBase::isnoneornil((LB).L, (LB).idx + 1))                 \
     VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                  \
   else                                                             \
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, ##__VA_ARGS__); \
@@ -1458,7 +1490,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 /* unary or ternary operator depending on state of Lua stack */
 #define LAYOUT_UNARY_OR_TERNARY(LB, F, Tr, ...)                       \
   LUA_MLM_BEGIN                                                       \
-  if (lua_isnoneornil((LB).L, (LB).idx + 1))                          \
+  if (gLuaBase::isnoneornil((LB).L, (LB).idx + 1))                    \
     VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                     \
   else                                                                \
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, Tr::safe, ##__VA_ARGS__); \

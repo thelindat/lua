@@ -123,6 +123,8 @@ LUA_API void lua_pushquat (lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua
 /*
 ** vector variants exposed in the library to simplify the internal/external
 ** translation between vector-types. (grit-lua compatibility)
+**
+** @ImplicitVec: single component vectors are represented by LUA_TNUMBER
 */
 #if !defined(LUA_VVECTOR3)
 #define LUA_VVECTOR1 (LUA_TNUMBER | (1 << 4))

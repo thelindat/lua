@@ -199,7 +199,8 @@ public:
 
     Iterator(lua_State *L_, int idx_, size_type arrayIdx)
       : glmLuaIterator<Tr>(L_, idx_), m_arrayIdx(arrayIdx) {
-      m_arraySize = lua_istable(L_, idx_) ? static_cast<size_type>(lua_rawlen(L_, idx_)) : 0;
+      lua_assert(lua_istable(L_, idx_));
+      m_arraySize = static_cast<size_type>(lua_rawlen(L_, idx_));
     }
 
     /// <summary>
@@ -249,8 +250,7 @@ private:
 public:
   glmLuaArray(lua_State *L_, int idx_ = 1)
     : glmLuaContainer<Tr>(L_, idx_) {
-
-    //assert(lua_istable(L_, idx_));
+    lua_assert(lua_istable(L_, idx_));
     m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
   }
 
@@ -262,7 +262,7 @@ public:
   /// Update the array state and ensure its size is still (cache) coherent.
   /// </summary>
   void validate() {
-    //assert(lua_istable(gLuaBase::L, gLuaBase::idx));
+    lua_assert(lua_istable(gLuaBase::L, gLuaBase::idx));
     m_arraySize = static_cast<size_type>(lua_rawlen(gLuaBase::L, gLuaBase::idx));
   }
 

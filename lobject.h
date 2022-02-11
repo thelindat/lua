@@ -788,6 +788,8 @@ typedef struct Table {
 /*
 ** vector variants may be exposed by grit_lib to simplify the internal/external
 ** translation between vector-types.
+**
+** @ImplicitVec: single component vectors are represented by LUA_TNUMBER
 */
 #if defined(LUA_VVECTOR3)
 #if LUA_VVECTOR2 != makevariant(LUA_TVECTOR, 0)

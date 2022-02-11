@@ -678,7 +678,7 @@ NUMBER_VECTOR_DEFN(float_distance, glm::float_distance, LAYOUT_BINARY)
 #if (defined(GTC_ULP_HPP) || defined(EXT_SCALAR_ULP_HPP) || defined(EXT_VECTOR_ULP_HPP)) && LUAGLM_INCLUDE_IEEE
 #define LAYOUT_NEXT_FLOAT(LB, F, Tr, ...) /* @GLMAssert: assert(ULPs >= 0); */           \
   LUA_MLM_BEGIN                                                                          \
-  if (lua_isnoneornil((LB).L, (LB).idx + 1))                                             \
+  if (gLuaBase::isnoneornil((LB).L, (LB).idx + 1))                                       \
     VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                                        \
   else if (gLuaTrait<int>::Is((LB).L, (LB).idx + 1))                                     \
     VA_CALL(BIND_FUNC, LB, F, Tr, gPositiveConstraint<gLuaTrait<int>>, ##__VA_ARGS__);   \
@@ -908,15 +908,15 @@ BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<
   LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::col_type, Tr::row_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
 #define LAYOUT_MATRIX_ACCESS_ROW(LB, F, Tr, ...) \
   LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::row_type, Tr::col_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
-#define LAYOUT_MATRIX_ACCESS(LB, F, Tr, TrComp, TrDim, TrIdx, ...)  \
-  LUA_MLM_BEGIN                                                     \
-  const lua_Integer _idx = luaL_checkinteger((LB).L, (LB).idx + 1); \
-  if (_idx < 0 || _idx >= cast(lua_Integer, TrDim::type::length())) \
-    return GLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");     \
-  else if (TrComp::Is((LB).L, (LB).idx + 2)) /* Set */              \
-    VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, TrComp, ##__VA_ARGS__);    \
-  else                                                              \
-    VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, ##__VA_ARGS__); /* Get */  \
+#define LAYOUT_MATRIX_ACCESS(LB, F, Tr, TrComp, TrDim, TrIdx, ...)     \
+  LUA_MLM_BEGIN                                                        \
+  const lua_Integer _idx = gLuaBase::tointegerx((LB).L, (LB).idx + 1); \
+  if (_idx < 0 || _idx >= cast(lua_Integer, TrDim::type::length()))    \
+    return GLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");        \
+  else if (TrComp::Is((LB).L, (LB).idx + 2)) /* Set */                 \
+    VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, TrComp, ##__VA_ARGS__);       \
+  else                                                                 \
+    VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, ##__VA_ARGS__); /* Get */     \
   LUA_MLM_END
 
 MATRIX_DEFN(column, glm::column, LAYOUT_MATRIX_ACCESS_COLUMN)
@@ -1308,7 +1308,7 @@ GLM_BINDING_QUALIFIER(toint) {
 /* glm::clamp */
 #define LAYOUT_CLAMP(LB, F, Tr, ...)                                                               \
   LUA_MLM_BEGIN /* <Tr, 0, 1>, <Tr, minVal, maxVal>, <Tr, TrMin, TrMax> */                         \
-  if (lua_isnoneornil((LB).L, (LB).idx + 1) && lua_isnoneornil((LB).L, (LB).idx + 2))              \
+  if (gLuaBase::isnoneornil((LB).L, (LB).idx + 1) && gLuaBase::isnoneornil((LB).L, (LB).idx + 2))  \
     VA_CALL(BIND_FUNC, LB, F, Tr, ##__VA_ARGS__);                                                  \
   else if (Tr::value_trait::Is((LB).L, (LB).idx + 1) && Tr::value_trait::Is((LB).L, (LB).idx + 2)) \
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, Tr::value_trait, ##__VA_ARGS__);                \

@@ -47,15 +47,14 @@ struct gLuaParametric : gLuaAbstractTrait<T, T> {
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return lua_isnoneornil(L_, idx) || gLuaTrait<T>::Is(L_, idx);
+    return gLuaBase::isnoneornil(L_, idx) || gLuaTrait<T>::Is(L_, idx);
   }
 
   LUA_BIND_QUALIFIER T Next(lua_State *L, int &idx) {
-    if (lua_isnoneornil(L, idx)) {
+    if (gLuaBase::isnoneornil(L, idx)) {
       idx++;  // Skip the argument
       return Zero();
     }
-
     return gLuaTrait<T>::Next(L, idx);
   }
 };
@@ -1703,7 +1702,7 @@ GLM_BINDING_QUALIFIER(polygon_extremePoint) {
 GLM_BINDING_QUALIFIER(polygon_new) {
   GLM_BINDING_BEGIN
   const int n = LB.top_for_recycle();
-  if (!lua_isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
+  if (!gLuaBase::isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
     return GLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
   }
 
@@ -1850,7 +1849,7 @@ extern "C" {
         BIND_PUSH(LB, key + 1, poly[key]);
       return gLuaBase::Push(LB);
     }
-    else if (lua_isnoneornil(LB.L, LB.idx) && poly.size() > 0)  // First index
+    else if (gLuaBase::isnoneornil(LB.L, LB.idx) && poly.size() > 0)  // First index
       BIND_PUSH(LB, size_t(1), poly[0]);
     else
       return gLuaBase::Push(LB);  // Nothing to iterate.
