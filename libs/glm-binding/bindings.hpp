@@ -831,7 +831,8 @@ template<bool FastPath> struct gLuaTrait<long double, FastPath> : gLuaPrimitive<
 
 /// <summary>
 /// strings type trait; includes the ability to also fetch the length of a
-/// string on Next().
+/// string on Next. As lua_tolstring has the ability to relocate the Lua stack,
+/// this implementation will not coerce other types.
 /// </summary>
 template<bool FastPath>
 struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const char *> {
@@ -847,15 +848,14 @@ struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const
   }
 
   LUA_BIND_QUALIFIER const char *Next(lua_State *L, int &idx, size_t *len = GLM_NULLPTR) {
-    LUA_IF_CONSTEXPR(FastPath) {
-      const TValue *o = glm_i2v(L, idx++);
+    const TValue *o = glm_i2v(L, idx++);
+    if (FastPath || l_likely(ttisstring(o))) {
       if (len != GLM_NULLPTR)
         *len = vslen(o);
       return svalue(o);
     }
-    else {
-      return lua_tolstring(L, idx++, len);
-    }
+    gLuaBase::typeerror(L, idx - 1, Label());
+    return GLM_NULLPTR;
   }
 
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const char *s) {

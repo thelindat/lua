@@ -295,8 +295,8 @@ LUA_API int   (lua_tabletype) (lua_State *L, int idx);
 ** readonly API
 */
 #if defined(LUAGLM_EXT_READONLY)
-LUA_API int   (lua_isreadonly) (lua_State* L, int idx);
-LUA_API void  (lua_setreadonly) (lua_State* L, int idx, int value);
+LUA_API int   (lua_isreadonly) (lua_State *L, int idx);
+LUA_API void  (lua_setreadonly) (lua_State *L, int idx, int value);
 #endif
 
 /*

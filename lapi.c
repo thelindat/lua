@@ -587,8 +587,6 @@ LUA_API char *lua_pushblob (lua_State *L, size_t len) {
 
 LUA_API char *lua_tostringblob (lua_State *L, int idx, size_t *len) {
   char *result = NULL;
-  size_t result_len = 0;
-
   TValue *o;
   lua_lock(L);
   o = index2value(L, idx);
@@ -596,17 +594,15 @@ LUA_API char *lua_tostringblob (lua_State *L, int idx, size_t *len) {
     TString *str = luaS_asblob(L, tsvalue(o));
     if (str != NULL) {  /* new object created; replace stack object */
       setsvalue(L, o, str);
-      luaC_checkGC(L);  /* previous call may reallocate the stack */
-      o = index2value(L, idx);
+      luaC_checkGC(L);
+      o = index2value(L, idx);  /* previous call may reallocate the stack */
     }
 
     result = svalue(o);
-    result_len = vslen(o);
+    if (len != NULL)
+      *len = vslen(o);
   }
   lua_unlock(L);
-
-  if (len != NULL)
-    *len = result_len;
   return result;
 }
 #endif
@@ -886,12 +882,12 @@ LUA_API void lua_createtable (lua_State *L, int narray, int nrec) {
 #define readonly_api_check(L, T) \
   api_check(L, !(T)->readonly, "attempting to modify a readonly table")
 
-LUA_API int lua_isreadonly (lua_State* L, int idx) {
+LUA_API int lua_isreadonly (lua_State *L, int idx) {
   const TValue *o = index2value(L, idx);
   return ttistable(o) ? cast_int((hvalue(o))->readonly) : 0;
 }
 
-LUA_API void lua_setreadonly (lua_State* L, int idx, int value) {
+LUA_API void lua_setreadonly (lua_State *L, int idx, int value) {
   const TValue *o;
   lua_lock(L);
   o = index2value(L, idx);

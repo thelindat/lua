@@ -146,7 +146,7 @@ public:
     return status;
   }
 
-  const char* what() const noexcept override {
+  const char *what() const noexcept override {
     if ((status == LUA_ERRRUN || status == LUA_ERRSYNTAX)
         && lua_gettop(L) > 0
         && lua_isstring(L, -1)) {

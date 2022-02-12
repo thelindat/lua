@@ -1042,7 +1042,7 @@ namespace glm {
 lua_Integer luaO_HashString(const char *string, size_t length, int ignore_case) {
   unsigned int hash = 0;
   for (size_t i = 0; i < length; ++i) {
-    hash += (ignore_case ? string[i] : tolower(string[i]));
+    hash += cast_uint(ignore_case ? string[i] : tolower(string[i]));
     hash += (hash << 10);
     hash ^= (hash >> 6);
   }

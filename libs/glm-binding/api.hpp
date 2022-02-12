@@ -284,6 +284,9 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VTRUE:
       case LUA_VFALSE: LAYOUT_HASH(LB, std::hash, gLuaTrait<bool>::fast); break;
       case LUA_VSHRSTR:
+  #if defined(LUA_VBLOBSTR)
+      case LUA_VBLOBSTR:
+  #endif
       case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
       case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumRaw::fast); break;

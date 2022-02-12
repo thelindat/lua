@@ -243,7 +243,7 @@ LUAI_FUNC int glmMat_equalObj (lua_State *L, const TValue *o1, const TValue *o2)
 /*
 ** Jenkins' one-at-a-time hash.
 */
-LUAI_FUNC lua_Integer luaO_HashString (const char* string, size_t length, int ignore_case);
+LUAI_FUNC lua_Integer luaO_HashString (const char *string, size_t length, int ignore_case);
 
 /* }================================================================== */
 
