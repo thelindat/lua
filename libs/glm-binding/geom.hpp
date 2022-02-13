@@ -68,6 +68,7 @@ struct gLuaTrait<glm::AABB<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::AABB<L, 
   /// @PointBinding: Type trait equivalent to glm::Structure::point_type
   /// </summary>
   using point_trait = gLuaTrait<typename glm::AABB<L, T, Q>::point_type>;
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "AABB";
@@ -96,6 +97,7 @@ struct gLuaTrait<glm::Line<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Line<L, 
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Line<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Line<L, T, Q>::point_type>;  // @PointBinding
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
 
   /// <summary>
   /// @RelativeZero: Lua type trait representing the relative negative-inf/zero
@@ -138,6 +140,7 @@ struct gLuaTrait<glm::LineSegment<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::L
   using point_trait = gLuaTrait<typename glm::LineSegment<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, true, T>;  // @RelativeOne
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Segment";
@@ -168,6 +171,7 @@ struct gLuaTrait<glm::Ray<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Ray<L, T,
   using point_trait = gLuaTrait<typename glm::Ray<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, false, T>;  // @RelativeOne
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Ray";
@@ -196,6 +200,7 @@ struct gLuaTrait<glm::Triangle<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Tria
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Triangle<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Triangle<L, T, Q>::point_type>;  // @PointBinding
+  static const LUA_CONSTEXPR int stack_size = (3 * point_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Triangle";
@@ -226,6 +231,7 @@ struct gLuaTrait<glm::Sphere<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Sphere
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Sphere<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Sphere<L, T, Q>::point_type>;  // @PointBinding
+  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Sphere";
@@ -254,6 +260,7 @@ struct gLuaTrait<glm::Plane<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Plane<L
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Plane<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Plane<L, T, Q>::point_type>;  // @PointBinding
+  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size); // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Plane";
@@ -314,7 +321,7 @@ struct gLuaTrait<glm::Polygon<3, T, Q>, FastPath> : gLuaAbstractTrait<glm::Polyg
       return result;
     }
     else {
-      luaL_error(L_, "Invalid polygon userdata");
+      gLuaBase::error(L_, "Invalid polygon userdata");
     }
     return glm::Polygon<3, T, Q>();
   }
@@ -330,7 +337,7 @@ struct gLuaTrait<glm::Polygon<3, T, Q>, FastPath> : gLuaAbstractTrait<glm::Polyg
     // This code-path is not implemented for the time being. All polygons must
     // already exist on the Lua stack, otherwise, polygon_new will need to be
     // duplicated/called here.
-    return luaL_error(LB.L, "not implemented");
+    return LUAGLM_ERROR(LB.L, "not implemented");
   }
 };
 
@@ -478,8 +485,8 @@ GLM_BINDING_QUALIFIER(aabb_new) {
   GLM_BINDING_BEGIN
   luaL_checktype(L, LB.idx, LUA_TTABLE);
   using value_type = gLuaAABB<>::point_trait::value_type;
-  using Iterator = glmLuaArray<gLuaAABB<>::point_trait>::Iterator;
-  glmLuaArray<gLuaAABB<>::point_trait> lArray(LB.L, LB.idx);
+  using Iterator = gLuaArray<gLuaAABB<>::point_trait>::Iterator;
+  gLuaArray<gLuaAABB<>::point_trait> lArray(LB.L, LB.idx);
   return gLuaBase::Push(LB, glm::minimalEnclosingAABB<Iterator, 3, value_type>(lArray.begin(), lArray.end()));
   GLM_BINDING_END
 }
@@ -667,8 +674,8 @@ GLM_BINDING_QUALIFIER(aabb2d_new) {
   GLM_BINDING_BEGIN
   luaL_checktype(L, LB.idx, LUA_TTABLE);
   using value_type = gLuaAABB<2>::point_trait::value_type;
-  using Iterator = glmLuaArray<gLuaAABB<2>::point_trait>::Iterator;
-  glmLuaArray<gLuaAABB<2>::point_trait> lArray(LB.L, LB.idx);
+  using Iterator = gLuaArray<gLuaAABB<2>::point_trait>::Iterator;
+  gLuaArray<gLuaAABB<2>::point_trait> lArray(LB.L, LB.idx);
   return gLuaBase::Push(LB, glm::minimalEnclosingAABB<Iterator, 2, value_type>(lArray.begin(), lArray.end()));
   GLM_BINDING_END
 }
@@ -1207,8 +1214,8 @@ GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
 //    case 4: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait, point_trait, point_trait); break;
 //    default: {
 //      luaL_checktype(L, LB.idx, LUA_TTABLE);
-//      glmLuaArray<point_trait> lArray(LB.L, LB.idx);
-//      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, LUAGLM_BINDING_QUAL, glmLuaArray<point_trait>>(lArray));
+//      gLuaArray<point_trait> lArray(LB.L, LB.idx);
+//      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, LUAGLM_BINDING_QUAL, gLuaArray<point_trait>>(lArray));
 //    }
 //  }
 //  GLM_BINDING_END
@@ -1703,7 +1710,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
   GLM_BINDING_BEGIN
   const int n = LB.top_for_recycle();
   if (!gLuaBase::isnoneornil(LB.L, LB.idx) && !lua_istable(LB.L, LB.idx)) {
-    return GLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
+    return LUAGLM_ARG_ERROR(LB.L, LB.idx, lua_typename(LB.L, LUA_TTABLE));
   }
 
   // Create a new polygon userdata.
@@ -1722,13 +1729,13 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     PolyList *list = static_cast<PolyList *>(allocator.realloc(GLM_NULLPTR, 0, sizeof(PolyList)));
     if (l_unlikely(list == GLM_NULLPTR)) {
       lua_pop(L, 1);
-      return luaL_error(L, "polygon allocation error");
+      return LUAGLM_ERROR(L, "polygon allocation error");
     }
 
     // Populate the polygon with an array of coordinates, if one exists.
     polygon->p = ::new (list) PolyList(LB.L, allocator);
     if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
-      glmLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
+      gLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
       const auto e = lArray.end();
       for (auto b = lArray.begin(); b != e; ++b) {
         polygon->p->push_back(*b);
@@ -1739,7 +1746,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
   }
 
   lua_pop(L, 2);
-  return luaL_error(L, "invalid polygon metatable");
+  return LUAGLM_ERROR(L, "invalid polygon metatable");
   GLM_BINDING_END
 }
 
@@ -1751,7 +1758,7 @@ GLM_BINDING_QUALIFIER(polygon_to_string) {
     return 1;
   }
 
-  return GLM_ARG_ERROR(L, 1, "Polygon");
+  return LUAGLM_ARG_ERROR(L, 1, "Polygon");
 }
 
 /// <summary>
@@ -1783,7 +1790,7 @@ GLM_BINDING_QUALIFIER(polygon_call) {
   lua_createtable(LB.L, static_cast<int>(poly.size()), 0);
   for (size_t i = 0; i < poly.size(); ++i) {
     if (l_unlikely(gLuaBase::Push(LB, poly[i]) != 1))
-      return luaL_error(LB.L, "invalid " GLM_STRING_VECTOR " structure");
+      return LUAGLM_ERROR(LB.L, "invalid " GLM_STRING_VECTOR " structure");
     lua_rawseti(LB.L, -2, static_cast<lua_Integer>(i) + 1);
   }
   return 1;
@@ -1824,7 +1831,7 @@ GLM_BINDING_QUALIFIER(polygon_newindex) {
     else if (index == poly.size() + 1)
       poly.p->push_back(value);
     else {
-      return luaL_error(LB.L, "Invalid polygon index");
+      return LUAGLM_ERROR(LB.L, "Invalid polygon index");
     }
   }
   return 0;
@@ -1838,7 +1845,7 @@ extern "C" {
   static int polygon_iterator(lua_State *L) {
     GLM_BINDING_BEGIN
     if (!gLuaPolygon<>::Is(LB.L, LB.idx)) {
-      return GLM_ARG_ERROR(LB.L, LB.idx, gLuaPolygon<>::Label());
+      return LUAGLM_ARG_ERROR(LB.L, LB.idx, gLuaPolygon<>::Label());
     }
 
     lua_settop(LB.L, LB.idx + 1);  // create a 2nd argument if there isn't one

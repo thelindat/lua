@@ -1595,9 +1595,10 @@ LUA_API const char *glm_pushstring(lua_State *L, int idx) {
     return lua_pushlstring(L, buff, cast_sizet(len < 0 ? 0 : len));
   }
   else if (ttismatrix(o)) {
+    int len;
     char buff[GLM_STRING_BUFFER];
     lua_lock(L);
-    const int len = glmMat_tostr(o, buff, GLM_STRING_BUFFER);
+    len = glmMat_tostr(o, buff, GLM_STRING_BUFFER);
     lua_unlock(L);
     return lua_pushlstring(L, buff, cast_sizet(len < 0 ? 0 : len));
   }
@@ -1660,16 +1661,19 @@ LUA_API int glm_unpack_matrix(lua_State *L, int idx) {
 }
 
 LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
+  lua_Integer hash = 0;
+  lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
   if (ttisstring(o))
-    return luaO_HashString(svalue(o), vslen(o), ignore_case);
+    hash = luaO_HashString(svalue(o), vslen(o), ignore_case);
   else if (ttisboolean(o))
-    return ttistrue(o) ? 1 : 0;
+    hash = ttistrue(o) ? 1 : 0;
   else if (ttisnumber(o)) {
     lua_Integer res = 0;
-    return tointeger(o, &res) ? res : 0;
+    hash = tointeger(o, &res) ? res : 0;
   }
-  return 0;
+  lua_unlock(L);
+  return hash;
 }
 
 /* }================================================================== */

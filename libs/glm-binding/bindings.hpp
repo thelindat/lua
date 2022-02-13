@@ -365,6 +365,7 @@ struct gLuaBase {
 
   gLuaBase(lua_State *baseL, int baseIdx = 1)
     : L(baseL), idx(baseIdx), recycle_top(0) {
+    lua_assert(baseIdx >= 1);
   }
 
   /// <summary>
@@ -402,8 +403,8 @@ struct gLuaBase {
   /// </summary>
   LUA_INLINE bool can_recycle() {
 #if defined(LUAGLM_RECYCLE)
-    const int n = top_for_recycle();
-    return (idx < 0 || idx <= n);
+    lua_assert(idx >= 1);
+    return idx <= top_for_recycle();
 #else
     return false;
 #endif
@@ -476,6 +477,15 @@ struct gLuaBase {
   /// </summary>
   static LUA_NORETURN argerror(lua_State *L_, int arg, const char *extrams) {
     luaL_argerror(L_, arg, extrams);
+    LUA_UNREACHABLE();
+  }
+
+  /// <summary>
+  /// @HACK: See typeerror
+  /// </summary>
+  static LUA_NORETURN error(lua_State *L_, const char *msg) {
+    lua_pushstring(L_, msg);
+    lua_error(L_);
     LUA_UNREACHABLE();
   }
 
@@ -665,6 +675,12 @@ struct gLuaAbstractTrait : glm::type<T> {
   /// table-to-vector/matrix.
   /// </summary>
   using fast = gLuaTrait<T, true>;
+
+  /// <summary>
+  /// @StackSize: Default number of elements on the stack required by the type-trait.
+  /// This value should primarily be used by trait iterators.
+  /// </summary>
+  static const LUA_CONSTEXPR int stack_size = 1;
 
   /// <summary>
   /// Return a descriptive parameter literal for debugging/error messaging.
@@ -1072,7 +1088,7 @@ struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C,
     }
 
 #if defined(LUAGLM_FORCED_RECYCLE)  // This library allocating memory is verboten!
-    return luaL_error(LB.L, "library configured to not allocate additional memory; use recycling mechanisms")
+    return LUAGLM_ERROR(LB.L, "library configured to not allocate additional memory; use recycling mechanisms")
 #else
     return glm_pushmat(LB.L, glmMatrix(m));
 #endif
@@ -1533,8 +1549,9 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 
 /* Invalid glm structure configurations */
 #define GLM_INVALID_MAT_DIMENSIONS ("invalid " GLM_STRING_MATRIX " dimensions")
-#define GLM_ARG_ERROR(L, I, S) (gLuaBase::argerror((L), (I), (S)), 0)
-#define GLM_TYPE_ERROR(L, I, S) (gLuaBase::typeerror((L), (I), (S)), 0)
+#define LUAGLM_ARG_ERROR(L, I, S) (gLuaBase::argerror((L), (I), (S)), 0)
+#define LUAGLM_TYPE_ERROR(L, I, S) (gLuaBase::typeerror((L), (I), (S)), 0)
+#define LUAGLM_ERROR(L, S) (gLuaBase::error((L), (S)), 0)
 
 /*
 ** Generalized vector parser.
@@ -1558,7 +1575,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     default:                                                                           \
       break;                                                                           \
   }                                                                                    \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
   LUA_MLM_END
 
 /* Vector definition where the lua_Number operation takes priority */
@@ -1585,7 +1602,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     default:                                                                            \
       break;                                                                            \
   }                                                                                     \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN); \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN); \
   LUA_MLM_END
 
 /* A GLM function that defined over any NxM matrix */
@@ -1602,7 +1619,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     case LUAGLM_MATRIX_4x3: ArgLayout(LB, F, gLuaMat4x3<>::fast, ##__VA_ARGS__); break; \
     case LUAGLM_MATRIX_4x4: ArgLayout(LB, F, gLuaMat4x4<>::fast, ##__VA_ARGS__); break; \
     default:                                                                            \
-      return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
+      return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);           \
   }                                                                                     \
   LUA_MLM_END
 
@@ -1616,10 +1633,10 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
       case LUAGLM_MATRIX_3x3: ArgLayout(LB, F, gLuaMat3x3<>::fast, ##__VA_ARGS__); break; \
       case LUAGLM_MATRIX_4x4: ArgLayout(LB, F, gLuaMat4x4<>::fast, ##__VA_ARGS__); break; \
       default:                                                                            \
-        return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
+        return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);           \
     }                                                                                     \
   }                                                                                       \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_SYMMATRIX);                          \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_SYMMATRIX);                       \
   LUA_MLM_END
 
 /*
@@ -1642,13 +1659,13 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
         case LUAGLM_MATRIX_4x3: ArgLayout(LB, F, gLuaMat4x3<>::fast, ##__VA_ARGS__); break; \
         case LUAGLM_MATRIX_4x4: ArgLayout(LB, F, gLuaMat4x4<>::fast, ##__VA_ARGS__); break; \
         default:                                                                            \
-          return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);              \
+          return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_INVALID_MAT_DIMENSIONS);           \
       }                                                                                     \
     }                                                                                       \
     default:                                                                                \
       break;                                                                                \
   }                                                                                         \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);     \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);  \
   LUA_MLM_END
 
 /* }================================================================== */
@@ -1775,7 +1792,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     const TValue *_m = glm_i2v((LB).L, (LB).idx);                     \
     if (l_likely(ttismatrix(_m)))                                     \
       PARSE_MATRIX(LB, mvalue_dims(_m), F, ArgLayout, ##__VA_ARGS__); \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_MATRIX);       \
+    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_MATRIX);    \
     GLM_BINDING_END                                                   \
   }
 
@@ -1839,7 +1856,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
   else if (Tr_Row::Is((LB).L, (LB).idx)) /* <Tr, Tr, vec> */                                    \
     BIND_RESULT(LB, F(_a, _b, Tr_Row::Next((LB).L, (LB).idx)));                                 \
   LAYOUT_EQUAL_ULPS(LB, F, _a, _b, _tv3) /* <Tr, Tr, ULPs> */                                   \
-  return GLM_TYPE_ERROR((LB).L, (LB).idx, "none, " GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, "none, " GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
   LUA_MLM_END
 
 /* }================================================================== */

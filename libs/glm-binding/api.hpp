@@ -249,7 +249,7 @@
       default:                                                                                   \
         break;                                                                                   \
     }                                                                                            \
-    return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);            \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);         \
     GLM_BINDING_END                                                                              \
   }
 
@@ -296,7 +296,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VQUAT: LAYOUT_HASH(LB, std::hash, gLuaQuat<>); break;
       case LUA_VMATRIX: PARSE_MATRIX(LB, mvalue_dims(_tv), std::hash, LAYOUT_HASH); break;
       default: {
-        return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
+        return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
       }
     }
   }
@@ -334,23 +334,30 @@ BIND_DEFN(forwardRH, glm::unit::forwardRH<glm_Float>)
 
 /*
 ** {==================================================================
-** Functional Operators. @TODO: Better.
+** Arithmetic operators: Function wrappers that allow the use of LUAGLM_RECYCLE.
+** @TODO: Better
 ** ===================================================================
 */
 
 /* Layout for object addition: object + object || object + number */
-#define LAYOUT_ADDITION_OP(LB, F, Tr, type, ...)                   \
+#define LAYOUT_ADDITION_OP(LB, F, Tr, ...)                         \
   LUA_MLM_BEGIN                                                    \
-  if (type == LUA_TNUMBER)                                         \
+  if (Tr::value_trait::Is((LB).L, (LB).idx + 1))                   \
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, ##__VA_ARGS__); \
   else                                                             \
     VA_CALL(BIND_FUNC, LB, F, Tr, Tr::safe, ##__VA_ARGS__);        \
   LUA_MLM_END
 
+/* Layout for F(number, matrix) operations */
+#define LAYOUT_RH_MULTIPLICATION_OP(LB, F, Tr, ...)              \
+  LUA_MLM_BEGIN                                                  \
+  VA_CALL(BIND_FUNC, LB, F, Tr::value_trait, Tr, ##__VA_ARGS__); \
+  LUA_MLM_END
+
 /* Layout for generic matrix multiplication. */
-#define LAYOUT_MULTIPLICATION_OP(LB, F, Tr, type, ...)                                      \
+#define LAYOUT_MULTIPLICATION_OP(LB, F, Tr, Type, ...)                                      \
   LUA_MLM_BEGIN                                                                             \
-  switch (type) {                                                                           \
+  switch ((Type)) {                                                                         \
     case LUA_TNUMBER: VA_CALL(BIND_FUNC, LB, F, Tr, Tr::value_trait, ##__VA_ARGS__); break; \
     case LUA_TVECTOR: VA_CALL(BIND_FUNC, LB, F, Tr, Tr::row_type, ##__VA_ARGS__); break;    \
     case LUA_TMATRIX: {                                                                     \
@@ -370,137 +377,30 @@ BIND_DEFN(forwardRH, glm::unit::forwardRH<glm_Float>)
   LUA_MLM_END
 
 /// <summary>
-/// A matrix addition function intended to allow the recycling of preallocated
-/// matrix structures (for the function result). Any operations that result in
-/// vector/numeric types should use the arithmetic operator.
+/// A matrix functions intended to allow the recycling of preallocated matrix
+/// structures. Any operations that result in vector/numeric types should use
+/// built-in Lua operators.
 /// </summary>
-GLM_BINDING_QUALIFIER(mat_add) {
-  GLM_BINDING_BEGIN
-  const TValue *_tv = glm_i2v(LB.L, LB.idx);
-  const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
-  if (l_likely(ttismatrix(_tv))) {
-    switch (mvalue_dims(_tv)) {
-      case LUAGLM_MATRIX_2x2: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat2x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_2x3: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat2x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_2x4: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat2x4<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x2: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat3x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x3: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat3x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x4: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat3x4<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x2: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat4x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x3: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat4x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x4: LAYOUT_ADDITION_OP(LB, operator+, gLuaMat4x4<>::fast, ttype(_tv2)); break;
-      default: {
-        break;
-      }
-    }
-  }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
-  GLM_BINDING_END
-}
-
-GLM_BINDING_QUALIFIER(mat_sub) {
-  GLM_BINDING_BEGIN
-  const TValue *_tv = glm_i2v(LB.L, LB.idx);
-  const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
-  if (l_likely(ttismatrix(_tv))) {
-    switch (mvalue_dims(_tv)) {
-      case LUAGLM_MATRIX_2x2: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat2x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_2x3: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat2x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_2x4: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat2x4<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x2: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat3x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x3: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat3x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_3x4: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat3x4<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x2: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat4x2<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x3: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat4x3<>::fast, ttype(_tv2)); break;
-      case LUAGLM_MATRIX_4x4: LAYOUT_ADDITION_OP(LB, operator-, gLuaMat4x4<>::fast, ttype(_tv2)); break;
-      default: {
-        break;
-      }
-    }
-  }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
-  GLM_BINDING_END
-}
-
-/// <summary>
-/// A matrix multiplication function intended to allow the recycling of
-/// preallocated matrix structures (for the function result). Any operations
-/// that result in vector/numeric types should use the arithmetic operator.
-/// </summary>
+MATRIX_DEFN(mat_add, operator+, LAYOUT_ADDITION_OP);
+MATRIX_DEFN(mat_sub, operator-, LAYOUT_ADDITION_OP);
+MATRIX_DEFN(mat_negate, operator-, LAYOUT_UNARY);
 GLM_BINDING_QUALIFIER(mat_mul) {
   GLM_BINDING_BEGIN
   const TValue *_tv = glm_i2v(LB.L, LB.idx);
   const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
   switch (ttypetag(_tv)) {
-    case LUA_VFALSE: case LUA_VTRUE:  // @BoolCoercion
     case LUA_VNUMINT:
-    case LUA_VNUMFLT: {  // number * matrix
-      if (l_likely(ttismatrix(_tv2))) {
-        switch (mvalue_dims(_tv2)) {
-          case LUAGLM_MATRIX_2x2: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat2x2<>::fast); break;
-          case LUAGLM_MATRIX_2x3: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat2x3<>::fast); break;
-          case LUAGLM_MATRIX_2x4: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat2x4<>::fast); break;
-          case LUAGLM_MATRIX_3x2: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat3x2<>::fast); break;
-          case LUAGLM_MATRIX_3x3: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat3x3<>::fast); break;
-          case LUAGLM_MATRIX_3x4: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat3x4<>::fast); break;
-          case LUAGLM_MATRIX_4x2: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat4x2<>::fast); break;
-          case LUAGLM_MATRIX_4x3: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat4x3<>::fast); break;
-          case LUAGLM_MATRIX_4x4: BIND_FUNC(LB, operator*, gLuaFloat, gLuaMat4x4<>::fast); break;
-          default: {
-            break;
-          }
-        }
-      }
-      break;
-    }
+    case LUA_VNUMFLT: PARSE_MATRIX(LB, mvalue_dims(_tv2), operator*, LAYOUT_RH_MULTIPLICATION_OP); break;
     case LUA_VVECTOR2: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec2<>::fast, ttype(_tv2)); break;
     case LUA_VVECTOR3: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec3<>::fast, ttype(_tv2)); break;
     case LUA_VVECTOR4: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec4<>::fast, ttype(_tv2)); break;
-    case LUA_VMATRIX: {
-      switch (mvalue_dims(_tv)) {
-        case LUAGLM_MATRIX_2x2: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat2x2<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_2x3: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat2x3<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_2x4: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat2x4<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_3x2: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat3x2<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_3x3: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat3x3<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_3x4: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat3x4<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_4x2: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat4x2<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_4x3: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat4x3<>::fast, ttype(_tv2)); break;
-        case LUAGLM_MATRIX_4x4: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaMat4x4<>::fast, ttype(_tv2)); break;
-        default: {
-          break;
-        }
-      }
-      break;
-    }
+    // @TODO: Special case for handling mat4x4 * vec3 and mat4x3 * vec3; see LUAGLM_MUL_DIRECTION.
+    case LUA_VMATRIX: PARSE_MATRIX(LB, mvalue_dims(_tv), operator*, LAYOUT_MULTIPLICATION_OP, ttype(_tv2)); break;
     default: {
       break;
     }
   }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
-  GLM_BINDING_END
-}
-
-GLM_BINDING_QUALIFIER(mat_negate) {
-  GLM_BINDING_BEGIN
-  const TValue *_tv = glm_i2v(LB.L, LB.idx);
-  if (l_likely(ttismatrix(_tv))) {
-    switch (mvalue_dims(_tv)) {
-      case LUAGLM_MATRIX_2x2: BIND_FUNC(LB, operator-, gLuaMat2x2<>::fast); break;
-      case LUAGLM_MATRIX_2x3: BIND_FUNC(LB, operator-, gLuaMat2x3<>::fast); break;
-      case LUAGLM_MATRIX_2x4: BIND_FUNC(LB, operator-, gLuaMat2x4<>::fast); break;
-      case LUAGLM_MATRIX_3x2: BIND_FUNC(LB, operator-, gLuaMat3x2<>::fast); break;
-      case LUAGLM_MATRIX_3x3: BIND_FUNC(LB, operator-, gLuaMat3x3<>::fast); break;
-      case LUAGLM_MATRIX_3x4: BIND_FUNC(LB, operator-, gLuaMat3x4<>::fast); break;
-      case LUAGLM_MATRIX_4x2: BIND_FUNC(LB, operator-, gLuaMat4x2<>::fast); break;
-      case LUAGLM_MATRIX_4x3: BIND_FUNC(LB, operator-, gLuaMat4x3<>::fast); break;
-      case LUAGLM_MATRIX_4x4: BIND_FUNC(LB, operator-, gLuaMat4x4<>::fast); break;
-      default: {
-        break;
-      }
-    }
-  }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 
@@ -570,7 +470,7 @@ GLM_BINDING_QUALIFIER(bitfieldInterleave) {
       break;
     }
   }
-  return luaL_error(LB.L, "interleave expects uint32_t x2, uint32_t x3, or uint16_t x4");
+  return LUAGLM_ERROR(LB.L, "interleave expects uint32_t x2, uint32_t x3, or uint16_t x4");
   GLM_BINDING_END
 }
 INTEGER_VECTOR_DEFN(mask, glm::mask, LAYOUT_UNARY, lua_Unsigned)
@@ -579,9 +479,9 @@ INTEGER_VECTOR_DEFN(mask, glm::mask, LAYOUT_UNARY, lua_Unsigned)
 #if defined(GTX_BIT_HPP)
 INTEGER_VECTOR_DEFN(highestBitValue, glm::highestBitValue, LAYOUT_UNARY, lua_Integer)
 INTEGER_VECTOR_DEFN(lowestBitValue, glm::lowestBitValue, LAYOUT_UNARY, lua_Integer)
-// GLM_BINDING_DECL(powerOfTwoAbove);  // Deprecated
-// GLM_BINDING_DECL(powerOfTwoBelow);  // Deprecated
-// GLM_BINDING_DECL(powerOfTwoNearest);  // Deprecated
+// GLM_BINDING_DECL(powerOfTwoAbove);  // @DEPRECATED
+// GLM_BINDING_DECL(powerOfTwoBelow);  // @DEPRECATED
+// GLM_BINDING_DECL(powerOfTwoNearest);  // @DEPRECATED
 #endif
 
 #if defined(PACKING_HPP)
@@ -718,7 +618,7 @@ GLM_BINDING_QUALIFIER(inverse) {
     PARSE_SYMMETRIC_MATRIX(LB, glm::inverse, LAYOUT_UNARY);
   else
     PARSE_NUMBER_VECTOR_QUAT(LB, glm::inverse, LAYOUT_UNARY, LAYOUT_UNARY, LAYOUT_UNARY);
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // LUA_MATRIX_EXTENSIONS
@@ -799,7 +699,7 @@ GLM_BINDING_QUALIFIER(outerProduct) {
       break;
     }
   }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR);
   GLM_BINDING_END
 }
 #endif
@@ -876,7 +776,7 @@ GLM_BINDING_QUALIFIER(identity) {
       break;
     }
   }
-  return luaL_error(LB.L, GLM_INVALID_MAT_DIMENSIONS);
+  return LUAGLM_ERROR(LB.L, GLM_INVALID_MAT_DIMENSIONS);
   GLM_BINDING_END
 }
 
@@ -915,7 +815,7 @@ BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<
   LUA_MLM_BEGIN                                                        \
   const lua_Integer _idx = gLuaBase::tointegerx((LB).L, (LB).idx + 1); \
   if (_idx < 0 || _idx >= cast(lua_Integer, TrDim::type::length()))    \
-    return GLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");        \
+    return LUAGLM_ARG_ERROR((LB).L, (LB).idx + 1, "matrix index");     \
   else if (TrComp::Is((LB).L, (LB).idx + 2)) /* Set */                 \
     VA_CALL(BIND_FUNC, LB, F, Tr, TrIdx, TrComp, ##__VA_ARGS__);       \
   else                                                                 \
@@ -1082,7 +982,7 @@ ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
       default:                                                                                              \
         break;                                                                                              \
     }                                                                                                       \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                    \
+    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);                 \
     GLM_BINDING_END                                                                                         \
   }
 
@@ -1157,7 +1057,7 @@ BIND_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
 #define LAYOUT_COMPUTE_COVARIANCE(LB, F, Mat, Cols, ...)               \
   LUA_MLM_BEGIN                                                        \
   using Vec = Mat::col_type;                                           \
-  glmLuaArray<Vec> lArray((LB).L, (LB).idx++);                         \
+  gLuaArray<Vec> lArray((LB).L, (LB).idx++);                           \
   if (Vec::fast::Is((LB).L, (LB).idx)) {                               \
     return gLuaBase::Push(LB, F<Cols, Mat::value_type, LUAGLM_BINDING_QUAL>( \
       lArray.begin(), lArray.end(), Vec::fast::Next((LB).L, (LB).idx)  \
@@ -1186,7 +1086,7 @@ GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
       break;
     }
   }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, "vector array");
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, "vector array");
   GLM_BINDING_END
 }
 #endif
@@ -1393,7 +1293,7 @@ GLM_BINDING_QUALIFIER(mix) {
   else
 #endif
   PARSE_NUMBER_VECTOR_QUAT(LB, glm::mix, LAYOUT_MIX, LAYOUT_MIX, LAYOUT_TERNARY_SCALAR);
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 #endif
@@ -1464,7 +1364,7 @@ GLM_BINDING_QUALIFIER(cross) {
       break;
     }
   }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);
   GLM_BINDING_END
 }
 BIND_DEFN(crossXAxis, glm::crossXAxis, gLuaVec3<>)  // LUA_VECTOR_EXTENSIONS
@@ -1666,7 +1566,7 @@ GLM_BINDING_QUALIFIER(saturation) {
   if (!_isvalid(LB.L, _tv2)) BIND_FUNC(LB, glm::saturation, gLuaNumCoT);
   else if (ttisvector3(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec3<>::fast);
   else if (ttisvector4(_tv2)) BIND_FUNC(LB, glm::saturation, gLuaFloat, gLuaVec4<>::fast);
-  return GLM_TYPE_ERROR(LB.L, LB.idx + 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx + 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR);
   GLM_BINDING_END
 }
 #endif
@@ -1955,7 +1855,7 @@ GLM_BINDING_QUALIFIER(orthonormalize) {
     BIND_FUNC(LB, glm::orthonormalize, gLuaVec3<>::fast, gLuaVec3<>);
   else if (ttismatrix(_tv) && mvalue_dims(_tv) == LUAGLM_MATRIX_3x3)
     BIND_FUNC(LB, glm::orthonormalize, gLuaMat3x3<>::fast);
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR3 " or " GLM_STRING_MATRIX "3x3");
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR3 " or " GLM_STRING_MATRIX "3x3");
   GLM_BINDING_END
 }
 
@@ -2078,7 +1978,7 @@ GLM_BINDING_QUALIFIER(rotate) {
         BIND_FUNC(LB, glm::rotate, gLuaQuat<>::fast, gLuaVec3<>::fast);
       else if (ttisvector4(_tv2)) /* glm/gtx/quaternion.hpp */
         BIND_FUNC(LB, glm::__rotate, gLuaQuat<>::fast, gLuaVec4<>::fast);  // @GLMFix
-      return luaL_error(LB.L, "quat-rotate expects: {quat, angle:radians, axis:vec3}, {quat, dir:vec3}, {quat, point:vec4}");
+      return LUAGLM_ERROR(LB.L, "invalid arguments for rotate(glm::qua, ...)");
     }
     case LUA_VMATRIX: {
       switch (mvalue_dims(_tv)) {
@@ -2088,13 +1988,13 @@ GLM_BINDING_QUALIFIER(rotate) {
           break;
         }
       }
-      return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX "3x3 or " GLM_STRING_MATRIX "4x4");
+      return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX "3x3 or " GLM_STRING_MATRIX "4x4");
     }
     default: {
       break;
     }
   }
-  return GLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 
@@ -2131,13 +2031,13 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
             break;                                                                         \
           }                                                                                \
         }                                                                                  \
-        return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_MATRIX);                        \
+        return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_MATRIX);                     \
       }                                                                                    \
       default: {                                                                           \
         break;                                                                             \
       }                                                                                    \
     }                                                                                      \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR3);                           \
+    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR3);                        \
     GLM_BINDING_END                                                                        \
   }
 
@@ -2160,7 +2060,7 @@ BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x
       default:                                                                                                      \
         break;                                                                                                      \
     }                                                                                                               \
-    return GLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR);                                                     \
+    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR);                                                  \
     GLM_BINDING_END                                                                                                 \
   }
 
@@ -2246,7 +2146,7 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
     const B::type _b = B::Next((LB).L, (LB).idx);                                \
     if (_a <= _b && (0 <= _a || _b <= _a + std::numeric_limits<A::type>::max())) \
       BIND_RESULT(LB, F(_a, _b)(LB));                                            \
-    return luaL_error(LB.L, "invalid uniform_dist arguments");                   \
+    return LUAGLM_ERROR(LB.L, "invalid uniform_dist arguments");                 \
   }                                                                              \
   BIND_RESULT(LB, F()(LB));                                                      \
   LUA_MLM_END

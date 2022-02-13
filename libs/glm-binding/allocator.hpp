@@ -180,8 +180,11 @@ private:
   /// </summary>
   inline void *realloc_(void *block, size_t osize, size_t nsize) {
     void *p = m_alloc.realloc(block, osize, nsize);
-    if (p == GLM_NULLPTR)
-      luaL_error(m_state, "LuaVector allocation failure");
+    if (p == GLM_NULLPTR) {
+      //lua_checkstack(m_state, 1);
+      lua_pushstring(m_state, "LuaVector allocation failure");
+      lua_error(m_state);
+    }
     return p;
   }
 
@@ -190,8 +193,11 @@ private:
   /// </summary>
   inline void *malloc_(size_t size_) {
     void *p = m_alloc.realloc(LUA_ALLOC_NULLPTR, 0, size_);
-    if (p == GLM_NULLPTR)
-      luaL_error(m_state, "LuaVector allocation failure");
+    if (p == GLM_NULLPTR) {
+      //lua_checkstack(m_state, 1);
+      lua_pushstring(m_state, "LuaVector allocation failure");
+      lua_error(m_state);
+    }
     return p;
   }
 

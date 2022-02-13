@@ -452,9 +452,9 @@ GLM_LUA_REG(simplex),
 #if defined(GTX_BIT_HPP)
 GLM_LUA_REG(highestBitValue),
 GLM_LUA_REG(lowestBitValue),
-/* powerOfTwoAbove */  // Deprecated
-/* powerOfTwoBelow */  // Deprecated
-/* powerOfTwoNearest */  // Deprecated
+/* powerOfTwoAbove */  // @DEPRECATED
+/* powerOfTwoBelow */  // @DEPRECATED
+/* powerOfTwoNearest */  // @DEPRECATED
 #endif
 
 #if defined(GTX_ASSOCIATED_MIN_MAX_HPP)
