@@ -726,8 +726,6 @@ For all GLM preprocessor, see the [GLM manual](https://github.com/g-truc/glm/blo
 * **LUAGLM_TYPE_COERCION**: Enable string-to-number type coercion when parsing arguments from the Lua stack.
 * **LUAGLM_RECYCLE**: Treat all trailing and unused values on the Lua stack (but passed as parameters to the `CClosure`) as a 'cache' of recyclable structures.
 * **LUAGLM_FORCED_RECYCLE**: Disable this library from allocating memory, i.e., force usage of LUAGLM\_RECYCLE.
-* **LUAGLM_DRIFT**: Experimental: Implicitly normalize all direction vector parameters (to avoid floating-point drift).
-* **LUAGLM_INLINED_TEMPLATES**: Experimental: Enable inlined-template resolution. Function names include object types to be parsed, e.g., F\_P1P2, up to template resolution.
 
 Recycling Example:
 
@@ -763,13 +761,14 @@ Ordered by priority.
 1. Cleanup testing scripts/environment and publish.
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Rewrite build scripts.
+1. Update the Benchmarking section.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
 1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
+1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. [ext](libs/glm-binding/ext): Allow configurable epsilon values for the variety of intersection functions.
 1. [ext](libs/glm-binding/ext): Improve SIMD support.
 1. [geom] Basic support for frustums (both orthographic and perspective) and OBBs.
 1. [geom](libs/glm-binding/ext/geom): Support for two-dimensional structures: Ray2D, Line2D, Plane2D.
-1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. Modify implementation to follow updated "Avoid taking the address of a 'TValue' field" (or reference) convention.
 
 ### Planned Features
@@ -783,8 +782,7 @@ Ordered by priority.
 
 These benchmark values are preliminary and subject to change. Correctness not
 guaranteed and no refunds allowed. LuaGLM was compiled with the default
-[makefile](./makefile) with `-DGLM_FORCE_DEFAULT_ALIGNED_GENTYPES` added to
-`GLM_FLAGS`.
+[makefile](./makefile).
 
 ### NumPy & PyGLM
 
