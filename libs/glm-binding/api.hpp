@@ -390,7 +390,11 @@ GLM_BINDING_QUALIFIER(mat_mul) {
   const TValue *_tv2 = glm_i2v(LB.L, LB.idx + 1);
   switch (ttypetag(_tv)) {
     case LUA_VNUMINT:
-    case LUA_VNUMFLT: PARSE_MATRIX(LB, mvalue_dims(_tv2), operator*, LAYOUT_RH_MULTIPLICATION_OP); break;
+    case LUA_VNUMFLT: {
+      if (l_likely(ttismatrix(_tv2))) // operator*(num, matrix)
+        PARSE_MATRIX(LB, mvalue_dims(_tv2), operator*, LAYOUT_RH_MULTIPLICATION_OP);
+      break;
+    }
     case LUA_VVECTOR2: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec2<>::fast, ttype(_tv2)); break;
     case LUA_VVECTOR3: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec3<>::fast, ttype(_tv2)); break;
     case LUA_VVECTOR4: LAYOUT_MULTIPLICATION_OP(LB, operator*, gLuaVec4<>::fast, ttype(_tv2)); break;
