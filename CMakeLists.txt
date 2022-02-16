@@ -746,6 +746,11 @@ IF( LUAGLM_DRIFT )
   ADD_COMPILE_DEFINITIONS(LUAGLM_DRIFT)
 ENDIF()
 
+OPTION(LUAGLM_TYPE_SANITIZE "Experiment: narrow_cast" OFF)
+IF( LUAGLM_TYPE_SANITIZE )
+  ADD_COMPILE_DEFINITIONS(LUAGLM_TYPE_SANITIZE)
+ENDIF()
+
 ################################################################################
 # Compilation
 ################################################################################

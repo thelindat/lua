@@ -49,6 +49,9 @@
 **    2. pushing result, e.g., glm::eulerAngleXYZ.
 @@ LUAGLM_DRIFT Implicitly normalize parameters that expect direction vectors
 **  and quaternions.
+@@ LUAGLM_TYPE_SANITIZE Enable narrow_cast for lua_Integer (to-and-from). At the
+** moment this value will be sanitized after the fact, e.g., ensure the casted
+** value is between 1 and size (inclusive).
 */
 #include "bindings.hpp"
 #include "iterators.hpp"

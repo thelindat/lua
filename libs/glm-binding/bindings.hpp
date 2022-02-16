@@ -298,6 +298,13 @@ public:
 */
 #define LUA_BIND_QUALIFIER_NIL LUA_BIND_DECL GLM_NEVER_INLINE
 
+/* Wrapper for LUAGLM_TYPE_SANITIZE */
+#if defined(LUAGLM_TYPE_SANITIZE)
+  #define LUA_NARROW_CAST(L, T, V) gLuaBase::narrow_cast<T>((L), (V))
+#else
+  #define LUA_NARROW_CAST(L, T, V) static_cast<T>((V))
+#endif
+
 /// <summary>
 /// Forward declaration of the Lua type trait: the interface that interacts with
 /// a stack iterator that converts sequences of Lua objects into function
@@ -376,7 +383,7 @@ struct gLuaBase {
   ** to reference math.random.
   */
 
-  using result_type = unsigned int;
+  using result_type = lua_Unsigned;
 
   /// <summary>
   /// Return the smallest possible value in the output range.
@@ -389,7 +396,7 @@ struct gLuaBase {
   /// Return the largest possible value in the output range.
   /// </summary>
   static constexpr result_type max() {
-    return static_cast<result_type>(-1);
+    return static_cast<result_type>(LUA_MAXINTEGER);
   }
 
   /// <summary>
@@ -407,7 +414,7 @@ struct gLuaBase {
     lua_checkstack(L, 2);
     lua_pushvalue(L, lua_upvalueindex(1));  // [..., rand_func]
     if (lua_isfunction(L, -1)) {
-      lua_pushinteger(L, static_cast<lua_Integer>(max()));  // [..., rand_func, upper limit]
+      lua_pushinteger(L, LUA_MAXINTEGER);  // [..., rand_func, upper limit]
       lua_call(L, 1, 1);  // [..., result]
       result = static_cast<result_type>(lua_tointegerx(L, -1, GLM_NULLPTR));
     }
@@ -450,6 +457,17 @@ struct gLuaBase {
 
   /* Binding Helpers */
 
+  template<class T, class U>
+  LUA_BIND_QUALIFIER T narrow_cast(lua_State *L_, U u) {
+    LUA_IF_CONSTEXPR(std::is_same<T, U>::value) return static_cast<T>(u);
+    const T t = static_cast<T>(u);
+    if (static_cast<U>(t) != u  // however, allow sign mismatch...
+        /* || (std::is_signed<T>::value != std::is_signed<U>::value && ((t < T{}) != (u < U{}))) */) {
+      error(L_, "integer value out of range");
+    }
+    return t;
+  }
+
   /// <summary>
   /// lua_isnoneornil
   /// </summary>
@@ -467,7 +485,7 @@ struct gLuaBase {
     switch (ttypetag(o)) {
       case LUA_VTRUE: return static_cast<T>(1);
       case LUA_VFALSE: return static_cast<T>(0);
-      case LUA_VNUMINT: return static_cast<T>(ivalue(o));
+      case LUA_VNUMINT: return LUA_NARROW_CAST(L_, T, ivalue(o));
       case LUA_VNUMFLT: return static_cast<T>(fltvalue(o));
       default: {
 #if defined(LUAGLM_TYPE_COERCION)
@@ -730,7 +748,7 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
     LUA_IF_CONSTEXPR(FastPath) {
       const TValue *o = glm_i2v(L, idx++);
       LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) return static_cast<T>(!l_isfalse(o));
-      LUA_IF_CONSTEXPR(std::is_integral<T>::value) return static_cast<T>(ivalue(o));
+      LUA_IF_CONSTEXPR(std::is_integral<T>::value) return LUA_NARROW_CAST(L, T, ivalue(o));
       LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return static_cast<T>(fltvalue(o));
     }
     else {
@@ -745,7 +763,7 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   template<typename U>
   LUA_BIND_QUALIFIER_NIL typename std::enable_if<std::is_integral<U>::value && !std::is_same<U, bool>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
     lua_LockScope _lock(LB.L);
-    setivalue(s2v(LB.L->top), static_cast<lua_Integer>(v));
+    setivalue(s2v(LB.L->top), LUA_NARROW_CAST(LB.L, lua_Integer, v));
     api_incr_top(LB.L);
     return 1;
   }
@@ -1805,7 +1823,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 /* @COMPAT: max ULPs parameters for scalar numbers introduced in 0.9.9.3 */
 #if LUAGLM_INCLUDE_IEEE && GLM_VERSION >= 993
   #define LAYOUT_EQUAL_ULPS(LB, F, A, B, TVal) \
-    BIND_RESULT((LB), F((A), (B), static_cast<int>(ivalue(TVal))))
+    BIND_RESULT((LB), F((A), (B), gLuaBase::narrow_cast<int>((LB).L, ivalue(TVal))))
 #else
   #define LAYOUT_EQUAL_ULPS(LB, F, A, B, TVal) ((void)0)
 #endif
