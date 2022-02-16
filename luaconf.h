@@ -936,6 +936,7 @@
 @@ LUAGLM_MATRIX_COLS Unpack the number of matrix columns for a given type.
 @@ LUAGLM_MATRIX_ROWS Unpack the number of matrix rows for a given type.
 @@ LUAGLM_MATRIX_TYPE Pack column/row dimensions into a single value.
+@@ LUAGLM_MATRIX_INVALID Placeholder value for denoting an invalid dimension.
 **
 ** @NOTE: Previous definition:
 **  #define LUAGLM_MATRIX_TYPE(C, R) ((C) | ((R) << 8))
@@ -955,6 +956,7 @@
 #define LUAGLM_MATRIX_4x2 LUAGLM_MATRIX_TYPE(4, 2)
 #define LUAGLM_MATRIX_4x3 LUAGLM_MATRIX_TYPE(4, 3)
 #define LUAGLM_MATRIX_4x4 LUAGLM_MATRIX_TYPE(4, 4)
+#define LUAGLM_MATRIX_INVALID 11
 
 /*
 ** GLM_FORCE_SIZE_T_LENGTH forces length_t to be size_t. Otherwise, defined as

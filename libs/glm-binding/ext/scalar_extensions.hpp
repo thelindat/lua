@@ -189,15 +189,6 @@ namespace glm {
   }
 
   /// <summary>
-  /// @COMPAT: Old versions of GLM include unnecessary precision qualifiers for
-  /// glm::atan2 and glm::saturate.
-  /// </summary>
-  template<typename T>
-  GLM_FUNC_QUALIFIER T atan2_(T x, T y) {
-    return atan(x, y);
-  }
-
-  /// <summary>
   /// Calculate sin and cos simultaneously.
   /// </summary>
   template<typename genType>

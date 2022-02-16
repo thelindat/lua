@@ -451,12 +451,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[2][1], M[2][2]);
+    const T T1 = glm::atan2<T, defaultp>(M[2][1], M[2][2]);
     const T C2 = sqrt(M[0][0] * M[0][0] + M[1][0] * M[1][0]);
-    const T T2 = atan2_(-M[2][0], C2);
+    const T T2 = glm::atan2<T, defaultp>(-M[2][0], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(S1 * M[0][2] - C1 * M[0][1], C1 * M[1][1] - S1 * M[1][2]);
+    const T T3 = glm::atan2<T, defaultp>(S1 * M[0][2] - C1 * M[0][1], C1 * M[1][1] - S1 * M[1][2]);
     t1 = -T1;
     t2 = -T2;
     t3 = -T3;
@@ -467,12 +467,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[2][0], M[2][2]);
+    const T T1 = glm::atan2<T, defaultp>(M[2][0], M[2][2]);
     const T C2 = sqrt(M[0][1] * M[0][1] + M[1][1] * M[1][1]);
-    const T T2 = atan2_(-M[2][1], C2);
+    const T T2 = glm::atan2<T, defaultp>(-M[2][1], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(S1 * M[1][2] - C1 * M[1][0], C1 * M[0][0] - S1 * M[0][2]);
+    const T T3 = glm::atan2<T, defaultp>(S1 * M[1][2] - C1 * M[1][0], C1 * M[0][0] - S1 * M[0][2]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -483,12 +483,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[0][2], M[0][1]);
+    const T T1 = glm::atan2<T, defaultp>(M[0][2], M[0][1]);
     const T S2 = sqrt(M[1][0] * M[1][0] + M[2][0] * M[2][0]);
-    const T T2 = atan2_(S2, M[0][0]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[0][0]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(C1 * M[1][2] - S1 * M[1][1], C1 * M[2][2] - S1 * M[2][1]);
+    const T T3 = glm::atan2<T, defaultp>(C1 * M[1][2] - S1 * M[1][1], C1 * M[2][2] - S1 * M[2][1]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -499,12 +499,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[0][1], -M[0][2]);
+    const T T1 = glm::atan2<T, defaultp>(M[0][1], -M[0][2]);
     const T S2 = sqrt(M[1][0] * M[1][0] + M[2][0] * M[2][0]);
-    const T T2 = atan2_(S2, M[0][0]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[0][0]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(-C1 * M[2][1] - S1 * M[2][2], C1 * M[1][1] + S1 * M[1][2]);
+    const T T3 = glm::atan2<T, defaultp>(-C1 * M[2][1] - S1 * M[2][2], C1 * M[1][1] + S1 * M[1][2]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -515,12 +515,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[1][0], M[1][2]);
+    const T T1 = glm::atan2<T, defaultp>(M[1][0], M[1][2]);
     const T S2 = sqrt(M[0][1] * M[0][1] + M[2][1] * M[2][1]);
-    const T T2 = atan2_(S2, M[1][1]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[1][1]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(C1 * M[2][0] - S1 * M[2][2], C1 * M[0][0] - S1 * M[0][2]);
+    const T T3 = glm::atan2<T, defaultp>(C1 * M[2][0] - S1 * M[2][2], C1 * M[0][0] - S1 * M[0][2]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -531,12 +531,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[1][2], -M[1][0]);
+    const T T1 = glm::atan2<T, defaultp>(M[1][2], -M[1][0]);
     const T S2 = sqrt(M[0][1] * M[0][1] + M[2][1] * M[2][1]);
-    const T T2 = atan2_(S2, M[1][1]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[1][1]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(-S1 * M[0][0] - C1 * M[0][2], S1 * M[2][0] + C1 * M[2][2]);
+    const T T3 = glm::atan2<T, defaultp>(-S1 * M[0][0] - C1 * M[0][2], S1 * M[2][0] + C1 * M[2][2]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -547,12 +547,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[2][1], M[2][0]);
+    const T T1 = glm::atan2<T, defaultp>(M[2][1], M[2][0]);
     const T S2 = sqrt(M[0][2] * M[0][2] + M[1][2] * M[1][2]);
-    const T T2 = atan2_(S2, M[2][2]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[2][2]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(C1 * M[0][1] - S1 * M[0][0], C1 * M[1][1] - S1 * M[1][0]);
+    const T T3 = glm::atan2<T, defaultp>(C1 * M[0][1] - S1 * M[0][0], C1 * M[1][1] - S1 * M[1][0]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -563,12 +563,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[2][0], -M[2][1]);
+    const T T1 = glm::atan2<T, defaultp>(M[2][0], -M[2][1]);
     const T S2 = sqrt(M[0][2] * M[0][2] + M[1][2] * M[1][2]);
-    const T T2 = atan2_(S2, M[2][2]);
+    const T T2 = glm::atan2<T, defaultp>(S2, M[2][2]);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(-C1 * M[1][0] - S1 * M[1][1], C1 * M[0][0] + S1 * M[0][1]);
+    const T T3 = glm::atan2<T, defaultp>(-C1 * M[1][0] - S1 * M[1][1], C1 * M[0][0] + S1 * M[0][1]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -579,12 +579,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[1][2], M[1][1]);
+    const T T1 = glm::atan2<T, defaultp>(M[1][2], M[1][1]);
     const T C2 = sqrt(M[0][0] * M[0][0] + M[2][0] * M[2][0]);
-    const T T2 = atan2_(-M[1][0], C2);
+    const T T2 = glm::atan2<T, defaultp>(-M[1][0], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(S1 * M[0][1] - C1 * M[0][2], C1 * M[2][2] - S1 * M[2][1]);
+    const T T3 = glm::atan2<T, defaultp>(S1 * M[0][1] - C1 * M[0][2], C1 * M[2][2] - S1 * M[2][1]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -595,12 +595,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(-M[0][2], M[0][0]);
+    const T T1 = glm::atan2<T, defaultp>(-M[0][2], M[0][0]);
     const T C2 = sqrt(M[1][1] * M[1][1] + M[2][1] * M[2][1]);
-    const T T2 = atan2_(M[0][1], C2);
+    const T T2 = glm::atan2<T, defaultp>(M[0][1], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(S1 * M[1][0] + C1 * M[1][2], S1 * M[2][0] + C1 * M[2][2]);
+    const T T3 = glm::atan2<T, defaultp>(S1 * M[1][0] + C1 * M[1][2], S1 * M[2][0] + C1 * M[2][2]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -611,12 +611,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(M[0][1], M[0][0]);
+    const T T1 = glm::atan2<T, defaultp>(M[0][1], M[0][0]);
     const T C2 = sqrt(M[1][2] * M[1][2] + M[2][2] * M[2][2]);
-    const T T2 = atan2_(-M[0][2], C2);
+    const T T2 = glm::atan2<T, defaultp>(-M[0][2], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(S1 * M[2][0] - C1 * M[2][1], C1 * M[1][1] - S1 * M[1][0]);
+    const T T3 = glm::atan2<T, defaultp>(S1 * M[2][0] - C1 * M[2][1], C1 * M[1][1] - S1 * M[1][0]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -627,12 +627,12 @@ namespace glm {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'extractEulerAngle' only accept floating-point inputs");
 
-    const T T1 = atan2_(-M[1][0], M[1][1]);
+    const T T1 = glm::atan2<T, defaultp>(-M[1][0], M[1][1]);
     const T C2 = sqrt(M[0][2] * M[0][2] + M[2][2] * M[2][2]);
-    const T T2 = atan2_(M[1][2], C2);
+    const T T2 = glm::atan2<T, defaultp>(M[1][2], C2);
     const T S1 = sin(T1);
     const T C1 = cos(T1);
-    const T T3 = atan2_(C1 * M[2][0] + S1 * M[2][1], C1 * M[0][0] + S1 * M[0][1]);
+    const T T3 = glm::atan2<T, defaultp>(C1 * M[2][0] + S1 * M[2][1], C1 * M[0][0] + S1 * M[0][1]);
     t1 = T1;
     t2 = T2;
     t3 = T3;
@@ -889,6 +889,46 @@ namespace glm {
 
     axis = normalize(vec<3, T, Q>(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]));
   }
+
+  /*
+  ** @GLMFix: The glm::mat<2, 3, ...> constructor will throw a compilation error
+  ** when the template context is different.
+  **
+  ** ./glm/./ext/../detail/.././ext/../detail/type_mat2x3.inl:23:14: error: ‘glm::mat<2, 3, float, glm::packed_lowp>::col_type glm::mat<2, 3, float, glm::packed_lowp>::value [2]’ is private within this context
+  **    23 |    : value{m.value[0], m.value[1]}
+  */
+  template<length_t C, length_t R, typename T, qualifier Q>
+  struct fixed_mat : public mat<C, R, T, Q> {
+    template<qualifier P>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR fixed_mat(mat<C, R, T, P> const &m)
+      : mat<C, R, T, Q>(m) {
+    }
+
+    template<length_t CC, length_t RR, typename U, qualifier P>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR fixed_mat(mat<CC, RR, U, P> const &m)
+      : mat<C, R, T, Q>(m) {
+    }
+
+    template<typename U, qualifier P>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR fixed_mat(mat<2, 3, U, P> const &m)
+      : mat<C, R, T, Q>(fixed_mat<2, 3, U, Q>(m)) {
+    }
+  };
+
+  template<typename T, qualifier Q>
+  struct fixed_mat<2, 3, T, Q> : public mat<2, 3, T, Q> {
+    using col_type = typename mat<2, 3, T, Q>::col_type;
+
+    template<typename U, qualifier P = Q>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR fixed_mat(mat<2, 3, U, P> const &m)
+      : mat<2, 3, T, Q>(col_type(m[0]), col_type(m[1])) {
+    }
+
+    template<length_t CC, length_t RR, typename U, qualifier P>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR fixed_mat(mat<CC, RR, U, P> const &m)
+      : mat<2, 3, T, Q>(m) {
+    }
+  };
 
   /* }====================================================== */
 }

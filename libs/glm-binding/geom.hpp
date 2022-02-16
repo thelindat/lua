@@ -68,14 +68,14 @@ struct gLuaTrait<glm::AABB<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::AABB<L, 
   /// @PointBinding: Type trait equivalent to glm::Structure::point_type
   /// </summary>
   using point_trait = gLuaTrait<typename glm::AABB<L, T, Q>::point_type>;
-  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "AABB";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::AABB<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -97,7 +97,7 @@ struct gLuaTrait<glm::Line<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Line<L, 
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Line<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Line<L, T, Q>::point_type>;  // @PointBinding
-  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size);  // @StackSize
 
   /// <summary>
   /// @RelativeZero: Lua type trait representing the relative negative-inf/zero
@@ -116,7 +116,7 @@ struct gLuaTrait<glm::Line<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Line<L, 
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::Line<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -140,14 +140,14 @@ struct gLuaTrait<glm::LineSegment<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::L
   using point_trait = gLuaTrait<typename glm::LineSegment<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, true, T>;  // @RelativeOne
-  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Segment";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::LineSegment<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -171,14 +171,14 @@ struct gLuaTrait<glm::Ray<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Ray<L, T,
   using point_trait = gLuaTrait<typename glm::Ray<L, T, Q>::point_type>;  // @PointBinding
   using zero_trait = gLuaParametric<true, true, T>;  // @RelativeZero
   using one_trait = gLuaParametric<false, false, T>;  // @RelativeOne
-  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (2 * point_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Ray";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::Ray<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -200,14 +200,16 @@ struct gLuaTrait<glm::Triangle<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Tria
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Triangle<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Triangle<L, T, Q>::point_type>;  // @PointBinding
-  static const LUA_CONSTEXPR int stack_size = (3 * point_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (3 * point_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Triangle";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && point_trait::Is(L_, idx + 1) && point_trait::Is(L_, idx + 2);
+    return point_trait::Is(L_, idx)
+           && point_trait::Is(L_, idx + point_trait::stack_size)
+           && point_trait::Is(L_, idx + 2 * point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::Triangle<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -231,14 +233,14 @@ struct gLuaTrait<glm::Sphere<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Sphere
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Sphere<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Sphere<L, T, Q>::point_type>;  // @PointBinding
-  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Sphere";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::Sphere<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -260,14 +262,14 @@ struct gLuaTrait<glm::Plane<L, T, Q>, FastPath> : gLuaAbstractTrait<glm::Plane<L
   template<typename Type = T>
   using as_type = gLuaTrait<glm::Plane<L, Type, Q>>;  // @CastBinding
   using point_trait = gLuaTrait<typename glm::Plane<L, T, Q>::point_type>;  // @PointBinding
-  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size); // @StackSize
+  static const LUA_CONSTEXPR int stack_size = (point_trait::stack_size + point_trait::value_trait::stack_size);  // @StackSize
 
   LUA_BIND_DECL LUA_CONSTEXPR const char *Label() {
     return "Plane";
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L_, int idx) {
-    return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + 1);
+    return point_trait::Is(L_, idx) && gLuaTrait<T>::Is(L_, idx + point_trait::stack_size);
   }
 
   LUA_BIND_QUALIFIER glm::Plane<L, T, Q> Next(lua_State *L_, int &idx) {
@@ -314,9 +316,9 @@ struct gLuaTrait<glm::Polygon<3, T, Q>, FastPath> : gLuaAbstractTrait<glm::Polyg
 
   LUA_BIND_QUALIFIER glm::Polygon<3, T, Q> Next(lua_State *L_, int &idx) {
     void *ptr = GLM_NULLPTR;
-    if ((ptr = luaL_checkudata(L_, idx++, Metatable())) != GLM_NULLPTR) {
+    if ((ptr = luaL_checkudata(L_, idx, Metatable())) != GLM_NULLPTR) {
       glm::Polygon<3, T, Q> result = *(static_cast<glm::Polygon<3, T, Q> *>(ptr));
-      result.stack_idx = idx - 1;
+      result.stack_idx = idx++;
       result.p->validate(L_);
       return result;
     }
@@ -381,21 +383,21 @@ using gLuaPolygon = gLuaTrait<glm::Polygon<3, T, Q>>;
 ** Generic project-to-axis definition; returning the parametric min & max of the
 ** axis projection.
 */
-#define GEOM_PROJECTION(LB, F, A, B)           \
-  LUA_MLM_BEGIN                                \
-  const A::type a = A::Next((LB).L, (LB).idx); \
-  const B::type b = B::Next((LB).L, (LB).idx); \
-  A::value_type outMin(0), outMax(0);          \
-  F(a, b, outMin, outMax);                     \
-  BIND_PUSH(LB, outMin, outMax);               \
+#define GEOM_PROJECTION(LB, F, A, B)  \
+  LUA_MLM_BEGIN                       \
+  A::value_type outMin, outMax;       \
+  const A::type a = (LB).Next<A>();   \
+  const B::type b = (LB).Next<B>();   \
+  F(a, b, outMin, outMax);            \
+  BIND_PUSH(LB, outMin, outMax);      \
   LUA_MLM_END
 
 /* Single parametric output */
 #define LAYOUT_GEOM_PARAMETRIC_U(LB, F, A, B, U) \
   LUA_MLM_BEGIN                                  \
-  U::type t = U::Zero();                         \
-  const A::type a = A::Next((LB).L, (LB).idx);   \
-  const B::type b = B::Next((LB).L, (LB).idx);   \
+  U::type t;                                     \
+  const A::type a = (LB).Next<A>();              \
+  const B::type b = (LB).Next<B>();              \
   const auto _r = F(a, b, t);                    \
   BIND_PUSH(LB, _r, t);                          \
   LUA_MLM_END
@@ -403,10 +405,9 @@ using gLuaPolygon = gLuaTrait<glm::Polygon<3, T, Q>>;
 /* Multiple parametric outputs */
 #define LAYOUT_GEOM_PARAMETRIC_UV(LB, F, A, B, U, V) \
   LUA_MLM_BEGIN                                      \
-  U::type n = U::Zero();                             \
-  V::type f = V::Zero();                             \
-  const A::type a = A::Next((LB).L, (LB).idx);       \
-  const B::type b = B::Next((LB).L, (LB).idx);       \
+  U::type n; V::type f;                              \
+  const A::type a = (LB).Next<A>();                  \
+  const B::type b = (LB).Next<B>();                  \
   const auto _r = F(a, b, n, f);                     \
   BIND_PUSH(LB, _r, n, f);                           \
   LUA_MLM_END
@@ -414,10 +415,10 @@ using gLuaPolygon = gLuaTrait<glm::Polygon<3, T, Q>>;
 /* Multiple parametric inputs & outputs */
 #define LAYOUT_GEOM_PARAMETRIC_UV_ARGS(LB, F, A, B, U, V) \
   LUA_MLM_BEGIN                                           \
-  const A::type a = A::Next((LB).L, (LB).idx);            \
-  const B::type b = B::Next((LB).L, (LB).idx);            \
-  U::type n = U::Next((LB).L, (LB).idx);                  \
-  V::type f = V::Next((LB).L, (LB).idx);                  \
+  const A::type a = (LB).Next<A>();                       \
+  const B::type b = (LB).Next<B>();                       \
+  U::type n = (LB).Next<U>();                             \
+  V::type f = (LB).Next<V>();                             \
   const auto _r = F(a, b, n, f);                          \
   BIND_PUSH(LB, _r, n, f);                                \
   LUA_MLM_END
@@ -425,11 +426,9 @@ using gLuaPolygon = gLuaTrait<glm::Polygon<3, T, Q>>;
 /* Multiple parametric outputs */
 #define LAYOUT_GEOM_PARAMETRIC_UVW(LB, F, A, B, U, V, W) \
   LUA_MLM_BEGIN                                          \
-  U::type u = U::Zero();                                 \
-  V::type v = V::Zero();                                 \
-  W::type w = W::Zero();                                 \
-  const A::type a = A::Next((LB).L, (LB).idx);           \
-  const B::type b = B::Next((LB).L, (LB).idx);           \
+  U::type u; V::type v; W::type w;                       \
+  const A::type a = (LB).Next<A>();                      \
+  const B::type b = (LB).Next<B>();                      \
   const auto _r = F(a, b, u, v, w);                      \
   BIND_PUSH(LB, _r, u, v, w);                            \
   LUA_MLM_END
@@ -642,11 +641,11 @@ static const luaL_Reg luaglm_aabblib[] = {
   { "ContainsVector3", GLM_NAME(aabb_contains) },
   { "Overlaps", GLM_NAME(aabb_intersectsAABB) },  // @O3DEAlias: Handles boundaries differently.
   //{ "Disjoint", GLM_NAME() }, // @O3DEAlias
-  { "GetExpanded", GLM_NAME(aabb_expand) }, // Expand
+  { "GetExpanded", GLM_NAME(aabb_expand) },  // Expand
   { "AddPoint", GLM_NAME(aabb_enclose) },
   { "AddAabb", GLM_NAME(aabb_encloseAABB) },
   { "GetDistance", GLM_NAME(aabb_distance) },
-  { "GetClamped", GLM_NAME(aabb_clamp) }, // Clamp
+  { "GetClamped", GLM_NAME(aabb_clamp) },  // Clamp
   { "Translate", GLM_NAME(aabb_operator_add) },
   { "GetTranslated", GLM_NAME(aabb_operator_add) },
   { "GetSurfaceArea", GLM_NAME(aabb_surfaceArea) },
@@ -1505,8 +1504,8 @@ GLM_BINDING_QUALIFIER(plane_point) {
 GLM_BINDING_QUALIFIER(plane_clipLine) {
   GLM_BINDING_BEGIN
   gLuaRay<>::type result;
-  const gLuaPlane<>::type plane = gLuaPlane<>::Next(LB.L, LB.idx);
-  const gLuaLine<>::type line = gLuaLine<>::Next(LB.L, LB.idx);
+  const gLuaPlane<>::type plane = LB.Next<gLuaPlane<>>();
+  const gLuaLine<>::type line = LB.Next<gLuaLine<>>();
   const int clip_type = glm::clip(plane, line, result);
   BIND_PUSH(LB, clip_type, result);
   GLM_BINDING_END
@@ -1515,9 +1514,9 @@ GLM_BINDING_QUALIFIER(plane_clipLine) {
 GLM_BINDING_QUALIFIER(plane_intersectsPlane) {
   GLM_BINDING_BEGIN
   gLuaPlane<>::point_trait::type result;
-  const gLuaPlane<>::type a = gLuaPlane<>::Next(LB.L, LB.idx);
-  const gLuaPlane<>::type b = gLuaPlane<>::Next(LB.L, LB.idx);
-  const gLuaPlane<>::type c = gLuaPlane<>::Next(LB.L, LB.idx);
+  const gLuaPlane<>::type a = LB.Next<gLuaPlane<>>();
+  const gLuaPlane<>::type b = LB.Next<gLuaPlane<>>();
+  const gLuaPlane<>::type c = LB.Next<gLuaPlane<>>();
   if (glm::intersects(a, b, c, result))
     BIND_PUSH(LB, true, result);
   else
@@ -1527,11 +1526,11 @@ GLM_BINDING_QUALIFIER(plane_intersectsPlane) {
 
 GLM_BINDING_QUALIFIER(plane_clipTriangle) {
   GLM_BINDING_BEGIN
-  const gLuaPlane<>::type plane = gLuaPlane<>::Next(LB.L, LB.idx);
-  const gLuaTriangle<>::type line = gLuaTriangle<>::Next(LB.L, LB.idx);
   gLuaTriangle<>::type t1 = gLuaTriangle<>::Zero();
   gLuaTriangle<>::type t2 = gLuaTriangle<>::Zero();
-  switch (clip(plane, line, t1, t1)) {
+  const gLuaPlane<>::type plane = LB.Next<gLuaPlane<>>();
+  const gLuaTriangle<>::type line = LB.Next<gLuaTriangle<>>();
+  switch (glm::clip(plane, line, t1, t1)) {
     case 1: BIND_PUSH(LB, t1); break;
     case 2: BIND_PUSH(LB, t1, t2); break;
     default: {
@@ -1685,7 +1684,7 @@ LAYOUT_DEFN(polygon_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaPoly
 
 GLM_BINDING_QUALIFIER(polygon_mapTo2D) {
   GLM_BINDING_BEGIN
-  if (gLuaTrait<size_t>::Is(LB.L, LB.idx + 1))
+  if (LB.Is<gLuaTrait<size_t>>(gLuaPolygon<>::stack_size))
     BIND_FUNC(LB, glm::mapTo2D, gLuaPolygon<>, gLuaTrait<size_t>);
   BIND_FUNC(LB, glm::mapTo2D, gLuaPolygon<>, gLuaPolygon<>::point_trait);
   GLM_BINDING_END
@@ -1694,8 +1693,8 @@ GLM_BINDING_QUALIFIER(polygon_mapTo2D) {
 GLM_BINDING_QUALIFIER(polygon_extremePoint) {
   GLM_BINDING_BEGIN
   gLuaPolygon<>::value_type distance(0);
-  const gLuaPolygon<>::type polygon = gLuaPolygon<>::Next(LB.L, LB.idx);
-  const gLuaPolygon<>::point_trait::type direction = gLuaPolygon<>::point_trait::Next(LB.L, LB.idx);
+  const gLuaPolygon<>::type polygon = LB.Next<gLuaPolygon<>>();
+  const gLuaPolygon<>::point_trait::type direction = LB.Next<gLuaPolygon<>::point_trait>();
   const gLuaPolygon<>::point_trait::type point = glm::extremePoint(polygon, direction, distance);
   BIND_PUSH(LB, point, distance);
   GLM_BINDING_END
@@ -1786,8 +1785,8 @@ BIND_DEFN(polygon_len, glm::length, gLuaPolygon<>)
 /// </summary>
 GLM_BINDING_QUALIFIER(polygon_call) {
   GLM_BINDING_BEGIN
-  const gLuaPolygon<>::type poly = gLuaPolygon<>::Next(LB.L, LB.idx);
-  lua_createtable(LB.L, static_cast<int>(poly.size()), 0);
+  const gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();
+  lua_createtable(LB.L, static_cast<int>(poly.size()), 0);  // arrow won't resize if overflow
   for (size_t i = 0; i < poly.size(); ++i) {
     if (l_unlikely(gLuaBase::Push(LB, poly[i]) != 1))
       return LUAGLM_ERROR(LB.L, "invalid " GLM_STRING_VECTOR " structure");
@@ -1799,9 +1798,9 @@ GLM_BINDING_QUALIFIER(polygon_call) {
 
 GLM_BINDING_QUALIFIER(polygon_index) {
   GLM_BINDING_BEGIN
-  const gLuaPolygon<>::type poly = gLuaPolygon<>::Next(LB.L, LB.idx);
-  if (gLuaTrait<size_t>::Is(LB.L, LB.idx)) {
-    const gLuaTrait<size_t>::type index = gLuaTrait<size_t>::Next(LB.L, LB.idx);
+  const gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();
+  if (LB.IsNextType<size_t>()) {
+    const size_t index = LB.AsNextType<size_t>();
     if (1 <= index && index <= poly.size())
       return gLuaBase::Push(LB, poly[index - 1]);
     return gLuaBase::Push(LB);  // nil
@@ -1820,10 +1819,10 @@ GLM_BINDING_QUALIFIER(polygon_index) {
 
 GLM_BINDING_QUALIFIER(polygon_newindex) {
   GLM_BINDING_BEGIN
-  gLuaPolygon<>::type poly = gLuaPolygon<>::Next(LB.L, LB.idx);
+  gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();
   if (l_likely(poly.p != GLM_NULLPTR)) {
-    const size_t index = gLuaTrait<size_t>::Next(LB.L, LB.idx);
-    const gLuaPolygon<>::point_trait::type value = gLuaPolygon<>::point_trait::Next(LB.L, LB.idx);
+    const size_t index = LB.AsNextType<size_t>();
+    const gLuaPolygon<>::point_trait::type value = LB.Next<gLuaPolygon<>::point_trait>();
 
     poly.p->validate(LB.L);
     if (index >= 1 && index <= poly.size())
@@ -1844,14 +1843,14 @@ extern "C" {
   /// </summary>
   static int polygon_iterator(lua_State *L) {
     GLM_BINDING_BEGIN
-    if (!gLuaPolygon<>::Is(LB.L, LB.idx)) {
+    if (!LB.Is<gLuaPolygon<>>()) {
       return LUAGLM_ARG_ERROR(LB.L, LB.idx, gLuaPolygon<>::Label());
     }
 
-    lua_settop(LB.L, LB.idx + 1);  // create a 2nd argument if there isn't one
-    const gLuaPolygon<>::type poly = gLuaPolygon<>::Next(LB.L, LB.idx);  // Polygon
-    if (gLuaTrait<size_t>::Is(LB.L, LB.idx)) {  // Index
-      const gLuaTrait<size_t>::type key = gLuaTrait<size_t>::Next(LB.L, LB.idx);
+    lua_settop(LB.L, LB.idx + gLuaPolygon<>::stack_size);  // create a 2nd argument if there isn't one
+    const gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();  // Polygon
+    if (LB.IsNextType<size_t>()) {  // Index
+      const size_t key = LB.AsNextType<size_t>();
       if (key >= 1 && key < poly.size())
         BIND_PUSH(LB, key + 1, poly[key]);
       return gLuaBase::Push(LB);

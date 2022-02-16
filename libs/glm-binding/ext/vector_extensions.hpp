@@ -1155,7 +1155,7 @@ namespace glm {
 #endif
 
 #if GLM_CONFIG_SIMD == GLM_ENABLE
-#if GLM_ARCH & GLM_ARCH_NEON_BIT
+  #if GLM_ARCH & GLM_ARCH_NEON_BIT
   namespace detail {
     /// <summary>
     /// @GLMFix: type_vec4_simd.inl:503:27: error: cannot convert ‘int32x4_t’ {aka ‘__vector(4) int’} to ‘glm::detail::storage<4, unsigned int, true>::type’ {aka ‘__vector(4) unsigned int’} in assignment
@@ -1223,7 +1223,7 @@ namespace glm {
       }
     };
   }
-#endif
+  #endif
 #endif
 
   /// <summary>
@@ -1236,7 +1236,7 @@ namespace glm {
     const vec<L, T, Q> yxl = y * length(x);
     const T n = length(xyl - yxl);
     if (epsilonNotEqual(n, T(0), epsilon<T>()))
-      return T(2) * atan2_(n, length(xyl + yxl));
+      return T(2) * glm::atan2<T, defaultp>(n, length(xyl + yxl));
     return T(0);
   }
 

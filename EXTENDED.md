@@ -898,6 +898,28 @@ vecN = extractScale(m --[[ matNxM ]])
 bool = hasUniformScale(m --[[ matNxM ]], epsilon --[[ number ]])
 ```
 
+## glm/gtx/matrix\_storage.hpp
+
+### colMajor
+
+```lua
+-- Generalized glm::colMajor implementation.
+m --[[ matNxM --] = colMajor(mat --[[ matNxM --]])
+m --[[ mat2x2 --] = colMajor(v1 --[[ vec2 ]], v2 --[[ vec2 ]])
+m --[[ mat3x3 --] = colMajor(v1 --[[ vec3 ]], v2 --[[ vec3 ]], v3 --[[ vec3 ]])
+m --[[ mat4x4 --] = colMajor(v1 --[[ vec4 ]], v2 --[[ vec4 ]], v3 --[[ vec4 ]], v4 --[[ vec4 ]])
+```
+
+### rowMajor
+
+```lua
+-- Generalized glm::rowMajor implementation.
+m --[[ matNxM --] = rowMajor(mat --[[ matNxM --]])
+m --[[ mat2x2 --] = rowMajor(v1 --[[ vec2 ]], v2 --[[ vec2 ]])
+m --[[ mat3x3 --] = rowMajor(v1 --[[ vec3 ]], v2 --[[ vec3 ]], v3 --[[ vec3 ]])
+m --[[ mat4x4 --] = rowMajor(v1 --[[ vec4 ]], v2 --[[ vec4 ]], v3 --[[ vec4 ]], v4 --[[ vec4 ]])
+```
+
 ## glm/gtx/norm.hpp
 
 ### Aliases
@@ -1237,7 +1259,7 @@ is implemented using `math.random` (cached as a function upval on library loadin
 
 Accessed by `glm.distribution[name]`.
 
-## uniform_int
+## uniform\_int
 
 ```lua
 -- a: distribution minimum value (integer); a >= 0
@@ -1245,7 +1267,7 @@ Accessed by `glm.distribution[name]`.
 value = uniform_int([a, b])
 ```
 
-## uniform_real
+## uniform\_real
 
 ```lua
 -- a: distribution minimum value (number); a >= 0
@@ -1268,7 +1290,7 @@ value = bernoulli([p])
 value = binomial([t, p])
 ```
 
-## negative_binomial
+## negative\_binomial
 
 ```lua
 -- k: number of trial successes (integer); k > 0
@@ -1313,7 +1335,7 @@ value = gamma([α, β])
 value = weibull([a, b])
 ```
 
-## extreme_value
+## extreme\_value
 
 ```lua
 -- a: location (number)
@@ -1337,7 +1359,7 @@ value = normal([μ, σ])
 value = lognormal([m, s])
 ```
 
-## chi_squared
+## chi\_squared
 
 ```lua
 -- n: degrees of freedom (number); n > 0
@@ -1352,7 +1374,7 @@ value = chi_squared([n])
 value = cauchy([a, b])
 ```
 
-## fisher_f
+## fisher\_f
 
 ```lua
 -- m: degrees of freedom (number); m > 0
@@ -1360,7 +1382,7 @@ value = cauchy([a, b])
 value = fisher_f([m, n])
 ```
 
-## student_t
+## student\_t
 
 ```lua
 -- n: degrees of freedom (number); n > 0

@@ -77,10 +77,10 @@ PLAT= guess
 # LUA_LINKAGE needs to be undefined
 LUA_LINKAGE= -DLUA_C_LINKAGE
 
-CC= gcc -std=gnu99 $(CWARNSCPP) $(CWARNSC) $(CWARNGCC) $(GCC_SANITIZE)
-CPP= g++ -std=c++11 $(CWARNSCPP) $(CWARNGCC) $(GCC_SANITIZE) $(GPP_SANITIZE)
-CFLAGS= -O2 -Wall -Wextra -DNDEBUG $(SYSCFLAGS) $(MYCFLAGS)
-CPERF_FLAGS = -O3 -march=native -ffast-math -fno-finite-math-only # -fno-plt
+CC= gcc -std=gnu99 -Wall $(CWARNSCPP) $(CWARNSC) $(CWARNGCC) $(GCC_SANITIZE)
+CPP= g++ -std=c++11 -Wall $(CWARNSCPP) $(CWARNGCC) $(GCC_SANITIZE) $(GPP_SANITIZE)
+CFLAGS= -O2 -DNDEBUG $(SYSCFLAGS) $(MYCFLAGS)
+CPERF_FLAGS= -O3 -march=native -ffast-math -fno-finite-math-only # -fno-plt
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS) $(GCC_SANITIZE) $(GPP_SANITIZE)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
 

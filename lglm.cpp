@@ -307,10 +307,10 @@ static glm::length_t swizzle(const lua_Float4 &v, const char *key, lua_Float4 &o
   glm::length_t i = 0;
   for (; i < 4 && key[i] != '\0'; ++i) {
     switch (key[i]) {
-      case 'x': GLM_IF_CONSTEXPR (L < 1) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[0]); break;
-      case 'y': GLM_IF_CONSTEXPR (L < 2) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[1]); break;
-      case 'z': GLM_IF_CONSTEXPR (L < 3) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[2]); break;
-      case 'w': GLM_IF_CONSTEXPR (L < 4) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[3]); break;
+      case 'x': GLM_IF_CONSTEXPR(L < 1) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[0]); break;
+      case 'y': GLM_IF_CONSTEXPR(L < 2) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[1]); break;
+      case 'z': GLM_IF_CONSTEXPR(L < 3) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[2]); break;
+      case 'w': GLM_IF_CONSTEXPR(L < 4) return 0; out.raw[i] = static_cast<lua_VecF>(v.raw[3]); break;
       default: {
         return 0;
       }
@@ -576,7 +576,7 @@ int glmVec_isfinite(const TValue *obj) {
     case LUA_VVECTOR2: return glm::__isfinite(glm_v2value(obj));
     case LUA_VVECTOR3: return glm::__isfinite(glm_v3value(obj));
     case LUA_VVECTOR4: return glm::__isfinite(glm_v4value(obj));
-    case LUA_VQUAT: return glm::__isfinite(glm_v4value(obj)); // @HACK
+    case LUA_VQUAT: return glm::__isfinite(glm_v4value(obj));  // @HACK
     default: {
       break;
     }
@@ -701,7 +701,7 @@ static int matgeti (const TValue *obj, lua_Integer n, StkId res) {
   if (l_likely(gidx >= 1 && gidx <= LUAGLM_MATRIX_COLS(m.dimensions))) {
     switch (LUAGLM_MATRIX_ROWS(m.dimensions)) {
       case 2: glm_setvvalue2s(res, m.m42[gidx - 1], LUA_VVECTOR2); return LUA_VVECTOR2;
-      case 3: glm_setvvalue2s(res, m.m43[gidx - 1], LUA_VVECTOR3); return LUA_VVECTOR3; // @ImplicitAlign
+      case 3: glm_setvvalue2s(res, m.m43[gidx - 1], LUA_VVECTOR3); return LUA_VVECTOR3;  // @ImplicitAlign
       case 4: glm_setvvalue2s(res, m.m44[gidx - 1], LUA_VVECTOR4); return LUA_VVECTOR4;
       default: {
         break;
@@ -864,7 +864,7 @@ int glmMat_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
 /// Generalized TValue to glm::vec conversion; using glmVector.Get to implicitly
 /// handle type conversions.
 /// </summary>
-template <glm::length_t D, typename T>
+template<glm::length_t D, typename T>
 static glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
   glm::vec<D, glm_Float> result(0);
 
@@ -879,7 +879,7 @@ static glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
 /// Generalized TValue to glm::mat conversion; using glmMatrix.Get to implicitly
 /// handle type conversions.
 /// </summary>
-template <glm::length_t C, glm::length_t R, typename T>
+template<glm::length_t C, glm::length_t R, typename T>
 static glm::mat<C, R, T> glm_tomat(lua_State *L, int idx) {
   glm::mat<C, R, T> result = glm::identity<glm::mat<C, R, glm_Float>>();
   lua_lock(L);
@@ -1606,7 +1606,7 @@ LUA_API const char *glm_pushstring(lua_State *L, int idx) {
 }
 
 LUA_API int glm_unpack_vector(lua_State *L, int idx) {
-  luaL_checkstack(L, 4, "vector fields"); // Ensure stack-space
+  luaL_checkstack(L, 4, "vector fields");  // Ensure stack-space
   const TValue *o = glm_index2value(L, idx);
   switch (ttypetag(o)) {
     case LUA_VVECTOR2:
@@ -1693,7 +1693,7 @@ LUA_API lua_Integer glm_tohash(lua_State *L, int idx, int ignore_case) {
 #if defined(__GNUC__) && __GNUC__ < 5
   #define FLOAT4_INIT() { {0, 0, 0, 0} }
 #else
-  #define FLOAT4_INIT() {}
+  #define FLOAT4_INIT() { }
 #endif
 
 /* Helper for grit-lua: lua_checkvectorX */
@@ -1781,17 +1781,17 @@ static int tovector(lua_State *L, int idx, lua_Float4 *f4) {
 
   if (f4 != GLM_NULLPTR) {
     if (novariant(variant) == LUA_TVECTOR) {
-  #if LUAGLM_QUAT_WXYZ
+#if LUAGLM_QUAT_WXYZ
       f4->raw[0] = ((variant == LUA_VQUAT) ? v.q.x : v.v4.x);
       f4->raw[1] = ((variant == LUA_VQUAT) ? v.q.y : v.v4.y);
       f4->raw[2] = ((variant == LUA_VQUAT) ? v.q.z : v.v4.z);
       f4->raw[3] = ((variant == LUA_VQUAT) ? v.q.w : v.v4.w);
-  #else
+#else
       f4->raw[0] = v.v4.x;
       f4->raw[1] = v.v4.y;
       f4->raw[2] = v.v4.z;
       f4->raw[3] = v.v4.w;
-  #endif
+#endif
     }
     else if (variant == LUA_VVECTOR1) {  // @ImplicitVec
       f4->raw[0] = v.v4.x;

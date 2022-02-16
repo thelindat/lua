@@ -88,7 +88,7 @@ namespace detail {
   /// </summary>
   template<typename T> struct lglmprefix{};
   template<> struct lglmprefix<float> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };
-  template<> struct lglmprefix<double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } }; // Changed for LuaGLM
+  template<> struct lglmprefix<double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };  // Changed for LuaGLM
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
   template<> struct lglmprefix<long double> { GLM_FUNC_QUALIFIER static char const *value() { return ""; } };
 #endif
@@ -388,30 +388,30 @@ namespace hash {
   };
 
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
-    /// <summary>
-    /// Not the most robust solution; see libcxx's implementation.
-    /// </summary>
-    template<>
-    struct lglm_hash<long double> {
-      GLM_FUNC_QUALIFIER size_t operator()(const long double &n) const {
-        using T = long double;  // -/+ 0.0 should return same hash.
-  #if defined(__i386__) || (defined(__x86_64__) && defined(__ILP32__))
-        union { T t; struct { size_t a, b, c, d; } s; } u;
-        u.s.a = 0;
-        u.s.b = 0;
-        u.s.c = 0;
-        u.s.d = 0;
-        u.t = n;
-        return (n == T(0)) ? 0 : (u.s.a ^ u.s.b ^ u.s.c ^ u.s.d);
-  #else
-        union { T t; struct { size_t a; size_t b; } s; } u;
-        u.s.a = 0;
-        u.s.b = 0;
-        u.t = n;
-        return (n == T(0)) ? 0 : (u.s.a ^ u.s.b);
-  #endif
-      }
-    };
+  /// <summary>
+  /// Not the most robust solution; see libcxx's implementation.
+  /// </summary>
+  template<>
+  struct lglm_hash<long double> {
+    GLM_FUNC_QUALIFIER size_t operator()(const long double &n) const {
+      using T = long double;  // -/+ 0.0 should return same hash.
+#if defined(__i386__) || (defined(__x86_64__) && defined(__ILP32__))
+      union { T t; struct { size_t a, b, c, d; } s; } u;
+      u.s.a = 0;
+      u.s.b = 0;
+      u.s.c = 0;
+      u.s.d = 0;
+      u.t = n;
+      return (n == T(0)) ? 0 : (u.s.a ^ u.s.b ^ u.s.c ^ u.s.d);
+#else
+      union { T t; struct { size_t a; size_t b; } s; } u;
+      u.s.a = 0;
+      u.s.b = 0;
+      u.t = n;
+      return (n == T(0)) ? 0 : (u.s.a ^ u.s.b);
+#endif
+    }
+  };
 #endif
 
   /// <summary>

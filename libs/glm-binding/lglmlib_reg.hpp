@@ -81,7 +81,7 @@ GLM_LUA_REG(mat_negate),
 
 #if defined(COMMON_HPP)
 GLM_LUA_REG(abs),
-{ "fabs", GLM_NAME(abs) },  // lmathlib alias
+{ "fabs", GLM_NAME(abs) },  // @MathlibCompat
 GLM_LUA_REG(ceil),
 GLM_LUA_REG(floor),
 GLM_LUA_REG(floatBitsToInt),
@@ -102,7 +102,7 @@ GLM_LUA_REG(smoothstep),
 GLM_LUA_REG(step),
 GLM_LUA_REG(trunc),
 GLM_LUA_REG(reverse),  // LUA_VECTOR_EXTENSIONS
-{ "tointeger", GLM_NAME(toint) },  // lmathlib alias
+{ "tointeger", GLM_NAME(toint) },  // @MathlibCompat
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(fdim),
 GLM_LUA_REG(hypot),
@@ -282,7 +282,7 @@ GLM_LUA_REG(homogenize),
 { "SetLength", GLM_NAME(scaleLength) },
 { "SetLengthEstimate", GLM_NAME(scaleLength) },
 { "Dot3", GLM_NAME(dot3) },
-{ "GetHomogenized", GLM_NAME(homogenize) }, // @O3DEAlias: Homogenize
+{ "GetHomogenized", GLM_NAME(homogenize) },  // @O3DEAlias: Homogenize
 //{ "NormalizeWithLength", GLM_NAME() }, // @O3DEAlias
 //{ "NormalizeWithLengthEstimate", GLM_NAME() }, // @O3DEAlias
 //{ "NormalizeSafe", GLM_NAME() }, // @O3DEAlias
@@ -301,7 +301,7 @@ GLM_LUA_REG(greaterThan),
 GLM_LUA_REG(greaterThanEqual),
 GLM_LUA_REG(lessThan),
 GLM_LUA_REG(lessThanEqual),
-GLM_LUA_REG(ult),  // lmathlib
+GLM_LUA_REG(ult),  // @MathlibCompat
 GLM_LUA_REG(ulte),
 #if GLM_HAS_CXX11_STL
 { "isgreater", GLM_NAME(greaterThan) },
@@ -336,8 +336,8 @@ GLM_LUA_REG(sinh),
 GLM_LUA_REG(tan),
 GLM_LUA_REG(tanh),
 GLM_LUA_REG(sincos),  // LUA_VECTOR_EXTENSION
-{ "deg", GLM_NAME(degrees) },  // @NOTE: lmathlib compat
-{ "rad", GLM_NAME(radians) },  // @NOTE: lmathlib compat
+{ "deg", GLM_NAME(degrees) },  // @MathlibCompat
+{ "rad", GLM_NAME(radians) },  // @MathlibCompat
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Sin", GLM_NAME(sin) },
 { "Cos", GLM_NAME(cos) },
@@ -1059,7 +1059,7 @@ GLM_LUA_REG(prev_float),
 GLM_LUA_REG(conjugate),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetConjugate", GLM_NAME(conjugate) },
-{ "GetInverseFast", GLM_NAME(conjugate) }, // @O3DEAlias: InvertFast; matrices
+{ "GetInverseFast", GLM_NAME(conjugate) },  // @O3DEAlias: InvertFast; matrices
 #endif
 #endif
 
@@ -1070,8 +1070,8 @@ GLM_LUA_REG(inverse_transform),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetReciprocal", GLM_NAME(inverse) },
 { "GetReciprocalEstimate", GLM_NAME(inverse) },
-{ "GetInverseFull", GLM_NAME(inverse) }, // @O3DEAlias; InvertFull; InvertFast
-{ "GetInverseTransform", GLM_NAME(inverse_transform) }, // @O3DEAlias: InvertTransform
+{ "GetInverseFull", GLM_NAME(inverse) },  // @O3DEAlias; InvertFull; InvertFast
+{ "GetInverseTransform", GLM_NAME(inverse_transform) },  // @O3DEAlias: InvertTransform
 #endif
 #endif
 
