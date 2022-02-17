@@ -429,6 +429,7 @@ static int tfreeze(lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   if (l_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL))
     return luaL_error(L, "cannot change a protected metatable");
+  lua_settop(L, 1);
   lua_setreadonly(L, 1, 1);
   lua_pushvalue(L, 1);
   return 1;
@@ -491,10 +492,14 @@ static int tcompact (lua_State *L) {
 
 static int tclone (lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
-  if (lua_gettop(L) >= 2)  /* supplied sink */
-    luaL_checktype(L, 2, LUA_TTABLE);
-  else
+  if (lua_gettop(L) == 1)  /* create a new table*/
     lua_newtable(L);
+  else {  /* supplied sink */
+    luaL_checktype(L, 2, LUA_TTABLE);
+    if (l_unlikely(luaL_getmetafield(L, 2, "__metatable") != LUA_TNIL))
+      return luaL_error(L, "cannot clone into table with a protected metatable");
+    lua_settop(L, 2);
+  }
 
   lua_clonetable(L, 1, 2);
   lua_pushvalue(L, 2);

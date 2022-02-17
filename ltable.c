@@ -1052,7 +1052,6 @@ void luaH_clonetable (lua_State *L, const Table *from, Table *to) {
 
   if (!isdummy(from)) {  /* create new hash part */
     const size_t size_from = cast_sizet(sizenode(from));
-
     newt.lsizenode = from->lsizenode;
     newt.node = luaM_newvector(L, size_from, Node);
     if (l_unlikely(newt.node == NULL))  /* allocation failed? */
@@ -1065,7 +1064,6 @@ void luaH_clonetable (lua_State *L, const Table *from, Table *to) {
 
   if (from_realasize > 0) {  /* create/reallocate new array part */
     TValue *array = (to_realasize == 0) ? newt.array : to->array;
-
     newt.alimit = from->alimit;
     newt.array = luaM_reallocvector(L, array, to_realasize, from_realasize, TValue);
     if (l_unlikely(newt.array == NULL)) {  /* allocation failed? */
@@ -1094,6 +1092,14 @@ void luaH_clonetable (lua_State *L, const Table *from, Table *to) {
 #endif
   if (isblack(obj2gco(to)))
     luaC_barrierback_(L, obj2gco(to));
+#if 0
+  if (from->metatable != NULL) {  /* replace metatable */
+    Table *from_mt = from->metatable;
+    to->metatable = from_mt;
+    luaC_objbarrier(L, obj2gco(to), from_mt);
+    luaC_checkfinalizer(L, obj2gco(to), from_mt);
+  }
+#endif
 }
 #endif
 

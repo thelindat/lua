@@ -12,8 +12,6 @@
 #ifndef lgritlib_h
 #define lgritlib_h
 
-#include <math.h>
-
 #include "luaconf.h"
 #include "lua.h"
 #include "lauxlib.h"
