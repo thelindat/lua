@@ -41,7 +41,7 @@ namespace glm {
       return x != y;
     }
 
-#if GLM_HAS_CXX11_STL
+#if GLM_HAS_CXX11_STL && (GLM_LANG & GLM_LANG_CXX14_FLAG)
     template<>
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool equal_strict(const float &x, const float &y) {
       return std::equal_to<float>()(x, y);

@@ -336,6 +336,7 @@ GLM_LUA_REG(sinh),
 GLM_LUA_REG(tan),
 GLM_LUA_REG(tanh),
 GLM_LUA_REG(sincos),  // LUA_VECTOR_EXTENSION
+GLM_LUA_REG(fromAngle),
 { "deg", GLM_NAME(degrees) },  // @MathlibCompat
 { "rad", GLM_NAME(radians) },  // @MathlibCompat
 #if defined(LUAGLM_ALIASES_UNITY)
@@ -352,6 +353,7 @@ GLM_LUA_REG(sincos),  // LUA_VECTOR_EXTENSION
 { "GetSinCos", GLM_NAME(sincos) },
 { "GetAcos", GLM_NAME(acos) },
 { "GetAtan", GLM_NAME(atan) },
+{ "CreateFromAngle", GLM_NAME(fromAngle) },
 #endif
 #endif
 
@@ -852,7 +854,6 @@ GLM_LUA_REG(angle),
 GLM_LUA_REG(orientedAngle),
 GLM_LUA_REG(angle_atan),  // LUA_VECTOR_EXTENSIONS
 GLM_LUA_REG(orientedAngle_atan),
-GLM_LUA_REG(fromAngle),
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "angle_to", GLM_NAME(angle) },
 { "signedAngle", GLM_NAME(orientedAngle) },
@@ -865,7 +866,6 @@ GLM_LUA_REG(fromAngle),
 { "SignedAngle", GLM_NAME(orientedAngle) },
 #endif
 #if defined(LUAGLM_ALIASES_O3DE)
-{ "CreateFromAngle", GLM_NAME(fromAngle) },
 //{ "AngleDeg", GLM_NAME() }, // @O3DEAlias
 //{ "AngleSafe", GLM_NAME() }, // @O3DEAlias
 //{ "AngleSafeDeg", GLM_NAME() }, // @O3DEAlias

@@ -121,10 +121,10 @@ extern LUA_API_LINKAGE {
 **
 @@ LUA_HAS_CONSTEXPR GLM_HAS_CONSTEXPR analogue
 */
-#if (GLM_COMPILER & GLM_COMPILER_CLANG)
-  #define LUA_HAS_CONSTEXPR __has_feature(cxx_relaxed_constexpr)
-#elif (GLM_LANG & GLM_LANG_CXX14_FLAG)
+#if (GLM_LANG & GLM_LANG_CXX11_FLAG)
   #define LUA_HAS_CONSTEXPR 1
+#elif (GLM_COMPILER & GLM_COMPILER_CLANG)
+  #define LUA_HAS_CONSTEXPR __has_feature(cxx_relaxed_constexpr
 #else
   #define LUA_HAS_CONSTEXPR ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && GLM_HAS_INITIALIZER_LISTS && (((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL17)) || ((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC15))))
 #endif
@@ -142,7 +142,7 @@ extern LUA_API_LINKAGE {
 @@ LUA_CONSTEXPR_STATEMENT Avoid 'statement in constexpr function' wrapper for
 ** icc, etc.
 */
-#if !(GLM_COMPILER & GLM_COMPILER_INTEL)
+#if !(GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_LANG & GLM_LANG_CXX14_FLAG)
   #define LUA_CONSTEXPR_STATEMENT LUA_CONSTEXPR
 #else
   #define LUA_CONSTEXPR_STATEMENT
@@ -152,14 +152,14 @@ extern LUA_API_LINKAGE {
 @@ LUA_HAS_IF_CONSTEXPR GLM_HAS_IF_CONSTEXPR analogue
 */
 #if LUA_HAS_CONSTEXPR
-  #if (GLM_COMPILER & GLM_COMPILER_CLANG)
+  #if (GLM_LANG & GLM_LANG_CXX17_FLAG)
+    #define LUA_HAS_IF_CONSTEXPR 1
+  #elif (GLM_COMPILER & GLM_COMPILER_CLANG)
     #if __has_feature(cxx_if_constexpr)
       #define LUA_HAS_IF_CONSTEXPR 1
     #else
       #define LUA_HAS_IF_CONSTEXPR 0
     #endif
-  #elif (GLM_LANG & GLM_LANG_CXX17_FLAG)
-    #define LUA_HAS_IF_CONSTEXPR 1
   #else
     #define LUA_HAS_IF_CONSTEXPR 0
   #endif
@@ -388,14 +388,14 @@ struct gLuaBase {
   /// <summary>
   /// Return the smallest possible value in the output range.
   /// </summary>
-  static constexpr result_type min() {
+  static LUA_CONSTEXPR result_type min() {
     return 0;
   }
 
   /// <summary>
   /// Return the largest possible value in the output range.
   /// </summary>
-  static constexpr result_type max() {
+  static LUA_CONSTEXPR result_type max() {
     return static_cast<result_type>(LUA_MAXINTEGER);
   }
 
@@ -590,8 +590,7 @@ struct gLuaBase {
   /// <summary>
   /// Attempt to push the number as an integer; falling back to number otherwise
   /// </summary>
-  LUA_BIND_QUALIFIER int PushNumInt(const gLuaBase &LB, glm_Number gd) {
-    const lua_Number d = static_cast<lua_Number>(gd);
+  LUA_BIND_QUALIFIER int PushNumInt(const gLuaBase &LB, lua_Number d) {
     lua_Integer n = 0;
     if (lua_numbertointeger(d, &n)) /* does 'd' fit in an integer? */
       lua_pushinteger(LB.L, n); /* result is integer */
@@ -1214,9 +1213,8 @@ struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
 // Specializations
 
 using gLuaFloat = gLuaTrait<glm_Float>;
-using gLuaNumber = gLuaTrait<glm_Number>;
+using gLuaNumber = gLuaTrait<lua_Number>;
 using gLuaInteger = gLuaTrait<lua_Integer>;
-using gLuaNumRaw = gLuaTrait<lua_Number>;
 
 /// <summary>
 /// gLuaNumberCompileTime; See @LUAGLM_NUMBER_ARGS.
@@ -1805,7 +1803,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 
 /* @TODO: Allow different specializations for lua_Number and vec2/3/4 */
 /* Generalized int16_t, int32_t, etc. function definition */
-#define INTEGER_VECTOR_DEFN(Name, F, ArgLayout, IType, ...)                                        \
+#define INTEGER_VECTOR_DEFN(Name, F, IType, ArgLayout, ...)                                        \
   GLM_BINDING_QUALIFIER(Name) {                                                                    \
     GLM_BINDING_BEGIN                                                                              \
     PARSE_VECTOR_TYPE(LB, F, IType, IType, IType, ArgLayout, ArgLayout, ArgLayout, ##__VA_ARGS__); \

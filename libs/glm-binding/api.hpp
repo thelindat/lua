@@ -243,7 +243,7 @@
       } LUA_FALLTHROUGH;                                                                         \
       case LUA_VFALSE: case LUA_VTRUE: /* @BoolCoercion */                                       \
       case LUA_VSHRSTR: case LUA_VLNGSTR: /* @StringCoercion */                                  \
-      case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaNumRaw, gLuaNumRaw); break;              \
+      case LUA_VNUMFLT: LAYOUT_GENERIC_EQUAL(LB, F, gLuaNumber, gLuaNumber); break;              \
       case LUA_VVECTOR2: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec2<>::fast, gLuaVec2<>::fast); break; \
       case LUA_VVECTOR3: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec3<>::fast, gLuaVec3<>::fast); break; \
       case LUA_VVECTOR4: LAYOUT_GENERIC_EQUAL(LB, F, gLuaVec4<>::fast, gLuaVec4<>::fast); break; \
@@ -289,7 +289,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
   #endif
       case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
-      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumRaw::fast); break;
+      case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumber::fast); break;
       case LUA_VVECTOR2: LAYOUT_HASH(LB, std::hash, gLuaVec2<>::fast); break;
       case LUA_VVECTOR3: LAYOUT_HASH(LB, std::hash, gLuaVec3<>::fast); break;
       case LUA_VVECTOR4: LAYOUT_HASH(LB, std::hash, gLuaVec4<>::fast); break;
@@ -434,33 +434,33 @@ GLM_BINDING_QUALIFIER(mat_mul) {  // @TODO: Reduce bloat!
   LUA_MLM_END
 
 #if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
-INTEGER_VECTOR_DEFN(bitCount, glm::bitCount, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(bitCount, glm::bitCount, lua_Unsigned, LAYOUT_UNARY)
 #endif
-INTEGER_VECTOR_DEFN(bitfieldExtract, glm::bitfieldExtract, LAYOUT_UNARY, lua_Unsigned, gLuaTrait<int>, gLuaTrait<int>)
-INTEGER_VECTOR_DEFN(bitfieldInsert, glm::bitfieldInsert, LAYOUT_BINARY, lua_Unsigned, gLuaTrait<int>, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldExtract, glm::bitfieldExtract, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldInsert, glm::bitfieldInsert, lua_Unsigned, LAYOUT_BINARY, gLuaTrait<int>, gLuaTrait<int>)
 #if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
-INTEGER_VECTOR_DEFN(bitfieldReverse, glm::bitfieldReverse, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(bitfieldReverse, glm::bitfieldReverse, lua_Unsigned, LAYOUT_UNARY)
 #endif
-INTEGER_VECTOR_DEFN(findLSB, glm::findLSB, LAYOUT_UNARY, lua_Unsigned)
-INTEGER_VECTOR_DEFN(findMSB, glm::findMSB, LAYOUT_UNARY, lua_Unsigned)
-INTEGER_VECTOR_DEFN(imulExtended, glm::imulExtended, LAYOUT_MUL_EXTENDED, int)
-INTEGER_VECTOR_DEFN(uaddCarry, glm::uaddCarry, LAYOUT_ADD_CARRY, glm::uint)
-INTEGER_VECTOR_DEFN(umulExtended, glm::umulExtended, LAYOUT_MUL_EXTENDED, glm::uint)
-INTEGER_VECTOR_DEFN(usubBorrow, glm::usubBorrow, LAYOUT_ADD_CARRY, glm::uint)
+INTEGER_VECTOR_DEFN(findLSB, glm::findLSB, lua_Unsigned, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(findMSB, glm::findMSB, lua_Unsigned, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(imulExtended, glm::imulExtended, int, LAYOUT_MUL_EXTENDED)
+INTEGER_VECTOR_DEFN(uaddCarry, glm::uaddCarry, glm::uint, LAYOUT_ADD_CARRY)
+INTEGER_VECTOR_DEFN(umulExtended, glm::umulExtended, glm::uint, LAYOUT_MUL_EXTENDED)
+INTEGER_VECTOR_DEFN(usubBorrow, glm::usubBorrow, glm::uint, LAYOUT_ADD_CARRY)
 #endif
 
 #if defined(EXT_SCALAR_INTEGER_HPP) || defined(EXT_VECTOR_INTEGER_HPP)
 #if GLM_VERSION >= 996  // @COMPAT: Added in 0.9.9.6
-INTEGER_VECTOR_DEFN(findNSB, glm::findNSB, LAYOUT_BINARY_AS_INT, lua_Unsigned)
+INTEGER_VECTOR_DEFN(findNSB, glm::findNSB, lua_Unsigned, LAYOUT_BINARY_AS_INT)
 #endif
 #endif
 
 #if defined(GTC_BITFIELD_HPP)
 BIND_DEFN(bitfieldDeinterleave, glm::bitfieldDeinterleave, gLuaTrait<glm::uint64>)
-INTEGER_VECTOR_DEFN(bitfieldFillOne, glm::bitfieldFillOne, LAYOUT_UNARY, lua_Unsigned, gLuaTrait<int>, gLuaTrait<int>)
-INTEGER_VECTOR_DEFN(bitfieldFillZero, glm::bitfieldFillZero, LAYOUT_UNARY, lua_Unsigned, gLuaTrait<int>, gLuaTrait<int>)
-INTEGER_VECTOR_DEFN(bitfieldRotateLeft, glm::bitfieldRotateLeft, LAYOUT_UNARY, lua_Unsigned, gLuaTrait<int>)
-INTEGER_VECTOR_DEFN(bitfieldRotateRight, glm::bitfieldRotateRight, LAYOUT_UNARY, lua_Unsigned, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldFillOne, glm::bitfieldFillOne, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldFillZero, glm::bitfieldFillZero, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldRotateLeft, glm::bitfieldRotateLeft, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>)
+INTEGER_VECTOR_DEFN(bitfieldRotateRight, glm::bitfieldRotateRight, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>)
 GLM_BINDING_QUALIFIER(bitfieldInterleave) {
   GLM_BINDING_BEGIN
   switch (LB.top()) {
@@ -474,12 +474,12 @@ GLM_BINDING_QUALIFIER(bitfieldInterleave) {
   return LUAGLM_ERROR(LB.L, "uint32_tx2, uint32_tx3, or uint16_tx4 expected");
   GLM_BINDING_END
 }
-INTEGER_VECTOR_DEFN(mask, glm::mask, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(mask, glm::mask, lua_Unsigned, LAYOUT_UNARY)
 #endif
 
 #if defined(GTX_BIT_HPP)
-INTEGER_VECTOR_DEFN(highestBitValue, glm::highestBitValue, LAYOUT_UNARY, lua_Integer)
-INTEGER_VECTOR_DEFN(lowestBitValue, glm::lowestBitValue, LAYOUT_UNARY, lua_Integer)
+INTEGER_VECTOR_DEFN(highestBitValue, glm::highestBitValue, lua_Integer, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(lowestBitValue, glm::lowestBitValue, lua_Integer, LAYOUT_UNARY)
 // GLM_BINDING_DECL(powerOfTwoAbove);  // @DEPRECATED
 // GLM_BINDING_DECL(powerOfTwoBelow);  // @DEPRECATED
 // GLM_BINDING_DECL(powerOfTwoNearest);  // @DEPRECATED
@@ -535,12 +535,12 @@ BIND_DEFN(packF3x9_E1x5, glm::packF3x9_E1x5, gLuaVec3<float>)
 BIND_DEFN(unpackF3x9_E1x5, glm::unpackF3x9_E1x5, gLuaTrait<glm::uint32>)
 BIND_DEFN(packRGBM, glm::packRGBM, gLuaVec3<>)
 BIND_DEFN(unpackRGBM, glm::unpackRGBM, gLuaVec4<>)
-INTEGER_VECTOR_DEFN(packHalf, glm::packHalf, LAYOUT_UNARY, float)
-INTEGER_VECTOR_DEFN(unpackHalf, glm::unpackHalf, LAYOUT_UNARY, glm::uint16)
-INTEGER_VECTOR_DEFN(packUnorm, glm::packUnorm<glm::uint16>, LAYOUT_UNARY, float)
-INTEGER_VECTOR_DEFN(unpackUnorm, glm::unpackUnorm<float>, LAYOUT_UNARY, glm::uint16)
-INTEGER_VECTOR_DEFN(packSnorm, glm::packSnorm<glm::int16>, LAYOUT_UNARY, float)
-INTEGER_VECTOR_DEFN(unpackSnorm, glm::unpackSnorm<float>, LAYOUT_UNARY, glm::int16)
+INTEGER_VECTOR_DEFN(packHalf, glm::packHalf, float, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(unpackHalf, glm::unpackHalf, glm::uint16, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(packUnorm, glm::packUnorm<glm::uint16>, float, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(unpackUnorm, glm::unpackUnorm<float>, glm::uint16, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(packSnorm, glm::packSnorm<glm::int16>, float, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(unpackSnorm, glm::unpackSnorm<float>, glm::int16, LAYOUT_UNARY)
 BIND_DEFN(packUnorm2x4, glm::packUnorm2x4, gLuaVec2<float>)
 BIND_DEFN(unpackUnorm2x4, glm::unpackUnorm2x4, gLuaTrait<glm::uint8>)
 BIND_DEFN(packUnorm4x4, glm::packUnorm4x4, gLuaVec4<float>)
@@ -1112,10 +1112,10 @@ BIND_DEFN(fma, glm::fma, gLuaNumber, gLuaNumber, gLuaNumber)
 #else
 NUMBER_VECTOR_DEFN(fma, glm::fma, LAYOUT_TERNARY)
 #endif
-INTEGER_VECTOR_DEFN(floatBitsToInt, glm::floatBitsToInt, LAYOUT_UNARY, float)
-INTEGER_VECTOR_DEFN(floatBitsToUint, glm::floatBitsToUint, LAYOUT_UNARY, float)
-INTEGER_VECTOR_DEFN(intBitsToFloat, glm::intBitsToFloat, LAYOUT_UNARY, int)
-INTEGER_VECTOR_DEFN(uintBitsToFloat, glm::uintBitsToFloat, LAYOUT_UNARY, unsigned)
+INTEGER_VECTOR_DEFN(floatBitsToInt, glm::floatBitsToInt, float, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(floatBitsToUint, glm::floatBitsToUint, float, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(intBitsToFloat, glm::intBitsToFloat, int, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(uintBitsToFloat, glm::uintBitsToFloat, unsigned, LAYOUT_UNARY)
 NUMBER_VECTOR_QUAT_DEFN(isinf, glm::isinf, LAYOUT_UNARY) /* glm/ext/quaternion_common.hpp */
 NUMBER_VECTOR_QUAT_DEFN(isnan, glm::isnan, LAYOUT_UNARY) /* glm/ext/quaternion_common.hpp */
 NUMBER_VECTOR_DEFN(round, glm::round, LAYOUT_UNARY)
@@ -1137,7 +1137,7 @@ NUMBER_VECTOR_DEFN(isunordered, glm::isunordered, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(nearbyint, glm::nearbyint, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(nextafter, glm::nextafter, LAYOUT_BINARY)
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
-BIND_DEFN(nexttoward, std::nexttoward, gLuaNumRaw, gLuaTrait<long double>)
+BIND_DEFN(nexttoward, std::nexttoward, gLuaNumber, gLuaTrait<long double>)
 #endif
 NUMBER_VECTOR_DEFN(remainder, glm::remainder, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(scalbn, glm::scalbn, LAYOUT_BINARY_AS_INT)
@@ -1373,9 +1373,9 @@ BIND_DEFN(dot3, glm::dot, gLuaVec4<>, gLuaVec3<>)
 #endif
 
 #if defined(VECTOR_RELATIONAL_HPP)
-INTEGER_VECTOR_DEFN(all, glm::all, LAYOUT_UNARY, bool)
-INTEGER_VECTOR_DEFN(any, glm::any, LAYOUT_UNARY, bool)
-INTEGER_VECTOR_DEFN(not_, glm::not_, LAYOUT_UNARY, bool)
+INTEGER_VECTOR_DEFN(all, glm::all, bool, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(any, glm::any, bool, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(not_, glm::not_, bool, LAYOUT_UNARY)
 #endif
 
 #if defined(VECTOR_RELATIONAL_HPP) || defined(GTC_QUATERNION_HPP)
@@ -1383,8 +1383,8 @@ NUMBER_VECTOR_QUAT_DEFN(greaterThan, glm::greaterThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(greaterThanEqual, glm::greaterThanEqual, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(lessThan, glm::lessThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(lessThanEqual, glm::lessThanEqual, LAYOUT_BINARY)
-INTEGER_VECTOR_DEFN(ult, glm::lessThan, LAYOUT_BINARY, lua_Unsigned)  // @MathlibCompat
-INTEGER_VECTOR_DEFN(ulte, glm::lessThanEqual, LAYOUT_BINARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(ult, glm::lessThan, lua_Unsigned, LAYOUT_BINARY)  // @MathlibCompat
+INTEGER_VECTOR_DEFN(ulte, glm::lessThanEqual, lua_Unsigned, LAYOUT_BINARY)
 #if defined(LUAGLM_ALIASES_O3DE)
 NUMBER_VECTOR_QUAT_DEFN(all_greaterThan, glm::all_greaterThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(all_greaterThanEqual, glm::all_greaterThanEqual, LAYOUT_BINARY)
@@ -1416,22 +1416,23 @@ NUMBER_VECTOR_DEFN(sinh, glm::sinh, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(tan, glm::tan, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(tanh, glm::tanh, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(sincos, glm::sincos, LAYOUT_SINCOS)  // LUA_VECTOR_EXTENSIONS
+BIND_DEFN(fromAngle, glm::fromAngle, gLuaNumCoT)
 #endif
 
 #if defined(EXT_SCALAR_INTEGER_HPP) || defined(EXT_VECTOR_INTEGER_HPP)
 #if GLM_VERSION >= 999  // @COMPAT: isMultiple fixed in 0.9.9.9
-INTEGER_VECTOR_DEFN(isMultiple, glm::isMultiple, LAYOUT_BINARY_SCALAR, lua_Unsigned)
+INTEGER_VECTOR_DEFN(isMultiple, glm::isMultiple, lua_Unsigned, LAYOUT_BINARY_SCALAR)
 #endif
 #if GLM_VERSION >= 996  // @COMPAT: Fixed in 0.9.9.6
-INTEGER_VECTOR_DEFN(isPowerOfTwo, glm::isPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(isPowerOfTwo, glm::isPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
 #else
 BIND_DEFN(isPowerOfTwo, glm::isPowerOfTwo, gLuaInteger)
 #endif
 #if GLM_VERSION >= 996  // @COMPAT: Added in 0.9.9.6
-INTEGER_VECTOR_DEFN(nextMultiple, glm::nextMultiple, LAYOUT_BINARY_OPTIONAL, lua_Unsigned)
-INTEGER_VECTOR_DEFN(nextPowerOfTwo, glm::nextPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
-INTEGER_VECTOR_DEFN(prevMultiple, glm::prevMultiple, LAYOUT_BINARY_OPTIONAL, lua_Unsigned)
-INTEGER_VECTOR_DEFN(prevPowerOfTwo, glm::prevPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(nextMultiple, glm::nextMultiple, lua_Unsigned, LAYOUT_BINARY_OPTIONAL)
+INTEGER_VECTOR_DEFN(nextPowerOfTwo, glm::nextPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(prevMultiple, glm::prevMultiple, lua_Unsigned, LAYOUT_BINARY_OPTIONAL)
+INTEGER_VECTOR_DEFN(prevPowerOfTwo, glm::prevPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
 #endif
 #endif
 
@@ -1485,9 +1486,9 @@ NUMBER_VECTOR_DEFN(sech, glm::sech, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(ceilMultiple, glm::ceilMultiple, LAYOUT_MODULO)
 INTEGER_NUMBER_VECTOR_DEFN(floorMultiple, glm::floorMultiple, LAYOUT_MODULO)
 INTEGER_NUMBER_VECTOR_DEFN(roundMultiple, glm::roundMultiple, LAYOUT_MODULO)
-INTEGER_VECTOR_DEFN(ceilPowerOfTwo, glm::ceilPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
-INTEGER_VECTOR_DEFN(floorPowerOfTwo, glm::floorPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
-INTEGER_VECTOR_DEFN(roundPowerOfTwo, glm::roundPowerOfTwo, LAYOUT_UNARY, lua_Unsigned)
+INTEGER_VECTOR_DEFN(ceilPowerOfTwo, glm::ceilPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(floorPowerOfTwo, glm::floorPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(roundPowerOfTwo, glm::roundPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(snap, glm::snap, LAYOUT_BINARY)
 #endif
 
@@ -1583,13 +1584,13 @@ INTEGER_NUMBER_VECTOR_DEFN(compAdd, glm::compAdd, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMax, glm::compMax, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMin, glm::compMin, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFN(compMul, glm::compMul, LAYOUT_UNARY)
-INTEGER_VECTOR_DEFN(compNormalize, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm_Integer)
+INTEGER_VECTOR_DEFN(compNormalize, glm::compNormalize<glm_Float>, glm_Integer, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
 /* glm::compNormalize/glm::compScale for different types, e.g., u8, i8, u16, i16 */
-INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i8)
-INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u8)
-INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::i16)
-INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, LAYOUT_UNARY, glm::u16)
+INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, glm::i8, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, glm::u8, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, glm::i16, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, glm::u16, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
@@ -2009,7 +2010,6 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
   }
 
 MATRIX_TRANSFORM_DEFN(scale, glm::scale)
-// BIND_DEFN(scale_slow, glm::scale_slow, gLuaMat4x4<>, gLuaVec3<>)
 MATRIX_TRANSFORM_DEFN(translate, glm::translate)
 BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
 BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x3<>)
@@ -2034,7 +2034,6 @@ NUMBER_VECTOR_QUAT_DEFNS(angle, glm::angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT
 ORIENTED_ANGLE_DEFN(orientedAngle, glm::orientedAngle)
 NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // LUA_VECTOR_EXTENSIONS
 ORIENTED_ANGLE_DEFN(orientedAngle_atan, glm::__orientedAngle)
-BIND_DEFN(fromAngle, glm::fromAngle, gLuaNumCoT)
 #endif
 
 #if defined(GTX_VECTOR_QUERY_HPP)
@@ -2115,7 +2114,7 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
   BIND_RESULT(LB, F()(LB));                                                      \
   LUA_MLM_END
 
-using raNum = gLuaNumRaw;
+using raNum = gLuaNumber;
 template<typename T = raNum::type> using raAboveZero = gPositiveConstraint<gLuaTrait<T>, false>;  // 0.0 < _Ax0
 template<typename T = raNum::type> using raAboveZeroInc = gPositiveConstraint<gLuaTrait<T>, true>;  // 0.0 <= _Ax0
 template<typename T = raNum::type> using raProbability = gRelativeConstraint<gLuaTrait<T>, true, true>;  // 0.0 <= _Ax0 && _Ax0 <= 1.0
@@ -2123,7 +2122,7 @@ template<typename T = raNum::type> using raRelativeGeo = gRelativeConstraint<gLu
 template<typename T = raNum::type> using raNegativeBinorm = gRelativeConstraint<gLuaTrait<T>, false, true>;  // 0.0 < _Ax0 && _Ax0 <= 1.0
 
 LAYOUT_DEFN(uniform_int, std::uniform_int_distribution<lua_Integer>, RANDOM_UNIFORM, gLuaInteger, gLuaInteger)
-LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_UNIFORM, raAboveZeroInc<>, gLuaNumRaw)
+LAYOUT_DEFN(uniform_real, std::uniform_real_distribution<raNum::type>, RANDOM_UNIFORM, raAboveZeroInc<>, gLuaNumber)
 LAYOUT_DEFN(bernoulli, std::bernoulli_distribution, RAND_TRAIT, raProbability<double>)
 LAYOUT_DEFN(binomial, std::binomial_distribution<lua_Integer>, RANDOM_DEVICE, gPositiveConstraint<gLuaTrait<lua_Integer>>, raProbability<double>)
 LAYOUT_DEFN(negative_binomial, std::negative_binomial_distribution<lua_Integer>, RANDOM_DEVICE, raAboveZero<lua_Integer>, raNegativeBinorm<double>)

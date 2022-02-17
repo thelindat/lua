@@ -84,16 +84,6 @@ typedef LUAGLM_FLOAT_TYPE glm_Float;
 typedef LUAGLM_INT_TYPE glm_Integer;
 
 /*
-** GLM specific lua_Number (re)definition to avoid the usage of long double
-** within GLM (generally unsupported).
-*/
-#if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
-typedef double glm_Number;
-#else
-typedef lua_Number glm_Number;
-#endif
-
-/*
 @@ LUAGLM_Q Specifies how vector, quat, and matrix types are qualified in terms
 ** of alignment and precision by the runtime/API. In practice, this is used to
 ** allow libraries to use different GLM alignment configurations.

@@ -440,8 +440,15 @@ ivecN = ilogb(v --[[ vecN ]])
 
 ```lua
 -- Calculate sin and cos simultaneously
-nsin --[[ number ]],ncos --[[ number ]] = sincos(v --[[ number ]])
-vsin --[[ vecN ]],vcos --[[ vecN ]] = sincos(v --[[ vecN ]])
+n_sin --[[ number ]],n_cos --[[ number ]] = sincos(n --[[ number ]])
+v_sin --[[ vecN ]],v_cos --[[ vecN ]] = sincos(v --[[ vecN ]])
+```
+
+### fromAngle
+
+```lua
+-- CreateFromAngle: calculate sin and cos simultaneously
+v_sincos --[[ vec2 ]] = fromAngle(n --[[ number ]])
 ```
 
 ### Aliases
