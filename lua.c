@@ -444,7 +444,7 @@ static int handle_luainit (lua_State *L) {
 
 #include <readline/readline.h>
 #include <readline/history.h>
-#define lua_initreadline(L)	((void)L, rl_readline_name=(char *)"lua")
+#define lua_initreadline(L)	((void)L, rl_readline_name="lua")
 #define lua_readline(L,b,p)	((void)L, ((b)=readline(p)) != NULL)
 #define lua_saveline(L,line)	((void)L, add_history(line))
 #define lua_freeline(L,b)	((void)L, free(b))

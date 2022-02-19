@@ -735,8 +735,8 @@ LUA_API int lua_getglobal (lua_State *L, const char *name) {
 
 
 LUA_API int lua_gettable (lua_State *L, int idx) {
-  TValue *t;
   const TValue *slot;
+  TValue *t;
   lua_lock(L);
   t = index2value(L, idx);
   if (luaV_fastget(L, t, s2v(L->top - 1), slot, luaH_get)) {
@@ -802,7 +802,7 @@ l_sinline int finishrawget (lua_State *L, const TValue *val) {
 }
 
 
-static Table *ensuretable (lua_State *L, const TValue *t) {
+static Table *gettable (lua_State *L, const TValue *t) {
   api_check(L, ttistable(t), "table expected");
   return hvalue(t);
 }
@@ -819,7 +819,7 @@ LUA_API int lua_rawget (lua_State *L, int idx) {
   else if (ttismatrix(o))
     result = glmMat_rawget(o, s2v(L->top - 1), L->top - 1);
   else {
-    Table *t = ensuretable(L, o);
+    Table *t = gettable(L, o);
     const TValue *val = luaH_get(t, s2v(L->top - 1));
     L->top--;  /* remove key */
     result = finishrawget(L, val);
@@ -843,7 +843,7 @@ LUA_API int lua_rawgeti (lua_State *L, int idx, lua_Integer n) {
     api_incr_top(L);
   }
   else {
-    Table *t = ensuretable(L, o);
+    Table *t = gettable(L, o);
     result = finishrawget(L, luaH_getint(t, n));
   }
   lua_unlock(L);
@@ -1093,7 +1093,7 @@ static void aux_rawset (lua_State *L, int idx, TValue *key, int n) {
   if (ttismatrix(v))
     glmMat_rawset(L, v, key, s2v(L->top - 1));
   else {
-    Table *t = ensuretable(L, v);
+    Table *t = gettable(L, v);
 #if defined(LUAGLM_EXT_READONLY)
     readonly_api_check(L, t);
 #endif
@@ -1129,7 +1129,7 @@ LUA_API void lua_rawseti (lua_State *L, int idx, lua_Integer n) {
     glmMat_rawset(L, v, &key, s2v(L->top - 1));
   }
   else {
-    Table *t = ensuretable(L, v);
+    Table *t = gettable(L, v);
 #if defined(LUAGLM_EXT_READONLY)
     readonly_api_check(L, t);
 #endif
@@ -1150,7 +1150,8 @@ LUA_API int lua_setmetatable (lua_State *L, int objindex) {
   if (ttisnil(s2v(L->top - 1)))
     mt = NULL;
   else {
-    mt = ensuretable(L, s2v(L->top - 1));
+    api_check(L, ttistable(s2v(L->top - 1)), "table expected");
+    mt = hvalue(s2v(L->top - 1));
   }
   switch (ttype(obj)) {
     case LUA_TTABLE: {
@@ -1468,8 +1469,8 @@ LUA_API int lua_error (lua_State *L) {
 
 
 LUA_API int lua_next (lua_State *L, int idx) {
-  int more;
   const TValue *o;
+  int more;
   lua_lock(L);
   api_checknelems(L, 1);
   o = index2value(L, idx);
@@ -1478,7 +1479,7 @@ LUA_API int lua_next (lua_State *L, int idx) {
   else if (ttismatrix(o))
     more = glmMat_next(o, L->top - 1);
   else {
-    Table *t = ensuretable(L, o);
+    Table *t = gettable(L, o);
     more = luaH_next(L, t, L->top - 1);
   }
   if (more) {

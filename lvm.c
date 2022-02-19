@@ -1290,9 +1290,8 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
           if (luaV_fastget(L, upval, key, slot, luaH_getshortstr)) {
             setobj2s(L, ra, slot);
           }
-          else {
+          else
             Protect(luaV_finishget(L, upval, rc, ra, slot));
-          }
         }
         vmbreak;
       }
@@ -1318,9 +1317,8 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
               : luaV_fastget(L, rb, rc, slot, luaH_get)) {
             setobj2s(L, ra, slot);
           }
-          else {
+          else
             Protect(luaV_finishget(L, rb, rc, ra, slot));
-          }
         }
         vmbreak;
       }
@@ -1364,30 +1362,25 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
           if (luaV_fastget(L, rb, key, slot, luaH_getshortstr)) {
             setobj2s(L, ra, slot);
           }
-          else {
+          else
             Protect(luaV_finishget(L, rb, rc, ra, slot));
-          }
         }
         vmbreak;
       }
       vmcase(OP_SETTABUP) {
+        const TValue *slot;
         TValue *upval = cl->upvals[GETARG_A(i)]->v;
         TValue *rb = KB(i);
         TValue *rc = RKC(i);
-        if (ttismatrix(upval))
-          Protect(glmMat_set(L, upval, rb, rc));
-        else {
-          const TValue *slot;
-          TString *key = tsvalue(rb);  /* key must be a string */
-          if (luaV_fastget(L, upval, key, slot, luaH_getshortstr)) {
+        TString *key = tsvalue(rb);  /* key must be a string */
+        if (luaV_fastget(L, upval, key, slot, luaH_getshortstr)) {
 #if defined(LUAGLM_EXT_READONLY)
-            luaV_readonly_check(L, hvalue(upval));
+          luaV_readonly_check(L, hvalue(upval));
 #endif
-            luaV_finishfastset(L, upval, slot, rc);
-          }
-          else
-            Protect(luaV_finishset(L, upval, rb, rc, slot));
+          luaV_finishfastset(L, upval, slot, rc);
         }
+        else
+          Protect(luaV_finishset(L, upval, rb, rc, slot));
         vmbreak;
       }
       vmcase(OP_SETTABLE) {
@@ -1406,9 +1399,8 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
 #endif
             luaV_finishfastset(L, s2v(ra), slot, rc);
           }
-          else {
+          else
             Protect(luaV_finishset(L, s2v(ra), rb, rc, slot));
-          }
         }
         vmbreak;
       }
@@ -1444,9 +1436,8 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
 #endif
           luaV_finishfastset(L, s2v(ra), slot, rc);
         }
-        else {
+        else
           Protect(luaV_finishset(L, s2v(ra), rb, rc, slot));
-        }
         vmbreak;
       }
       vmcase(OP_NEWTABLE) {
@@ -1482,9 +1473,8 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
           if (luaV_fastget(L, rb, key, slot, luaH_getstr)) {
             setobj2s(L, ra, slot);
           }
-          else {
+          else
             Protect(luaV_finishget(L, rb, rc, ra, slot));
-          }
         }
         vmbreak;
       }

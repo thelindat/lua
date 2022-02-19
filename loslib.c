@@ -64,15 +64,15 @@
 */
 #if !defined(LUA_NUMTIME)	/* { */
 
-#define l_timet          lua_Integer
-#define l_pushtime(L,t)  lua_pushinteger(L, (lua_Integer)(t))
-#define l_gettime(L,arg) luaL_checkinteger(L, arg)
+#define l_timet			lua_Integer
+#define l_pushtime(L,t)		lua_pushinteger(L,(lua_Integer)(t))
+#define l_gettime(L,arg)	luaL_checkinteger(L, arg)
 
 #else				/* }{ */
 
-#define l_timet          lua_Number
-#define l_pushtime(L,t)  lua_pushnumber(L, (lua_Number)(t))
-#define l_gettime(L,arg) luaL_checknumber(L, arg)
+#define l_timet			lua_Number
+#define l_pushtime(L,t)		lua_pushnumber(L,(lua_Number)(t))
+#define l_gettime(L,arg)	luaL_checknumber(L, arg)
 
 #endif				/* } */
 
@@ -546,7 +546,6 @@ static const luaL_Reg syslib[] = {
   {"clock",     os_clock},
   {"date",      os_date},
   {"difftime",  os_difftime},
-  {"time",      os_time},
 #if !defined(LUA_SANDBOX_OSLIB)
   {"execute",   os_execute},
   {"exit",      os_exit},
@@ -554,6 +553,9 @@ static const luaL_Reg syslib[] = {
   {"remove",    os_remove},
   {"rename",    os_rename},
   {"setlocale", os_setlocale},
+#endif
+  {"time",      os_time},
+#if !defined(LUA_SANDBOX_OSLIB)
   {"tmpname",   os_tmpname},
 #endif
 #if defined(LUA_SYS_CLOCK)

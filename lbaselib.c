@@ -184,9 +184,10 @@ static int luaB_rawget (lua_State *L) {
   return 1;
 }
 
+#define luaB_hasset(t) ((t) == LUA_TTABLE || (t) == LUA_TMATRIX)
 static int luaB_rawset (lua_State *L) {
   const int type = lua_type(L, 1);
-  if (type != LUA_TTABLE && type != LUA_TMATRIX)
+  if (!luaB_hasset(type))
     luaL_typeerror(L, 1, lua_typename(L, LUA_TTABLE));
   luaL_checkany(L, 2);
   luaL_checkany(L, 3);
@@ -274,11 +275,11 @@ static int luaB_collectgarbage (lua_State *L) {
 }
 
 
-#define luaB_glmtype(t) ((t) == LUA_TVECTOR || (t) == LUA_TMATRIX)
+#define luaB_typehasname(t) ((t) == LUA_TVECTOR || (t) == LUA_TMATRIX)
 static int luaB_type (lua_State *L) {
   int t = lua_type(L, 1);
   luaL_argcheck(L, t != LUA_TNONE, 1, "value expected");
-  if (luaB_glmtype(t))
+  if (luaB_typehasname(t))
     lua_pushstring(L, glm_typename(L, 1));
   else
     lua_pushstring(L, lua_typename(L, t));
@@ -601,13 +602,11 @@ static int luaB_tostring (lua_State *L) {
 /* func2close */
 static int luaB_defer (lua_State *L) {
   luaL_checktype(L, 1, LUA_TFUNCTION);  /* check defer function */
-
   lua_newtable(L);  /* to-be-closed dummy object */
   lua_newtable(L);  /* metatable */
   lua_pushvalue(L, 1);
   lua_setfield(L, -2, "__close");
   lua_setmetatable(L, -2);  /* pops: metatable */
-
   return 1;
 }
 #endif
@@ -619,7 +618,6 @@ static int luaB_joaat (lua_State *L) {
   const int type = lua_type(L, 1);
   if (type != LUA_TNUMBER && type != LUA_TBOOLEAN && type != LUA_TSTRING)
     return luaL_typeerror(L, 1, lua_typename(L, LUA_TSTRING));
-
   lua_pushinteger(L, glm_tohash(L, 1, lua_toboolean(L, 2)));
   return 1;
 }

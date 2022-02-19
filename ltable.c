@@ -1103,7 +1103,6 @@ void luaH_clonetable (lua_State *L, const Table *from, Table *to) {
 }
 #endif
 
-
 #if defined(LUA_DEBUG)
 
 /* export these functions for the test library */

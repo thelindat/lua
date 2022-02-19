@@ -135,7 +135,7 @@ static void checkclosemth (lua_State *L, StkId level) {
 
 
 #if defined(LUAGLM_EXT_DEFER)
-static void calldefermethod(lua_State *L, TValue *func, TValue *err) {
+static void calldefermethod (lua_State *L, TValue *func, TValue *err) {
   if (l_likely(ttisfunction(func))) {
     StkId top = L->top;
     setobj2s(L, top, func);  /* will call defer function */

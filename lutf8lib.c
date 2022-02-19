@@ -259,11 +259,9 @@ static utfint utf8_to_utf32(const char *src, size_t length) {
 static lua_Integer utf8_to_utf16_length(const char *u8str, size_t u8len) {
   const char *const u8end = u8str + u8len;
   const char *u8cur = u8str;
-
   size_t u16measuredLen = 0;
   while (u8cur < u8end) {
     size_t u8charLen;
-
     u16measuredLen++;
     u8charLen = utf8_codepointlen(*u8cur);
     if ((u8cur + u8charLen - 1 >= u8end))
@@ -272,7 +270,6 @@ static lua_Integer utf8_to_utf16_length(const char *u8str, size_t u8len) {
       const utfint codepoint = utf8_to_utf32(u8cur, u8charLen);
       if (codepoint > 0xFFFF)
         u16measuredLen++;  /* UTF16 surrogate pair */
-
       u8cur += u8charLen;
     }
   }

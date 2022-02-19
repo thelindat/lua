@@ -179,13 +179,9 @@ static int str_trim (lua_State *L) {
   size_t len = 0;
   const char *str = luaL_checklstring(L, 1, &len);
   const char *delimiter = luaL_optstring(L, 2, "\t\n\v\f\r "); /* isspace */
-
   const char *back = str + len - 1;
-  while (str <= back && strchr(delimiter, *str))
-    str++;
-  while (back > str && strchr(delimiter, *back))
-    back--;
-
+  while (str <= back && strchr(delimiter, *str)) str++;
+  while (back > str && strchr(delimiter, *back)) back--;
   lua_pushlstring(L, str, back - str + 1);
   return 1;
 }
@@ -194,8 +190,8 @@ static int str_split (lua_State *L) {
   const char *delimiter = luaL_checkstring(L, 1);
   const char *str = luaL_checkstring(L, 2);
   const lua_Integer limit = luaL_optinteger(L, 3, 0);
-  int count = 0;
 
+  int count = 0;
   lua_settop(L, 0); /* clear new slots */
   if (limit == 0 || limit > 1) {
     const char *end;
@@ -241,7 +237,6 @@ static int str_join (lua_State *L) {
     lua_concat(L, top - 1);
   else {
     int i;
-
     luaL_Buffer b;
     luaL_buffinit(L, &b);
     for (i = 2; i <= top; ++i) {

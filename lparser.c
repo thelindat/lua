@@ -1293,9 +1293,7 @@ static void suffixedexp (LexState *ls, expdesc *v) {
 #if defined(LUAGLM_EXT_JOAAT)
       case TK_HASH:
 #endif
-      case '(':
-      case TK_STRING:
-      case '{': {  /* funcargs */
+      case '(': case TK_STRING: case '{': {  /* funcargs */
         luaK_exp2nextreg(fs, v);
         funcargs(ls, v, line);
         break;
