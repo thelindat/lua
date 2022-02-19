@@ -255,6 +255,11 @@ bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]], eps --[[ vec4 ]])
 bool = any_notequal(m1 --[[ matrix ]], m2 --[[ matrix ]], ULPs --[[ integer ]])
 ```
 
+### all\_greaterThan
+### all\_greaterThanEqual
+### all\_lessThan
+### all\_lessThanEqual
+
 ### right
 
 ```lua
@@ -283,6 +288,8 @@ vec3 = forwardLH()
 vec3 = forwardRH()
 ```
 
+### Aliases
+
 ## glm/common.hpp
 
 ### signP
@@ -299,6 +306,14 @@ s --[[ vecN ]] = signP(x --[[ vecN ]])
 -- Returns the non-positive sign (1.0 if > 0) for each component
 s --[[ number ]] = signN(x --[[ number ]])
 s --[[ vecN ]] = signN(x --[[ vecN ]])
+```
+
+### reverse
+
+```lua
+-- Reverse the elements of a vector
+s --[[ number ]] = reverse(x --[[ number ]])
+s --[[ vecN ]] = reverse(x --[[ vecN ]])
 ```
 
 ### fdim
@@ -508,7 +523,44 @@ vec4 = homogenize(v --[[ vec4 ]],
 
 ```lua
 -- Return the product of two vectors using only the x,y,z components.
+-- Requires LUAGLM_ALIASES_O3DE
 number = dot3(x --[[ vec4 ]], y --[[ vec4 ]])
+```
+
+### crossXAxis
+
+```lua
+vec3 = crossXAxis(v --[[ vec3 --]])
+```
+
+### crossYAxis
+
+```lua
+vec3 = crossYAxis(v --[[ vec3 --]])
+```
+
+### crossZAxis
+
+```lua
+vec3 = crossZAxis(v --[[ vec3 --]])
+```
+
+### xAxisCross
+
+```lua
+vec3 = xAxisCross(v --[[ vec3 --]])
+```
+
+### yAxisCross
+
+```lua
+vec3 = yAxisCross(v --[[ vec3 --]])
+```
+
+### zAxisCross
+
+```lua
+vec3 = zAxisCross(v --[[ vec3 --]])
 ```
 
 ### Aliases
@@ -905,6 +957,15 @@ vecN = extractScale(m --[[ matNxM ]])
 bool = hasUniformScale(m --[[ matNxM ]], epsilon --[[ number ]])
 ```
 
+## glm/gtx/matrix\_operation.hpp
+
+### diagonal
+
+```lua
+-- Generalized glm::diagonal implementation.
+v --[[ vecX --] = diagonal(mat --[[ matNxM --]])
+```
+
 ## glm/gtx/matrix\_storage.hpp
 
 ### colMajor
@@ -1038,6 +1099,13 @@ quat = rotateTowards(
 )
 ```
 
+### shortest\_equivalent
+
+```lua
+-- Return the shortest equivalent of the rotation.
+quat = shortest_equivalent(q --[[ quat ]])
+```
+
 ### Aliases
 
 - `transformDir = operator*(quat, vec3)`
@@ -1066,6 +1134,25 @@ vecN = barycentric(
 -- Returns the smallest absolute angle, in radians, between two vectors.
 -- Note, this function is implemented with atan22
 rads = angle2(x --[[ vecN ]], y --[[ vecN ]])
+```
+
+### angle\_atan
+
+```lua
+-- glm::angle that is numerically stable at all angles.
+rads = angle_atan(x --[[ number ]], y --[[ number ]])
+rads = angle_atan(x --[[ vecN ]], y --[[ vecN ]])
+rads = angle_atan(x --[[ quat ]])
+rads = angle_atan(x --[[ quat ]], y --[[ quat ]])
+```
+
+### orientedAngle\_atan
+
+```lua
+-- glm::orientedAngle implementation that uses angle_atan
+rads = orientedAngle_atan(x --[[ vec2 --]], y --[[ vec2 --]])
+rads = orientedAngle_atan(x --[[ vec3 --]], y --[[ vec3 --]], ref --[[ vec3 --]])
+rads = orientedAngle_atan(x --[[ quat --]], y --[[ quat --]], ref --[[ vec3 --]])
 ```
 
 ### Aliases

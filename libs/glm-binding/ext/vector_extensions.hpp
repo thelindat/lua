@@ -197,10 +197,15 @@ namespace glm {
 
   /* API Completeness */
 
+  /// <summary>
+  /// Consistency with glm::clamp(vec<L, T, Q> const& Texcoord)
+  /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> fclamp(vec<L, T, Q> const &x) {
     return fclamp(x, T(0), T(1));
   }
+
+  /* Allow scalar 'Multiple' arguments */
 
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> ceilMultiple(vec<L, T, Q> const &Source, T const &Multiple) {
@@ -1019,7 +1024,7 @@ namespace glm {
 
   /*
   ** {======================================================
-  ** Monkey Patches
+  ** Patches
   ** =======================================================
   */
 

@@ -45,7 +45,7 @@ GLM_LUA_REG(hash),
 #endif
 GLM_LUA_REG(unpack),
 GLM_LUA_REG(to_string),
-GLM_LUA_REG(up),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(up),  // @GLMVectorExtensions
 GLM_LUA_REG(right),
 GLM_LUA_REG(forward),
 GLM_LUA_REG(forwardLH),
@@ -101,7 +101,7 @@ GLM_LUA_REG(roundEven),
 GLM_LUA_REG(smoothstep),
 GLM_LUA_REG(step),
 GLM_LUA_REG(trunc),
-GLM_LUA_REG(reverse),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(reverse),  // @GLMVectorExtensions
 { "tointeger", GLM_NAME(toint) },  // @MathlibCompat
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(fdim),
@@ -186,7 +186,7 @@ GLM_LUA_REG(inversesqrt),
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(expm1),
 #endif
-GLM_LUA_REG(logistic),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(logistic),  // @GLMVectorExtensions
 //{ "sigmoid", GLM_NAME(logistic) },
 #endif
 
@@ -215,7 +215,7 @@ GLM_LUA_REG(ilogb),
 
 #if defined(EXPONENTIAL_HPP) || defined(GTX_EXTERIOR_PRODUCT_HPP) || defined(EXT_QUATERNION_GEOMETRIC_HPP)
 GLM_LUA_REG(cross),
-GLM_LUA_REG(crossXAxis),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(crossXAxis),  // @GLMVectorExtensions
 GLM_LUA_REG(crossYAxis),
 GLM_LUA_REG(crossZAxis),
 GLM_LUA_REG(xAxisCross),
@@ -256,10 +256,11 @@ GLM_LUA_REG(refract),
 GLM_LUA_REG(dot),
 GLM_LUA_REG(length),
 GLM_LUA_REG(normalize),
-GLM_LUA_REG(clampLength),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(clampLength),  // @GLMVectorExtensions
 GLM_LUA_REG(scaleLength),
 GLM_LUA_REG(direction),
 GLM_LUA_REG(homogenize),
+GLM_LUA_REG(dot3),
 { "norm", GLM_NAME(normalize) },
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "magnitude", GLM_NAME(length) },
@@ -303,6 +304,10 @@ GLM_LUA_REG(lessThan),
 GLM_LUA_REG(lessThanEqual),
 GLM_LUA_REG(ult),  // @MathlibCompat
 GLM_LUA_REG(ulte),
+GLM_LUA_REG(all_greaterThan),  // @GLMVectorExtensions
+GLM_LUA_REG(all_greaterThanEqual),
+GLM_LUA_REG(all_lessThan),
+GLM_LUA_REG(all_lessThanEqual),
 #if GLM_HAS_CXX11_STL
 { "isgreater", GLM_NAME(greaterThan) },
 { "isgreaterequal", GLM_NAME(greaterThanEqual) },
@@ -335,7 +340,7 @@ GLM_LUA_REG(sin),
 GLM_LUA_REG(sinh),
 GLM_LUA_REG(tan),
 GLM_LUA_REG(tanh),
-GLM_LUA_REG(sincos),  // LUA_VECTOR_EXTENSION
+GLM_LUA_REG(sincos),  // @GLMVectorExtensions
 GLM_LUA_REG(fromAngle),
 { "deg", GLM_NAME(degrees) },  // @MathlibCompat
 { "rad", GLM_NAME(radians) },  // @MathlibCompat
@@ -426,7 +431,7 @@ GLM_LUA_REG(floorMultiple),
 GLM_LUA_REG(floorPowerOfTwo),
 GLM_LUA_REG(roundMultiple),
 GLM_LUA_REG(roundPowerOfTwo),
-GLM_LUA_REG(snap),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(snap),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_UNITY)
 { "RoundToMultipleOf", GLM_NAME(roundMultiple) },
 //{ "GetClosestPowerOfTen", GLM_NAME() }, // @UnityAlias
@@ -509,6 +514,7 @@ GLM_LUA_REG(openBounded),
 GLM_LUA_REG(isfinite),
 GLM_LUA_REG(atan2),
 GLM_LUA_REG(saturate),
+GLM_LUA_REG(all_isfinite),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Atan2", GLM_NAME(atan2) },
 #endif
@@ -622,7 +628,7 @@ GLM_LUA_REG(fastCos),
 GLM_LUA_REG(fastSin),
 GLM_LUA_REG(fastTan),
 GLM_LUA_REG(wrapAngle),
-GLM_LUA_REG(wrapAngle2),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(wrapAngle2),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetAngleMod", GLM_NAME(wrapAngle2) },
 #endif
@@ -630,9 +636,9 @@ GLM_LUA_REG(wrapAngle2),  // LUA_VECTOR_EXTENSIONS
 
 #if defined(GTX_FUNCTIONS_HPP)
 GLM_LUA_REG(gauss),
-GLM_LUA_REG(moveTowards),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(moveTowards),  // @GLMVectorExtensions
 GLM_LUA_REG(smoothDamp),
-GLM_LUA_REG(rotateTowards),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(rotateTowards),  // @GLMQuatExtensions
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(erf),
 GLM_LUA_REG(erfc),
@@ -733,7 +739,7 @@ GLM_LUA_REG(pow4),
 
 #if defined(GTX_ORTHONORMALIZE_HPP)
 GLM_LUA_REG(orthonormalize),
-GLM_LUA_REG(orthonormalize3),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(orthonormalize3),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetOrthogonalized", GLM_NAME(orthonormalize) },  // @O3DEAlias; Orthogonalize
 #endif
@@ -741,7 +747,7 @@ GLM_LUA_REG(orthonormalize3),  // LUA_VECTOR_EXTENSIONS
 
 #if defined(GTX_PERPENDICULAR_HPP)
 GLM_LUA_REG(perp),
-GLM_LUA_REG(isPerpendicular),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(isPerpendicular),  // @GLMVectorExtensions
 GLM_LUA_REG(perpendicular),
 GLM_LUA_REG(perpendicular2),
 GLM_LUA_REG(perpendicularBasis),
@@ -764,7 +770,7 @@ GLM_LUA_REG(polar),
 
 #if defined(GTX_PROJECTION_HPP)
 GLM_LUA_REG(proj),
-GLM_LUA_REG(projNorm),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(projNorm),  // @GLMVectorExtensions
 GLM_LUA_REG(projPlane),
 GLM_LUA_REG(projDecompose),
 #if defined(LUAGLM_ALIASES_UNITY) || defined(LUAGLM_ALIASES_O3DE)
@@ -796,7 +802,7 @@ GLM_LUA_REG(rotateZ),
 
 #if defined(GTX_ROTATE_VECTOR_HPP) || defined(EXT_QUATERNION_COMMON_HPP)
 GLM_LUA_REG(slerp),
-GLM_LUA_REG(barycentric),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(barycentric),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_UNITY)
 //{ "SlerpUnclamped", GLM_NAME() }, // @UnityAlias
 #endif
@@ -808,10 +814,10 @@ GLM_LUA_REG(barycentric),  // LUA_VECTOR_EXTENSIONS
 #if defined(GTX_ROTATE_VECTOR_HPP) || defined(EXT_MATRIX_TRANSFORM_HPP) || defined(GTX_MATRIX_TRANSFORM_2D_HPP) || defined(GTX_QUATERNION_TRANSFORM_HPP)
 GLM_LUA_REG(rotate),
 // GLM_LUA_REG(rotate_slow),  // @COMPAT: Defined in ext/matrix_transform.inl
-GLM_LUA_REG(transformPos),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(transformPos),  // @GLMMatrixExtensions
 GLM_LUA_REG(transformPosPerspective),
 GLM_LUA_REG(transformDir),
-GLM_LUA_REG(rotateFromTo),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(rotateFromTo),  // @GLMQuatExtensions
 GLM_LUA_REG(shortest_equivalent),
 #if defined(LUAGLM_ALIASES_UNITY)
 { "MultiplyPoint", GLM_NAME(transformPosPerspective) },
@@ -838,7 +844,7 @@ GLM_LUA_REG(levels),
 GLM_LUA_REG(scale),
 // GLM_LUA_REG(scale_slow),  // @COMPAT: Defined in ext/matrix_transform.inl
 GLM_LUA_REG(translate),
-GLM_LUA_REG(trs),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(trs),  // @GLMMatrixExtensions
 GLM_LUA_REG(inverse_world_tensor),
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Scale", GLM_NAME(scale) },
@@ -852,7 +858,7 @@ GLM_LUA_REG(inverse_world_tensor),
 #if defined(GTX_VECTOR_ANGLE_HPP) || defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
 GLM_LUA_REG(angle),
 GLM_LUA_REG(orientedAngle),
-GLM_LUA_REG(angle_atan),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(angle_atan),  // @GLMVectorExtensions
 GLM_LUA_REG(orientedAngle_atan),
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "angle_to", GLM_NAME(angle) },
@@ -882,7 +888,7 @@ GLM_LUA_REG(isCompNull),
 #if defined(GTX_VECTOR_QUERY_HPP) || defined(GTX_MATRIX_QUERY_HPP)
 GLM_LUA_REG(isNormalized),
 GLM_LUA_REG(isNull),
-GLM_LUA_REG(isUniform),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(isUniform),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "isZero", GLM_NAME(isNull) },
 { "isEmpty", GLM_NAME(isNull) },
@@ -898,7 +904,7 @@ GLM_LUA_REG(isUniform),  // LUA_VECTOR_EXTENSIONS
 GLM_LUA_REG(mirrorClamp),
 GLM_LUA_REG(mirrorRepeat),
 GLM_LUA_REG(repeat),  // Reserved Lua keyword
-GLM_LUA_REG(deltaAngle),  // LUA_VECTOR_EXTENSIONS
+GLM_LUA_REG(deltaAngle),  // @GLMVectorExtensions
 GLM_LUA_REG(wrap),
 GLM_LUA_REG(loopRepeat),
 GLM_LUA_REG(pingPong),
@@ -1065,7 +1071,7 @@ GLM_LUA_REG(conjugate),
 
 #if defined(EXT_QUATERNION_COMMON_HPP) || defined(MATRIX_HPP)
 GLM_LUA_REG(inverse),
-GLM_LUA_REG(invertible),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(invertible),  // @GLMMatrixExtensions
 GLM_LUA_REG(inverse_transform),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetReciprocal", GLM_NAME(inverse) },
@@ -1093,7 +1099,7 @@ GLM_LUA_REG(yaw),
 GLM_LUA_REG(quatLookAt),
 GLM_LUA_REG(quatLookAtLH),
 GLM_LUA_REG(quatLookAtRH),
-GLM_LUA_REG(quatbillboardRH),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(quatbillboardRH),  // @GLMQuatExtensions
 GLM_LUA_REG(quatbillboardLH),
 GLM_LUA_REG(quatbillboard),
 GLM_LUA_REG(quatFromBasis),
@@ -1194,7 +1200,7 @@ GLM_LUA_REG(identity),
 GLM_LUA_REG(lookAt),
 GLM_LUA_REG(lookAtLH),
 GLM_LUA_REG(lookAtRH),
-GLM_LUA_REG(lookRotation),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(lookRotation),  // @GLMMatrixExtensions
 GLM_LUA_REG(lookRotationRH),
 GLM_LUA_REG(lookRotationLH),
 GLM_LUA_REG(billboard),
@@ -1210,8 +1216,8 @@ GLM_LUA_REG(projectZO),
 GLM_LUA_REG(unProject),
 GLM_LUA_REG(unProjectNO),
 GLM_LUA_REG(unProjectZO),
-GLM_LUA_REG(rayPicking),  // LUA_VECTOR_EXTENSIONS
-GLM_LUA_REG(containsProjection),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(rayPicking),  // @GLMVectorExtensions
+GLM_LUA_REG(containsProjection),  // @GLMMatrixExtensions
 #endif
 
 #if defined(GTC_MATRIX_ACCESS_HPP)
@@ -1274,7 +1280,7 @@ GLM_LUA_REG(extractEulerAngleZXY),
 GLM_LUA_REG(extractEulerAngleZXZ),
 GLM_LUA_REG(extractEulerAngleZYX),
 GLM_LUA_REG(extractEulerAngleZYZ),
-GLM_LUA_REG(quatEulerAngleX),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(quatEulerAngleX),  // @GLMQuatExtensions
 GLM_LUA_REG(quatEulerAngleXY),
 GLM_LUA_REG(quatEulerAngleXYX),
 GLM_LUA_REG(quatEulerAngleXYZ),
@@ -1294,7 +1300,7 @@ GLM_LUA_REG(quatEulerAngleZXY),
 GLM_LUA_REG(quatEulerAngleZXZ),
 GLM_LUA_REG(quatEulerAngleZY),
 GLM_LUA_REG(quatEulerAngleZYX),
-GLM_LUA_REG(quatEulerAngleZYZ),  // LUA_QUATERNION_EXTENSIONS
+GLM_LUA_REG(quatEulerAngleZYZ),  // @GLMQuatExtensions
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "eulerX", GLM_NAME(eulerAngleX) },
 { "eulerXY", GLM_NAME(eulerAngleXY) },
@@ -1375,7 +1381,7 @@ GLM_LUA_REG(diagonal3x4),
 GLM_LUA_REG(diagonal4x2),
 GLM_LUA_REG(diagonal4x3),
 GLM_LUA_REG(diagonal4x4),
-GLM_LUA_REG(diagonal),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(diagonal),  // @GLMMatrixExtensions
 #if GLM_VERSION >= 993 && defined(LUAGLM_ALIASES_O3DE)
 { "GetAdjugate", GLM_NAME(adjugate) },
 { "GetDiagonal", GLM_NAME(diagonal) },
@@ -1385,7 +1391,7 @@ GLM_LUA_REG(diagonal),  // LUA_MATRIX_EXTENSIONS
 #if defined(GTX_MATRIX_QUERY_HPP)
 GLM_LUA_REG(isIdentity),
 GLM_LUA_REG(isOrthogonal),
-GLM_LUA_REG(extractScale),  // LUA_MATRIX_EXTENSIONS
+GLM_LUA_REG(extractScale),  // @GLMMatrixExtensions
 GLM_LUA_REG(hasUniformScale),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "IsOrthogonal", GLM_NAME(isOrthogonal) },

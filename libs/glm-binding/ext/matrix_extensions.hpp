@@ -224,24 +224,24 @@ namespace glm {
   /// Create a matrix that mirrors the given plane normal.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<C, R, T, Q> planeMirror(T x, T y, T z, T d = T(0)) {
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> planeMirror(const glm::vec<3, T, Q> &n, T d = T(0)) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid affine plane mirror");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'planeMirror' only accept floating-point inputs");
 
     mat<C, R, T, Q> m(T(0));
-    m[0].x = T(1) - T(2) * x * x;
-    m[0].y = T(-2) * x * y;
-    m[0].z = T(-2) * x * z;
-    m[1].x = T(-2) * y * x;
-    m[1].y = T(1) - T(2) * y * y;
-    m[1].z = T(-2) * y * z;
-    m[2].x = T(-2) * z * x;
-    m[2].y = T(-2) * y * z;
-    m[2].z = T(1) - T(2) * z * z;
+    m[0].x = T(1) - T(2) * n.x * n.x;
+    m[0].y = T(-2) * n.x * n.y;
+    m[0].z = T(-2) * n.x * n.z;
+    m[1].x = T(-2) * n.y * n.x;
+    m[1].y = T(1) - T(2) * n.y * n.y;
+    m[1].z = T(-2) * n.y * n.z;
+    m[2].x = T(-2) * n.z * n.x;
+    m[2].y = T(-2) * n.y * n.z;
+    m[2].z = T(1) - T(2) * n.z * n.z;
     GLM_IF_CONSTEXPR(C >= 4) {
-      m[3].x = T(2) * d * x;
-      m[3].y = T(2) * d * y;
-      m[3].z = T(2) * d * z;
+      m[3].x = T(2) * d * n.x;
+      m[3].y = T(2) * d * n.y;
+      m[3].z = T(2) * d * n.z;
     }
     return m;
   }
@@ -251,24 +251,24 @@ namespace glm {
   /// the provided plane.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<C, R, T, Q> orthoProjection(T x, T y, T z, T d = T(0)) {
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> orthoProjection(const glm::vec<3, T, Q> &n, T d = T(0)) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid affine plane projection");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'orthoProjection' only accept floating-point inputs");
 
     mat<C, R, T, Q> m(T(0));
-    m[0].x = T(1) - x * x;
-    m[0].y = -x * y;
-    m[0].z = -x * z;
-    m[1].x = -y * x;
-    m[1].y = T(1) - y * y;
-    m[1].z = -y * z;
-    m[2].x = -z * x;
-    m[2].y = -y * z;
-    m[2].z = T(1) - z * z;
+    m[0].x = T(1) - n.x * n.x;
+    m[0].y = -n.x * n.y;
+    m[0].z = -n.x * n.z;
+    m[1].x = -n.y * n.x;
+    m[1].y = T(1) - n.y * n.y;
+    m[1].z = -n.y * n.z;
+    m[2].x = -n.z * n.x;
+    m[2].y = -n.y * n.z;
+    m[2].z = T(1) - n.z * n.z;
     GLM_IF_CONSTEXPR(C >= 4) {
-      m[3].x = d * x;
-      m[3].y = d * y;
-      m[3].z = d * z;
+      m[3].x = d * n.x;
+      m[3].y = d * n.y;
+      m[3].z = d * n.z;
     }
     return m;
   }

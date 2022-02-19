@@ -168,13 +168,6 @@ namespace glm {
     return (v > 0) ? genType(1) : genType(-1);
   }
 
-  /* API Completeness */
-
-  template<typename genType>
-  GLM_FUNC_QUALIFIER genType fclamp(genType x) {
-    return fclamp(x, genType(0), genType(1));
-  }
-
   /* Numeric extensions */
   template<typename genType>
   GLM_FUNC_QUALIFIER bool isUniform(genType v, const genType eps = epsilon<genType>()) {
@@ -316,6 +309,16 @@ namespace glm {
     return lerp(x, y, t);
   }
 
+  /* API Completeness */
+
+  /// <summary>
+  /// Consistency with glm::clamp(vec<L, T, Q> const& Texcoord)
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER genType fclamp(genType x) {
+    return fclamp(x, genType(0), genType(1));
+  }
+
   /* Functions with additional integral type support. */
 
   template<typename T>
@@ -324,13 +327,13 @@ namespace glm {
   }
 
   template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type ifloor(T x) {
-    return x;
+  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, T>::type iceil(T x) {
+    return ceil(x);
   }
 
   template<typename T>
-  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, T>::type iceil(T x) {
-    return ceil(x);
+  GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type ifloor(T x) {
+    return x;
   }
 
   template<typename T>
@@ -671,7 +674,7 @@ namespace glm {
 
   /*
   ** {======================================================
-  ** Monkey Patches
+  ** Patches
   ** =======================================================
   */
 

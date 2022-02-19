@@ -269,8 +269,8 @@ GLM_BINDING_QUALIFIER(to_string) {
 /* glm/ext/scalar_relational.hpp, glm/ext/vector_common.hpp, glm/ext/vector_relational.hpp, glm/ext/quaternion_relational.hpp, glm/ext/matrix_relational.hpp */
 EQUAL_DEFN(equal, glm::equal)
 EQUAL_DEFN(notEqual, glm::notEqual)
-EQUAL_DEFN(all_equal, glm::all_equal)  // LUA_VECTOR_EXTENSIONS
-EQUAL_DEFN(any_notequal, glm::any_notequal)  // LUA_VECTOR_EXTENSIONS
+EQUAL_DEFN(all_equal, glm::all_equal)  // @GLMVectorExtensions
+EQUAL_DEFN(any_notequal, glm::any_notequal)  // @GLMVectorExtensions
 #if GLM_HAS_CXX11_STL
 #define LAYOUT_HASH(LB, F, Tr, ...) \
   BIND_PUSH_V(LB, F<Tr::type>()((LB).Next<Tr>()))
@@ -322,7 +322,7 @@ GLM_BINDING_QUALIFIER(unpack) {
   GLM_BINDING_END
 }
 
-BIND_DEFN(up, glm::unit::up<glm_Float>)  // LUA_VECTOR_EXTENSIONS
+BIND_DEFN(up, glm::unit::up<glm_Float>)  // @GLMVectorExtensions
 BIND_DEFN(right, glm::unit::right<glm_Float>)
 BIND_DEFN(forward, glm::unit::forward<glm_Float>)
 BIND_DEFN(forwardLH, glm::unit::forwardLH<glm_Float>)
@@ -619,7 +619,7 @@ GLM_BINDING_QUALIFIER(inverse) {
   PARSE_NUMBER_VECTOR_QUAT(LB, glm::inverse, LAYOUT_UNARY, LAYOUT_UNARY, LAYOUT_UNARY);
   GLM_BINDING_END
 }
-SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // LUA_MATRIX_EXTENSIONS
+SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // @GLMMatrixExtensions
 ROTATION_MATRIX_DEFN(inverse_transform, glm::inverse_transform, LAYOUT_UNARY)
 #endif
 
@@ -638,7 +638,7 @@ BIND_DEFN(yaw, glm::yaw, gLuaQuat<>)
 BIND_DEFN(quatLookAt, glm::quatLookAt, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatLookAtLH, glm::quatLookAtLH, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatLookAtRH, glm::quatLookAtRH, gLuaDir3<>, gLuaDir3<>)
-BIND_DEFN(quatbillboard, glm::quatbillboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)  // LUA_QUATERNION_EXTENSIONS
+BIND_DEFN(quatbillboard, glm::quatbillboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)  // @GLMQuatExtensions
 BIND_DEFN(quatbillboardRH, glm::quatbillboardRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatbillboardLH, glm::quatbillboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatFromBasis, glm::fromBasis, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
@@ -779,7 +779,7 @@ GLM_BINDING_QUALIFIER(identity) {
 BIND_DEFN(lookAt, glm::lookAt, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
 BIND_DEFN(lookAtLH, glm::lookAtLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
 BIND_DEFN(lookAtRH, glm::lookAtRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>)
-BIND_DEFN(lookRotation, glm::lookRotation, gLuaDir3<>, gLuaDir3<>)  // LUA_MATRIX_EXTENSIONS
+BIND_DEFN(lookRotation, glm::lookRotation, gLuaDir3<>, gLuaDir3<>)  // @GLMMatrixExtensions
 BIND_DEFN(lookRotationRH, glm::lookRotationRH, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(lookRotationLH, glm::lookRotationLH, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(billboard, glm::billboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
@@ -798,8 +798,8 @@ BIND_DEFN(projectZO, glm::projectZO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLu
 BIND_DEFN(unProject, glm::unProject, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
 BIND_DEFN(unProjectNO, glm::unProjectNO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
 BIND_DEFN(unProjectZO, glm::unProjectZO, gLuaVec3<>, gLuaMat4x4<>, gLuaMat4x4<>, gLuaVec4<>)
-BIND_DEFN(rayPicking, glm::rayPicking, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat)  // LUA_VECTOR_EXTENSIONS
-BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<>::eps_trait)  // LUA_MATRIX_EXTENSIONS
+BIND_DEFN(rayPicking, glm::rayPicking, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat, gLuaFloat)  // @GLMVectorExtensions
+BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<>::eps_trait)  // @GLMMatrixExtensions
 #endif
 
 #if defined(GTC_MATRIX_ACCESS_HPP)  // @NOTE: These GLM functions are zero-based
@@ -874,7 +874,7 @@ ROTATION_MATRIX_DEFN(extractEulerAngleZXY, glm::extractEulerAngleZXY, LAYOUT_EUL
 ROTATION_MATRIX_DEFN(extractEulerAngleZXZ, glm::extractEulerAngleZXZ, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYX, glm::extractEulerAngleZYX, LAYOUT_EULER_DECOMPOSE)
 ROTATION_MATRIX_DEFN(extractEulerAngleZYZ, glm::extractEulerAngleZYZ, LAYOUT_EULER_DECOMPOSE)
-BIND_DEFN(quatEulerAngleX, glm::quatEulerAngleX, gLuaNumCoT)  // LUA_QUATERNION_EXTENSIONS
+BIND_DEFN(quatEulerAngleX, glm::quatEulerAngleX, gLuaNumCoT)  // @GLMQuatExtensions
 BIND_DEFN(quatEulerAngleXY, glm::quatEulerAngleXY, gLuaNumCoT, gLuaNumCoT)
 BIND_DEFN(quatEulerAngleXYX, glm::quatEulerAngleXYX, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
 BIND_DEFN(quatEulerAngleXYZ, glm::quatEulerAngleXYZ, gLuaNumCoT, gLuaNumCoT, gLuaNumCoT)
@@ -985,7 +985,7 @@ MATRIX_MAJOR_DEFN(colMajor4, glm::colMajor4, LAYOUT_QUATERNARY, gLuaMat4x4<>)
 MATRIX_MAJOR_DEFN(rowMajor2, glm::rowMajor2, LAYOUT_BINARY, gLuaMat2x2<>)
 MATRIX_MAJOR_DEFN(rowMajor3, glm::rowMajor3, LAYOUT_TERNARY, gLuaMat3x3<>)
 MATRIX_MAJOR_DEFN(rowMajor4, glm::rowMajor4, LAYOUT_QUATERNARY, gLuaMat4x4<>)
-MATRIX_GENERAL_MAJOR_DEFN(colMajor, glm::colMajor)  // LUA_MATRIX_EXTENSIONS
+MATRIX_GENERAL_MAJOR_DEFN(colMajor, glm::colMajor)  // @GLMMatrixExtensions
 MATRIX_GENERAL_MAJOR_DEFN(rowMajor, glm::rowMajor)
 #endif
 
@@ -1002,13 +1002,13 @@ BIND_DEFN(diagonal3x4, glm::diagonal3x4, gLuaVec3<>)
 BIND_DEFN(diagonal4x2, glm::diagonal4x2, gLuaVec2<>)
 BIND_DEFN(diagonal4x3, glm::diagonal4x3, gLuaVec3<>)
 BIND_DEFN(diagonal4x4, glm::diagonal4x4, gLuaVec4<>)
-MATRIX_DEFN(diagonal, glm::diagonal, LAYOUT_UNARY)  // LUA_MATRIX_EXTENSIONS
+MATRIX_DEFN(diagonal, glm::diagonal, LAYOUT_UNARY)  // @GLMMatrixExtensions
 #endif
 
 #if defined(GTX_MATRIX_QUERY_HPP)
 MATRIX_DEFN(isIdentity, glm::_isIdentity, LAYOUT_BINARY_EPS)
 MATRIX_DEFN(isOrthogonal, glm::isOrthogonal, LAYOUT_BINARY_EPS)
-ROTATION_MATRIX_DEFN(extractScale, glm::extractScale, LAYOUT_UNARY)  // LUA_MATRIX_EXTENSIONS
+ROTATION_MATRIX_DEFN(extractScale, glm::extractScale, LAYOUT_UNARY)  // @GLMMatrixExtension
 ROTATION_MATRIX_DEFN(hasUniformScale, glm::hasUniformScale, LAYOUT_BINARY_EPS)
 #endif
 
@@ -1125,7 +1125,7 @@ NUMBER_VECTOR_DEFN(step, glm::step, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(trunc, glm::trunc, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(ldexp, glm::ldexp, LAYOUT_BINARY_AS_INT)
 NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP, int)
-NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // @GLMVectorExtensions
 INTEGER_NUMBER_VECTOR_DEFN(mod, glm::imod, LAYOUT_MODULO)  // @MathlibCompat
 INTEGER_NUMBER_VECTOR_DEFNS(ceil, glm::iceil, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFNS(floor, glm::ifloor, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
@@ -1281,7 +1281,7 @@ GLM_BINDING_QUALIFIER(mix) {
 
 #if defined(COMMON_HPP) || defined(GTX_LOG_BASE_HPP)
 NUMBER_VECTOR_DEFN(sign, glm::sign, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(signP, glm::signP, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(signP, glm::signP, LAYOUT_UNARY)  // @GLMVectorExtensions
 NUMBER_VECTOR_DEFN(signN, glm::signN, LAYOUT_UNARY)
 #if GLM_HAS_CXX11_STL
 NUMBER_VECTOR_DEFN(copysign, glm::copysign, LAYOUT_BINARY)
@@ -1295,7 +1295,7 @@ NUMBER_VECTOR_DEFN(inversesqrt, glm::inversesqrt, LAYOUT_UNARY)
 #if GLM_HAS_CXX11_STL
 NUMBER_VECTOR_DEFN(expm1, glm::expm1, LAYOUT_UNARY)
 #endif
-NUMBER_VECTOR_DEFN(logistic, glm::logistic, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(logistic, glm::logistic, LAYOUT_UNARY)  // @GLMVectorExtensions
 #endif
 
 #if defined(EXPONENTIAL_HPP) || defined(EXT_QUATERNION_EXPONENTIAL_HPP) || defined(GTX_LOG_BASE_HPP)
@@ -1344,7 +1344,7 @@ GLM_BINDING_QUALIFIER(cross) {
   return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);
   GLM_BINDING_END
 }
-BIND_DEFN(crossXAxis, glm::crossXAxis, gLuaVec3<>)  // LUA_VECTOR_EXTENSIONS
+BIND_DEFN(crossXAxis, glm::crossXAxis, gLuaVec3<>)  // @GLMVectorExtensions
 BIND_DEFN(crossYAxis, glm::crossYAxis, gLuaVec3<>)
 BIND_DEFN(crossZAxis, glm::crossZAxis, gLuaVec3<>)
 BIND_DEFN(xAxisCross, glm::xAxisCross, gLuaVec3<>)
@@ -1363,13 +1363,11 @@ NUMBER_VECTOR_DEFN(refract, glm::refract, LAYOUT_TERNARY_SCALAR)
 NUMBER_VECTOR_QUAT_DEFN(dot, glm::dot, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(length, glm::length, LAYOUT_UNARY)
 NUMBER_VECTOR_QUAT_DEFN(normalize, glm::normalize, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(clampLength, glm::clampLength, LAYOUT_BINARY_SCALAR)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(clampLength, glm::clampLength, LAYOUT_BINARY_SCALAR)  // @GLMVectorExtensions
 NUMBER_VECTOR_DEFN(scaleLength, glm::scaleLength, LAYOUT_BINARY_SCALAR)
 NUMBER_VECTOR_DEFN(direction, glm::direction, LAYOUT_BINARY)
 BIND_DEFN(homogenize, glm::homogenize, gLuaVec4<>)
-#if defined(LUAGLM_ALIASES_O3DE)
 BIND_DEFN(dot3, glm::dot, gLuaVec4<>, gLuaVec3<>)
-#endif
 #endif
 
 #if defined(VECTOR_RELATIONAL_HPP)
@@ -1385,12 +1383,10 @@ NUMBER_VECTOR_QUAT_DEFN(lessThan, glm::lessThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(lessThanEqual, glm::lessThanEqual, LAYOUT_BINARY)
 INTEGER_VECTOR_DEFN(ult, glm::lessThan, lua_Unsigned, LAYOUT_BINARY)  // @MathlibCompat
 INTEGER_VECTOR_DEFN(ulte, glm::lessThanEqual, lua_Unsigned, LAYOUT_BINARY)
-#if defined(LUAGLM_ALIASES_O3DE)
 NUMBER_VECTOR_QUAT_DEFN(all_greaterThan, glm::all_greaterThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(all_greaterThanEqual, glm::all_greaterThanEqual, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(all_lessThan, glm::all_lessThan, LAYOUT_BINARY)
 NUMBER_VECTOR_QUAT_DEFN(all_lessThanEqual, glm::all_lessThanEqual, LAYOUT_BINARY)
-#endif
 #endif
 
 #if defined(TRIGONOMETRIC_HPP)
@@ -1415,7 +1411,7 @@ NUMBER_VECTOR_DEFN(sin, glm::sin, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(sinh, glm::sinh, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(tan, glm::tan, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(tanh, glm::tanh, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(sincos, glm::sincos, LAYOUT_SINCOS)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(sincos, glm::sincos, LAYOUT_SINCOS)  // @GLMVectorExtensions
 BIND_DEFN(fromAngle, glm::fromAngle, gLuaNumCoT)
 #endif
 
@@ -1489,7 +1485,7 @@ INTEGER_NUMBER_VECTOR_DEFN(roundMultiple, glm::roundMultiple, LAYOUT_MODULO)
 INTEGER_VECTOR_DEFN(ceilPowerOfTwo, glm::ceilPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(floorPowerOfTwo, glm::floorPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(roundPowerOfTwo, glm::roundPowerOfTwo, lua_Unsigned, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(snap, glm::snap, LAYOUT_BINARY)
+NUMBER_VECTOR_DEFN(snap, glm::snap, LAYOUT_BINARY)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTC_COLOR_SPACE_HPP) && !defined(GLM_FORCE_XYZW_ONLY)
@@ -1564,9 +1560,7 @@ INTEGER_NUMBER_VECTOR_DEFN(fmod, glm::fmod, LAYOUT_MODULO)
 NUMBER_VECTOR_DEFN(isfinite, glm::isfinite, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(atan2, glm::atan2, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(saturate, glm::saturate, LAYOUT_UNARY)
-#if defined(LUAGLM_ALIASES_O3DE)
-NUMBER_VECTOR_DEFN(all_isfinite, glm::all_isfinite, LAYOUT_UNARY)
-#endif
+NUMBER_VECTOR_DEFN(all_isfinite, glm::all_isfinite, LAYOUT_UNARY)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTX_COMPATIBILITY_HPP) || defined(EXT_QUATERNION_COMMON_HPP)
@@ -1664,7 +1658,7 @@ NUMBER_VECTOR_DEFN(fastCos, glm::fastCos, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(fastSin, glm::fastSin, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(fastTan, glm::fastTan, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(wrapAngle, glm::wrapAngle, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(wrapAngle2, glm::wrapAngle2, LAYOUT_UNARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(wrapAngle2, glm::wrapAngle2, LAYOUT_UNARY)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTX_FUNCTIONS_HPP)
@@ -1681,12 +1675,12 @@ NUMBER_VECTOR_DEFN(wrapAngle2, glm::wrapAngle2, LAYOUT_UNARY)  // LUA_VECTOR_EXT
   LUA_MLM_END
 
 BINARY_LAYOUT_DEFN(gauss, glm::gauss, LAYOUT_TERNARY, gLuaNumber, gLuaVec2<>::fast)
-NUMBER_VECTOR_DEFN(smoothDamp, glm::smoothDamp, LAYOUT_SMOOTH_DAMP)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(smoothDamp, glm::smoothDamp, LAYOUT_SMOOTH_DAMP)  // @GLMVectorExtensions
 NUMBER_VECTOR_DEFN(moveTowards, glm::moveTowards, LAYOUT_TERNARY_SCALAR)
 GLM_BINDING_QUALIFIER(rotateTowards) {
   GLM_BINDING_BEGIN
   if (LB.Is<gLuaQuat<>>())
-    BIND_FUNC(LB, glm::rotateTowards, gLuaQuat<>::fast, gLuaQuat<>, gLuaFloat);
+    BIND_FUNC(LB, glm::rotateTowards, gLuaQuat<>::fast, gLuaQuat<>, gLuaFloat);  // @GLMQuatExtensions
   BIND_FUNC(LB, glm::rotateTowards, gLuaVec3<>, gLuaVec3<>, gLuaFloat, gLuaFloat);
   GLM_BINDING_END
 }
@@ -1828,7 +1822,7 @@ GLM_BINDING_QUALIFIER(orthonormalize) {
   GLM_BINDING_END
 }
 
-GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
+GLM_BINDING_QUALIFIER(orthonormalize3) {  // @GLMVectorExtensions
   GLM_BINDING_BEGIN
   gLuaVec3<>::type x = LB.Next<gLuaVec3<>>();
   gLuaVec3<>::type y = LB.Next<gLuaVec3<>>();
@@ -1854,7 +1848,7 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // LUA_VECTOR_EXTENSIONS
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(perp, glm::perp, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(isPerpendicular, glm::isPerpendicular, LAYOUT_BINARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(isPerpendicular, glm::isPerpendicular, LAYOUT_BINARY)  // @GLMVectorExtensions
 LAYOUT_DEFN(perpendicular, glm::perpendicular, LAYOUT_UNARY_OR_TERNARY, gLuaDir3<>)
 LAYOUT_DEFN(perpendicular2, glm::perpendicular2, LAYOUT_UNARY_OR_TERNARY, gLuaDir3<>)
 LAYOUT_DEFN(perpendicularBasis, glm::perpendicularBasis, LAYOUT_PERPBASIS, gLuaDir3<>)
@@ -1877,7 +1871,7 @@ BIND_DEFN(polar, glm::polar, gLuaVec3<>)
   LUA_MLM_END
 
 NUMBER_VECTOR_DEFN(proj, glm::proj, LAYOUT_BINARY)
-NUMBER_VECTOR_DEFN(projNorm, glm::projNorm, LAYOUT_BINARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(projNorm, glm::projNorm, LAYOUT_BINARY)  // @GLMVectorExtensions
 NUMBER_VECTOR_DEFN(projPlane, glm::projPlane, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(projDecompose, glm::projDecompose, LAYOUT_DECOMPOSE)
 #endif
@@ -1923,7 +1917,7 @@ BINARY_LAYOUT_DEFN(rotateZ, glm::rotateZ, LAYOUT_BINARY_SCALAR, gLuaVec3<>::fast
 #endif
 
 NUMBER_VECTOR_QUAT_DEFNS(slerp, glm::__slerp, LAYOUT_TERNARY_SCALAR, LAYOUT_TERNARY_SCALAR, LAYOUT_QUAT_SLERP)
-NUMBER_VECTOR_QUAT_DEFN(barycentric, glm::barycentric, LAYOUT_BARYCENTRIC)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_QUAT_DEFN(barycentric, glm::barycentric, LAYOUT_BARYCENTRIC)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTX_ROTATE_VECTOR_HPP) || defined(EXT_MATRIX_TRANSFORM_HPP) || defined(GTX_MATRIX_TRANSFORM_2D_HPP) || defined(GTX_QUATERNION_TRANSFORM_HPP)
@@ -1967,9 +1961,9 @@ GLM_BINDING_QUALIFIER(rotate) {
 }
 
 // BIND_DEFN(rotate_slow, glm::rotate_slow, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
-BIND_DEFN(rotateFromTo, glm::rotateFromTo, gLuaVec3<>, gLuaVec3<>)  // LUA_QUATERNION_EXTENSIONS
+BIND_DEFN(rotateFromTo, glm::rotateFromTo, gLuaVec3<>, gLuaVec3<>)  // @GLMQuatExtensions
 BIND_DEFN(shortest_equivalent, glm::shortest_equivalent, gLuaQuat<>)
-ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
+ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // @GLMMatrixExtensions
 ROTATION_MATRIX_DEFN(transformPos, glm::transformPos, LAYOUT_UNARY, gLuaVec3<>)
 BIND_DEFN(transformPosPerspective, glm::transformPosPerspective, gLuaMat4x4<>, gLuaVec3<>)
 #endif
@@ -2011,7 +2005,7 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
 
 MATRIX_TRANSFORM_DEFN(scale, glm::scale)
 MATRIX_TRANSFORM_DEFN(translate, glm::translate)
-BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // LUA_MATRIX_EXTENSIONS
+BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // @GLMMatrixExtensions
 BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x3<>)
 #endif
 
@@ -2032,7 +2026,7 @@ BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x
 
 NUMBER_VECTOR_QUAT_DEFNS(angle, glm::angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)
 ORIENTED_ANGLE_DEFN(orientedAngle, glm::orientedAngle)
-NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // @GLMVectorExtensions
 ORIENTED_ANGLE_DEFN(orientedAngle_atan, glm::__orientedAngle)
 #endif
 
@@ -2056,14 +2050,14 @@ NUMBER_VECTOR_DEFN(isCompNull, glm::isCompNull, LAYOUT_BINARY_EPS)
 
 QUERY_DEFN(isNormalized, glm::isNormalized, glm::_isNormalized)
 QUERY_DEFN(isNull, glm::isNull, glm::_isNull)
-NUMBER_VECTOR_DEFN(isUniform, glm::isUniform, LAYOUT_BINARY_EPS)  // LUA_VECTOR_EXTENSIONS
+NUMBER_VECTOR_DEFN(isUniform, glm::isUniform, LAYOUT_BINARY_EPS)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTX_WRAP_HPP) || defined(EXT_SCALAR_COMMON_HPP)
 NUMBER_VECTOR_DEFN(mirrorClamp, glm::mirrorClamp, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(mirrorRepeat, glm::mirrorRepeat, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(repeat, glm::repeat, LAYOUT_UNARY)
-BIND_DEFN(deltaAngle, glm::deltaAngle, gLuaNumber, gLuaNumber)  // LUA_VECTOR_EXTENSIONS
+BIND_DEFN(deltaAngle, glm::deltaAngle, gLuaNumber, gLuaNumber)  // @GLMVectorExtensions
 NUMBER_VECTOR_DEFN(wrap, glm::wrap, LAYOUT_BINARY_OPTIONAL)
 NUMBER_VECTOR_DEFN(loopRepeat, glm::loopRepeat, LAYOUT_BINARY_OPTIONAL)
 NUMBER_VECTOR_DEFN(pingPong, glm::pingPong, LAYOUT_BINARY)

@@ -161,8 +161,9 @@ namespace glm {
     );
   }
 
-  /* API completeness for quat_cast */
+  /* API completeness */
 
+  /* Explicit support for all rotation matrices */
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> quat_cast(qua<T, Q> const &q) {
     return q;
@@ -176,6 +177,25 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> quat_cast(mat<4, 3, T, Q> const &m) {
     return quat_cast(mat<3, 3, T, Q>(m));
+  }
+
+  /* Emulate vector_query.hpp for quaternions */
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER bool isNormalized(qua<T, Q> const &q, const T eps = epsilon<T>()) {
+    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNormalized' only accept floating-point inputs");
+    return abs(length(q) - static_cast<T>(1)) <= static_cast<T>(2) * eps;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER bool isNull(qua<T, Q> const &q, const T eps = epsilon<T>()) {
+    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNull' only accept floating-point inputs");
+    return length(q) <= eps;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> fastNormalize(qua<T, Q> const &x) {
+    return x * fastInverseSqrt<T>(dot(x, x));
   }
 
   /* quaternion-as-vector4 operations */
@@ -260,23 +280,6 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR bool any_notequal(qua<T, Q> const &x, qua<T, Q> const &y, vec<4, int, Q> const &MaxULPs) {
     return any(notEqual(x, y, MaxULPs));
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool isNormalized(qua<T, Q> const &q, const T eps = epsilon<T>()) {
-    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNormalized' only accept floating-point inputs");
-    return abs(length(q) - static_cast<T>(1)) <= static_cast<T>(2) * eps;
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool isNull(qua<T, Q> const &q, const T eps = epsilon<T>()) {
-    GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNull' only accept floating-point inputs");
-    return length(q) <= eps;
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER qua<T, Q> fastNormalize(qua<T, Q> const &x) {
-    return x * fastInverseSqrt<T>(dot(x, x));
   }
 
   /// <summary>
@@ -424,7 +427,7 @@ namespace glm {
   */
 
   /// <summary>
-  /// @GLMFix: genTypeTrait qualifier support
+  /// @GLMFix: genTypeTrait glm::qualifier support
   /// </summary>
   namespace detail {
     template<typename T, glm::qualifier Q>

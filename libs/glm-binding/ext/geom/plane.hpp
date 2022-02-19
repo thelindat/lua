@@ -612,7 +612,7 @@ namespace glm {
   /// </summary>
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER mat<4, 3, T, Q> orthoProjection(const Plane<3, T, Q> &plane) {
-    return orthoProjection<4, 3, T, Q>(plane.normal.x, plane.normal.y, plane.normal.z, plane.d);
+    return orthoProjection<4, 3, T, Q>(plane.normal, plane.d);
   }
 
   /// <summary>
@@ -628,7 +628,7 @@ namespace glm {
   /// </summary>
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER mat<4, 3, T, Q> mirrorMatrix(const Plane<3, T, Q> &plane) {
-    return planeMirror<4, 3, T, Q>(plane.normal.x, plane.normal.y, plane.normal.z, plane.d);
+    return planeMirror<4, 3, T, Q>(plane.normal, plane.d);
   }
 
   // Computes the closest point on this plane to the given object.
