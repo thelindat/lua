@@ -267,25 +267,7 @@ ELSE()
   ENDIF()
 
   IF( CMAKE_COMPILER_IS_CLANG )
-    ADD_COMPILE_OPTIONS(-ferror-limit=5 -fno-common -Wno-deprecated
-      # Clang Everything support;
-      #-Weverything
-      #-Wno-gnu-zero-variadic-macro-arguments
-      #-Wno-covered-switch-default
-      #-Wno-reserved-id-macro
-      #-Wno-unused-macros
-      #-Wno-padded
-      #-Wno-old-style-cast
-      #-Wno-extra-semi-stmt
-      #-Wno-c++98-compat-pedantic
-      #-Wno-zero-as-null-pointer-constant
-      #-Wno-gnu-anonymous-struct
-      #-Wno-gnu-label-as-value
-      #-Wno-nested-anon-types
-      #-Wno-enum-enum-conversion
-      #-Wno-documentation-unknown-command
-      #-Wno-float-equal
-    )
+    ADD_COMPILE_OPTIONS(-ferror-limit=5 -fno-common -Wno-deprecated)
   ELSEIF( CMAKE_COMPILER_IS_GNUCC )
     ADD_COMPILE_OPTIONS(-fmax-errors=5 -Wduplicated-cond -Wrestrict -Wlogical-op
       -Wno-aggressive-loop-optimizations -Wno-ignored-qualifiers
@@ -310,6 +292,30 @@ ELSE()
       LIST(APPEND LIBS dl)
     ENDIF()
   ENDIF()
+ENDIF()
+
+# Clang Everything support for debugging.
+IF( CMAKE_COMPILER_IS_CLANG )
+  ADD_COMPILE_OPTIONS(-fstrict-aliasing)
+  ADD_COMPILE_OPTIONS(
+    #-Weverything
+    #-Wno-gnu-zero-variadic-macro-arguments
+    #-Wno-covered-switch-default
+    #-Wno-reserved-id-macro
+    #-Wno-unused-macros
+    #-Wno-padded
+    #-Wno-old-style-cast
+    #-Wno-extra-semi-stmt
+    #-Wno-c++98-compat-pedantic
+    #-Wno-zero-as-null-pointer-constant
+    #-Wno-gnu-anonymous-struct
+    #-Wno-gnu-label-as-value
+    #-Wno-nested-anon-types
+    #-Wno-enum-enum-conversion
+    #-Wno-documentation-unknown-command
+    #-Wno-float-equal
+    #-Wcast-align
+  )
 ENDIF()
 
 ################################################################################

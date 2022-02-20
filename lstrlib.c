@@ -175,6 +175,7 @@ static int str_rep (lua_State *L) {
 
 
 #if defined(LUAGLM_EXT_API)
+/* newstr = strtrim(str[, chars]) */
 static int str_trim (lua_State *L) {
   size_t len = 0;
   const char *str = luaL_checklstring(L, 1, &len);
@@ -186,44 +187,79 @@ static int str_trim (lua_State *L) {
   return 1;
 }
 
+/* s1, s2, ... = strsplit | string.split(delimiter, str[, pieces]) */
 static int str_split (lua_State *L) {
   const char *delimiter = luaL_checkstring(L, 1);
   const char *str = luaL_checkstring(L, 2);
-  const lua_Integer limit = luaL_optinteger(L, 3, 0);
+  const lua_Integer pieces = luaL_optinteger(L, 3, 0);
+  const int top = lua_gettop(L);
 
-  int count = 0;
-  lua_settop(L, 0); /* clear new slots */
-  if (limit == 0 || limit > 1) {
+  lua_Integer count = 0;
+  if (pieces == 0 || pieces > 1) {
     const char *end;
     for (end = str; *end; ++end) {
-      const char *s;
-      int split = 0;
+      int has_split = 0;
+      const char *s; /* @NOTE: uses a raw string as delimited, not a pattern */
       for (s = delimiter; *s; ++s) {
         if (*s == *end) {
-          split = 1;
+          has_split = 1;
           break;
         }
       }
 
-      if (split) {
-        luaL_checkstack(L, count + 1, "too many results");
-        lua_pushlstring(L, str, (end - str));
-
-        ++count;
+      if (has_split) {
+        luaL_checkstack(L, 1, "too many results");
+        lua_pushlstring(L, str, end - str);
         str = end + 1;
-        if ((lua_Integer)count == (limit - 1)) {
+        if (++count == (pieces - 1)) {
           break;
         }
       }
     }
   }
 
-  /* Trailing characters */
-  luaL_checkstack(L, count + 1, "too many results");
-  lua_pushstring(L, str);
-  return count + 1;
+  luaL_checkstack(L, 1, "too many results");
+  lua_pushstring(L, str);  /* Trailing characters */
+  return lua_gettop(L) - top;
 }
 
+/* chunks = strsplittable(delimiter, str[, pieces]) */
+static int str_splittable (lua_State *L) {
+  const char *delimiter = luaL_checkstring(L, 1);
+  const char *str = luaL_checkstring(L, 2);
+  const lua_Integer pieces = luaL_optinteger(L, 3, 0);
+
+  lua_Integer count = 0;
+  lua_newtable(L);  /* [..., table] */
+  if (pieces == 0 || pieces > 1) {
+    const char *end;
+    for (end = str; *end; ++end) {
+      int has_split = 0;
+      const char *s;
+      for (s = delimiter; *s; ++s) {
+        if (*s == *end) {
+          has_split = 1;
+          break;
+        }
+      }
+
+      if (has_split) {
+        lua_pushlstring(L, str, end - str);  /* [..., table, string] */
+        lua_rawseti(L, -2, count + 1);  /* [..., table]; Note 1-based indexing */
+        str = end + 1;
+        if (++count == (pieces - 1)) {
+          break;
+        }
+      }
+    }
+  }
+
+  lua_pushstring(L, str);  /* [..., table, string]; trailing characters */
+  lua_rawseti(L, -2, count + 1);
+  return 1;
+}
+
+/* strjoin(delimiter, string1, string2 [, ...]) */
 static int str_join (lua_State *L) {
   size_t delimiter_length = 0;
   const char *delimiter = luaL_checklstring(L, 1, &delimiter_length);
@@ -246,8 +282,9 @@ static int str_join (lua_State *L) {
 
       lua_pushvalue(L, i);
       luaL_addvalue(&b);
-      if (i < top)
+      if (i < top) {
         luaL_addlstring(&b, delimiter, delimiter_length);
+      }
     }
     luaL_pushresult(&b);
   }
@@ -2047,11 +2084,17 @@ static const luaL_Reg strlib[] = {
   {"match", str_match},
   {"rep", str_rep},
 #if defined(LUAGLM_EXT_API)
+  {"trim", str_trim},
+  {"split", str_split},
+  {"splittable", str_splittable},
+  {"join", str_join},
+  {"concat", str_concat},
+  {"tostringall", str_tostringall},
+  /* @DEPRECATED */
   {"strtrim", str_trim},
   {"strsplit", str_split},
   {"strjoin", str_join},
   {"strconcat", str_concat},
-  {"tostringall", str_tostringall},
 #endif
   {"reverse", str_reverse},
   {"sub", str_sub},

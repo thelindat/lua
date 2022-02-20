@@ -535,16 +535,16 @@ t2 = table.clone(t[, t2]) -- t2 is a preallocated destination table
 label = table.type(t) -- "empty", "array", "hash", or "mixed"
 
 -- Joins strings together with a delimiter;
-str = string.strjoin(delimiter [, string, ...])
+str = string.join(delimiter [, string, ...])
 
 -- Trim characters off the beginning and end of a string;
-str = string.strtrim(input [, chars])
+str = string.trim(input [, chars])
 
 -- Returns a concatenation of all number/string arguments passed;
-str = string.strconcat(...)
+str = string.concat(...)
 
 -- Splits a string using a delimiter (optionally: into a specified number of pieces);
-... = string.strsplit(delimiter [, string [, pieces]])
+... = string.split(delimiter [, string [, pieces]])
 
 -- Converts all arguments to strings;
 ... = string.tostringall(...)
