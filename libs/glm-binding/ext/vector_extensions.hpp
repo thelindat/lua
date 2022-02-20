@@ -483,6 +483,48 @@ namespace glm {
     return length2(cross(p2 - p1, p3 - p1)) <= epsSq;
   }
 
+  /* Encode/Decode a spherical normal vector */
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<2, T, Q> spherical_encode(const vec<3, T, Q> &v) {
+    const vec<2, T, Q> Result(glm::atan2<T, defaultp>(v.y, v.x) * glm::one_over_pi<T>(), v.z);
+    return Result * T(0.5) + T(0.5);
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, T, Q> spherical_decode(const vec<2, T, Q> &v) {
+    const vec<2, T, Q> ang = v * T(2) - T(1);
+    const vec<2, T, Q> sc(sin(ang.x * glm::pi<T>()), cos(ang.x * glm::pi<T>()));
+    const vec<2, T, Q> phi(sqrt(T(1) - ang.y * ang.y), ang.y);
+    return vec<3, T, Q>(sc.y * phi.x, sc.x * phi.x, phi.y);
+  }
+
+  /* Encode/Decode a octahedron normal vector */
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<2, T, Q> octahedron_encode(const vec<3, T, Q> &v) {
+    const vec<3, T, Q> n = v / (abs(v.x) + abs(v.y) + abs(v.z));
+    vec<2, T, Q> Result(T(0));
+    if (n.z >= T(0)) {
+      Result.x = n.x;
+      Result.y = n.y;
+    }
+    else {
+      Result.x = (T(1) - abs(n.y)) * (n.x >= T(0) ? T(1) : -T(1));
+      Result.y = (T(1) - abs(n.x)) * (n.y >= T(0) ? T(1) : -T(1));
+    }
+    Result.x = Result.x * T(0.5) + T(0.5);
+    Result.y = Result.y * T(0.5) + T(0.5);
+    return Result;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, T, Q> octahedron_decode(const vec<2, T, Q> &v) {
+    const vec<2, T, Q> f(v.x * T(2) - T(1), v.y * T(2) - T(1));
+    const T t = saturate(-(T(1) - abs(f.x) - abs(f.y)));
+    return normalize(vec<3, T, Q>(f.x >= 0 ? -t : t, f.y >= 0 ? -t : t, t));
+  }
+
   /// <summary>
   /// </summary>
   /// <param name="negativeSideRefractionIndex">Refraction index of material exiting</param>
@@ -1105,12 +1147,22 @@ namespace glm {
   /// </summary>
   namespace detail {
     template<>
-    struct compute_rand<1, uint8, glm::defaultp> {
-      GLM_FUNC_QUALIFIER static vec<1, uint8, glm::defaultp> call() {
-        return vec<1, uint8, glm::defaultp>(static_cast<uint8>(
+    struct compute_rand<1, uint8, glm::highp> {
+      GLM_FUNC_QUALIFIER static vec<1, uint8, glm::highp> call() {
+        return vec<1, uint8, glm::highp>(static_cast<uint8>(
         std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
       }
     };
+
+#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
+    template<>
+    struct compute_rand<1, uint8, glm::aligned_highp> {
+      GLM_FUNC_QUALIFIER static vec<1, uint8, glm::aligned_highp> call() {
+        return vec<1, uint8, glm::aligned_highp>(static_cast<uint8>(
+        std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
+      }
+    };
+#endif
   }
 
 #if (GLM_ARCH & GLM_ARCH_SSE2_BIT) && (GLM_CONFIG_SIMD == GLM_ENABLE)

@@ -740,6 +740,10 @@ GLM_LUA_REG(pow4),
 #if defined(GTX_ORTHONORMALIZE_HPP)
 GLM_LUA_REG(orthonormalize),
 GLM_LUA_REG(orthonormalize3),  // @GLMVectorExtensions
+GLM_LUA_REG(spherical_encode),
+GLM_LUA_REG(spherical_decode),
+GLM_LUA_REG(octahedron_encode),
+GLM_LUA_REG(octahedron_decode),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetOrthogonalized", GLM_NAME(orthonormalize) },  // @O3DEAlias; Orthogonalize
 #endif

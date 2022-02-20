@@ -1837,6 +1837,10 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // @GLMVectorExtensions
   }
   GLM_BINDING_END
 }
+BIND_DEFN(spherical_encode, glm::spherical_encode, gLuaVec3<>)
+BIND_DEFN(spherical_decode, glm::spherical_decode, gLuaVec2<>)
+BIND_DEFN(octahedron_encode, glm::octahedron_encode, gLuaVec3<>)
+BIND_DEFN(octahedron_decode, glm::octahedron_decode, gLuaVec2<>)
 #endif
 
 #if defined(GTX_PERPENDICULAR_HPP)
