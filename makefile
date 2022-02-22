@@ -87,7 +87,10 @@ LIBS= -lm $(SYSLIBS) $(MYLIBS)
 AR= ar rc
 RANLIB= ranlib
 RM= rm -f
-UNAME= uname
+UNAME:= $(shell uname 2>/dev/null || echo posix)
+UNAME:= $(patsubst CYGWIN%,cygwin,$(UNAME))
+UNAME:= $(patsubst MINGW%,msys,$(UNAME))
+UNAME:= $(patsubst MSYS%,msys,$(UNAME))
 
 SYSCFLAGS=
 SYSLDFLAGS=
@@ -136,7 +139,7 @@ MYOBJS=
 
 # == END OF USER SETTINGS -- NO NEED TO CHANGE ANYTHING BELOW THIS LINE =======
 
-PLATS= guess aix bsd freebsd generic linux linux-readline macos mingw posix solaris
+PLATS= guess aix bsd freebsd generic linux linux-readline macos mingw cygwin msys posix solaris
 
 LUA_A=	liblua.a
 CORE_O=	lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o lundump.o lvm.o lzio.o ltests.o lglm.o
@@ -201,8 +204,8 @@ help:
 	@echo "See doc/readme.html for complete instructions."
 
 guess:
-	@echo Guessing `$(UNAME)`
-	@$(MAKE) `$(UNAME)`
+	@echo Guessing $(UNAME)
+	@$(MAKE) $(UNAME)
 
 AIX aix:
 	$(MAKE) $(ALL) CC="xlc" CFLAGS="-O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN" SYSLIBS="-ldl" SYSLDFLAGS="-brtl -bexpall"
@@ -236,10 +239,10 @@ macos-readline:
 macos-one:
 	$(MAKE) macos-readline CC="$(CPP)" LUA_O="onelua.o" BASE_O="onelua.o" LUA_A="" CORE_O="" LIB_O="" LUAC_T="" MYCFLAGS="$(LINUX_ONE_FLAGS)"
 
-mingw:
+mingw cygwin msys:
 	$(MAKE) "LUA_A=lua54.dll" "LUA_T=lua.exe" \
 	"AR=$(CC) -shared -o" "RANLIB=strip --strip-unneeded" \
-	"SYSCFLAGS=-Wno-attributes -DLUA_USE_POSIX -DLUA_BUILD_AS_DLL -D_WIN32" "SYSLIBS=" "SYSLDFLAGS=-s" lua.exe
+	"SYSCFLAGS=-DLUA_USE_POSIX -DLUA_BUILD_AS_DLL -D_WIN32" "SYSLIBS=" "SYSLDFLAGS=-s" lua.exe
 	$(MAKE) "LUAC_T=luac.exe" luac.exe
 
 posix:

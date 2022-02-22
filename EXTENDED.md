@@ -1006,6 +1006,34 @@ normal,tangent = orthonormalize3(normal --[[ vec3 ]], tangent --[[ vec3 ]])
 normal,tangent,binormal = orthonormalize3(normal --[[ vec3 ]], tangent --[[ vec3 ]], binormal --[[ vec3 ]])
 ```
 
+### spherical_encode
+
+```lua
+-- Encode a normal vector by projecting it onto an sphere
+vec2 = spherical_encode(v --[[ vec3 --]])
+```
+
+### spherical_decode
+
+```lua
+-- Decode a spherically projected normal vector
+vec3 = spherical_encode(v --[[ vec2 --]])
+```
+
+### octahedron_encode
+
+```lua
+-- Encode a normal vector by projecting it onto an octahedron
+vec2 = octahedron_encode(v --[[ vec3 --]])
+```
+
+### octahedron_decode
+
+```lua
+-- Decode a octhedron projected normal vector
+vec3 = octahedron_decode(v --[[ vec2 --]])
+```
+
 ## glm/gtx/projection.hpp
 
 ### projNorm

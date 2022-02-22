@@ -544,7 +544,10 @@ str = string.trim(input [, chars])
 str = string.concat(...)
 
 -- Splits a string using a delimiter (optionally: into a specified number of pieces);
-... = string.split(delimiter [, string [, pieces]])
+... = string.split(delimiter, string [, pieces]])
+
+-- string.split that places results into a table.
+array = string.splittable(delimiter, string [, pieces]])
 
 -- Converts all arguments to strings;
 ... = string.tostringall(...)
@@ -684,7 +687,7 @@ Note, not all Lua-specific options are listed.
   + **LUAGLM_EXT_READONLY**: Enable 'Readonly'
   + **LUAGLM_EXT_SAFENAV**: Enable 'Safe Navigation'.
   + **LUAGLM_EXT_TABINIT**: Enable 'Set Constructors'
-  + **LUAGLM_EXT_SCOPE_RESOLUTION**
+  + **LUAGLM_EXT_SCOPE_RESOLUTION**: Replace TK\_DBCOLON tokens with field selection (e.g., emulate C++ scope resolution operator). Note, this invalidates the 'label' rule in the grammar.
 
 #### GLM Preprocessor Configurations
 

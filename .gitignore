@@ -1,7 +1,7 @@
 .gitattributes
 manual/manual.html
 
-# Test scripts 
+# Test scripts
 libs/scripts/tests
 
 ## Ignore Visual Studio temporary files, build results, and
