@@ -1165,7 +1165,46 @@ namespace glm {
 #endif
   }
 
-#if (GLM_ARCH & GLM_ARCH_SSE2_BIT) && (GLM_CONFIG_SIMD == GLM_ENABLE)
+#if GLM_CONFIG_SIMD == GLM_ENABLE
+  #if !(GLM_ARCH & GLM_ARCH_SSE41_BIT)
+  /// <summary>
+  /// @GLMFix: Avoid imprecise _mm_floor_ps emulation when GLM_ARCH_SSE41_BIT is
+  /// not enabled.
+  /// </summary>
+  namespace detail {
+    using glm_vec4_floor_t = vec<4, float, glm::qualifier::aligned_highp>;
+
+    template<>
+    struct compute_floor<4, float, glm::qualifier::aligned_highp, true> {
+      GLM_FUNC_QUALIFIER static glm_vec4_floor_t call(glm_vec4_floor_t const &v) {
+        return glm_vec4_floor_t(compute_floor<4, float, glm::qualifier::highp, false>::call(
+          vec<4, float, glm::qualifier::highp>(v)
+        ));
+      }
+    };
+
+    template<>
+    struct compute_mod<4, float, glm::qualifier::aligned_highp, true> {
+      GLM_FUNC_QUALIFIER static glm_vec4_floor_t call(glm_vec4_floor_t const &x, glm_vec4_floor_t const &y) {
+        return glm_vec4_floor_t(compute_mod<4, float, glm::qualifier::highp, false>::call(
+          vec<4, float, glm::qualifier::highp>(x),
+          vec<4, float, glm::qualifier::highp>(y)
+        ));
+      }
+    };
+
+    template<>
+    struct compute_fract<4, float, glm::qualifier::aligned_highp, true> {
+      GLM_FUNC_QUALIFIER static glm_vec4_floor_t call(glm_vec4_floor_t const &v) {
+        return glm_vec4_floor_t(compute_fract<4, float, glm::qualifier::highp, false>::call(
+          vec<4, float, glm::qualifier::highp>(v)
+        ));
+      }
+    };
+  }
+  #endif
+
+  #if (GLM_ARCH & GLM_ARCH_SSE2_BIT)
   /// <summary>
   /// @GLMFix: glm/glm/detail/func_integer_simd.inl:42:32: error: could not convert ‘add0’ from ‘const __m128i’ to ‘glm::vec<4, unsigned int, glm::aligned_highp>’
   /// </summary>
@@ -1209,10 +1248,9 @@ namespace glm {
       }
     };
   }
-#endif
+  #endif
 
-#if GLM_CONFIG_SIMD == GLM_ENABLE
-  #if GLM_ARCH & GLM_ARCH_NEON_BIT
+  #if (GLM_ARCH & GLM_ARCH_NEON_BIT)
   namespace detail {
     /// <summary>
     /// @GLMFix: type_vec4_simd.inl:503:27: error: cannot convert ‘int32x4_t’ {aka ‘__vector(4) int’} to ‘glm::detail::storage<4, unsigned int, true>::type’ {aka ‘__vector(4) unsigned int’} in assignment
