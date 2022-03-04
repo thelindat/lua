@@ -463,8 +463,7 @@ static void rethook (lua_State *L, CallInfo *ci, int nres) {
 
 
 /* Unpack the first vector/matrix object */
-static int glmVec_call_unpack(lua_State *L) { return glm_unpack_vector(L, 1); }
-static int glmMat_call_unpack(lua_State *L) { return glm_unpack_matrix(L, 1); }
+static int call_luaglm_unpack(lua_State *L) { return luaglm_unpack(L, 1); }
 
 
 /*
@@ -484,12 +483,8 @@ StkId luaD_tryfuncTM (lua_State *L, StkId func) {
     ** e.g., vector into scalars and matrix into column vectors. This approach
     ** creates a temporary TValue that holds the pointer to the unpack function.
     */
-    if (ttisvector(s2v(func))) {
-      setfvalue(&tm_unpack, glmVec_call_unpack);
-      tm = &tm_unpack;
-    }
-    else if (ttismatrix(s2v(func))) {
-      setfvalue(&tm_unpack, glmMat_call_unpack);
+    if (ttisvector(s2v(func)) || ttismatrix(s2v(func))) {
+      setfvalue(&tm_unpack, call_luaglm_unpack);
       tm = &tm_unpack;
     }
     else {

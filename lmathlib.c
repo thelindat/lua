@@ -889,7 +889,7 @@ static const luaL_Reg mathlib[] = {
 #endif
 #endif
   /* grit-lua compatibility */
-  { "clamp", glmVec_clamp },
+  { "clamp", luaglm_clamp },
   /* placeholders */
   {"random", NULL},
   {"randomseed", NULL},
@@ -915,7 +915,16 @@ LUAMOD_API int luaopen_math (lua_State *L) {
   lua_pushinteger(L, LUA_MININTEGER);
   lua_setfield(L, -2, "mininteger");
 #if defined(LUA_C99_MATHLIB)
-  lua_pushnumber(L, LUA_NUMBER_EPS); lua_setfield(L, -2, "eps");
+  lua_pushnumber(L,
+  #if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+    FLT_EPSILON
+  #elif LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
+    DBL_EPSILON
+  #else
+    LDBL_EPSILON
+  #endif
+  );
+  lua_setfield(L, -2, "eps");
   lua_pushnumber(L, (lua_Number)FLT_EPSILON); lua_setfield(L, -2, "feps");
 #endif
   setrandfunc(L);

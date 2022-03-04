@@ -94,7 +94,7 @@ typedef LUAGLM_INT_TYPE glm_Integer;
     #define LUAGLM_Q glm::qualifier::aligned_highp
   #else
     #define LUAGLM_Q glm::qualifier::highp
-    #error "Invalid ALIGNED_GENTYPES configuration; compiler does not support aligned types"
+    #error "Invalid ALIGNED_GENTYPES configuration; compiler/configuration does not support aligned types"
   #endif
 #else
   #define LUAGLM_Q glm::qualifier::highp
@@ -223,6 +223,8 @@ union glmVector {
   glmVector(const glm::vec<3, glm_Float, LUAGLM_Q> &_v) : v3(_v) { }
   glmVector(const glm::vec<4, glm_Float, LUAGLM_Q> &_v) : v4(_v) { }
   glmVector(const glm::qua<glm_Float, LUAGLM_Q> &_q) : q(_q) { }
+  glmVector(glm_Float x, glm_Float y, glm_Float z, glm_Float w) : v4(x, y, z, w) { }
+  template <typename T> glmVector(T x, T y, T z, T w) : v4(x, y, z, w) { }
 
   // Realignment Constructors
 
@@ -401,17 +403,11 @@ union glmMatrixBoundary {
   glmMatrixBoundary(const lua_Mat4 &_m) : lua(_m) { }
 };
 
-/* lua_Float4/lua_Mat4 -> glmVector/glmMatrix */
+/* Vector and Matrix Boundaries */
 #define glm_vec_boundary(o) reinterpret_cast<glmVectorBoundary *>(o)->glm
 #define glm_mat_boundary(o) reinterpret_cast<glmMatrixBoundary *>(o)->glm
 #define glm_constvec_boundary(o) reinterpret_cast<const glmVectorBoundary *>(o)->glm
 #define glm_constmat_boundary(o) reinterpret_cast<const glmMatrixBoundary *>(o)->glm
-
-/* glmVector/glmMatrix -> lua_Float4/lua_Mat4 */
-#define lua_vec_boundary(o) reinterpret_cast<glmVectorBoundary *>(o)->lua
-#define lua_mat_boundary(o) reinterpret_cast<glmMatrixBoundary *>(o)->lua
-#define lua_constvec_boundary(o) reinterpret_cast<const glmVectorBoundary *>(o)->lua
-#define lua_constmat_boundary(o) reinterpret_cast<const glmMatrixBoundary *>(o)->lua
 
 /* Additional defensive checks around the aliasing and alignment of lua_Mat4 and glmMatrix. */
 #if GLM_HAS_STATIC_ASSERT
@@ -435,6 +431,11 @@ union glmMatrixBoundary {
   #endif
 
   GLM_STATIC_ASSERT(true
+    && sizeof(glmVectorBoundary) == sizeof(lua_Float4)
+    && sizeof(glmVectorBoundary) == sizeof(glmVector), "Inconsistent Vector Boundaries!"
+  );
+
+  GLM_STATIC_ASSERT(true
     && sizeof(grit_length_t) == sizeof(glm::length_t)
     && sizeof(lua_Mat4) == sizeof(glmMatrix)
     && sizeof(lua_Mat4::Columns::m2) == sizeof(glmMatrix::m24)
@@ -447,10 +448,8 @@ union glmMatrixBoundary {
   );
 
   GLM_STATIC_ASSERT(true
-    && sizeof(glmVectorBoundary) == sizeof(lua_Float4)
-    && sizeof(glmVectorBoundary) == sizeof(glmVector)
     && sizeof(glmMatrixBoundary) == sizeof(lua_Mat4)
-    && sizeof(glmMatrixBoundary) == sizeof(glmMatrix), "Inconsistent Boundary Types!"
+    && sizeof(glmMatrixBoundary) == sizeof(glmMatrix), "Inconsistent Matrix Boundaries!"
   );
 #endif
 #endif

@@ -96,7 +96,7 @@ static void dumpInteger (DumpState *D, lua_Integer x) {
 }
 
 
-static void dumpVectorType(DumpState *D, lua_Float4 v, int t) {
+static void dumpVectorType (DumpState *D, luai_Float4 v, int t) {
   switch (t) {
     case LUA_VVECTOR2:
       dumpVar(D, v.raw[0]);

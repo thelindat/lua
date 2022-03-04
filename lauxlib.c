@@ -898,7 +898,7 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
       }
       case LUA_TVECTOR:
       case LUA_TMATRIX:
-        glm_pushstring(L, idx);
+        luaglm_pushstring(L, idx);
         break;
       case LUA_TSTRING:
         lua_pushvalue(L, idx);

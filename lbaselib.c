@@ -280,7 +280,7 @@ static int luaB_type (lua_State *L) {
   int t = lua_type(L, 1);
   luaL_argcheck(L, t != LUA_TNONE, 1, "value expected");
   if (luaB_typehasname(t))
-    lua_pushstring(L, glm_typename(L, 1));
+    lua_pushstring(L, luaglm_typename(L, 1));
   else
     lua_pushstring(L, lua_typename(L, t));
   return 1;
@@ -400,7 +400,7 @@ static int luaB_ipairs (lua_State *L) {
 */
 static int luaB_ipairs (lua_State *L) {
   luaL_checkany(L, 1);
-  if (lua_isvector_t(L, 1) || lua_ismatrix_t(L, 1)) {
+  if (lua_isvectortype(L, 1) || lua_ismatrixtype(L, 1)) {
     lua_pushcfunction(L, luaB_next);  /* will return generator, */
     lua_pushvalue(L, 1);  /* state, */
     lua_pushinteger(L, 0);
@@ -618,7 +618,7 @@ static int luaB_joaat (lua_State *L) {
   const int type = lua_type(L, 1);
   if (type != LUA_TNUMBER && type != LUA_TBOOLEAN && type != LUA_TSTRING)
     return luaL_typeerror(L, 1, lua_typename(L, LUA_TSTRING));
-  lua_pushinteger(L, glm_tohash(L, 1, lua_toboolean(L, 2)));
+  lua_pushinteger(L, lua_tohash(L, 1, lua_toboolean(L, 2)));
   return 1;
 }
 #endif
@@ -681,38 +681,38 @@ static const luaL_Reg base_funcs[] = {
 #if defined(LUAGLM_EXT_API)
   {"scrub", luaB_scrub},
 #endif
-  {"vec", glmVec_vec}, {"vector", glmVec_vec},
-  {"vec1", glmVec_vec1}, {"vector1", glmVec_vec1},
-  {"vec2", glmVec_vec2}, {"vector2", glmVec_vec2},
-  {"vec3", glmVec_vec3}, {"vector3", glmVec_vec3},
-  {"vec4", glmVec_vec4}, {"vector4", glmVec_vec4},
-  {"ivec", glmVec_ivec},
-  {"ivec1", glmVec_ivec1},
-  {"ivec2", glmVec_ivec2},
-  {"ivec3", glmVec_ivec3},
-  {"ivec4", glmVec_ivec4},
-  {"bvec", glmVec_bvec},
-  {"bvec1", glmVec_bvec1},
-  {"bvec2", glmVec_bvec2},
-  {"bvec3", glmVec_bvec3},
-  {"bvec4", glmVec_bvec4},
-  {"mat", glmMat_mat},
-  {"mat2x2", glmMat_mat2x2}, {"mat2", glmMat_mat2x2},
-  {"mat2x3", glmMat_mat2x3},
-  {"mat2x4", glmMat_mat2x4},
-  {"mat3x2", glmMat_mat3x2},
-  {"mat3x3", glmMat_mat3x3}, {"mat3", glmMat_mat3x3},
-  {"mat3x4", glmMat_mat3x4},
-  {"mat4x2", glmMat_mat4x2},
-  {"mat4x3", glmMat_mat4x3},
-  {"mat4x4", glmMat_mat4x4}, {"mat4", glmMat_mat4x4},
-  {"qua", glmVec_qua}, {"quat", glmVec_qua},
+  {"vec", luaglm_vec}, {"vector", luaglm_vec},
+  {"vec1", luaglm_vec1}, {"vector1", luaglm_vec1},
+  {"vec2", luaglm_vec2}, {"vector2", luaglm_vec2},
+  {"vec3", luaglm_vec3}, {"vector3", luaglm_vec3},
+  {"vec4", luaglm_vec4}, {"vector4", luaglm_vec4},
+  {"ivec", luaglm_ivec},
+  {"ivec1", luaglm_ivec1},
+  {"ivec2", luaglm_ivec2},
+  {"ivec3", luaglm_ivec3},
+  {"ivec4", luaglm_ivec4},
+  {"bvec", luaglm_bvec},
+  {"bvec1", luaglm_bvec1},
+  {"bvec2", luaglm_bvec2},
+  {"bvec3", luaglm_bvec3},
+  {"bvec4", luaglm_bvec4},
+  {"mat", luaglm_mat},
+  {"mat2x2", luaglm_mat2x2}, {"mat2", luaglm_mat2x2},
+  {"mat2x3", luaglm_mat2x3},
+  {"mat2x4", luaglm_mat2x4},
+  {"mat3x2", luaglm_mat3x2},
+  {"mat3x3", luaglm_mat3x3}, {"mat3", luaglm_mat3x3},
+  {"mat3x4", luaglm_mat3x4},
+  {"mat4x2", luaglm_mat4x2},
+  {"mat4x3", luaglm_mat4x3},
+  {"mat4x4", luaglm_mat4x4}, {"mat4", luaglm_mat4x4},
+  {"qua", luaglm_qua}, {"quat", luaglm_qua},
   /* grit-lua compatibility functions */
-  {"dot", glmVec_dot},
-  {"cross", glmVec_cross},
-  {"inv", glmVec_inverse},
-  {"norm", glmVec_normalize},
-  {"slerp", glmVec_slerp},
+  {"dot", luaglm_dot},
+  {"cross", luaglm_cross},
+  {"inv", luaglm_inverse},
+  {"norm", luaglm_normalize},
+  {"slerp", luaglm_slerp},
   /* placeholders */
   {LUA_GNAME, NULL},
   {"_VERSION", NULL},

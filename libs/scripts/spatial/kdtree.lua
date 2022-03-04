@@ -51,7 +51,6 @@ local Interval = Interval or require('sat')
 
 local vec3 = vec3
 
-local table = table
 local table_remove = table.remove
 local table_create = table.create or function() return {} end
 local table_wipe = table.wipe or function() return {} end
@@ -96,7 +95,7 @@ function KDTree.New()
 
         --[[ Tree structure --]]
         root = nil, -- Root index of the tree.
-        nodeCount = 1, -- Indes count
+        nodeCount = 1, -- Index count
         cardinalAxis = {}, -- Specifies along which axis this node is split.
         low = {}, high = {}, -- Partitions/Children
 
@@ -115,8 +114,8 @@ function KDTree.New()
         leafMinBounds = {}, leafMaxBounds = {}, -- Accumulative bounds of all objects within the leaf.
 
         --[[ Cache structures --]]
-        availableNodeIndicies = {}, -- available nodes within the (flat-)array tree structure.
-        availableLeafIndicies = {}, -- available leafs within the (flat-)array tree structure.
+        availableNodeIndices = {}, -- available nodes within the (flat-)array tree structure.
+        availableLeafIndices = {}, -- available leafs within the (flat-)array tree structure.
     }, KDTree)
 end
 
@@ -148,8 +147,8 @@ function KDTree:Clear()
     self.leafMaxBounds = table_wipe(self.leafMaxBounds)
 
     --[[ Cached Data.--]]
-    self.availableNodeIndicies = table_wipe(self.availableNodeIndicies)
-    self.availableLeafIndicies = table_wipe(self.availableLeafIndicies)
+    self.availableNodeIndices = table_wipe(self.availableNodeIndices)
+    self.availableLeafIndices = table_wipe(self.availableLeafIndices)
 
     return self
 end
@@ -261,8 +260,8 @@ end
 --]]
 function KDTree:NewNode(axis, value, minBound, maxBound, low, high)
     local node = nil
-    if #self.availableNodeIndicies > 0 then
-        node = table_remove(self.availableNodeIndicies)
+    if #self.availableNodeIndices > 0 then
+        node = table_remove(self.availableNodeIndices)
     else
         node = self.nodeCount
         self.nodeCount = node + 1
@@ -293,8 +292,8 @@ end
 --]]
 function KDTree:NewLeaf(objects, minBound, maxBound)
     local leafNode = nil
-    if #self.availableLeafIndicies > 0 then
-        leafNode = table_remove(self.availableLeafIndicies)
+    if #self.availableLeafIndices > 0 then
+        leafNode = table_remove(self.availableLeafIndices)
     else
         leafNode = self.leafCount ; self.leafCount = leafNode + 1
     end
@@ -324,7 +323,7 @@ function KDTree:BuildLeafNode(interval, items, minBound, maxBound)
     return self:NewLeaf(leafObjects, minBound, maxBound)
 end
 
---[[ Delete the provided node from the tree table. --]]
+--[[ Delete 'node' from the tree table. --]]
 function KDTree:DeleteNode(node)
     if node > 0 then
         self.low[node] = 0
@@ -334,22 +333,22 @@ function KDTree:DeleteNode(node)
         self.nodeMinBounds[node] = __emptybounds
         self.nodeMaxBounds[node] = __emptybounds
 
-        self.availableNodeIndicies[#self.availableNodeIndicies + 1] = node
+        self.availableNodeIndices[#self.availableNodeIndices + 1] = node
     else
         local leafNode = -node
 
         self.objects[leafNode] = table_wipe(self.objects[leafNode])
         self.leafMinBounds[leafNode] = __emptybounds
         self.leafMaxBounds[leafNode] = __emptybounds
-        self.availableLeafIndicies[#self.availableLeafIndicies + 1] = leafNode
+        self.availableLeafIndices[#self.availableLeafIndices + 1] = leafNode
     end
     return self
 end
 
 --[[
 @RETURN
-    True if this node has at least one child node (if its a non-leaf) or
-    contains more than one object (if it s a leaf).
+    True if 'node' has at least one child node (if its a non-leaf) or contains
+    more than one object (if it s a leaf).
 --]]
 function KDTree:HasChildren(node)
     if node < 0 then
@@ -361,7 +360,7 @@ function KDTree:HasChildren(node)
 end
 
 --[[
-    Re-compute the absolute dimensions of the subtree rooted at "node"
+    Recompute the absolute dimensions of the subtree rooted at 'node'
 
 @PARAM allPaths - if true, traverse the entire subtree and recompute the bounds
     to each node. Otherwise, only look at the children (or leaves) of this node.
@@ -413,7 +412,7 @@ end
 
 --[[
     Insert an object into the subtree rooted at 'node'. This function will
-    return 'node', however, its subtree may be reorganized.
+    return 'node', although its subtree may be reorganized.
 
 @RETURN
     Index of the node.
@@ -466,9 +465,9 @@ function KDTree:InsertNode(intervals, node, object, pooler)
 end
 
 --[[
-    Remove an object from the subtree rooted at 'node'. This function may
+    Remove 'object' from the subtree rooted at 'node'. This function may
     reorganize the entire sub-tree (e.g., delete an entire branch). So the
-    returned 'node' may be different.
+    returned node may be different.
 
 @RETURN:
     The node of the new subtree root ('node' if nothing has changed).
@@ -584,12 +583,12 @@ end
 
 --[[ @OVERRIDE --]]
 function KDTree:Immutable()
-    table_wipe(self.availableNodeIndicies)
-    table_wipe(self.availableLeafIndicies)
+    table_wipe(self.availableNodeIndices)
+    table_wipe(self.availableLeafIndices)
 
     self.intervals = nil
-    self.availableNodeIndicies = nil
-    self.availableLeafIndicies = nil
+    self.availableNodeIndices = nil
+    self.availableLeafIndices = nil
     return self
 end
 

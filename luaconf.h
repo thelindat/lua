@@ -9,7 +9,6 @@
 #define luaconf_h
 
 #include <limits.h>
-#include <float.h>
 #include <stddef.h>
 
 
@@ -442,7 +441,6 @@
 #if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT		/* { single float */
 
 #define LUA_NUMBER	float
-#define LUA_NUMBER_EPS FLT_EPSILON
 
 #define l_floatatt(n)		(FLT_##n)
 
@@ -459,7 +457,6 @@
 #elif LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE	/* }{ long double */
 
 #define LUA_NUMBER	long double
-#define LUA_NUMBER_EPS LDBL_EPSILON
 
 #define l_floatatt(n)		(LDBL_##n)
 
@@ -475,7 +472,6 @@
 #elif LUA_FLOAT_TYPE == LUA_FLOAT_DOUBLE	/* }{ double */
 
 #define LUA_NUMBER	double
-#define LUA_NUMBER_EPS DBL_EPSILON
 
 #define l_floatatt(n)		(DBL_##n)
 
@@ -857,11 +853,10 @@
 **    2. LUAGLM_FORCES_ALIGNED_GENTYPES*
 **    3. GLM_FORCE_SIZE_T_LENGTH
 **
-** In addition GLM_FORCE_QUAT_DATA_XYZW, formerly GLM_FORCE_QUAT_DATA_WXYZ,
+** @TODO: In addition GLM_FORCE_QUAT_DATA_XYZW, formerly GLM_FORCE_QUAT_DATA_WXYZ,
 ** requires consideration for quaternions when operating within the C boundary.
 ** ===================================================================
 */
-#define LUA_GRIT_API
 
 /* @NOTE: GRIT_LONG_FLOAT has been deprecated and replaced by LUAGLM_NUMBER_TYPE */
 #if defined(GRIT_LONG_FLOAT) && !defined(LUAGLM_NUMBER_TYPE)
@@ -878,13 +873,11 @@
 ** experimented with.
 */
 #if defined(LUAGLM_NUMBER_TYPE) && LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE
-  #define LUA_VEC_TYPE LUA_FLOAT_TYPE
-  #define LUA_VEC_NUMBER LUA_NUMBER
+  #define LUAGLM_VEC_TYPE LUA_FLOAT_TYPE
   #define LUAGLM_FLOAT_TYPE LUA_NUMBER
   #define LUAGLM_INT_TYPE LUA_INTEGER
 #else
-  #define LUA_VEC_TYPE LUA_FLOAT_FLOAT
-  #define LUA_VEC_NUMBER float
+  #define LUAGLM_VEC_TYPE LUA_FLOAT_FLOAT
   #define LUAGLM_FLOAT_TYPE float
   #define LUAGLM_INT_TYPE int
 #endif
@@ -898,7 +891,7 @@
 */
 #if !defined(RC_INVOKED)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
-  #if LUA_VEC_TYPE != LUA_FLOAT_FLOAT
+  #if LUAGLM_VEC_TYPE != LUA_FLOAT_FLOAT
     #error "__m256/__m512 advanced vector extensions are not supported!"
   #else
     #define LUAGLM_ALIGN LUA_ALIGNED_(16)
@@ -973,7 +966,7 @@
 #endif
 
 /* vector/matrix floating point type */
-typedef LUA_VEC_NUMBER lua_VecF;
+typedef LUAGLM_FLOAT_TYPE lua_VecF;
 typedef lua_VecF lua_CFloat2[2];
 typedef lua_VecF lua_CFloat3[3]; /* @TODO: @ImplicitAlign */
 typedef lua_VecF lua_CFloat4[4];

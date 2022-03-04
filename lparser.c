@@ -1417,6 +1417,7 @@ static BinOpr getbinopr (int op) {
     case TK_BANDEQ: return OPR_BAND;
     case TK_BOREQ: return OPR_BOR;
     case TK_BXOREQ: return OPR_BXOR;
+    case TK_CONCATEQ: return OPR_CONCAT;
 #endif
     default: return OPR_NOBINOPR;
   }
@@ -1714,7 +1715,7 @@ static RET_ASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nv
 #if defined(LUAGLM_EXT_COMPOUND)
   else if (opeqexpr(ls->t.token)) {  /* restassign -> opeq expr */
     check_condition(ls, nvars == 1, "compound assignment not allowed on tuples");
-    compound_assignment(ls,&lh->v);
+    compound_assignment(ls, &lh->v);
     return RET_ASSIGN_RETURN;
   }
   else {

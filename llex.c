@@ -52,7 +52,7 @@ static const char *const luaX_tokens [] = {
     "<number>", "<integer>", "<name>", "<string>"
     , "<hash>"
 #if defined(LUAGLM_EXT_COMPOUND)
-    , "+=", "-=", "*=", "/=", "<<=", ">>=", "&=", "|=", "^="
+    , "+=", "-=", "*=", "/=", "<<=", ">>=", "&=", "|=", "^=", "..="
 #endif
 };
 
@@ -628,6 +628,10 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (check_next1(ls, '.')) {
           if (check_next1(ls, '.'))
             return TK_DOTS;   /* '...' */
+#if defined(LUAGLM_EXT_COMPOUND)
+          if (check_next1(ls, '='))
+            return TK_CONCATEQ;   /* '..=' */
+#endif
           else return TK_CONCAT;   /* '..' */
         }
         else if (!lisdigit(ls->current)) return '.';

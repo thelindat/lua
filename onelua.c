@@ -47,6 +47,7 @@
 /* setup for luaconf.h */
 #define LUA_CORE
 #define LUA_LIB
+#define LUA_GRIT_API
 #define ltable_c
 #define lvm_c
 #include "luaconf.h"

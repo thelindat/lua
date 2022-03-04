@@ -204,10 +204,9 @@ static int tpack (lua_State *L) {
 static int tunpack (lua_State *L) {
   lua_Unsigned n;
   lua_Integer i, e;
-  if (lua_isvector_t(L, 1))
-    return glm_unpack_vector(L, 1);
-  else if (lua_ismatrix_t(L, 1))
-    return glm_unpack_matrix(L, 1);
+  if (lua_isvectortype(L, 1) || lua_ismatrixtype(L, 1)) {
+    return luaglm_unpack(L, 1);
+  }
 
   i = luaL_optinteger(L, 2, 1);
   e = luaL_opt(L, luaL_checkinteger, 3, luaL_len(L, 1));

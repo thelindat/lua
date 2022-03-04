@@ -9,9 +9,6 @@
 */
 #ifndef BINDING_API_HPP
 #define BINDING_API_HPP
-#if !defined(LUA_LIB)
-  #define LUA_LIB
-#endif
 
 /* Ensure experimental headers are included with glm/ext.hpp */
 #if !defined(GLM_ENABLE_EXPERIMENTAL)
@@ -310,8 +307,10 @@ GLM_BINDING_QUALIFIER(unpack) {
   const int n = LB.top_for_recycle();
   for (; LB.idx <= n; ++LB.idx) {
     switch (ttype(LB.i2v())) {
-      case LUA_TVECTOR: glm_unpack_vector(LB.L, LB.idx); break;
-      case LUA_TMATRIX: glm_unpack_matrix(LB.L, LB.idx); break;
+      case LUA_TVECTOR:
+      case LUA_TMATRIX:
+        luaglm_unpack(LB.L, LB.idx);
+        break;
       default: {
         lua_pushvalue(LB.L, LB.idx);
         break;
@@ -433,12 +432,12 @@ GLM_BINDING_QUALIFIER(mat_mul) {  // @TODO: Reduce bloat!
   BIND_PUSH(LB, lsb, msb);                  \
   LUA_MLM_END
 
-#if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
+#if LUA_INT_TYPE != LUA_INT_INT || !LUAGLM_ALIGNED
 INTEGER_VECTOR_DEFN(bitCount, glm::bitCount, lua_Unsigned, LAYOUT_UNARY)
 #endif
 INTEGER_VECTOR_DEFN(bitfieldExtract, glm::bitfieldExtract, lua_Unsigned, LAYOUT_UNARY, gLuaTrait<int>, gLuaTrait<int>)
 INTEGER_VECTOR_DEFN(bitfieldInsert, glm::bitfieldInsert, lua_Unsigned, LAYOUT_BINARY, gLuaTrait<int>, gLuaTrait<int>)
-#if LUA_INT_TYPE != LUA_INT_INT || !defined(LUAGLM_ALIGNED)
+#if LUA_INT_TYPE != LUA_INT_INT || !LUAGLM_ALIGNED
 INTEGER_VECTOR_DEFN(bitfieldReverse, glm::bitfieldReverse, lua_Unsigned, LAYOUT_UNARY)
 #endif
 INTEGER_VECTOR_DEFN(findLSB, glm::findLSB, lua_Unsigned, LAYOUT_UNARY)
@@ -1583,10 +1582,10 @@ NUMBER_VECTOR_DEFN(compScale, glm::compScale<glm_Integer>, LAYOUT_UNARY)
 /* glm::compNormalize/glm::compScale for different types, e.g., u8, i8, u16, i16 */
 INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, glm::i8, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, glm::u8, LAYOUT_UNARY)
-INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, glm::i16, LAYOUT_UNARY)
-INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, glm::u16, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, glm::i16, LAYOUT_UNARY)
+INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, glm::u16, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
 #endif

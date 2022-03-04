@@ -12,8 +12,8 @@
 #include "lglm_core.h"
 
 #include "allocator.hpp"
-#include "iterators.hpp"
 #include "bindings.hpp"
+#include "iterators.hpp"
 
 #include "ext/geom/setup.hpp"
 #include "ext/geom/aabb.hpp"

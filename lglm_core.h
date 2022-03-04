@@ -84,9 +84,7 @@ static LUA_INLINE int vecgeti (const TValue *obj, lua_Integer n, StkId res) {
 #if LUAGLM_QUAT_WXYZ  /* quaternion has WXYZ layout */
     if (ttypetag(obj) == LUA_VQUAT) n = ((n % 4) + 1);
 #endif
-
-    /* Assumes a packed x,y,z,w struct */
-    setfltvalue(s2v(res), cast_num(vvalue_(obj).raw[n - 1]));
+    setfltvalue(s2v(res), cast_num(f4_loadf(vvalue_(obj).raw[n - 1])));
     return LUA_TNUMBER;
   }
   return LUA_TNONE;
@@ -113,7 +111,7 @@ static LUA_INLINE int vecgets (const TValue *obj, const char *k, StkId res) {
 #if LUAGLM_QUAT_WXYZ  /* quaternion has WXYZ layout */
     if (ttypetag(obj) == LUA_VQUAT) _n = ((_n + 1) % 4);
 #endif
-    setfltvalue(s2v(res), cast_num(vvalue_(obj).raw[_n]));
+    setfltvalue(s2v(res), cast_num(f4_loadf(vvalue_(obj).raw[_n])));
     return LUA_TNUMBER;
   }
   return LUA_TNONE;
@@ -163,9 +161,6 @@ LUAI_FUNC int glmVec_isfinite (const TValue *obj);
 ** nothing.
 */
 LUAI_FUNC int glmVec_next (const TValue *obj, StkId key);
-
-/* trybinTM handler for GLM objects */
-LUAI_FUNC int glm_trybinTM (lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
 
 /* }================================================================== */
 
@@ -239,6 +234,9 @@ LUAI_FUNC int glmMat_equalObj (lua_State *L, const TValue *o1, const TValue *o2)
 ** Miscellaneous
 ** ===================================================================
 */
+
+/* trybinTM handler for GLM objects */
+LUAI_FUNC int luaglm_trybinTM (lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event);
 
 /*
 ** Jenkins' one-at-a-time hash.

@@ -107,6 +107,7 @@ cat << EOF >> ${OUTFILE}
 /* setup for luaconf.h */
 #define LUA_CORE
 #define LUA_LIB
+#define LUA_GRIT_API
 /* #define LUA_INCLUDE_LIBGLM */ /* Disabled by default; include in build unit */
 #define ltable_c
 #define lvm_c

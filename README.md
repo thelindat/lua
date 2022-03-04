@@ -319,9 +319,9 @@ useful changes to the Lua runtime, all bound to preprocessor flags:
 
 ### Compound Operators
 
-Add ``+=, -=, *=, /=, <<=, >>=, &=, |=, and ^=`` to the language. The increment
-and decrement operators (``++, --``) have not been implemented due to one of
-those operators being reserved.
+Add ``+=, -=, *=, /=, <<=, >>=, &=, |=, ^=``, and ..= to the language. The
+increment and decrement operators (``++, --``) have not been implemented due to
+one of those operators being reserved.
 
 ### Safe Navigation
 
@@ -763,6 +763,7 @@ Ordered by priority.
 
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Cleanup testing scripts/environment and publish.
+1. Half precision vector storage
 1. Rewrite build scripts.
 1. Update the Benchmarking section.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
@@ -776,7 +777,7 @@ Ordered by priority.
 
 ### Planned Features
 
-1. One downside to vectors/quaternions being an explicit `Value` is that they increase the minimum Value size to at least 16 bytes. Given that types in Lua are fairly transparent, it may be beneficial to introduce, or at least experiment with, a compile-time option to make vector/quaternion types collectible.
+1. One downside to vectors/quaternions being an explicit `Value` is that they increase the minimum Value size to at least 16 bytes. Given that types in Lua are fairly transparent, it may be beneficial to introduce, or at least experiment with, half-precision floating-point formats or a compile-time option to make vector/quaternion types collectible.
 1. Support for integer vectors/matrices. Either by introducing an additional type, e.g., `LUA_TVECTORI`, or splitting the vector tag `LUA_TVECTOR` into `LUA_TVECTOR2`, `LUA_TVECTOR3`, `LUA_TVECTOR4`, and `LUA_TQUAT` and use variant bits for the primitive type.
 1. Include broad phase collision scripting examples, e.g., dynamic AABB tree and/or multibox sweep-and-prune.
 1. A significantly less efficient shared-library implementation, using tables and/or userdata instead of first-class types, for Lua5.1, Lua5.2, Lua5.3, Lua5.4, and [LuaJIT](https://github.com/LuaJIT/LuaJIT).

@@ -410,8 +410,8 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 
 #define lua_isfunction(L,n)	(lua_type(L, (n)) == LUA_TFUNCTION)
 #define lua_istable(L,n)	(lua_type(L, (n)) == LUA_TTABLE)
-#define lua_ismatrix_t(L, n) (lua_type(L, (n)) == LUA_TMATRIX)
-#define lua_isvector_t(L, n) (lua_type(L, (n)) == LUA_TVECTOR)
+#define lua_ismatrixtype(L, n) (lua_type(L, (n)) == LUA_TMATRIX)
+#define lua_isvectortype(L, n) (lua_type(L, (n)) == LUA_TVECTOR)
 #define lua_islightuserdata(L,n)	(lua_type(L, (n)) == LUA_TLIGHTUSERDATA)
 #define lua_isnil(L,n)		(lua_type(L, (n)) == LUA_TNIL)
 #define lua_isboolean(L,n)	(lua_type(L, (n)) == LUA_TBOOLEAN)

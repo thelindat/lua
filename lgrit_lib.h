@@ -24,66 +24,51 @@
 
 /* Constructors */
 
-LUA_API int glmVec_vec (lua_State *L);
-LUA_API int glmVec_vec1 (lua_State *L);
-LUA_API int glmVec_vec2 (lua_State *L);
-LUA_API int glmVec_vec3 (lua_State *L);
-LUA_API int glmVec_vec4 (lua_State *L);
+LUA_API int luaglm_vec (lua_State *L);
+LUA_API int luaglm_vec1 (lua_State *L);
+LUA_API int luaglm_vec2 (lua_State *L);
+LUA_API int luaglm_vec3 (lua_State *L);
+LUA_API int luaglm_vec4 (lua_State *L);
 
-LUA_API int glmVec_ivec (lua_State *L);
-LUA_API int glmVec_ivec1 (lua_State *L);
-LUA_API int glmVec_ivec2 (lua_State *L);
-LUA_API int glmVec_ivec3 (lua_State *L);
-LUA_API int glmVec_ivec4 (lua_State *L);
+LUA_API int luaglm_ivec (lua_State *L);
+LUA_API int luaglm_ivec1 (lua_State *L);
+LUA_API int luaglm_ivec2 (lua_State *L);
+LUA_API int luaglm_ivec3 (lua_State *L);
+LUA_API int luaglm_ivec4 (lua_State *L);
 
-LUA_API int glmVec_bvec (lua_State *L);
-LUA_API int glmVec_bvec1 (lua_State *L);
-LUA_API int glmVec_bvec2 (lua_State *L);
-LUA_API int glmVec_bvec3 (lua_State *L);
-LUA_API int glmVec_bvec4 (lua_State *L);
+LUA_API int luaglm_bvec (lua_State *L);
+LUA_API int luaglm_bvec1 (lua_State *L);
+LUA_API int luaglm_bvec2 (lua_State *L);
+LUA_API int luaglm_bvec3 (lua_State *L);
+LUA_API int luaglm_bvec4 (lua_State *L);
 
-LUA_API int glmMat_mat (lua_State *L);
-LUA_API int glmMat_mat2x2 (lua_State *L);
-LUA_API int glmMat_mat2x3 (lua_State *L);
-LUA_API int glmMat_mat2x4 (lua_State *L);
-LUA_API int glmMat_mat3x2 (lua_State *L);
-LUA_API int glmMat_mat3x3 (lua_State *L);
-LUA_API int glmMat_mat3x4 (lua_State *L);
-LUA_API int glmMat_mat4x2 (lua_State *L);
-LUA_API int glmMat_mat4x3 (lua_State *L);
-LUA_API int glmMat_mat4x4 (lua_State *L);
+LUA_API int luaglm_mat (lua_State *L);
+LUA_API int luaglm_mat2x2 (lua_State *L);
+LUA_API int luaglm_mat2x3 (lua_State *L);
+LUA_API int luaglm_mat2x4 (lua_State *L);
+LUA_API int luaglm_mat3x2 (lua_State *L);
+LUA_API int luaglm_mat3x3 (lua_State *L);
+LUA_API int luaglm_mat3x4 (lua_State *L);
+LUA_API int luaglm_mat4x2 (lua_State *L);
+LUA_API int luaglm_mat4x3 (lua_State *L);
+LUA_API int luaglm_mat4x4 (lua_State *L);
 
-LUA_API int glmVec_qua (lua_State *L);
+LUA_API int luaglm_qua (lua_State *L);
 
 /* Return the name of the GLM type (number, vector, matrix) at 'idx'. */
-LUA_API const char *glm_typename (lua_State *L, int idx);
+LUA_API const char *luaglm_typename (lua_State *L, int idx);
 
 /*
 ** Pushes onto the stack a formatted string of the vector/matrix at 'idx' and
 ** returns a pointer to this string.
 */
-LUA_API const char *glm_pushstring (lua_State *L, int idx);
+LUA_API const char *luaglm_pushstring (lua_State *L, int idx);
 
 /*
-** Place the contents of the vector at 'idx' onto the stack, returning the
-** number of elements (i.e., dimensions of vector).
+** Place the contents of the vector or matrix at 'idx' onto the stack, returning
+** the number of elements (i.e., dimensions of vector or columns of matrix).
 */
-LUA_API int glm_unpack_vector (lua_State *L, int idx);
-
-/*
-** Place the contents of the matrix at 'idx' onto the stack, returning the
-** number of elements (i.e., columns of matrix).
-*/
-LUA_API int glm_unpack_matrix (lua_State *L, int idx);
-
-/*
-** Jenkins-hash the object at 'idx'. String values are hashed, boolean and
-** numeric values are casted to lua_Integer; otherwise, zero is returned.
-**
-** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
-**  string character is computed then hashed.
-*/
-LUA_API lua_Integer glm_tohash (lua_State *L, int idx, int ignore_case);
+LUA_API int luaglm_unpack (lua_State *L, int idx);
 
 /* }================================================================== */
 
@@ -150,23 +135,33 @@ LUA_API void lua_pushmatrix (lua_State *L, const lua_Mat4 *matrix);
 
 /*
 ** {==================================================================
-** @DEPRECATED: grit-lua base library compatibility
+** Miscellaneous
 ** ===================================================================
 */
 
 /*
-** Jenkins-hash the object at the provided index. String values are hashed,
-** boolean and numeric values are casted to lua_Integer; otherwise, zero is
-** returned.
+** Jenkins-hash the object at 'idx'. String values are hashed, boolean and
+** numeric values are casted to lua_Integer; otherwise, zero is returned.
+**
+** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
+**  string character is computed then hashed.
 */
-LUA_API lua_Integer lua_ToHash (lua_State *L, int idx, int ignore_case);
+LUA_API lua_Integer lua_tohash (lua_State *L, int idx, int ignore_case);
+
+/* }================================================================== */
+
+/*
+** {==================================================================
+** @DEPRECATED: grit-lua base library compatibility
+** ===================================================================
+*/
 
 /*
 ** Returns the dot product of x and y, i.e., result = x * y.
 **   T glm::dot(qua<T, Q> const &x, qua<T, Q> const &y)
 **   T glm::dot(vec<L, T, Q> const &x, vec<L, T, Q> const &y)
 */
-LUA_API int glmVec_dot (lua_State *L);
+LUA_API int luaglm_dot (lua_State *L);
 
 /*
 ** Returns the cross product of x and y.
@@ -176,31 +171,31 @@ LUA_API int glmVec_dot (lua_State *L);
 **   vec<3, T, Q> glm::cross(vec<3, T, Q> const &x, qua<T, Q> const &y)
 **   T glm::cross(vec<2, T, Q> const &x, vec<2, T, Q> const &y)
 */
-LUA_API int glmVec_cross (lua_State *L);
+LUA_API int luaglm_cross (lua_State *L);
 
 /*
 ** Returns the m/q inverse.
 **   qua<T, Q> glm::inverse(qua<T, Q> const &q)
 **   mat<C, R, T, Q> glm::inverse(mat<C, R, T, Q> const &m)
 */
-LUA_API int glmVec_inverse (lua_State *L);
+LUA_API int luaglm_inverse (lua_State *L);
 
 /*
 ** Returns a vector in the same direction as x but with length of 1.
 **   qua<T, Q> glm::normalize(qua<T, Q> const &x)
 **   vec<L, T, Q> glm::normalize(vec<L, T, Q> const &x)
 */
-LUA_API int glmVec_normalize (lua_State *L);
+LUA_API int luaglm_normalize (lua_State *L);
 
 /*
 ** Spherical linear interpolation of two vectors/quaternions.
 **   qua<T, Q> glm::slerp(qua<T, Q> const &x, qua<T, Q> const &y, T a)
 **   vec<3, T, Q> glm::slerp(vec<3, T, Q> const &x, vec<3, T, Q> const &y, T const &a)
 */
-LUA_API int glmVec_slerp (lua_State *L);
+LUA_API int luaglm_slerp (lua_State *L);
 
 /* grit-lua math library extension */
-LUA_API int glmVec_clamp (lua_State *L);
+LUA_API int luaglm_clamp (lua_State *L);
 
 /* }================================================================== */
 

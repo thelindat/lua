@@ -113,8 +113,8 @@ static lua_Integer loadInteger (LoadState *S) {
 }
 
 
-static lua_Float4 loadVectorType(LoadState *S, int t) {
-  lua_Float4 v = {{ 0, 0, 0, 0 }};
+static luai_Float4 loadVectorType (LoadState *S, int t) {
+  luai_Float4 v = f4_zero();
   switch (t) {
     case LUA_VVECTOR2:
       loadVar(S, v.raw[0]);

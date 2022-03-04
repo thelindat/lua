@@ -27,7 +27,6 @@ local Octree
 local vec3 = vec3
 local vec4 = vec4
 
-local table = table
 local table_remove = table.remove
 local table_create = table.create or function() return {} end
 local table_wipe = table.wipe or function() return {} end
@@ -104,7 +103,7 @@ function Octree.New(position, leafSize, initialLength, minSize, looseness)
         parent = {}, -- Cached reference to parent
         objects  = {}, -- Objects in this node
 
-        -- [node] = {}: an array of indicies corresponding to the eight
+        -- [node] = {}: an array of indices corresponding to the eight
         -- potential subdivisions of node.
         children = {},
 
@@ -126,7 +125,7 @@ function Octree.New(position, leafSize, initialLength, minSize, looseness)
         indexLookup = {},
 
         -- available/recycled indices within the (flat-)array tree structure
-        availableIndicies = {},
+        availableIndices = {},
     }, Octree)
 
     tree.root = tree:NewNode(-1, position, tree.initialLength)
@@ -144,6 +143,7 @@ function Octree.EstimateParameters(minBounds, maxBounds)
     local minDim,maxDim = vec3(glm_huge),vec3(-glm_huge)
 
     local npts = #minBounds
+    assert(#minBounds > 0) -- @TODO: Return default <centroid, axis, minSize>
     for i=1,npts do
         local min = minBounds[i]
         local max = (maxBounds and maxBounds[i]) or nil
@@ -161,7 +161,13 @@ function Octree.EstimateParameters(minBounds, maxBounds)
         end
     end
 
+    -- @TODO: The above approach to compute the centroid is not well-suited for
+    -- large datasets. In the meantime, ensure no values are infinite (or NaN?).
     local centroid = (mid / npts) + (width / npts)
+    if glm.any(glm.isinf(centroid)) then
+        centroid = vec3(0)
+    end
+
     if maxBounds and not glm.equal(0.0, glm.compMin(minDim), glm.feps) then -- At least some AABBs exist
         return centroid, -- middle point
             0.5 * glm.compMax(maxDim - minDim), -- initAxis
@@ -197,7 +203,7 @@ function Octree:Clear()
     --[[ Cached Structures. --]]
     self.hasObjects = table_wipe(self.hasObjects)
     self.indexLookup = table_wipe(self.indexLookup)
-    self.availableIndicies = table_wipe(self.availableIndicies)
+    self.availableIndices = table_wipe(self.availableIndices)
 
     return self
 end
@@ -217,7 +223,7 @@ end
 ----------- Flat Octree Node -----------
 ----------------------------------------
 
---[[ Find which child node this object would be most likely to fit in. --]]
+--[[ Find which child node the object would be most likely to fit in. --]]
 function Octree:BestChildBounds(node, minBound, maxBound)
     local center = self.center[node]
     local objCenter = (maxBound and glm_midpoint(minBound, maxBound)) or minBound
@@ -236,8 +242,8 @@ end
 --]]
 function Octree:NewNode(parent, position, axisLength)
     local node = nil
-    if #self.availableIndicies > 0 then
-        node = table_remove(self.availableIndicies)
+    if #self.availableIndices > 0 then
+        node = table_remove(self.availableIndices)
     else
         node = self.nodeCount
         self.nodeCount = self.nodeCount + 1
@@ -254,7 +260,7 @@ end
 --[[
     Set the node location and dimensions.
 
-@NOTE Assume that the node has no children, as that would require recursively
+@NOTE Assume that 'node' has no children, as that would require recursively
     updating its location relative to this new position.
 --]]
 function Octree:SetNodeLocation(node, position, axisLength)
@@ -269,8 +275,8 @@ function Octree:SetNodeLocation(node, position, axisLength)
 end
 
 --[[
-    Recycle the entire subtree (or leaf) rooted at the node, clearing everything
-    ... All node indices are dumped into "availableIndicies" for recycling.
+    Recycle the entire subtree rooted at the 'node' and clear everything.
+    All nodes indices are dumped into 'availableIndices' for recycling.
 
 @NOTE: callers of this function must manage/cleanup the objects contained in
     'indexLookup'.
@@ -285,7 +291,7 @@ function Octree:Recycle(node)
 
     self.children[node] = table_wipe(self.children[node])
     self.objects[node] = table_wipe(self.objects[node])
-    self.availableIndicies[#self.availableIndicies + 1] = node
+    self.availableIndices[#self.availableIndices + 1] = node
 
     self.parent[node] = 0
     self.center[node] = __emptycenter
@@ -301,12 +307,12 @@ end
 
 --[[
 @RETURN
-    true if the node is a leaf, i.e., it can no longer be subdivided without
+    true if 'node' is a leaf, i.e., it can no longer be subdivided without
     breaking the limits specified by the tree.
 --]]
 function Octree:IsLeaf(node) return (self.center[node][4] * 0.5) < self.minSize end
 
---[[ Populate the children list of this node. --]]
+--[[ Populate the children list of 'node'. --]]
 function Octree:Split(node)
     local divisions = Octree.ChildDivision
     local children,center = self.children[node],self.center[node]
@@ -325,11 +331,11 @@ function Octree:Split(node)
 end
 
 --[[
-    Update the "hasObjects" cache for a specific node. Its assumed this tree is
-    constructed from the leaves up, and no DFS is required to update the cache.
+    Update the 'hasObjects' cache for a specific node. Its assumed this tree is
+    constructed from the leaves up (requires no DFS to update caches).
 
-    This node has objects if either (1) it has objects (obviously); or (2) one
-    of its children has objects: hasObjects[child] == true.
+    'Node' has objects if either (1) it has objects (obviously); or (2) one of
+    its children has objects: hasObjects[child] == true.
 --]]
 function Octree:UpdateObjectCache(node)
     local hasObjects = self.hasObjects
@@ -347,9 +353,9 @@ function Octree:UpdateObjectCache(node)
 end
 
 --[[
-    Determine if the children of this 'node' can be merged into node. This is
-    possible if: (1) None of the children have children; and (2) The total
-    number of objects among this node and its children is less than the
+    Determine if the children of 'node' can be merged into 'node'. This is
+    possible if: (1) None of the children of 'node' have children; and (2) The
+    total number of objects among 'node' and its children is less than the
     configured leaf size of the tree.
 
 @RETURN
@@ -373,7 +379,7 @@ function Octree:CanMerge(node)
 end
 
 --[[
-    Merge all children of the node into itself; see the conditions to CanMerge.
+    Merge all children of 'node' into itself. See the conditions to CanMerge.
 
 @TODO:
     Since "children" is a single array holding arrays of size 8, contemplate
@@ -431,7 +437,7 @@ end
     current root), shift root center by half of its length and then double its
     bounds.
 
-    This ensures the new bounds still contain the root bounds, while growing in
+    This ensures the new bounds still contain the root bounds while growing in
     the direction that will encompass the object to be added.
 --]]
 function Octree:ShiftAndGrow(direction)
@@ -480,7 +486,7 @@ function Octree:ShiftAndGrow(direction)
 end
 
 --[[
-    An inverse ShiftAndGrow, attempt to reduce the root node and its dimensions,
+    An inverse ShiftAndGrow: attempt to reduce the root node and its dimensions
     while enclosing all objects within the node.
 --]]
 function Octree:ShrinkAndShift()
@@ -562,8 +568,8 @@ function Octree:Remove(object, shrink)
         error("Tree is immutable")
     end
 
-    -- The node the object belongs to is cached: remove the object from the node
-    -- and then determine if the node can be destroyed/merged into its parent.
+    -- The node that 'object' belongs to is cached: remove 'object' from the
+    -- node and determine if the node can be destroyed/merged into its parent.
     local node = self.indexLookup[object]
     if node then
         local objects = self.objects[node]
@@ -585,7 +591,7 @@ function Octree:Remove(object, shrink)
 end
 
 --[[
-    Add an object into the (sub-)tree rooted at "node". Creating new children on
+    Add an object into the (sub-)tree rooted at 'node'. Creating new children on
     the fly to satisfy the constraints of the tree.
 --]]
 function Octree:Add(node, objectToAdd)
@@ -676,7 +682,7 @@ function Octree:CompressNode(node)
         end
     end
 
-    -- Using the "hasObjects" cache, look through each child node to determine
+    -- Using the 'hasObjects' cache, look through each child node to determine
     -- whether at most one of them has objects (and its equal to bestNode) and
     -- all others are empty.
     local hasContent = false

@@ -187,9 +187,11 @@ extern LUA_API_LINKAGE {
 ** implementations being broken in GLM.
 */
 #if !defined(LUAGLM_ALIGNED)
-  #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
-    #define LUAGLM_ALIGNED
-  #endif
+#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+  #define LUAGLM_ALIGNED 1
+#else
+  #define LUAGLM_ALIGNED 0
+#endif
 #endif
 
 /*
@@ -200,18 +202,21 @@ extern LUA_API_LINKAGE {
 ** @GLMFix: Vectors and quaternions have constructors which can implicitly
 ** convert these types; matrices require the glm::fixed_mat .
 */
-#if defined(LUAGLM_ALIGNED) && !defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
+#if LUAGLM_ALIGNED && !defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
   #define glm_mat_cast(M, C, R, T, P) glm::fixed_mat<C, R, T, P>((M))
-  #define LUAGLM_BINDING_REALIGN
+  #define LUAGLM_BINDING_REALIGN 1
   #if GLM_MESSAGES == GLM_ENABLE
     #pragma message("LuaGLM: binding and runtime compiled with different alignments")
   #endif
-#elif !defined(LUAGLM_ALIGNED) && defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
-  #error "Runtime is compiled with aligned types and so should the binding..."
 #else
   #define glm_mat_cast(M, C, R, T, P) ((M))
+  #define LUAGLM_BINDING_REALIGN 0
   #if GLM_MESSAGES == GLM_ENABLE
     #pragma message("LuaGLM: binding and runtime compiled with same alignment")
+  #endif
+
+  #if !LUAGLM_ALIGNED && defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
+    #error "Runtime is compiled with aligned types and so should the binding..."
   #endif
 #endif
 
@@ -230,20 +235,35 @@ extern LUA_API_LINKAGE {
 ** ===================================================================
 */
 
-/* lua_gettop() macro */
+/* lua_gettop */
 #if !defined(_gettop)
-  #define _gettop(L) cast_int((L)->top - ((L)->ci->func + 1))
-  #define _isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
+#define _gettop(L) (cast_int((L)->top - ((L)->ci->func + 1)))
+#endif
+
+/* test for a valid index (one that is not the 'nilvalue') */
+#if !defined(_isvalid)
+#define _isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
 #endif
 
 /* TValue -> glmVector */
 #if !defined(glm_vvalue)
-  #define glm_mvalue(o) glm_constmat_boundary(mvalue_ref(o))
-  #define glm_vvalue(o) glm_constvec_boundary(vvalue_ref(o))
-  #define glm_v2value(o) glm_vvalue(o).v2
-  #define glm_v3value(o) glm_vvalue(o).v3
-  #define glm_v4value(o) glm_vvalue(o).v4
-  #define glm_qvalue(o) glm_vvalue(o).q
+/* object accessors */
+#define glm_vvalue(o) glm_constvec_boundary(vvalue_ref(o))
+#define glm_setvvalue2s(s, x, o)        \
+  LUA_MLM_BEGIN                         \
+  TValue *io = s2v(s);                  \
+  glm_vec_boundary(&vvalue_(io)) = (x); \
+  settt_(io, (o));                      \
+  LUA_MLM_END
+
+/* glm::type vector references */
+#define glm_v2value(o) glm_vvalue(o).v2
+#define glm_v3value(o) glm_vvalue(o).v3
+#define glm_v4value(o) glm_vvalue(o).v4
+#define glm_qvalue(o) glm_vvalue(o).q
+
+/* glm::type matrix references */
+#define glm_mvalue(o) glm_constmat_boundary(mvalue_ref(o))
 #endif
 
 /*
@@ -826,9 +846,7 @@ struct gLuaAbstractVector : gLuaAbstractTrait<glm::vec<D, T, Q>> {
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::vec<D, T, Q> &v) {
     //GLM_STATIC_ASSERT(D >= 2 && D <= 4, "invalid vector specialization");
     lua_LockScope _lock(LB.L);
-    TValue *o = s2v(LB.L->top);
-    glm_vec_boundary(&vvalue_(o)) = v;  // May use explicit copy constructor
-    settt_(o, glm_variant(D));
+    glm_setvvalue2s(LB.L->top, v, glm_variant(D));  // May use explicit copy constructor
     api_incr_top(LB.L);
     return 1;
   }
@@ -995,9 +1013,7 @@ struct gLuaTrait<glm::qua<T, Q>, FastPath> : gLuaAbstractTrait<glm::qua<T, Q>> {
 
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, const glm::qua<T, Q> &q) {
     lua_LockScope _lock(LB.L);
-    TValue *io = s2v(LB.L->top);
-    glm_vec_boundary(&vvalue_(io)) = q;  // May use explicit copy constructor
-    settt_(io, LUA_VQUAT);
+    glm_setvvalue2s(LB.L->top, q, LUA_VQUAT);  // May use explicit copy constructor
     api_incr_top(LB.L);
     return 1;
   }

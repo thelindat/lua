@@ -16,9 +16,8 @@
 */
 
 #define lglmlib_cpp
-#if !defined(LUA_LIB)
-  #define LUA_LIB
-#endif
+#define LUA_LIB
+#define LUA_GRIT_API
 
 #include <algorithm>
 #include <functional>
@@ -299,7 +298,7 @@ extern "C" {
     lua_pushliteral(L, LUAGLM_COPYRIGHT); lua_setfield(L, -2, "_COPYRIGHT");
     lua_pushliteral(L, LUAGLM_DESCRIPTION); lua_setfield(L, -2, "_DESCRIPTION");
     lua_pushinteger(L, GLM_VERSION); lua_setfield(L, -2, "_GLM_VERSION");
-#if defined(LUAGLM_ALIGNED)
+#if LUAGLM_ALIGNED
     lua_pushboolean(L, 1); lua_setfield(L, -2, "_GLM_SIMD");
 #else
     lua_pushboolean(L, 0); lua_setfield(L, -2, "_GLM_SIMD");

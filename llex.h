@@ -48,7 +48,7 @@ enum RESERVED {
   , TK_HASH
 #endif
 #if defined(LUAGLM_EXT_COMPOUND)
-  , TK_PLUSEQ, TK_MINUSEQ, TK_MULTEQ, TK_DIVEQ, TK_SHLEQ, TK_SHREQ, TK_BANDEQ, TK_BOREQ, TK_BXOREQ
+  , TK_PLUSEQ, TK_MINUSEQ, TK_MULTEQ, TK_DIVEQ, TK_SHLEQ, TK_SHREQ, TK_BANDEQ, TK_BOREQ, TK_BXOREQ, TK_CONCATEQ
 #endif
 };
 
@@ -57,7 +57,7 @@ enum RESERVED {
 
 #if defined(LUAGLM_EXT_COMPOUND)
 /* ORDER RESERVED */
-#define opeqexpr(t) ((t) >= TK_PLUSEQ && (t) <= TK_BXOREQ)
+#define opeqexpr(t) ((t) >= TK_PLUSEQ && (t) <= TK_CONCATEQ)
 #endif
 
 typedef union {
