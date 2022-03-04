@@ -692,6 +692,7 @@ LUA_API int lua_pushthread (lua_State *L) {
 */
 
 
+/* @LuaGLM: lua_lock/lua_unlock happen in same function */
 l_sinline int auxgetstr (lua_State *L, const TValue *t, const char *k) {
   const TValue *slot;
   TString *str = luaS_new(L, k);
@@ -724,7 +725,7 @@ l_sinline int auxgetstr (lua_State *L, const TValue *t, const char *k) {
 
 
 LUA_API int lua_getglobal (lua_State *L, const char *name) {
-  int result = LUA_TNONE;
+  int result;
   const TValue *G;
   lua_lock(L);
   G = getGtable(L);
@@ -754,7 +755,7 @@ LUA_API int lua_gettable (lua_State *L, int idx) {
 
 
 LUA_API int lua_getfield (lua_State *L, int idx, const char *k) {
-  int result = LUA_TNONE;
+  int result;
   TValue *v;
   lua_lock(L);
   v = index2value(L, idx);
@@ -792,6 +793,7 @@ LUA_API int lua_geti (lua_State *L, int idx, lua_Integer n) {
 }
 
 
+/* @LuaGLM: lua_lock/lua_unlock happen in same function */
 l_sinline int finishrawget (lua_State *L, const TValue *val) {
   if (isempty(val))  /* avoid copying empty items to the stack */
     setnilvalue(s2v(L->top));
@@ -802,6 +804,7 @@ l_sinline int finishrawget (lua_State *L, const TValue *val) {
 }
 
 
+/* @LuaGLM: TValue has already been fetched for parsing vector/matrix types */
 static Table *gettable (lua_State *L, const TValue *t) {
   api_check(L, ttistable(t), "table expected");
   return hvalue(t);
@@ -809,7 +812,7 @@ static Table *gettable (lua_State *L, const TValue *t) {
 
 
 LUA_API int lua_rawget (lua_State *L, int idx) {
-  int result = LUA_TNONE;
+  int result;
   const TValue *o;
   lua_lock(L);
   api_checknelems(L, 1);
@@ -830,7 +833,7 @@ LUA_API int lua_rawget (lua_State *L, int idx) {
 
 
 LUA_API int lua_rawgeti (lua_State *L, int idx, lua_Integer n) {
-  int result = LUA_TNONE;
+  int result;
   const TValue *o;
   lua_lock(L);
   o = index2value(L, idx);

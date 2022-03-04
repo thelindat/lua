@@ -29,6 +29,7 @@
 
 
 
+/* @LuaGLM: 'next' is a common name and may conflict with the C++ STL (onelua) */
 #define ls_next(ls)	(ls->current = zgetc(ls->z))
 
 

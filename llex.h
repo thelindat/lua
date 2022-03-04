@@ -55,8 +55,10 @@ enum RESERVED {
 /* number of reserved words */
 #define NUM_RESERVED	(cast_int(TK_WHILE-FIRST_RESERVED + 1))
 
+#if defined(LUAGLM_EXT_COMPOUND)
 /* ORDER RESERVED */
 #define opeqexpr(t) ((t) >= TK_PLUSEQ && (t) <= TK_BXOREQ)
+#endif
 
 typedef union {
   lua_Number r;

@@ -116,6 +116,8 @@
 
 /*
 @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
+** @LuaGLM: Allowed to be defined at compile-time to simplify testing and
+** build-system integration.
 */
 #if !defined(LUA_32BITS)
 #define LUA_32BITS	0
@@ -599,6 +601,7 @@
 #if !defined(LUA_USE_C89)
 #define l_sprintf(s,sz,f,i)	snprintf(s,sz,f,i)
 #elif defined(LUA_USE_WINDOWS) && defined(__STDC_WANT_SECURE_LIB__)
+/* @LuaGLM: Support __STDC_WANT_SECURE_LIB__ where possible. */
 #define l_sprintf(s,sz,f,i)	sprintf_s(s,sz,f,i)
 #else
 #define l_sprintf(s,sz,f,i)	((void)(sz), sprintf(s,f,i))

@@ -533,7 +533,7 @@ static int luaB_assert (lua_State *L) {
 static int luaB_select (lua_State *L) {
   int n = lua_gettop(L);
   if (lua_type(L, 1) == LUA_TSTRING && *lua_tostring(L, 1) == '#') {
-    lua_pushinteger(L, (lua_Integer)n - 1);
+    lua_pushinteger(L, (lua_Integer)n - 1);  /* @LuaGLM: Explicit cast */
     return 1;
   }
   else {
@@ -681,8 +681,6 @@ static const luaL_Reg base_funcs[] = {
 #if defined(LUAGLM_EXT_API)
   {"scrub", luaB_scrub},
 #endif
-  /* placeholders */
-
   {"vec", glmVec_vec}, {"vector", glmVec_vec},
   {"vec1", glmVec_vec1}, {"vector1", glmVec_vec1},
   {"vec2", glmVec_vec2}, {"vector2", glmVec_vec2},
@@ -715,7 +713,7 @@ static const luaL_Reg base_funcs[] = {
   {"inv", glmVec_inverse},
   {"norm", glmVec_normalize},
   {"slerp", glmVec_slerp},
-
+  /* placeholders */
   {LUA_GNAME, NULL},
   {"_VERSION", NULL},
   {NULL, NULL}

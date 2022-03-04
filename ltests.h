@@ -47,12 +47,12 @@
 /* memory-allocator control variables */
 typedef struct Memcontrol {
   int failnext;
-  unsigned long numblocks;
-  unsigned long total;
-  unsigned long maxmem;
-  unsigned long memlimit;
-  unsigned long countlimit;
-  unsigned long objcount[LUA_NUMTYPES];
+  size_t numblocks;  /* @LuaGLM: unsigned long -> size_t */
+  size_t total;
+  size_t maxmem;  /* @LuaGLM: lu_mem */
+  size_t memlimit;  /* @LuaGLM: lu_mem */
+  size_t countlimit;
+  size_t objcount[LUA_NUMTYPES];
 } Memcontrol;
 
 LUA_API Memcontrol l_memcontrol;

@@ -59,7 +59,7 @@
 #define LUAI_DDEC(def)	/* empty */
 #define LUAI_DDEF	static
 
-/* setup export symbols */
+/* @LuaGLM: Redefine export symbols */
 #if defined(__cplusplus) && defined(LUA_C_LINKAGE)
 #undef LUA_API
 #if defined(LUA_BUILD_AS_DLL)

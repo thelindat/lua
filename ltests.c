@@ -217,7 +217,7 @@ void *debug_realloc (void *ud, void *b, size_t oldsize, size_t size) {
     mc->memlimit = limit ? strtoul(limit, NULL, 10) : ULONG_MAX;
   }
   if (block == NULL) {
-    type = (oldsize < LUA_NUMTAGS) ? oldsize : 0;
+    type = cast_int((oldsize < LUA_NUMTAGS) ? oldsize : 0);  /* @LuaGLM: explicit cast */
     oldsize = 0;
   }
   else {
@@ -570,7 +570,7 @@ static lu_mem checkgraylist (global_State *g, GCObject *o) {
 ** Check objects in gray lists.
 */
 static lu_mem checkgrays (global_State *g) {
-  int total = 0;  /* count number of elements in all lists */
+  lu_mem total = 0;  /* count number of elements in all lists; @LuaGLM: fix type */
   if (!keepinvariant(g)) return total;
   total += checkgraylist(g, g->gray);
   total += checkgraylist(g, g->grayagain);
@@ -846,6 +846,10 @@ static int get_limits (lua_State *L) {
 
 static int mem_query (lua_State *L) {
   if (lua_isnone(L, 1)) {
+    /* @LuaGLM: Sanitize query values */
+    lua_assert(l_memcontrol.total <= LUA_MAXINTEGER);
+    lua_assert(l_memcontrol.numblocks <= LUA_MAXINTEGER);
+    lua_assert(l_memcontrol.maxmem <= LUA_MAXINTEGER);
     lua_pushinteger(L, l_memcontrol.total);
     lua_pushinteger(L, l_memcontrol.numblocks);
     lua_pushinteger(L, l_memcontrol.maxmem);
@@ -874,8 +878,11 @@ static int mem_query (lua_State *L) {
 static int alloc_count (lua_State *L) {
   if (lua_isnone(L, 1))
     l_memcontrol.countlimit = ~0L;
-  else
-    l_memcontrol.countlimit = luaL_checkinteger(L, 1);
+  else {
+    lua_Integer i = luaL_checkinteger(L, 1);  /* @LuaGLM: sanitize */
+    lua_assert(i >= 0);
+    l_memcontrol.countlimit = cast_sizet(i);
+  }
   return 0;
 }
 
@@ -993,7 +1000,7 @@ static int stacklevel (lua_State *L) {
   lua_pushinteger(L, stacksize(L));
   lua_pushinteger(L, L->nCcalls);
   lua_pushinteger(L, L->nci);
-  lua_pushinteger(L, (unsigned long)&a);
+  lua_pushinteger(L, cast(lua_Integer, cast(intptr_t, &a)));  /* @LuaGLM: changed pointer-casting */
   return 5;
 }
 
@@ -1104,9 +1111,11 @@ static int upvalue (lua_State *L) {
 
 
 static int newuserdata (lua_State *L) {
+  char *p = NULL;  /* @LuaGLM: sanitize nuv */
   size_t size = cast_sizet(luaL_optinteger(L, 1, 0));
-  int nuv = luaL_optinteger(L, 2, 0);
-  char *p = cast_charp(lua_newuserdatauv(L, size, nuv));
+  lua_Integer nuv = luaL_optinteger(L, 2, 0);
+  lua_assert(nuv >= INT_MIN && nuv <= INT_MAX);
+  p = cast_charp(lua_newuserdatauv(L, size, cast_int(nuv)));
   while (size--) *p++ = '\0';
   return 1;
 }
@@ -1120,7 +1129,8 @@ static int pushuserdata (lua_State *L) {
 
 
 static int udataval (lua_State *L) {
-  lua_pushinteger(L, cast(long, lua_touserdata(L, 1)));
+  /* @LuaGLM: changed pointer-casting */
+  lua_pushinteger(L, cast(lua_Integer, cast(intptr_t, lua_touserdata(L, 1))));
   return 1;
 }
 
@@ -1416,14 +1426,15 @@ static int runC (lua_State *L, lua_State *L1, const char *pc) {
     }
     else if EQ("append") {
       int t = getindex;
-      int i = lua_rawlen(L1, t);
-      lua_rawseti(L1, t, i + 1);
+      lua_Unsigned i = lua_rawlen(L1, t);  /* @LuaGLM: correct typing */
+      lua_rawseti(L1, t, luaL_intop(+, i, 1));
     }
     else if EQ("arith") {
-      int op;
+      ptrdiff_t op;  /* @LuaGLM: correct typing and sanitize cast */
       skip(&pc);
       op = strchr(ops, *pc++) - ops;
-      lua_arith(L1, op);
+      lua_assert(op >= INT_MIN && op <= INT_MAX);
+      lua_arith(L1, cast_int(op));
     }
     else if EQ("call") {
       int narg = getnum;
@@ -1464,7 +1475,7 @@ static int runC (lua_State *L, lua_State *L1, const char *pc) {
     }
     else if EQ("func2num") {
       lua_CFunction func = lua_tocfunction(L1, getindex);
-      lua_pushnumber(L1, cast_sizet(func));
+      lua_pushnumber(L1, cast_num(cast(intptr_t, func)));  /* @LuaGLM: changed pointer-casting */
     }
     else if EQ("getfield") {
       int t = getindex;
@@ -1923,7 +1934,8 @@ static int Cfunck (lua_State *L, int status, lua_KContext ctx) {
   lua_setglobal(L, "status");
   lua_pushinteger(L, ctx);
   lua_setglobal(L, "ctx");
-  return runC(L, L, lua_tostring(L, ctx));
+  lua_assert(ctx >= INT_MIN && ctx <= INT_MAX);  /* @LuaGLM: sanitize and explicit cast */
+  return runC(L, L, lua_tostring(L, cast_int(ctx)));
 }
 
 

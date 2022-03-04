@@ -80,7 +80,7 @@ const TValue *luaT_gettmbyobj (lua_State *L, const TValue *o, TMS event) {
       break;
     default:
       mt = G(L)->mt[ttype(o)];
-      break;
+      break;  /* @LuaGLM: Style */
   }
   return (mt ? luaH_getshortstr(mt, G(L)->tmname[event]) : &G(L)->nilvalue);
 }
@@ -150,13 +150,12 @@ static int callbinTM (lua_State *L, const TValue *p1, const TValue *p2,
 void luaT_trybinTM (lua_State *L, const TValue *p1, const TValue *p2,
                     StkId res, TMS event) {
   /*
-  ** For performance reasons, inlined unary/binary vector/quaternion/matrix
-  ** operators take precedence over metamethods. This approach leaves the base
-  ** Lua implementation in tact.
+  ** @LuaGLM: For performance reasons, inlined vec/quat/mat operators take
+  ** precedence over metamethods.
   **
-  ** As bitwise operators only apply to integer vectors, i.e., glm::ivec. This
-  ** iteration of LuaGLM will int-cast each vector component beforehand. Native
-  ** integer-vector support is not-yet-supported.
+  ** As bitwise operators only apply to integer vectors. This version of LuaGLM
+  ** will int-cast each vector component beforehand. Native int-vector support
+  ** is not yet supported.
   */
   if (ttisvector(p1) || ttismatrix(p1) || ttisvector(p2) || ttismatrix(p2)) {
     if (l_likely(glm_trybinTM(L, p1, p2, res, event))) {
@@ -186,7 +185,7 @@ void luaT_tryconcatTM (lua_State *L) {
   const TValue *p1 = s2v(top - 2);
   const TValue *p2 = s2v(top - 1);
   if (l_unlikely(!callbinTM(L, p1, p2, top - 2, TM_CONCAT))) {
-    /* Append a value to the vector, increasing its dimensions. */
+    /* @LuaGLM: append value to vector, increasing its dimension count */
     if (ttisvector(p1) && glmVec_concat(p1, p2, top - 2))
       return;
 

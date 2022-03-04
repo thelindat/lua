@@ -148,8 +148,7 @@ public:
 
   const char *what() const noexcept override {
     if ((status == LUA_ERRRUN || status == LUA_ERRSYNTAX)
-        && lua_gettop(L) > 0
-        && lua_isstring(L, -1)) {
+        && lua_gettop(L) > 0 && lua_isstring(L, -1)) {
       return lua_tostring(L, -1);
     }
 
@@ -476,23 +475,25 @@ static int glmMat_call_unpack(lua_State *L) { return glm_unpack_matrix(L, 1); }
 StkId luaD_tryfuncTM (lua_State *L, StkId func) {
   const TValue *tm;
   StkId p;
-  TValue vunpack;
+  TValue tm_unpack;
   checkstackGCp(L, 1, func);  /* space for metamethod */
   tm = luaT_gettmbyobj(L, s2v(func), TM_CALL);  /* (after previous GC) */
   if (l_unlikely(ttisnil(tm))) {
     /*
-    ** The default TM_CALL operator for vectors and matrices is to unpack its
-    ** contents. This approach creates a temporary TValue that will be written
-    ** to 'func'.
+    ** @LuaGLM: TM_CALL for vectors and matrices will unpack its components,
+    ** e.g., vector into scalars and matrix into column vectors. This approach
+    ** creates a temporary TValue that holds the pointer to the unpack function.
     */
     if (ttisvector(s2v(func))) {
-      setfvalue(&vunpack, glmVec_call_unpack); tm = &vunpack;
+      setfvalue(&tm_unpack, glmVec_call_unpack);
+      tm = &tm_unpack;
     }
     else if (ttismatrix(s2v(func))) {
-      setfvalue(&vunpack, glmMat_call_unpack); tm = &vunpack;
+      setfvalue(&tm_unpack, glmMat_call_unpack);
+      tm = &tm_unpack;
     }
     else {
-      setnilvalue(&vunpack);
+      setnilvalue(&tm_unpack);
       luaG_callerror(L, s2v(func));  /* nothing to call */
     }
   }

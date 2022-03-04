@@ -1339,9 +1339,9 @@ static int constfolding (FuncState *fs, int op, expdesc *e1,
   if (!tonumeral(e1, &v1) || !tonumeral(e2, &v2) || !validop(op, &v1, &v2))
     return 0;  /* non-numeric operands or not safe to fold */
   /*
-  ** @HACK: suppress g++ warnings when unity building, e.g., MAKE_LUAC is very
-  ** inline friendly and -O3 may generate useless warnings as validop ensures
-  ** luaO_rawarith will be successful; sanitize result anyway.
+  ** @LuaGLM: suppress g++ warnings when unity building, e.g., MAKE_LUAC is very
+  ** inline friendly and may generate incorrect warnings as validop ensures
+  ** luaO_rawarith will be successful; sanitize anyway.
   */
   if (!luaO_rawarith(fs->ls->L, op, &v1, &v2, &res))  /* does operation */
     return 0;

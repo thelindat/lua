@@ -46,8 +46,8 @@
 
 
 /*
-** Prevent GCC -- or attempt to -- from optimizing the indirect jumps by sharing
-** them between opcodes when using threaded code.
+** @LuaGLM: Prevent GCC, or attempt to, from optimizing the indirect jumps by
+** sharing them between opcodes when using threaded code.
 **
 ** Note: icc/icpc does not recognize these optimization levels.
 */
@@ -101,7 +101,7 @@
 */
 static int l_strton (const TValue *obj, TValue *result) {
   lua_assert(obj != result);
-  setivalue(result, 0);
+  setivalue(result, 0); /* @LuaGLM: avoid compiler warnings w/ unity builds */
   if (!cvt2num(obj))  /* is object not a string? */
     return 0;
   else
@@ -368,8 +368,10 @@ void luaV_finishset (lua_State *L, const TValue *t, TValue *key,
     }
     else {  /* not a table; check metamethod */
       tm = luaT_gettmbyobj(L, t, TM_NEWINDEX);
-      if (l_unlikely(notm(tm)))
-        luaG_typeerror(L, t, ttisvector(t) ? "mutate" : "index");
+      if (l_unlikely(notm(tm))) {
+        /* @LuaGLM: improve error description for vector and matrix types. */
+        luaG_typeerror(L, t, ttisvector(t) ? "mutate" : ttismatrix(t) ? "incorrectly modify" : "index");
+      }
     }
     /* try the metamethod */
     if (ttisfunction(tm)) {
@@ -1608,7 +1610,7 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
         op_bitwise(L, l_bxor);
         vmbreak;
       }
-      vmcase(OP_SHL) {
+      vmcase(OP_SHL) {  /* @LuaGLM: fix incorrect ordering */
         op_bitwise(L, luaV_shiftl);
         vmbreak;
       }
