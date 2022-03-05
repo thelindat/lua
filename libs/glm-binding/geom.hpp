@@ -614,13 +614,6 @@ static const luaL_Reg luaglm_aabblib[] = {
   { "intersection", GLM_NAME(aabb_intersection) },
   { "slabs", GLM_NAME(aabb_slabs) },
   { "projectToAxis", GLM_NAME(aabb_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectAABB", GLM_NAME(aabb_intersectsAABB) },
-  { "intersectSphere", GLM_NAME(aabb_intersectsSphere) },
-  { "intersectPlane", GLM_NAME(aabb_intersectsPlane) },
-  { "intersectLine", GLM_NAME(aabb_intersectsLine) },
-  { "intersectSegment", GLM_NAME(aabb_intersectsSegment) },
-  { "intersectRay", GLM_NAME(aabb_intersectsRay) },
 #if defined(LUAGLM_ALIASES_O3DE)
   //{ "ToString", GLM_NAME() }, // @O3DEAlias
   //{ "CreateNull", GLM_NAME() }, // @O3DEAlias
@@ -767,11 +760,6 @@ static const luaL_Reg luaglm_aabb2dlib[] = {
   { "intersectsRay", GLM_NAME(aabb2d_intersectsRay) },
   { "intersection", GLM_NAME(aabb2d_intersection) },
   { "projectToAxis", GLM_NAME(aabb2d_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectAABB", GLM_NAME(aabb2d_intersectsAABB) },
-  { "intersectLine", GLM_NAME(aabb2d_intersectsLine) },
-  { "intersectSegment", GLM_NAME(aabb2d_intersectsSegment) },
-  { "intersectRay", GLM_NAME(aabb2d_intersectsRay) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -846,10 +834,6 @@ static const luaL_Reg luaglm_linelib[] = {
   { "intersectsPlane", GLM_NAME(line_intersectsPlane) },
   { "intersectsTriangle", GLM_NAME(line_intersectsTriangle) },
   { "projectToAxis", GLM_NAME(line_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectAABB", GLM_NAME(line_intersectsAABB) },
-  { "intersectSphere", GLM_NAME(line_intersectsSphere) },
-  { "intersectPlane", GLM_NAME(line_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -918,10 +902,6 @@ static const luaL_Reg luaglm_raylib[] = {
   { "intersectsTriangle", GLM_NAME(ray_intersectsTriangle) },
   { "intersectPlane", GLM_NAME(ray_intersectsPlane) },
   { "projectToAxis", GLM_NAME(ray_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectSphere", GLM_NAME(ray_intersectsSphere) },
-  { "intersectAABB", GLM_NAME(ray_intersectsAABB) },
-  { "intersectPlane", GLM_NAME(ray_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 
@@ -1311,13 +1291,6 @@ static const luaL_Reg luaglm_spherelib[] = {
   { "fitThroughPoints", GLM_NAME(sphere_fitThroughPoints) },
   //{ "optimalEnclosingSphere", GLM_NAME(sphere_optimalEnclosingSphere) },  // @BloatTodo
   { "projectToAxis", GLM_NAME(sphere_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectSphere", GLM_NAME(sphere_intersectsSphere) },
-  { "intersectAABB", GLM_NAME(sphere_intersectsAABB) },
-  { "intersectLine", GLM_NAME(sphere_intersectsLine) },
-  { "intersectSegment", GLM_NAME(sphere_intersectsSegment) },
-  { "intersectRay", GLM_NAME(sphere_intersectsRay) },
-  { "intersectPlane", GLM_NAME(sphere_intersectsPlane) },
 #if defined(LUAGLM_ALIASES_O3DE)
   //{ "CreateUnitSphere", GLM_NAME() }, // @O3DEAlias
   //{ "CreateFromAabb", GLM_NAME() }, // @O3DEAlias
@@ -1414,13 +1387,6 @@ static const luaL_Reg luaglm_circlelib[] = {
   { "extendRadiusToContainCircle", GLM_NAME(circle_extendRadiusToContainCircle) },
   { "maximalContainedAABB", GLM_NAME(circle_maximalContainedAABB) },
   { "projectToAxis", GLM_NAME(circle_projectToAxis) },
-  // @DEPRECATED: intersectsObject
-  { "intersectCircle", GLM_NAME(circle_intersectsCircle) },
-  { "intersectAABB", GLM_NAME(circle_intersectsAABB) },
-  { "intersectLine", GLM_NAME(circle_intersectsLine) },
-  { "intersectSegment", GLM_NAME(circle_intersectsSegment) },
-  { "intersectRay", GLM_NAME(circle_intersectsRay) },
-  { "intersectPlane", GLM_NAME(circle_intersectsPlane) },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
 

@@ -526,7 +526,7 @@ t = table.wipe(t)
 t = table.compact(t)
 
 -- An efficient (implemented using memcpy) table shallow-copy implementation;
-t2 = table.clone(t[, t2]) -- t2 is a preallocated destination table
+t2 = table.clone(t)
 
 -- Return the type of table being used. Note, this function only measures the
 -- size of the "array part" of a Lua table and the "root" node of its

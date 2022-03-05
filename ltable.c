@@ -1092,14 +1092,12 @@ void luaH_clonetable (lua_State *L, const Table *from, Table *to) {
 #endif
   if (isblack(obj2gco(to)))
     luaC_barrierback_(L, obj2gco(to));
-#if 0
   if (from->metatable != NULL) {  /* replace metatable */
     Table *from_mt = from->metatable;
     to->metatable = from_mt;
     luaC_objbarrier(L, obj2gco(to), from_mt);
     luaC_checkfinalizer(L, obj2gco(to), from_mt);
   }
-#endif
 }
 #endif
 
