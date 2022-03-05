@@ -400,12 +400,7 @@ void glmVec_geti(lua_State *L, const TValue *obj, lua_Integer c, StkId res) {
 }
 
 void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
-  if (ttisnumber(key)) {
-    if (vecgeti(obj, glm_ivalue(key), res) != LUA_TNONE) {
-      return;
-    }
-  }
-  else if (ttisstring(key)) {
+  if (l_likely(ttisstring(key))) {
     if (vslen(key) == 1) {  // hot-path single character access
       if (vecgets(obj, svalue(key), res) != LUA_TNONE) {
         return;
@@ -463,6 +458,11 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
           break;
         }
       }
+    }
+  }
+  else if (ttisnumber(key)) {
+    if (vecgeti(obj, glm_ivalue(key), res) != LUA_TNONE) {
+      return;
     }
   }
 
@@ -723,35 +723,6 @@ static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *v
   return raw ? glm_runerror(L, "invalid " GLM_STRING_MATRIX " key") : glm_finishset(L, obj, key, val);
 }
 
-/// <summary>
-/// Helper function for generalized matrix int-access
-/// </summary>
-static int matgeti(const TValue *obj, lua_Integer n, StkId res) {
-  const lua_Mat4 &m = mvalue(obj);
-  if (l_likely(n >= 1 && n <= cast(lua_Integer, LUAGLM_MATRIX_COLS(m.dimensions)))) {
-    const grit_length_t idx = cast(grit_length_t, n - 1);
-    switch (LUAGLM_MATRIX_ROWS(m.dimensions)) {
-      case 2:
-        setvvalue(s2v(res), f4_cstore(m.m.m2[idx][0], m.m.m2[idx][1], 0, 0), LUA_VVECTOR2);
-        return LUA_VVECTOR2;
-      case 3:
-#if LUAGLM_IMPLICIT_ALIGN
-        setvvalue(s2v(res), f4_cstore(m.m.m4[idx][0], m.m.m4[idx][1], m.m.m4[idx][2], 0), LUA_VVECTOR3);
-#else
-        setvvalue(s2v(res), f4_cstore(m.m.m3[idx][0], m.m.m3[idx][1], m.m.m3[idx][2], 0), LUA_VVECTOR3);
-#endif
-        return LUA_VVECTOR3;
-      case 4:
-        setvvalue(s2v(res), f4_cstore(m.m.m4[idx][0], m.m.m4[idx][1], m.m.m4[idx][2], m.m.m4[idx][3]), LUA_VVECTOR4);
-        return LUA_VVECTOR4;
-      default: {
-        break;
-      }
-    }
-  }
-  return LUA_TNONE;
-}
-
 GCMatrix *glmMat_new(lua_State *L) {
   GCObject *o = luaC_newobj(L, LUA_VMATRIX, sizeof(GCMatrix));
   GCMatrix *mat = gco2mat(o);
@@ -760,7 +731,7 @@ GCMatrix *glmMat_new(lua_State *L) {
 }
 
 int glmMat_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
-  const int result = matgeti(obj, n, res);
+  const int result = glmMat_vmgeti(obj, n, res);
   if (result == LUA_TNONE) {
     setnilvalue(s2v(res));
     return LUA_TNIL;
@@ -769,7 +740,19 @@ int glmMat_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
 }
 
 int glmMat_vmgeti(const TValue *obj, lua_Integer n, StkId res) {
-  return matgeti(obj, n, res);
+  const glmMatrix &m = glm_mvalue(obj);
+  if (l_likely(n >= 1 && n <= cast(lua_Integer, LUAGLM_MATRIX_COLS(m.dimensions)))) {
+    const glm::length_t idx = cast(glm::length_t, n - 1);
+    switch (LUAGLM_MATRIX_ROWS(m.dimensions)) {
+      case 2: glm_setvvalue2s(res, m.m42[idx], LUA_VVECTOR2); return LUA_VVECTOR2;
+      case 3: glm_setvvalue2s(res, m.m43[idx], LUA_VVECTOR3); return LUA_VVECTOR3;  // @ImplicitAlign
+      case 4: glm_setvvalue2s(res, m.m44[idx], LUA_VVECTOR4); return LUA_VVECTOR4;
+      default: {
+        break;
+      }
+    }
+  }
+  return LUA_TNONE;
 }
 
 int glmMat_rawget(const TValue *obj, TValue *key, StkId res) {
@@ -785,13 +768,13 @@ void glmMat_rawset(lua_State *L, const TValue *obj, TValue *key, TValue *val) {
 }
 
 void glmMat_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
-  if (!ttisnumber(key) || matgeti(obj, glm_ivalue(key), res) == LUA_TNONE) {
+  if (!ttisnumber(key) || glmMat_vmgeti(obj, glm_ivalue(key), res) == LUA_TNONE) {
     vec_finishget(L, obj, key, res);
   }
 }
 
 void glmMat_geti(lua_State *L, const TValue *obj, lua_Integer c, StkId res) {
-  if (matgeti(obj, c, res) == LUA_TNONE) {
+  if (glmMat_vmgeti(obj, c, res) == LUA_TNONE) {
     TValue key;
     setivalue(&key, c);
     vec_finishget(L, obj, &key, res);

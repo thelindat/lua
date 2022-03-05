@@ -629,7 +629,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
           if (check_next1(ls, '.'))
             return TK_DOTS;   /* '...' */
 #if defined(LUAGLM_EXT_COMPOUND)
-          if (check_next1(ls, '='))
+          else if (check_next1(ls, '='))
             return TK_CONCATEQ;   /* '..=' */
 #endif
           else return TK_CONCAT;   /* '..' */
