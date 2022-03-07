@@ -856,7 +856,7 @@ namespace glm {
       return intersects2D(polygon, segment);
     }
 
-    // The line segment properly intersects the plane of the polygon
+    // The segment intersects the plane of the polygon
     const T t = (plane.d - dot(plane.normal, line.a)) / denom;
     return (t >= T(0) && t <= T(1)) ? contains(polygon, getPoint(line, t)) : false;
   }
@@ -876,7 +876,6 @@ namespace glm {
       maxD = max(maxD, d);
     }
 
-    // Allow a very small (epsilon) tolerance.
     return minD <= epsilon<T>() && maxD >= -epsilon<T>();
   }
 

@@ -184,10 +184,8 @@ LUAI_FUNC int glmMat_rawgeti (const TValue *obj, lua_Integer n, StkId res);
 **
 ** @NOTE: matgeti is an inlined function that could be directly used by lvm.c.
 ** However, certain GLM configurations will implicitly align glm::vec3. This
-** logic does not exist within the C boundary of the runtime at the moment.
-**
-** This should incur a ~5% hit on the throughput of matrix accessing, e.g.,
-** 305657101.637 Mi/s vs. 285964300.217 Mi/
+** logic does not exist within the C boundary of the runtime at the moment (see
+** @ImplicitAlign).
 */
 LUAI_FUNC int glmMat_vmgeti (const TValue *obj, lua_Integer n, StkId res);
 

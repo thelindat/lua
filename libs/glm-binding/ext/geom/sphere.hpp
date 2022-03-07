@@ -823,9 +823,8 @@ namespace glm {
         s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]], pts[i], redundant, eps);
         rSq = s.r * s.r + eps;
 
-        // A sphere is uniquely defined by four points, so one of the five
-        // points passed in above is now redundant, and can be removed from the
-        // support set.
+        // A sphere is uniquely defined by four points: one of the five points
+        // above is now redundant and can be removed from sp.
         if (redundant != 4 && (sp[redundant] < i || expendable[redundant])) {
           sp[redundant] = i;
           expendable[redundant] = false;

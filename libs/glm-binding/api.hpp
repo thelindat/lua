@@ -1279,9 +1279,9 @@ GLM_BINDING_QUALIFIER(mix) {
 #endif
 
 #if defined(COMMON_HPP) || defined(GTX_LOG_BASE_HPP)
-NUMBER_VECTOR_DEFN(sign, glm::sign, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(signP, glm::signP, LAYOUT_UNARY)  // @GLMVectorExtensions
-NUMBER_VECTOR_DEFN(signN, glm::signN, LAYOUT_UNARY)
+INTEGER_NUMBER_VECTOR_DEFN(sign, glm::sign, LAYOUT_UNARY)
+INTEGER_NUMBER_VECTOR_DEFN(signP, glm::signP, LAYOUT_UNARY)  // @GLMVectorExtensions
+INTEGER_NUMBER_VECTOR_DEFN(signN, glm::signN, LAYOUT_UNARY)
 #if GLM_HAS_CXX11_STL
 NUMBER_VECTOR_DEFN(copysign, glm::copysign, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(fpclassify, glm::fpclassify, LAYOUT_UNARY)

@@ -680,6 +680,7 @@ static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *v
         m.m.m4[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
         m.m.m4[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
         m.m.m4[m_idx][2] = f4_loadf(vvalue_(val).raw[2]);
+        m.m.m4[m_idx][3] = f4_loadf(0);
 #else
         m.m.m3[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
         m.m.m3[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
@@ -742,7 +743,7 @@ int glmMat_rawgeti(const TValue *obj, lua_Integer n, StkId res) {
 int glmMat_vmgeti(const TValue *obj, lua_Integer n, StkId res) {
   const glmMatrix &m = glm_mvalue(obj);
   if (l_likely(n >= 1 && n <= cast(lua_Integer, LUAGLM_MATRIX_COLS(m.dimensions)))) {
-    const glm::length_t idx = cast(glm::length_t, n - 1);
+    const glm::length_t idx = glm_castlen(n - 1);
     switch (LUAGLM_MATRIX_ROWS(m.dimensions)) {
       case 2: glm_setvvalue2s(res, m.m42[idx], LUA_VVECTOR2); return LUA_VVECTOR2;
       case 3: glm_setvvalue2s(res, m.m43[idx], LUA_VVECTOR3); return LUA_VVECTOR3;  // @ImplicitAlign

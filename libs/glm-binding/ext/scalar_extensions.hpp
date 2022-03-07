@@ -160,11 +160,13 @@ namespace glm {
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType signP(genType v) {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559 || (std::numeric_limits<genType>::is_signed && std::numeric_limits<genType>::is_integer), "'sign' only accept signed inputs");
     return (v >= 0) ? genType(1) : genType(-1);
   }
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType signN(genType v) {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559 || (std::numeric_limits<genType>::is_signed && std::numeric_limits<genType>::is_integer), "'sign' only accept signed inputs");
     return (v > 0) ? genType(1) : genType(-1);
   }
 
