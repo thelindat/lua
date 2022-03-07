@@ -1317,6 +1317,25 @@ namespace glm {
         return r == ~0u;
       }
     };
+
+    /// <summary>
+    /// @GLMFix: ARMv7: fatal error: use of undeclared identifier 'vdivq_f32'
+    /// </summary>
+    template<>
+    struct compute_vec4_div<float, glm::aligned_highp, true> {
+      static vec<4, float, glm::aligned_highp> call(vec<4, float, glm::aligned_highp> const &a, vec<4, float, glm::aligned_highp> const &b) {
+        vec<4, float, glm::aligned_highp> Result;
+    #if GLM_ARCH & GLM_ARCH_ARMV8_BIT
+        Result.data = vdivq_f32(a.data, b.data);
+    #else
+        float32x4_t x = vrecpeq_f32(b.data);  // Two Newton-Raphson iterations
+        x = vmulq_f32(vrecpsq_f32(b.data, x), x);
+        x = vmulq_f32(vrecpsq_f32(b.data, x), x);
+        Result.data = vmulq_f32(a.data, x);
+    #endif
+        return Result;
+      }
+    };
   }
   #endif
 #endif
