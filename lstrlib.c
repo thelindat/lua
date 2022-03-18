@@ -2090,6 +2090,12 @@ static const luaL_Reg strlib[] = {
   {"join", str_join},
   {"concat", str_concat},
   {"tostringall", str_tostringall},
+#if defined(LUA_GRIT_COMPAT) /* @DEPRECATED */
+  {"strtrim", str_trim},
+  {"strsplit", str_split},
+  {"strjoin", str_join},
+  {"strconcat", str_concat},
+#endif
 #endif
   {"reverse", str_reverse},
   {"sub", str_sub},
