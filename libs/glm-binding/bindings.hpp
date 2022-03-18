@@ -247,6 +247,12 @@ extern LUA_API_LINKAGE {
 
 /* object accessors */
 #if !defined(glm_vvalue)
+#if defined(LUAGLM_HALF_STORAGE)
+#define _A(o, i) (i < std::decay<decltype(o)>::type::length() ? (o)[i] : 0)
+#define glm_vvalue(o) glmVector(f4_loadf4(vvalue(o)))
+#define glm_setvvalue2s(s, x, o) \
+  setvvalue(s2v(s), f4_cstore(_A(x, 0), _A(x, 1), _A(x, 2), _A(x, 3)), (o))
+#else
 #define glm_vvalue(o) glm_constvec_boundary(vvalue_ref(o))
 #define glm_setvvalue2s(s, x, o)        \
   LUA_MLM_BEGIN                         \
@@ -254,6 +260,7 @@ extern LUA_API_LINKAGE {
   glm_vec_boundary(&vvalue_(io)) = (x); \
   settt_(io, (o));                      \
   LUA_MLM_END
+#endif
 
 /* glm::type vector references */
 #define glm_v2value(o) glm_vvalue(o).v2

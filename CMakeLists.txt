@@ -56,6 +56,19 @@ OPTION(LUA_NATIVE_ARCH "Enable compiler optimizations for the native processor a
 # Include additional optimizations for glm-specific vector and matrix operations;
 OPTION(LUA_FAST_MATH "Enable fast math optimizations" OFF)
 
+OPTION(GLM_HALF_STORAGE "Use a half-precision floating-point as the vector storage type" OFF)
+IF( GLM_HALF_STORAGE )
+  ADD_COMPILE_DEFINITIONS(LUAGLM_HALF_STORAGE)
+
+  # Check if compiler supports half-precision floating-points
+  INCLUDE(CheckTypeSize)
+  CHECK_TYPE_SIZE("_Float16" HALF_FLOAT)
+  IF( HAVE_HALF_FLOAT )
+    MESSAGE(STATUS "LUA_HAS_FLOAT16 - found")
+    ADD_COMPILE_DEFINITIONS(LUA_HAS_FLOAT16)
+  ENDIF()
+ENDIF()
+
 # A subset of LUA_NATIVE_ARCH for only the GLM bindings
 OPTION(GLM_NATIVE_ARCH "Enable compiler optimizations for the native processor architecture" OFF)
 

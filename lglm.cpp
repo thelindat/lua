@@ -221,6 +221,156 @@ static inline lua_Integer glm_numbertointeger(const TValue *obj) {
   return 0;
 }
 
+/* Half-precision definitions */
+#if (LUAGLM_HALF_TYPE & LUAGLM_HALF_SHORT)
+#define LUAGLM_HALF_ARCH_AVX 0x1
+#define LUAGLM_HALF_ARCH_NEON 0x2
+#define LUAGLM_HALF_ARCH_INTERNAL 0x4
+
+ /* @SEE: GCC #87558 */
+#if ((GLM_COMPILER & GLM_COMPILER_GCC) && __GNUC__ >= 9) \
+  || ((GLM_COMPILER & GLM_COMPILER_CLANG) && __clang_major__ >= 8) \
+  || (GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_INTEL))
+  #define LUAGLM_HAS_STOREU_SI64 1
+#else
+  #define LUAGLM_HAS_STOREU_SI64 0
+#endif
+
+#if (defined(__F16C__) || defined(__AVX2__)) && LUAGLM_HAS_STOREU_SI64
+  #include <immintrin.h>
+  #define LUAGLM_HALF_ARCH LUAGLM_HALF_ARCH_AVX
+  #define LUAGLM_F16_ROUND (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
+  #pragma message("LuaGLM: Enabling AVX half/float conversion")
+#elif (GLM_ARCH & GLM_ARCH_NEON_BIT) && (GLM_ARCH & GLM_ARCH_ARMV8_BIT)
+  #include <arm_neon.h>
+  #define LUAGLM_HALF_ARCH LUAGLM_HALF_ARCH_NEON
+  #pragma message("LuaGLM: Enabling Neon half/float conversion")
+#else
+  #define LUAGLM_HALF_ARCH LUAGLM_HALF_ARCH_INTERNAL
+  #pragma message("LuaGLM: using internal half/float conversion")
+#endif
+
+/*
+** Internal definitions for packing/unpacking, based on __gnu_h2f_internal and
+** __gnu_float2h_internal.
+**
+** These functions are implemented independent of glm/detail/type_half.{hpp,inl}
+** to allow, or eventually allow, emulation of AVX (and other) flags.
+*/
+#if (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_INTERNAL)
+static LUA_INLINE unsigned int h2f_internal(unsigned short input) {
+  unsigned int exponent = cast(unsigned int, input & 0x7C00u);
+  unsigned int mantissa = cast(unsigned int, input & 0x03FFu);
+  unsigned int sign = (cast(unsigned int, input) & 0x8000u) << 16;
+  unsigned int fint;
+  switch (exponent) {
+    case 0x7C00u: fint = 0x7F800000u | (mantissa << 13); break; //  Signed Inf/NaN
+    case 0x0000u: {  // Signed-zero/subnormal
+      if (mantissa == 0)
+        fint = 0;
+      else {
+        mantissa <<= 1;  // @TODO: __builtin_clz
+        while ((mantissa & 0x0400u) == 0) {
+          mantissa <<= 1;
+          exponent++;
+        }
+        fint = ((0x70 - exponent) << 23) | ((mantissa & 0x03FFu) << 13);
+      }
+      break;
+    }
+    default: {
+      fint = cast(unsigned int, (input & 0x7FFFu) + 0x1C000u) << 13;
+      break;
+    }
+  }
+  return sign | fint;
+}
+
+static LUA_INLINE unsigned short f2h_internal(unsigned int input) {
+  const unsigned int sign = (input & 0x80000000U) >> 16U;
+  const unsigned int a = input & 0x7FFFFFFFU;
+  unsigned int half;
+  if (a >= 0x47800000)  // Exponent overflow/NaN -> Signed Inf/NaN
+    half = 0x7C00U | ((a > 0x7F800000) ? (0x200 | ((a >> 13U) & 0x3FFU)) : 0U);
+  else if (a < 0x38800000U) {  // Exponent underflow -> Signed-zero/subnormal
+    if (a <= 0x33000000U)  // Signed zero
+      half = 0;
+    else {
+      const unsigned int shift = 125U - (a >> 23U);
+      const unsigned int sig = 0x800000U | (a & 0x7FFFFFU);
+      const unsigned int last = (sig & ((1U << shift) - 1)) != 0;  // last bit
+      half = ((sig >> (shift + 1)) | last) & ((sig >> shift) & 1U);
+    }
+  }
+  else {
+    const unsigned int sig = a + 0xC8000000U;
+    half = ((sig + 0x0FFFU + ((sig >> 13U) & 1U)) >> 13U) & 0x7FFFU;
+  }
+  return cast(unsigned short, sign | half);
+}
+#endif
+
+LUA_API unsigned short lua_truncsfhf(float input) {
+#if (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_AVX)
+  return _mm_extract_epi16(_mm_cvtps_ph(_mm_set_ss(input), LUAGLM_F16_ROUND), 0);
+#elif (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_NEON)
+  return vget_lane_u16(vreinterpret_u16_f16(vcvt_f16_f32(vdupq_n_f32(input))), 0);
+#else
+  GLM_STATIC_ASSERT(sizeof(float) == sizeof(unsigned int), "float/unsigned bits");
+  union { float f; unsigned int fbits; } conv;
+  conv.f = input;
+  return f2h_internal(conv.fbits);
+#endif
+}
+
+LUA_API float lua_extendhfsf(unsigned short input) {
+#if (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_AVX)
+  return _mm_cvtss_f32(_mm_cvtph_ps(_mm_cvtsi32_si128(cast_int(input))));
+#elif (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_NEON)
+  return vgetq_lane_f32(vcvt_f32_f16(vreinterpret_f16_u16(vdup_n_u16(input))), 0);
+#else
+  GLM_STATIC_ASSERT(sizeof(float) == sizeof(unsigned int), "float/unsigned bits");
+  union { float ret; unsigned int retbits; } conv;
+  conv.retbits = h2f_internal(input);
+  return conv.ret;
+#endif
+}
+
+LUA_API luai_Float4 lua_packf4(lua_Float4 f4) {
+  luai_Float4 result;
+#if (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_AVX)
+  _mm_storeu_si64(&result.raw[0], _mm_cvtps_ph(_mm_loadu_ps(&f4.raw[0]), LUAGLM_F16_ROUND));
+#elif (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_NEON)
+  const float32x4_t f32 = { f4.raw[0], f4.raw[1], f4.raw[2], f4.raw[3] };
+  vst1_u16_x4(&result.raw[0], vreinterpret_u16_f16(vcvt_f16_f32(f32)));
+#else
+  result = f4_init(
+    lua_truncsfhf(f4.raw[0]), lua_truncsfhf(f4.raw[1]),
+    lua_truncsfhf(f4.raw[2]), lua_truncsfhf(f4.raw[3])
+  );
+#endif
+  return result;
+}
+
+LUA_API lua_Float4 lua_unpackf4(luai_Float4 f4) {
+  lua_Float4 result;
+#if (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_AVX)
+  _mm_storeu_ps(&result.raw[0], _mm_cvtph_ps(_mm_loadu_si64(&f4.raw[0])));
+#elif (LUAGLM_HALF_ARCH & LUAGLM_HALF_ARCH_NEON)
+  const uint16x4_t u16 = { f4.raw[0], f4.raw[1], f4.raw[2], f4.raw[3] };
+  vst1q_f32_x4(&result.raw[0], vcvt_f32_f16(vreinterpret_f16_u16(u16)));
+#else
+  result = f4_init(
+    lua_extendhfsf(f4.raw[0]), lua_extendhfsf(f4.raw[1]),
+    lua_extendhfsf(f4.raw[2]), lua_extendhfsf(f4.raw[3])
+  );
+#endif
+  return result;
+}
+#elif (LUAGLM_HALF_TYPE & LUAGLM_HALF_FLOAT16)
+  #pragma message("LuaGLM: Using _Float16 conversion")
+#endif
+
 /* }================================================================== */
 
 /*
@@ -240,6 +390,16 @@ static inline lua_Integer glm_numbertointeger(const TValue *obj) {
 #define glm_ivalue(o) (ttisinteger(o) ? ivalue(o) : glm_numbertointeger(o))
 
 /* object accessors */
+#if defined(LUAGLM_HALF_STORAGE)
+#define _A(o, i) (i < std::decay<decltype(o)>::type::length() ? (o)[i] : 0)
+#define glm_vvalueraw(o) glmVector(f4_loadf4(vvalue_raw(o)))
+#define glm_vvalue(o) glmVector(f4_loadf4(vvalue(o)))
+#define glm_setvvalue2s(s, x, o)                                                 \
+  LUA_MLM_BEGIN                                                                  \
+  auto _R = (x); /* uses operator[] to support LUAGLM_QUAT_WXYZ */               \
+  setvvalue(s2v(s), f4_cstore(_A(_R, 0), _A(_R, 1), _A(_R, 2), _A(_R, 3)), (o)); \
+  LUA_MLM_END
+#else
 #define glm_vvalueraw(o) glm_constvec_boundary(&vvalue_raw(o))
 #define glm_vvalue(o) glm_constvec_boundary(vvalue_ref(o))
 #define glm_setvvalue2s(s, x, o)        \
@@ -248,6 +408,7 @@ static inline lua_Integer glm_numbertointeger(const TValue *obj) {
   glm_vec_boundary(&vvalue_(io)) = (x); \
   settt_(io, (o));                      \
   LUA_MLM_END
+#endif
 
 /* raw object fields */
 #define glm_v2valueraw(o) glm_vvalueraw(o).v2

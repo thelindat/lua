@@ -485,7 +485,7 @@ INTEGER_VECTOR_DEFN(lowestBitValue, glm::lowestBitValue, lua_Integer, LAYOUT_UNA
 // GLM_BINDING_DECL(powerOfTwoNearest);  // @DEPRECATED
 #endif
 
-#if defined(PACKING_HPP)
+#if defined(PACKING_HPP) && !defined(LUAGLM_HALF_STORAGE)
 BIND_DEFN(packUnorm2x16, glm::packUnorm2x16, gLuaVec2<float>)
 BIND_DEFN(unpackUnorm2x16, glm::unpackUnorm2x16, gLuaTrait<glm::uint>)
 BIND_DEFN(packSnorm2x16, glm::packSnorm2x16, gLuaVec2<float>)
@@ -500,7 +500,7 @@ BIND_DEFN(packHalf2x16, glm::packHalf2x16, gLuaVec2<float>)
 BIND_DEFN(unpackHalf2x16, glm::unpackHalf2x16, gLuaTrait<glm::uint>)
 #endif
 
-#if defined(GTC_TYPE_PRECISION_HPP)
+#if defined(GTC_TYPE_PRECISION_HPP) && !defined(LUAGLM_HALF_STORAGE)
 BIND_DEFN(packUnorm1x8, glm::packUnorm1x8, gLuaTrait<float>)
 BIND_DEFN(unpackUnorm1x8, glm::unpackUnorm1x8, gLuaTrait<glm::uint8>)
 BIND_DEFN(packUnorm2x8, glm::packUnorm2x8, gLuaVec2<float>)
@@ -1123,10 +1123,12 @@ BIND_DEFN(fma, glm::fma, gLuaNumber, gLuaNumber, gLuaNumber)
 #else
 NUMBER_VECTOR_DEFN(fma, glm::fma, LAYOUT_TERNARY)
 #endif
+#if !defined(LUAGLM_HALF_STORAGE)
 INTEGER_VECTOR_DEFN(floatBitsToInt, glm::floatBitsToInt, float, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(floatBitsToUint, glm::floatBitsToUint, float, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(intBitsToFloat, glm::intBitsToFloat, int, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(uintBitsToFloat, glm::uintBitsToFloat, unsigned, LAYOUT_UNARY)
+#endif
 NUMBER_VECTOR_QUAT_DEFN(isinf, glm::isinf, LAYOUT_UNARY) /* glm/ext/quaternion_common.hpp */
 NUMBER_VECTOR_QUAT_DEFN(isnan, glm::isnan, LAYOUT_UNARY) /* glm/ext/quaternion_common.hpp */
 NUMBER_VECTOR_DEFN(round, glm::round, LAYOUT_UNARY)
@@ -1137,7 +1139,7 @@ NUMBER_VECTOR_DEFN(trunc, glm::trunc, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(ldexp, glm::ldexp, LAYOUT_BINARY_AS_INT)
 NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP, int)
 NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // @GLMVectorExtensions
-#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT && !defined(LUAGLM_HALF_STORAGE)
 BIND_DEFN(morton3D, glm::morton3D, gLuaVec3<>)
 BIND_DEFN(expandBits, glm::expandBits, gLuaTrait<unsigned int>)
 #endif
@@ -1600,10 +1602,12 @@ INTEGER_VECTOR_DEFN(compNormalize_i8, glm::compNormalize<glm_Float>, glm::i8, LA
 INTEGER_VECTOR_DEFN(compNormalize_u8, glm::compNormalize<glm_Float>, glm::u8, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i8, glm::compScale<glm::i8>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_u8, glm::compScale<glm::u8>, LAYOUT_UNARY)
+#if !defined(LUAGLM_HALF_STORAGE)
 INTEGER_VECTOR_DEFN(compNormalize_i16, glm::compNormalize<glm_Float>, glm::i16, LAYOUT_UNARY)
 INTEGER_VECTOR_DEFN(compNormalize_u16, glm::compNormalize<glm_Float>, glm::u16, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_i16, glm::compScale<glm::i16>, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(compScale_u16, glm::compScale<glm::u16>, LAYOUT_UNARY)
+#endif
 #endif
 
 #if defined(GTX_EASING_HPP)

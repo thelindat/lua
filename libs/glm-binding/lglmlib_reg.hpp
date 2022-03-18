@@ -85,10 +85,12 @@ GLM_LUA_REG(abs),
 { "fabs", GLM_NAME(abs) },  // @MathlibCompat
 GLM_LUA_REG(ceil),
 GLM_LUA_REG(floor),
+#if !defined(LUAGLM_HALF_STORAGE)
 GLM_LUA_REG(floatBitsToInt),
 GLM_LUA_REG(floatBitsToUint),
 GLM_LUA_REG(intBitsToFloat),
 GLM_LUA_REG(uintBitsToFloat),
+#endif
 GLM_LUA_REG(fma),
 GLM_LUA_REG(fract),
 GLM_LUA_REG(frexp),
@@ -103,7 +105,7 @@ GLM_LUA_REG(smoothstep),
 GLM_LUA_REG(step),
 GLM_LUA_REG(trunc),
 GLM_LUA_REG(reverse),  // @GLMVectorExtensions
-#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT && !defined(LUAGLM_HALF_STORAGE)
 GLM_LUA_REG(morton3D),
 GLM_LUA_REG(expandBits),
 #endif
@@ -556,10 +558,12 @@ GLM_LUA_REG(compNormalize_i8),
 GLM_LUA_REG(compNormalize_u8),
 GLM_LUA_REG(compScale_i8),
 GLM_LUA_REG(compScale_u8),
+#if !defined(LUAGLM_HALF_STORAGE)
 GLM_LUA_REG(compNormalize_i16),
 GLM_LUA_REG(compNormalize_u16),
 GLM_LUA_REG(compScale_i16),
 GLM_LUA_REG(compScale_u16),
+#endif
 #if defined(LUAGLM_ALIASES_UNITY)
 //{ "Scale", GLM_NAME() }, // @UnityAlias
 #endif
@@ -968,7 +972,7 @@ GLM_LUA_REG(highestBitValue),
 GLM_LUA_REG(lowestBitValue),
 #endif
 
-#if defined(PACKING_HPP)
+#if defined(PACKING_HPP) && !defined(LUAGLM_HALF_STORAGE)
 GLM_LUA_REG(packUnorm2x16),
 GLM_LUA_REG(packSnorm2x16),
 GLM_LUA_REG(packUnorm4x8),
@@ -983,7 +987,7 @@ GLM_LUA_REG(packHalf2x16),
 GLM_LUA_REG(unpackHalf2x16),
 #endif
 
-#if defined(GTC_TYPE_PRECISION_HPP)
+#if defined(GTC_TYPE_PRECISION_HPP) && !defined(LUAGLM_HALF_STORAGE)
 GLM_LUA_REG(packUnorm1x8),
 GLM_LUA_REG(unpackUnorm1x8),
 GLM_LUA_REG(packUnorm2x8),

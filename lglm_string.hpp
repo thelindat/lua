@@ -370,6 +370,25 @@ namespace glm {
       }
     };
 
+    template<>
+    struct lua_hash<unsigned short> {
+      GLM_FUNC_QUALIFIER size_t operator()(const unsigned short &n) const {
+        return static_cast<size_t>(n);
+      }
+    };
+
+#if defined(LUA_HAS_FLOAT16)
+    template<>
+    struct lua_hash<_Float16> {
+      GLM_FUNC_QUALIFIER size_t operator()(const _Float16 &n) const {
+        union { _Float16 __t; unsigned short __a; } __scalar_hash;
+        __scalar_hash.__a = 0;
+        __scalar_hash.__t = n;
+        return (n == _Float16(0)) ? 0 : __scalar_hash.__a;
+      }
+    };
+#endif
+
 #if LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
     /// <summary>
     /// Not the most robust solution; see libcxx's implementation.

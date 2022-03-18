@@ -181,6 +181,7 @@ static const luaL_Reg luaglm_lib[] = {
   { "_COPYRIGHT", GLM_NULLPTR },
   { "_DESCRIPTION", GLM_NULLPTR },
   { "_GLM_VERSION", GLM_NULLPTR },
+  { "_GLM_HALF", GLM_NULLPTR },
   { "_GLM_SIMD", GLM_NULLPTR },
   { GLM_NULLPTR, GLM_NULLPTR }
 };
@@ -269,7 +270,11 @@ extern "C" {
     GLM_CONSTANT(L, pi); /* lmathlib */
     lua_pushnumber(L, glm::two_pi<lua_Number>()); lua_setfield(L, -2, "tau");
     lua_pushnumber(L, glm::epsilon<lua_Number>()); lua_setfield(L, -2, "eps");
+#if defined(LUAGLM_HALF_STORAGE)
+    lua_pushnumber(L, static_cast<lua_Number>(0.0009765625)); lua_setfield(L, -2, "feps");  // 2^-10
+#else
     lua_pushnumber(L, static_cast<lua_Number>(glm::epsilon<glm_Float>())); lua_setfield(L, -2, "feps");
+#endif
     lua_pushnumber(L, std::numeric_limits<lua_Number>::infinity()); lua_setfield(L, -2, "huge");
     lua_pushinteger(L, std::numeric_limits<lua_Integer>::max()); lua_setfield(L, -2, "maxinteger");
     lua_pushinteger(L, std::numeric_limits<lua_Integer>::min()); lua_setfield(L, -2, "mininteger");
@@ -298,6 +303,11 @@ extern "C" {
     lua_pushliteral(L, LUAGLM_COPYRIGHT); lua_setfield(L, -2, "_COPYRIGHT");
     lua_pushliteral(L, LUAGLM_DESCRIPTION); lua_setfield(L, -2, "_DESCRIPTION");
     lua_pushinteger(L, GLM_VERSION); lua_setfield(L, -2, "_GLM_VERSION");
+#if defined(LUAGLM_HALF_STORAGE)
+    lua_pushboolean(L, 1); lua_setfield(L, -2, "_GLM_HALF");
+#else
+    lua_pushboolean(L, 0); lua_setfield(L, -2, "_GLM_HALF");
+#endif
 #if LUAGLM_ALIGNED
     lua_pushboolean(L, 1); lua_setfield(L, -2, "_GLM_SIMD");
 #else

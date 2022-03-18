@@ -66,11 +66,43 @@ static LUA_INLINE grit_length_t glm_dimensions (lu_byte rtt) {
   return cast(grit_length_t, (rtt == LUA_VQUAT) ? 4 : (2 + ((rtt & 0x30) >> 4)));
 }
 
+#if (LUAGLM_HALF_TYPE & LUAGLM_HALF_SHORT)
+
+/* Convert between external/internal vector primitives, i.e., f32 and f16 */
+LUA_API unsigned short lua_truncsfhf(float input);
+LUA_API float lua_extendhfsf(unsigned short input);
+
+/* Convert between external/internal vector types */
+LUA_API luai_Float4 lua_packf4(lua_Float4 input);
+LUA_API lua_Float4 lua_unpackf4(luai_Float4 input);
+
+#elif (LUAGLM_HALF_TYPE & LUAGLM_HALF_FLOAT16)
+#define lua_truncsfhf(F) (luai_VecF)(F)
+#define lua_extendhfsf(F) (lua_VecF)(F)
+#define lua_packf4(F) f4_init(lua_truncsfhf((F).raw[0]), lua_truncsfhf((F).raw[1]), lua_truncsfhf((F).raw[2]), lua_truncsfhf((F).raw[3]))
+#define lua_unpackf4(F) f4_init(lua_extendhfsf((F).raw[0]), lua_extendhfsf((F).raw[1]), lua_extendhfsf((F).raw[2]), lua_extendhfsf((F).raw[3]))
+#else
+#define lua_truncsfhf(F) F
+#define lua_extendhfsf(F) F
+#define lua_packf4(F) F
+#define lua_unpackf4(F) F
+#endif
+
 /* Half-precision floating-point cplusplus helpers */
 #if defined(__cplusplus)
+#if (LUAGLM_HALF_TYPE & LUAGLM_HALF_SHORT)
+  #define f4_loadf4(F) lua_unpackf4((F))
+  #define f4_cstoref4(F) lua_packf4((F))
+  #define f4_cstore(x, y, z, w) lua_packf4(lua_Float4(f4_init((lua_VecF)(x), (lua_VecF)(y), (lua_VecF)(z), (lua_VecF)(w))))
+#elif (LUAGLM_HALF_TYPE & LUAGLM_HALF_FLOAT16)
+  #define f4_loadf4(F) lua_Float4(lua_unpackf4((F)))
+  #define f4_cstoref4(F) luai_Float4(lua_packf4((F)))
+  #define f4_cstore(x, y, z, w) luai_Float4(f4_init(lua_truncsfhf(x), lua_truncsfhf(y), lua_truncsfhf(z), lua_truncsfhf(w)))
+#else
   #define f4_loadf4(F) F
   #define f4_cstoref4(F) F
   #define f4_cstore(x, y, z, w) luai_Float4(f4_init((luai_VecF)(x), (luai_VecF)(y), (luai_VecF)(z), (luai_VecF)(w)))
+#endif
 #endif
 
 /*

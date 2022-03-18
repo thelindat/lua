@@ -77,8 +77,8 @@ PLAT= guess
 # LUA_LINKAGE needs to be undefined
 LUA_LINKAGE= -DLUA_C_LINKAGE
 
-CC= gcc -std=gnu99 -Wall $(CWARNSCPP) $(CWARNSC) $(CWARNGCC) $(GCC_SANITIZE)
-CPP= g++ -std=c++11 -Wall $(CWARNSCPP) $(CWARNGCC) $(GCC_SANITIZE) $(GPP_SANITIZE)
+CC= gcc-12 -DLUA_HAS_FLOAT16 -DLUAGLM_HALF_STORAGE -std=gnu99 -Wall $(CWARNSCPP) $(CWARNSC) $(CWARNGCC) $(GCC_SANITIZE)
+CPP= g++-12 -DLUA_HAS_FLOAT16 -DLUAGLM_HALF_STORAGE -std=c++11 -Wall $(CWARNSCPP) $(CWARNGCC) $(GCC_SANITIZE) $(GPP_SANITIZE)
 CFLAGS= -O2 -DNDEBUG $(SYSCFLAGS) $(MYCFLAGS)
 CPERF_FLAGS= -O3 -march=native -ffast-math -fno-finite-math-only # -fno-plt
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS) $(GCC_SANITIZE) $(GPP_SANITIZE)
@@ -356,6 +356,6 @@ lglm.o: lglm.cpp lua.h luaconf.h lglm.hpp lua.hpp lualib.h \
  lauxlib.h lglm_core.h llimits.h ltm.h lobject.h lglm_string.hpp \
  lgrit_lib.h lapi.h lstate.h lzio.h lmem.h ldebug.h lfunc.h lgc.h \
  lstring.h ltable.h lvm.h ldo.h
-	$(CPP) $(LUA_LINKAGE) $(CFLAGS) $(CPERF_FLAGS) $(TESTS) -c -o lglm.o lglm.cpp
+	$(CPP) $(LUA_LINKAGE) $(CFLAGS) $(CPERF_FLAGS) $(TESTS) -fno-exceptions -c -o lglm.o lglm.cpp
 
 # (end of Makefile)
