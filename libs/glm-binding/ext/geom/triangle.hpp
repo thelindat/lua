@@ -215,12 +215,10 @@ namespace glm {
   /// Return an edge of the triangle.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER LineSegment<L, T, Q> edge(const Triangle<L, T, Q> &t, int i) {
+  GLM_GEOM_QUALIFIER LineSegment<L, T, Q> edge(const Triangle<L, T, Q> &t, length_t i) {
     switch (i) {
-      case 1:
-        return LineSegment<L, T, Q>(t.b, t.c);
-      case 2:
-        return LineSegment<L, T, Q>(t.c, t.a);
+      case 1: return LineSegment<L, T, Q>(t.b, t.c);
+      case 2: return LineSegment<L, T, Q>(t.c, t.a);
       default: {
         return LineSegment<L, T, Q>(t.a, t.b);
       }
@@ -231,12 +229,10 @@ namespace glm {
   /// Return a vertex of the Triangle.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<L, T, Q> vertex(const Triangle<L, T, Q> &t, int i) {
+  GLM_GEOM_QUALIFIER vec<L, T, Q> vertex(const Triangle<L, T, Q> &t, length_t i) {
     switch (i) {
-      case 1:
-        return t.b;
-      case 2:
-        return t.c;
+      case 1: return t.b;
+      case 2: return t.c;
       default: {
         return t.a;
       }
@@ -244,7 +240,7 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<L, T, Q> cornerPoint(const Triangle<L, T, Q> &t, int i) {
+  GLM_GEOM_QUALIFIER vec<L, T, Q> cornerPoint(const Triangle<L, T, Q> &t, length_t i) {
     return vertex(t, i);
   }
 
@@ -711,7 +707,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const Triangle<L, T, Q> &t, const Ray<L, T, Q> &ray, T &u, T &v, T &d) {
-    d = intersectTriangleLine(t, toLine(ray), u, v);
+    d = intersectTriangleLine(t, ray, u, v);
     return isfinite(d) && d >= T(0);
   }
 
@@ -743,7 +739,7 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const Triangle<L, T, Q> &t, const Ray<L, T, Q> &ray) {
     T u, v;
-    const T d = intersectTriangleLine(t, toLine(ray), u, v);
+    const T d = intersectTriangleLine(t, ray, u, v);
     return isfinite(d) && d >= T(0);
   }
 

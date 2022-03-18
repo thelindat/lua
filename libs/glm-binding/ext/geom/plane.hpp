@@ -49,17 +49,17 @@ namespace glm {
 
     Plane(const point_type &direction, T offset)
       : normal(direction), d(offset) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
+      GLM_GEOM_ASSERT(isNormalized(normal, epsilon<T>()));
     }
 
     Plane(const point_type &point, const point_type &normal_)
       : normal(normal_), d(dot(point, normal)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
+      GLM_GEOM_ASSERT(isNormalized(normal, epsilon<T>()));
     }
 
     Plane(const Plane<L, T, Q> &plane)
       : normal(plane.normal), d(plane.d) {
-      GLM_GEOM_ASSERT(glm::isNormalized(normal, epsilon<T>()));
+      GLM_GEOM_ASSERT(isNormalized(normal, epsilon<T>()));
     }
 
     Plane<L, T, Q> &operator=(const Plane<L, T, Q> &plane) {
@@ -76,7 +76,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Plane<L, T, Q> &p1, const Plane<L, T, Q> &p2) {
-    return p1.normal == p2.normal && glm::detail::equal_strict(p1.d, p2.d);
+    return p1.normal == p2.normal && detail::equal_strict(p1.d, p2.d);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -706,7 +706,7 @@ namespace glm {
       return true;
     }
 
-    if (!glm::detail::exactly_zero(denom)) {
+    if (!detail::exactly_zero(denom)) {
       d = (planeD - dot(planeNormal, linePos)) / denom;
       if (abs(d) < epsilon<T>()) {
         return true;

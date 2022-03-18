@@ -40,6 +40,28 @@
 #endif
 
 /// <summary>
+/// @TODO: Move all declarations in this header to this namespace.
+/// </summary>
+// namespace lua { }
+#if __cplusplus >= 202002L
+using std::construct_at;
+#else
+template<class T, class... Args>
+T *construct_at(T *p, Args &&...args) {
+  return ::new (const_cast<void *>(static_cast<const volatile void *>(p))) T(std::forward<Args>(args)...);
+}
+#endif
+
+#if __cplusplus >= 201703L
+using std::destroy_at;
+#else
+template<class T>
+void destroy_at(T *p) {
+  p->~T();
+}
+#endif
+
+/// <summary>
 /// A CRuntime allocator that uses lua_Alloc.
 /// </summary>
 template<class T>
@@ -180,7 +202,7 @@ private:
   /// </summary>
   inline void *realloc_(void *block, size_t osize, size_t nsize) {
     void *p = m_alloc.realloc(block, osize, nsize);
-    if (p == GLM_NULLPTR) {
+    if (p == LUA_ALLOC_NULLPTR) {
       //lua_checkstack(m_state, 1);
       lua_pushstring(m_state, "LuaVector allocation failure");
       lua_error(m_state);
@@ -193,7 +215,7 @@ private:
   /// </summary>
   inline void *malloc_(size_t size_) {
     void *p = m_alloc.realloc(LUA_ALLOC_NULLPTR, 0, size_);
-    if (p == GLM_NULLPTR) {
+    if (p == LUA_ALLOC_NULLPTR) {
       //lua_checkstack(m_state, 1);
       lua_pushstring(m_state, "LuaVector allocation failure");
       lua_error(m_state);
@@ -219,7 +241,7 @@ private:
 
   inline void destroyInPlace(iterator begin_, iterator end_) {
     while (begin_ != end_) {
-      begin_->~T();
+      destroy_at(begin_);
       begin_++;
     }
   }

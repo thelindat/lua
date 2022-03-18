@@ -19,7 +19,7 @@ namespace glm {
   /// direction.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  struct Ray {
+  struct Ray : Line<L, T, Q> {
 
     // -- Implementation detail --
 
@@ -29,37 +29,37 @@ namespace glm {
 
     // -- Data --
 
-    point_type pos;  // Specifies the origin of this line.
-    point_type dir;  // The normalized direction vector of this ray.
+    using Line<L, T, Q>::pos;  // Specifies the origin of this line.
+    using Line<L, T, Q>::dir;  // The normalized direction vector of this ray.
 
 #if GLM_CONFIG_DEFAULTED_DEFAULT_CTOR == GLM_ENABLE
     Ray() GLM_DEFAULT_CTOR;
 #else
     Ray()
   #if GLM_CONFIG_CTOR_INIT != GLM_CTOR_INIT_DISABLE
-      : pos(T(0)), dir(T(0))
+      : Line<L, T, Q>()
   #endif
     {
     }
 #endif
 
     Ray(T scalar)
-      : pos(scalar), dir(scalar) {
+      : Line<L, T, Q>(scalar) {
     }
 
     Ray(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
-      : pos(position), dir(normalize(direction)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
+      : Line<L, T, Q>(position, direction) {
+      GLM_GEOM_ASSERT(isNormalized(dir, epsilon<T>()));
     }
 
     Ray(const Line<L, T, Q> &line)
-      : pos(line.pos), dir(line.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
+      : Line<L, T, Q>(line) {
+      GLM_GEOM_ASSERT(isNormalized(dir, epsilon<T>()));
     }
 
     Ray(const Ray<L, T, Q> &ray)
-      : pos(ray.pos), dir(ray.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
+      : Line<L, T, Q>(ray) {
+      GLM_GEOM_ASSERT(isNormalized(dir, epsilon<T>()));
     }
 
     Ray<L, T, Q> &operator=(const Ray<L, T, Q> &ray) {
@@ -68,11 +68,6 @@ namespace glm {
       return *this;
     }
   };
-
-  template<length_t L, typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER Line<L, T, Q> toLine(const Ray<L, T, Q> &ray) {
-    return Line<L, T, Q>(ray.pos, ray.dir);
-  }
 
   template<length_t L, typename T, qualifier Q>
   static Ray<L, T, Q> operator-(const Ray<L, T, Q> &ray) {
@@ -384,8 +379,8 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER bool intersects(const Ray<L, T, Q> &ray, const Triangle<L, T, Q> &triangle, T &d, T &u, T &v) {
-    d = intersectTriangleLine(triangle, toLine(ray), u, v);
-    return glm::isfinite(d) && d >= T(0);
+    d = intersectTriangleLine(triangle, ray, u, v);
+    return isfinite(d) && d >= T(0);
   }
 
   template<length_t L, typename T, qualifier Q>

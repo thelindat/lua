@@ -812,29 +812,15 @@ typedef struct Table {
 #define LUA_VQUAT makevariant(LUA_TVECTOR, 3)
 #endif
 
-/* Conversion between internal storage type and lua_VecF */
-#define f4_loadf(i) (i)
-#define f4_storef(i) (i)
-
 /* Definitions for initializing lua_Float4 */
 #define f4_init(x, y, z, w) { { (x), (y), (z), (w) } }
-#define f4_initload(x, y, z, w) { { f4_loadf(x), f4_loadf(y), f4_loadf(z), f4_loadf(w) } }
-#define f4_initstore(x, y, z, w) { { f4_storef(x), f4_storef(y), f4_storef(z), f4_storef(w) } }
 #define f4_zero() f4_init(0, 0, 0, 0)
 
 /* Conversion between internal/external storage types */
+#define f4_loadf(i) (i)
+#define f4_storef(i) (i)
 #define f4_load(F) F
 #define f4_store(F) F
-/* #define f4_load(F) f4_initload((F).raw[0], (F).raw[1], (F).raw[2], (F).raw[3])   */
-/* #define f4_store(F) f4_initstore((F).raw[0], (F).raw[1], (F).raw[2], (F).raw[3]) */
-
-/* cplusplus helpers */
-#if defined(__cplusplus)
-#define f4_ctor(x, y, z, w) lua_Float4(f4_init((x), (y), (z), (w)))
-#define f4_cstore(x, y, z, w) luai_Float4(f4_initstore((x), (y), (z), (w)))
-#define f4_ctorf4(F) F
-/* #define f4_ctorf4(F) luai_Float4(f4_store((F))) */
-#endif
 
 #define ttisvector(o) checktype((o), LUA_TVECTOR)
 #define ttisvector2(o) checktag((o), LUA_VVECTOR2)
@@ -865,14 +851,14 @@ typedef struct Table {
 
 typedef struct GCMatrix {
   CommonHeader;
-  lua_Mat4 mat4;
+  lua_Mat4 m;
 } GCMatrix;
 
 #define LUA_VMATRIX makevariant(LUA_TMATRIX, 0)
 
 #define ttismatrix(o) checktag((o), ctb(LUA_VMATRIX))
-#define mvalue(o) check_exp(ttismatrix(o), gco2mat(val_(o).gc)->mat4)
-#define mvalue_ref(o) check_exp(ttismatrix(o), &gco2mat(val_(o).gc)->mat4)
+#define mvalue(o) check_exp(ttismatrix(o), gco2mat(val_(o).gc)->m)
+#define mvalue_ref(o) check_exp(ttismatrix(o), &gco2mat(val_(o).gc)->m)
 #define mvalue_dims(o) mvalue(o).dimensions
 #define setmvalue(L, o, x)      \
   LUA_MLM_BEGIN                 \

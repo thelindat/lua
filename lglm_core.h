@@ -32,11 +32,11 @@
 @@ LUAGLM_QUAT_WXYZ Quaternion layout (i.e., wxyz vs xyzw)
 */
 #if LUAGLM_LIBVERSION < 999
-  #if defined(GLM_FORCE_QUAT_DATA_WXYZ)
-    #define LUAGLM_QUAT_WXYZ 1
-  #else
-    #define LUAGLM_QUAT_WXYZ 0
-  #endif
+#if defined(GLM_FORCE_QUAT_DATA_WXYZ)
+  #define LUAGLM_QUAT_WXYZ 1
+#else
+  #define LUAGLM_QUAT_WXYZ 0
+#endif
 #elif defined(GLM_FORCE_QUAT_DATA_XYZW)
   #define LUAGLM_QUAT_WXYZ 0
 #else
@@ -47,7 +47,7 @@
 ** This value should be greater than: (MAXNUMBER2STR * 16) + 64:
 **  [d]mat4x4((%f, %f, %f, %f), (%f, %f, %f, %f), (%f, %f, %f, %f), (%f, %f, %f, %f))
 */
-#define GLM_STRING_BUFFER 1024
+#define LUAGLM_MAX2STR 1024
 
 /*
 ** Return the vector variant (tag) associated with 'dimensions'. Note, this
@@ -65,6 +65,13 @@ static LUA_INLINE lu_byte glm_variant (grit_length_t dimensions) {
 static LUA_INLINE grit_length_t glm_dimensions (lu_byte rtt) {
   return cast(grit_length_t, (rtt == LUA_VQUAT) ? 4 : (2 + ((rtt & 0x30) >> 4)));
 }
+
+/* Half-precision floating-point cplusplus helpers */
+#if defined(__cplusplus)
+  #define f4_loadf4(F) F
+  #define f4_cstoref4(F) F
+  #define f4_cstore(x, y, z, w) luai_Float4(f4_init((luai_VecF)(x), (luai_VecF)(y), (luai_VecF)(z), (luai_VecF)(w)))
+#endif
 
 /*
 ** {==================================================================

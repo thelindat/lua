@@ -249,7 +249,7 @@
       default:                                                                                   \
         break;                                                                                   \
     }                                                                                            \
-    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);         \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN);   \
     GLM_BINDING_END                                                                              \
   }
 
@@ -293,7 +293,7 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
       case LUA_VQUAT: LAYOUT_HASH(LB, std::hash, gLuaQuat<>); break;
       case LUA_VMATRIX: PARSE_MATRIX(LB, mvalue_dims(o), std::hash, LAYOUT_HASH); break;
       default: {
-        return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
+        return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN " or " LUAGLM_STRING_MATRIX);
       }
     }
   }
@@ -326,6 +326,7 @@ BIND_DEFN(right, glm::unit::right<glm_Float>)
 BIND_DEFN(forward, glm::unit::forward<glm_Float>)
 BIND_DEFN(forwardLH, glm::unit::forwardLH<glm_Float>)
 BIND_DEFN(forwardRH, glm::unit::forwardRH<glm_Float>)
+BIND_DEFN(spherical, glm::unit::spherical, gLuaNumCoT, gLuaNumCoT);
 
 /* }================================================================== */
 
@@ -401,7 +402,7 @@ GLM_BINDING_QUALIFIER(mat_mul) {  // @TODO: Reduce bloat!
       break;
     }
   }
-  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " or " GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_NUMBER " or " LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 
@@ -628,6 +629,13 @@ BIND_DEFN(angleAxis, glm::angleAxis, gLuaVec3<>::value_trait, gLuaDir3<>)
 #endif
 
 #if defined(GTC_QUATERNION_HPP)
+#define LAYOUT_SWINGTWIST(LB, F, Tr, ...) \
+  LUA_MLM_BEGIN                           \
+  Tr::type u, v;                          \
+  F((LB).Next<Tr>(), u, v);               \
+  BIND_PUSH(LB, u, v);                    \
+  LUA_MLM_END
+
 BIND_DEFN(eulerAngles, glm::eulerAngles, gLuaQuat<>)
 BIND_DEFN(mat3_cast, glm::mat3_cast, gLuaQuat<>)
 BIND_DEFN(mat4_cast, glm::mat4_cast, gLuaQuat<>)
@@ -641,6 +649,8 @@ BIND_DEFN(quatbillboard, glm::quatbillboard, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>,
 BIND_DEFN(quatbillboardRH, glm::quatbillboardRH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatbillboardLH, glm::quatbillboardLH, gLuaVec3<>, gLuaVec3<>, gLuaDir3<>, gLuaDir3<>)
 BIND_DEFN(quatFromBasis, glm::fromBasis, gLuaDir3<>, gLuaDir3<>, gLuaDir3<>)
+BIND_DEFN(twist, glm::twist, gLuaQuat<>, gLuaDir3<>)
+LAYOUT_DEFN(swingtwist, glm::swingtwist, LAYOUT_SWINGTWIST, gLuaQuat<>)
 #endif
 
 #if defined(GTX_QUATERNION_HPP)
@@ -694,7 +704,7 @@ GLM_BINDING_QUALIFIER(outerProduct) {
       break;
     }
   }
-  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR);
   GLM_BINDING_END
 }
 #endif
@@ -803,9 +813,9 @@ BIND_DEFN(containsProjection, glm::containsProjection, gLuaMat4x4<>, gLuaMat4x4<
 
 #if defined(GTC_MATRIX_ACCESS_HPP)  // @NOTE: These GLM functions are zero-based
 #define LAYOUT_MATRIX_ACCESS_COLUMN(LB, F, Tr, ...) \
-  LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::col_type, Tr::row_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
+  LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::col_type, Tr::row_type, gLuaLen_t, ##__VA_ARGS__)
 #define LAYOUT_MATRIX_ACCESS_ROW(LB, F, Tr, ...) \
-  LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::row_type, Tr::col_type, gLuaTrait<glm::length_t>, ##__VA_ARGS__)
+  LAYOUT_MATRIX_ACCESS(LB, F, Tr, Tr::row_type, Tr::col_type, gLuaLen_t, ##__VA_ARGS__)
 #define LAYOUT_MATRIX_ACCESS(LB, F, Tr, TrComp, TrDim, TrIdx, ...)                  \
   LUA_MLM_BEGIN                                                                     \
   const lua_Integer _idx = gLuaBase::tointegerx((LB).L, (LB).idx + Tr::stack_size); \
@@ -974,7 +984,7 @@ ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
       default:                                                                          \
         break;                                                                          \
     }                                                                                   \
-    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_MATRIX); \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_MATRIX); \
     GLM_BINDING_END                                                                     \
   }
 
@@ -1057,19 +1067,21 @@ BIND_DEFN(shearY, glm::shearY, gLuaMat3x3<>, gLuaMat3x3<>::value_trait)
 SYMMETRIC_MATRIX_DEFN(findEigenvaluesSymReal, glm::findEigenvaluesSymReal, LAYOUT_FIND_EIGEN)
 GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
   GLM_BINDING_BEGIN
+  glm::length_t dimensions = 0;
   luaL_checktype(L, LB.idx, LUA_TTABLE);
   lua_rawgeti(LB.L, LB.idx, 1);  // Determine array dimensions
-  const glm::length_t dimensions = glm_vector_length(LB.L, -1);
-  lua_pop(L, 1);
-
-  switch (dimensions) {
-    case 2: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat2x2<>, 2); break;
-    case 3: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat3x3<>, 3); break;
-    case 4: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat4x4<>, 4); break;
-    default: {
-      break;
+  if (glm_isvector(LB.L, -1, dimensions)) {
+    lua_pop(LB.L, 1);
+    switch (dimensions) {
+      case 2: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat2x2<>, 2); break;
+      case 3: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat3x3<>, 3); break;
+      case 4: LAYOUT_COMPUTE_COVARIANCE(LB, glm::computeCovarianceMatrix, gLuaMat4x4<>, 4); break;
+      default: {
+        break;
+      }
     }
   }
+  lua_pop(LB.L, 1);
   return LUAGLM_TYPE_ERROR(LB.L, LB.idx, "vector array");
   GLM_BINDING_END
 }
@@ -1125,6 +1137,10 @@ NUMBER_VECTOR_DEFN(trunc, glm::trunc, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(ldexp, glm::ldexp, LAYOUT_BINARY_AS_INT)
 NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP, int)
 NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // @GLMVectorExtensions
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+BIND_DEFN(morton3D, glm::morton3D, gLuaVec3<>)
+BIND_DEFN(expandBits, glm::expandBits, gLuaTrait<unsigned int>)
+#endif
 INTEGER_NUMBER_VECTOR_DEFN(mod, glm::imod, LAYOUT_MODULO)  // @MathlibCompat
 INTEGER_NUMBER_VECTOR_DEFNS(ceil, glm::iceil, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
 INTEGER_NUMBER_VECTOR_DEFNS(floor, glm::ifloor, LAYOUT_UNARY, LAYOUT_UNARY_NUMINT, LAYOUT_UNARY)
@@ -1340,7 +1356,7 @@ GLM_BINDING_QUALIFIER(cross) {
       break;
     }
   }
-  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN);
   GLM_BINDING_END
 }
 BIND_DEFN(crossXAxis, glm::crossXAxis, gLuaVec3<>)  // @GLMVectorExtensions
@@ -1817,7 +1833,7 @@ GLM_BINDING_QUALIFIER(orthonormalize) {
     BIND_FUNC(LB, glm::orthonormalize, gLuaVec3<>::fast, gLuaVec3<>);
   else if (ttismatrix(o) && mvalue_dims(o) == LUAGLM_MATRIX_3x3)
     BIND_FUNC(LB, glm::orthonormalize, gLuaMat3x3<>::fast);
-  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR3 " or " GLM_STRING_MATRIX "3x3");
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR3 " or " LUAGLM_STRING_MATRIX "3x3");
   GLM_BINDING_END
 }
 
@@ -1856,6 +1872,7 @@ LAYOUT_DEFN(perpendicular, glm::perpendicular, LAYOUT_UNARY_OR_TERNARY, gLuaDir3
 LAYOUT_DEFN(perpendicular2, glm::perpendicular2, LAYOUT_UNARY_OR_TERNARY, gLuaDir3<>)
 LAYOUT_DEFN(perpendicularBasis, glm::perpendicularBasis, LAYOUT_PERPBASIS, gLuaDir3<>)
 BINARY_LAYOUT_DEFN(perpendicularFast, glm::perpendicularFast, LAYOUT_UNARY, gLuaVec3<>::fast, gLuaVec2<>::fast)
+BIND_DEFN(hint, glm::hint, gLuaDir3<>);
 #endif
 
 #if defined(GTX_POLAR_COORDINATES_HPP)
@@ -1953,13 +1970,13 @@ GLM_BINDING_QUALIFIER(rotate) {
           break;
         }
       }
-      return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX "3x3 or " GLM_STRING_MATRIX "4x4");
+      return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_MATRIX "3x3 or " LUAGLM_STRING_MATRIX "4x4");
     }
     default: {
       break;
     }
   }
-  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);
+  return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN " or " LUAGLM_STRING_MATRIX);
   GLM_BINDING_END
 }
 
@@ -1996,13 +2013,13 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
             break;                                                                         \
           }                                                                                \
         }                                                                                  \
-        return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_MATRIX);                     \
+        return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, LUAGLM_STRING_MATRIX);                  \
       }                                                                                    \
       default: {                                                                           \
         break;                                                                             \
       }                                                                                    \
     }                                                                                      \
-    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR3);                            \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR3);                         \
     GLM_BINDING_END                                                                        \
   }
 
@@ -2023,7 +2040,7 @@ BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x
       default:                                                                                                      \
         break;                                                                                                      \
     }                                                                                                               \
-    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_VECTOR);                                                      \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_VECTOR);                                                   \
     GLM_BINDING_END                                                                                                 \
   }
 

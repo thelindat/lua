@@ -18,7 +18,100 @@
 
 /*
 ** {==================================================================
-** LuaGLM C-API
+** grit-lua API
+** ===================================================================
+*/
+
+/* These functions are defined in lua.h of grit-lua */
+
+LUA_API int lua_isvector2 (lua_State *L, int idx);
+LUA_API int lua_isvector3 (lua_State *L, int idx);
+LUA_API int lua_isvector4 (lua_State *L, int idx);
+LUA_API int lua_isquat (lua_State *L, int idx);
+
+LUA_API void lua_checkvector2 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y);
+LUA_API void lua_checkvector3 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z);
+LUA_API void lua_checkvector4 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z, lua_VecF *w);
+LUA_API void lua_checkquat (lua_State *L, int idx, lua_VecF *w, lua_VecF *x, lua_VecF *y, lua_VecF *z);
+
+LUA_API void lua_pushvector2 (lua_State *L, lua_VecF x, lua_VecF y);
+LUA_API void lua_pushvector3 (lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z);
+LUA_API void lua_pushvector4 (lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z, lua_VecF w);
+LUA_API void lua_pushquat (lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua_VecF z);
+
+/* }================================================================== */
+
+/*
+** {==================================================================
+** Extended grit-lua API
+** ===================================================================
+*/
+
+/*
+** vector variants exposed in the library to simplify the internal/external
+** translation between vector-types. (grit-lua compatibility)
+**
+** @ImplicitVec: single component vectors are represented by LUA_TNUMBER
+*/
+#if !defined(LUA_VVECTOR3)
+#define LUA_VVECTOR1 (LUA_TNUMBER | (1 << 4))
+#define LUA_VVECTOR2 (LUA_TVECTOR | (0 << 4))
+#define LUA_VVECTOR3 (LUA_TVECTOR | (1 << 4))
+#define LUA_VVECTOR4 (LUA_TVECTOR | (2 << 4))
+#define LUA_VQUAT (LUA_TVECTOR | (3 << 4))
+#endif
+
+/* Return the length of the vector if it is indeed a vector, zero otherwise. */
+LUA_API int lua_isvector (lua_State *L, int idx);
+LUA_API int lua_tovector (lua_State *L, int idx, lua_Float4 *vector);
+LUA_API void lua_pushvector (lua_State *L, lua_Float4 f4, int variant);
+LUA_API void lua_pushquatf4 (lua_State *L, lua_Float4 f4);
+
+/*
+** Return true if the object at the given index is a matrix. Storing the matrix
+** type in 'type' when not NULL; see LUAGLM_MATRIX_TYPE.
+*/
+LUA_API int lua_ismatrix (lua_State *L, int idx, int *type);
+LUA_API int lua_tomatrix (lua_State *L, int idx, lua_Mat4 *matrix);
+LUA_API void lua_pushmatrix (lua_State *L, const lua_Mat4 *matrix);
+
+/* }================================================================== */
+
+/*
+** {==================================================================
+** Miscellaneous
+** ===================================================================
+*/
+
+/*
+** Jenkins-hash the object at 'idx'. String values are hashed, boolean and
+** numeric values are casted to lua_Integer; otherwise, zero is returned.
+**
+** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
+**  string character is computed then hashed.
+*/
+LUA_API lua_Integer luaglm_tohash (lua_State *L, int idx, int ignore_case);
+
+/* Return the name of the GLM type (number, vector, matrix) at 'idx'. */
+LUA_API const char *luaglm_typename (lua_State *L, int idx);
+
+/*
+** Pushes onto the stack a formatted string of the vector/matrix at 'idx' and
+** returns a pointer to this string.
+*/
+LUA_API const char *luaglm_pushstring (lua_State *L, int idx);
+
+/*
+** Place the contents of the vector or matrix at 'idx' onto the stack, returning
+** the number of elements (i.e., dimensions of vector or columns of matrix).
+*/
+LUA_API int luaglm_unpack (lua_State *L, int idx);
+
+/* }================================================================== */
+
+/*
+** {==================================================================
+** grit-lua library compatibility
 ** ===================================================================
 */
 
@@ -54,107 +147,6 @@ LUA_API int luaglm_mat4x3 (lua_State *L);
 LUA_API int luaglm_mat4x4 (lua_State *L);
 
 LUA_API int luaglm_qua (lua_State *L);
-
-/* Return the name of the GLM type (number, vector, matrix) at 'idx'. */
-LUA_API const char *luaglm_typename (lua_State *L, int idx);
-
-/*
-** Pushes onto the stack a formatted string of the vector/matrix at 'idx' and
-** returns a pointer to this string.
-*/
-LUA_API const char *luaglm_pushstring (lua_State *L, int idx);
-
-/*
-** Place the contents of the vector or matrix at 'idx' onto the stack, returning
-** the number of elements (i.e., dimensions of vector or columns of matrix).
-*/
-LUA_API int luaglm_unpack (lua_State *L, int idx);
-
-/* }================================================================== */
-
-/*
-** {==================================================================
-** @DEPRECATED: grit-lua API
-** ===================================================================
-*/
-
-/* These functions are defined in lua.h of grit-lua */
-
-LUA_API int lua_isvector2 (lua_State *L, int idx);
-LUA_API int lua_isvector3 (lua_State *L, int idx);
-LUA_API int lua_isvector4 (lua_State *L, int idx);
-LUA_API int lua_isquat (lua_State *L, int idx);
-
-LUA_API void lua_checkvector2 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y);
-LUA_API void lua_checkvector3 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z);
-LUA_API void lua_checkvector4 (lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z, lua_VecF *w);
-LUA_API void lua_checkquat (lua_State *L, int idx, lua_VecF *w, lua_VecF *x, lua_VecF *y, lua_VecF *z);
-
-LUA_API void lua_pushvector2 (lua_State *L, lua_VecF x, lua_VecF y);
-LUA_API void lua_pushvector3 (lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z);
-LUA_API void lua_pushvector4 (lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z, lua_VecF w);
-LUA_API void lua_pushquat (lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua_VecF z);
-
-/* }================================================================== */
-
-/*
-** {==================================================================
-** @DEPRECATED: Extended grit-lua API
-** ===================================================================
-*/
-
-/*
-** vector variants exposed in the library to simplify the internal/external
-** translation between vector-types. (grit-lua compatibility)
-**
-** @ImplicitVec: single component vectors are represented by LUA_TNUMBER
-*/
-#if !defined(LUA_VVECTOR3)
-#define LUA_VVECTOR1 (LUA_TNUMBER | (1 << 4))
-#define LUA_VVECTOR2 (LUA_TVECTOR | (0 << 4))
-#define LUA_VVECTOR3 (LUA_TVECTOR | (1 << 4))
-#define LUA_VVECTOR4 (LUA_TVECTOR | (2 << 4))
-#define LUA_VQUAT (LUA_TVECTOR | (3 << 4))
-#endif
-
-/* Return the length of the vector if it is indeed a vector, zero otherwise. */
-LUA_API int lua_isvector (lua_State *L, int idx);
-LUA_API int lua_tovector (lua_State *L, int idx, lua_Float4 *vector);
-LUA_API void lua_pushvector (lua_State *L, lua_Float4 f4, int variant);
-LUA_API void lua_pushquatf4 (lua_State *L, lua_Float4 f4);
-
-/*
-** Return true if the object at the given index is a matrix. Storing its
-** dimension tag in 'dimensions' when not NULL; see LUAGLM_MATRIX_TYPE.
-*/
-LUA_API int lua_ismatrix (lua_State *L, int idx, int *dimensions);
-LUA_API int lua_tomatrix (lua_State *L, int idx, lua_Mat4 *matrix);
-LUA_API void lua_pushmatrix (lua_State *L, const lua_Mat4 *matrix);
-
-/* }================================================================== */
-
-/*
-** {==================================================================
-** Miscellaneous
-** ===================================================================
-*/
-
-/*
-** Jenkins-hash the object at 'idx'. String values are hashed, boolean and
-** numeric values are casted to lua_Integer; otherwise, zero is returned.
-**
-** ignore_case: A string value is hashed as-is. Otherwise, the lowercase of each
-**  string character is computed then hashed.
-*/
-LUA_API lua_Integer lua_tohash (lua_State *L, int idx, int ignore_case);
-
-/* }================================================================== */
-
-/*
-** {==================================================================
-** @DEPRECATED: grit-lua base library compatibility
-** ===================================================================
-*/
 
 /*
 ** Returns the dot product of x and y, i.e., result = x * y.

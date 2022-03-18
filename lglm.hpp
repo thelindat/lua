@@ -48,7 +48,7 @@
   #define GLM_CONFIG_DEFAULTED_DEFAULT_CTOR GLM_CONFIG_DEFAULTED_FUNCTIONS
 #endif
 
-/* @COMPAT: fix GLM_NEVER_INLINE on COMPILER_VC */
+/* @COMPAT: GLM_NEVER_INLINE on COMPILER_VC */
 #if defined(GLM_FORCE_INLINE) && (GLM_COMPILER & GLM_COMPILER_VC)
   #undef GLM_NEVER_INLINE
   #define GLM_NEVER_INLINE __declspec(noinline)
@@ -102,16 +102,16 @@ typedef LUAGLM_INT_TYPE glm_Integer;
 #endif
 
 /* lib:LuaGLM requirements */
-#define GLM_STRING_INTEGER "integer"
-#define GLM_STRING_NUMBER "number"
-#define GLM_STRING_VECTOR "vector"
-#define GLM_STRING_VECTOR1 "vector1"
-#define GLM_STRING_VECTOR2 "vector2"
-#define GLM_STRING_VECTOR3 "vector3"
-#define GLM_STRING_VECTOR4 "vector4"
-#define GLM_STRING_QUATERN "quat"
-#define GLM_STRING_MATRIX "matrix"
-#define GLM_STRING_SYMMATRIX "symmetric " GLM_STRING_MATRIX
+#define LUAGLM_STRING_INTEGER "integer"
+#define LUAGLM_STRING_NUMBER "number"
+#define LUAGLM_STRING_VECTOR "vector"
+#define LUAGLM_STRING_VECTOR1 "vector1"
+#define LUAGLM_STRING_VECTOR2 "vector2"
+#define LUAGLM_STRING_VECTOR3 "vector3"
+#define LUAGLM_STRING_VECTOR4 "vector4"
+#define LUAGLM_STRING_QUATERN "quat"
+#define LUAGLM_STRING_MATRIX "matrix"
+#define LUAGLM_STRING_SYMMATRIX "symmetric " LUAGLM_STRING_MATRIX
 
 /* }================================================================== */
 
@@ -122,19 +122,19 @@ typedef LUAGLM_INT_TYPE glm_Integer;
 */
 
 /*
-** Return true if the element at the given index is a vector, setting "size" to
-** the dimensions of the vector.
+** Return true if the element at the given index is a vector; setting "length"
+** to length the vector.
 */
-LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &size);
+LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &length);
 
 /* Return true if the element at the given index is a quaternion. */
 LUAGLM_API bool glm_isquat(lua_State *L, int idx);
 
 /*
-** Return true if the element at the given index is a matrix, setting
-** "dimensions" to the dimensions tag of the matrix; see LUAGLM_MATRIX_TYPE.
+** Return true if the element at the given index is a matrix; setting
+** "type" to the type of matrix; see LUAGLM_MATRIX_TYPE.
 */
-LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &dimensions);
+LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &type);
 
 /* Push a vector/quaternion onto the stack. */
 LUAGLM_API int glm_pushvec1(lua_State *L, const glm::vec<1, glm_Float, LUAGLM_Q> &v);
@@ -148,7 +148,6 @@ LUAGLM_API int glm_pushquat(lua_State *L, const glm::qua<glm_Float, LUAGLM_Q> &q
 ** permissible, i.e., the dimensions of element is greater-than-or-equal to the
 ** dimensions of the conversion.
 */
-
 LUAGLM_API glm::vec<1, glm_Float, LUAGLM_Q> glm_tovec1(lua_State *L, int idx);
 LUAGLM_API glm::vec<2, glm_Float, LUAGLM_Q> glm_tovec2(lua_State *L, int idx);
 LUAGLM_API glm::vec<3, glm_Float, LUAGLM_Q> glm_tovec3(lua_State *L, int idx);
@@ -171,7 +170,6 @@ LUAGLM_API int glm_pushmat4x4(lua_State *L, const glm::mat<4, 4, glm_Float, LUAG
 ** the number of columns to the element is greater-than-or-equal to the
 ** dimensions of the conversion.
 */
-
 LUAGLM_API glm::mat<2, 2, glm_Float, LUAGLM_Q> glm_tomat2x2(lua_State *L, int idx);
 LUAGLM_API glm::mat<2, 3, glm_Float, LUAGLM_Q> glm_tomat2x3(lua_State *L, int idx);
 LUAGLM_API glm::mat<2, 4, glm_Float, LUAGLM_Q> glm_tomat2x4(lua_State *L, int idx);
@@ -182,22 +180,14 @@ LUAGLM_API glm::mat<4, 2, glm_Float, LUAGLM_Q> glm_tomat4x2(lua_State *L, int id
 LUAGLM_API glm::mat<4, 3, glm_Float, LUAGLM_Q> glm_tomat4x3(lua_State *L, int idx);
 LUAGLM_API glm::mat<4, 4, glm_Float, LUAGLM_Q> glm_tomat4x4(lua_State *L, int idx);
 
-/*
-** Return the dimensions of the vector at the given index; zero on failure. This
-** function is simply syntactic sugar for glm_isvector;
-*/
-static LUA_INLINE glm::length_t glm_vector_length(lua_State *L, int idx) {
-  glm::length_t size = 0;
-  return glm_isvector(L, idx, size) ? size : 0;
-}
-
 /* }================================================================== */
 
 /*
 ** {==================================================================
-**  GLM Object & Internal Definitions
+**  C/CPP boundary-interfacing structures
 ** ===================================================================
 */
+#if defined(LUA_GRIT_API)
 
 /// <summary>
 /// Internal vector definition
@@ -218,21 +208,20 @@ union glmVector {
 #else
   glmVector() GLM_DEFAULT_CTOR;
 #endif
-  glmVector(const glm::vec<1, glm_Float, LUAGLM_Q> &_v) : v1(_v) { }
-  glmVector(const glm::vec<2, glm_Float, LUAGLM_Q> &_v) : v2(_v) { }
-  glmVector(const glm::vec<3, glm_Float, LUAGLM_Q> &_v) : v3(_v) { }
+  glmVector(const glm::vec<1, glm_Float, LUAGLM_Q> &_v) : v4(_v, 0, 0, 0) { }
+  glmVector(const glm::vec<2, glm_Float, LUAGLM_Q> &_v) : v4(_v, 0, 0) { }
+  glmVector(const glm::vec<3, glm_Float, LUAGLM_Q> &_v) : v4(_v, 0) { }
   glmVector(const glm::vec<4, glm_Float, LUAGLM_Q> &_v) : v4(_v) { }
   glmVector(const glm::qua<glm_Float, LUAGLM_Q> &_q) : q(_q) { }
+  glmVector(const lua_Float4 &_f4) : v4(_f4.raw[0], _f4.raw[1], _f4.raw[2], _f4.raw[3]) { }
+
+  // Scalar Constructors
+
+  glmVector(glm_Float s) : v4(s) { }
   glmVector(glm_Float x, glm_Float y, glm_Float z, glm_Float w) : v4(x, y, z, w) { }
   template <typename T> glmVector(T x, T y, T z, T w) : v4(x, y, z, w) { }
 
   // Realignment Constructors
-
-  template<glm::qualifier P> glmVector(const glm::vec<1, glm_Float, P> &_v) : v1(_v) { }
-  template<glm::qualifier P> glmVector(const glm::vec<2, glm_Float, P> &_v) : v2(_v) { }
-  template<glm::qualifier P> glmVector(const glm::vec<3, glm_Float, P> &_v) : v3(_v) { }
-  template<glm::qualifier P> glmVector(const glm::vec<4, glm_Float, P> &_v) : v4(_v) { }
-  template<glm::qualifier P> glmVector(const glm::qua<glm_Float, P> &_q) : q(_q) { }
 
   template<typename T, glm::qualifier P> glmVector(const glm::vec<1, T, P> &_v) : v1(_v) { }
   template<typename T, glm::qualifier P> glmVector(const glm::vec<2, T, P> &_v) : v2(_v) { }
@@ -253,20 +242,6 @@ union glmVector {
   template<typename T, glm::qualifier P> inline void operator=(const glm::vec<3, T, P> &_v) { v3 = glm::vec<3, glm_Float, LUAGLM_Q>(_v); }
   template<typename T, glm::qualifier P> inline void operator=(const glm::vec<4, T, P> &_v) { v4 = glm::vec<4, glm_Float, LUAGLM_Q>(_v); }
   template<typename T, glm::qualifier P> inline void operator=(const glm::qua<T, P> &_q) { q = glm::qua<glm_Float, LUAGLM_Q>(_q); }
-
-  // Reassignment; glm::vec = glmVector.
-
-  inline int Get(glm::vec<1, glm_Float, LUAGLM_Q> &_v) const { _v = v1; return 1; }
-  inline int Get(glm::vec<2, glm_Float, LUAGLM_Q> &_v) const { _v = v2; return 1; }
-  inline int Get(glm::vec<3, glm_Float, LUAGLM_Q> &_v) const { _v = v3; return 1; }
-  inline int Get(glm::vec<4, glm_Float, LUAGLM_Q> &_v) const { _v = v4; return 1; }
-  inline int Get(glm::qua<glm_Float, LUAGLM_Q> &_q) const { _q = q; return 1; }
-
-  template<typename T, glm::qualifier P> inline int Get(glm::vec<1, T, P> &_v) const { _v = glm::vec<1, T, P>(v1); return 1; }
-  template<typename T, glm::qualifier P> inline int Get(glm::vec<2, T, P> &_v) const { _v = glm::vec<2, T, P>(v2); return 1; }
-  template<typename T, glm::qualifier P> inline int Get(glm::vec<3, T, P> &_v) const { _v = glm::vec<3, T, P>(v3); return 1; }
-  template<typename T, glm::qualifier P> inline int Get(glm::vec<4, T, P> &_v) const { _v = glm::vec<4, T, P>(v4); return 1; }
-  template<typename T, glm::qualifier P> inline int Get(glm::qua<T, P> &_q) const { _q = glm::qua<T, P>(q); return 1; }
 };
 
 /// <summary>
@@ -343,8 +318,8 @@ LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
 };
 
 /*
-** Pushes a vector with dimensions 'd' represented by 'v' onto the stack.
-** Returning one on success (i.e., valid dimension argument), zero otherwise.
+** Pushes a vector 'v' with dimensions 'd' onto the stack. Returning one on
+** success (i.e., valid dimension argument), zero otherwise.
 **
 ** @NOTE: If Lua is compiled with LUA_USE_APICHECK, a runtime error will be
 **  thrown instead of returning zero.
@@ -352,31 +327,13 @@ LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
 LUAGLM_API int glm_pushvec(lua_State *L, const glmVector &v, glm::length_t d);
 
 /*
-** Pushes a quaternion represented by 'q' onto the stack. Returning one on
-** success, zero otherwise.
-**
-** @NOTE: This function is identical to glm_pushquat, but without the (implicit)
-**  conversion.
-*/
-LUAGLM_API int glm_pushvec_quat(lua_State *L, const glmVector &q);
-
-/*
 ** Creates a new Matrix object, represented by 'm', and places it onto the stack.
 ** Returning one on success, zero otherwise (invalid glmMatrix dimensions).
 **
-** @NOTE: If Lua is compiled with LUA_USE_APICHECK, a runtime error with be
-**  thrown instead of returning zero.
+** @NOTE: If Lua is compiled with LUA_USE_APICHECK, a runtime error will be
+**  thrown if an invalid matrix (packed-)dimension is supplied.
 */
 LUAGLM_API int glm_pushmat(lua_State *L, const glmMatrix &m);
-
-/* }================================================================== */
-
-/*
-** {==================================================================
-**  C/CPP boundary-interfacing structures
-** ===================================================================
-*/
-#if defined(LUA_GRIT_API)
 
 /// <summary>
 /// A union for aliasing the Lua vector definition (lua_Float4) with the GLM

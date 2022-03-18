@@ -919,9 +919,9 @@ LUAMOD_API int luaopen_math (lua_State *L) {
   #if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
     FLT_EPSILON
   #elif LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE
-    DBL_EPSILON
-  #else
     LDBL_EPSILON
+  #else
+    DBL_EPSILON
   #endif
   );
   lua_setfield(L, -2, "eps");

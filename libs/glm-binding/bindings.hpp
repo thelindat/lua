@@ -245,9 +245,8 @@ extern LUA_API_LINKAGE {
 #define _isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
 #endif
 
-/* TValue -> glmVector */
-#if !defined(glm_vvalue)
 /* object accessors */
+#if !defined(glm_vvalue)
 #define glm_vvalue(o) glm_constvec_boundary(vvalue_ref(o))
 #define glm_setvvalue2s(s, x, o)        \
   LUA_MLM_BEGIN                         \
@@ -511,7 +510,7 @@ struct gLuaBase {
 #if defined(LUAGLM_TYPE_COERCION)
         return static_cast<T>(luaL_checkinteger(L_, idx_));
 #else
-        gLuaBase::typeerror(L_, idx_, GLM_STRING_INTEGER);
+        gLuaBase::typeerror(L_, idx_, LUAGLM_STRING_INTEGER);
         return T(0);
 #endif
       }
@@ -537,7 +536,7 @@ struct gLuaBase {
 #if defined(LUAGLM_TYPE_COERCION)
         return static_cast<T>(luaL_checknumber(L_, idx_));
 #else
-        gLuaBase::typeerror(L_, idx_, GLM_STRING_NUMBER);
+        gLuaBase::typeerror(L_, idx_, LUAGLM_STRING_NUMBER);
         return T(0);
 #endif
       }
@@ -749,8 +748,8 @@ template<typename T, bool FastPath = false>
 struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   LUA_BIND_DECL LUA_CONSTEXPR_STATEMENT const char *Label() {
     LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) return "bool";
-    LUA_IF_CONSTEXPR(std::is_integral<T>::value) return GLM_STRING_INTEGER;
-    LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return GLM_STRING_NUMBER;
+    LUA_IF_CONSTEXPR(std::is_integral<T>::value) return LUAGLM_STRING_INTEGER;
+    LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return LUAGLM_STRING_NUMBER;
     return "Unknown_Type";
   }
 
@@ -918,7 +917,7 @@ struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const
 /// </summary>
 template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::vec<1, T, Q>, FastPath> : gLuaAbstractVector<1, T, Q> {
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return GLM_STRING_VECTOR1; }
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return LUAGLM_STRING_VECTOR1; }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
     return gLuaTrait<T>::Is(L, idx);
@@ -938,7 +937,7 @@ struct gLuaTrait<glm::vec<1, T, Q>, FastPath> : gLuaAbstractVector<1, T, Q> {
 /// </summary>
 template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::vec<2, T, Q>, FastPath> : gLuaAbstractVector<2, T, Q> {
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return GLM_STRING_VECTOR2; }
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return LUAGLM_STRING_VECTOR2; }
 
   LUA_BIND_QUALIFIER glm::vec<2, T, Q> Next(lua_State *L, int &idx) {
     const TValue *o = glm_i2v(L, idx++);
@@ -956,7 +955,7 @@ struct gLuaTrait<glm::vec<2, T, Q>, FastPath> : gLuaAbstractVector<2, T, Q> {
 /// </summary>
 template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::vec<3, T, Q>, FastPath> : gLuaAbstractVector<3, T, Q> {
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return GLM_STRING_VECTOR3; }
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return LUAGLM_STRING_VECTOR3; }
 
   LUA_BIND_QUALIFIER glm::vec<3, T, Q> Next(lua_State *L, int &idx) {
     const TValue *o = glm_i2v(L, idx++);
@@ -974,7 +973,7 @@ struct gLuaTrait<glm::vec<3, T, Q>, FastPath> : gLuaAbstractVector<3, T, Q> {
 /// </summary>
 template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::vec<4, T, Q>, FastPath> : gLuaAbstractVector<4, T, Q> {
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return GLM_STRING_VECTOR4; }
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return LUAGLM_STRING_VECTOR4; }
 
   LUA_BIND_QUALIFIER glm::vec<4, T, Q> Next(lua_State *L, int &idx) {
     const TValue *o = glm_i2v(L, idx++);
@@ -994,7 +993,7 @@ template<typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::qua<T, Q>, FastPath> : gLuaAbstractTrait<glm::qua<T, Q>> {
   template<typename Type = T>
   using as_type = gLuaTrait<glm::qua<Type, Q>>;  // @CastBinding
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return GLM_STRING_QUATERN; }
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return LUAGLM_STRING_QUATERN; }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
     const TValue *o = glm_i2v(L, idx);
@@ -1059,16 +1058,16 @@ struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C,
 
   LUA_BIND_DECL const char *Label() {
     static const LUA_CONSTEXPR glm::length_t D = LUAGLM_MATRIX_TYPE(C, R);
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x2) return GLM_STRING_MATRIX "2x2";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x3) return GLM_STRING_MATRIX "2x3";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x4) return GLM_STRING_MATRIX "2x4";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x2) return GLM_STRING_MATRIX "3x2";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x3) return GLM_STRING_MATRIX "3x3";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x4) return GLM_STRING_MATRIX "3x4";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x2) return GLM_STRING_MATRIX "4x2";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x3) return GLM_STRING_MATRIX "4x3";
-    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x4) return GLM_STRING_MATRIX "4x4";
-    return GLM_STRING_MATRIX;
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x2) return LUAGLM_STRING_MATRIX "2x2";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x3) return LUAGLM_STRING_MATRIX "2x3";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_2x4) return LUAGLM_STRING_MATRIX "2x4";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x2) return LUAGLM_STRING_MATRIX "3x2";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x3) return LUAGLM_STRING_MATRIX "3x3";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_3x4) return LUAGLM_STRING_MATRIX "3x4";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x2) return LUAGLM_STRING_MATRIX "4x2";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x3) return LUAGLM_STRING_MATRIX "4x3";
+    LUA_IF_CONSTEXPR(D == LUAGLM_MATRIX_4x4) return LUAGLM_STRING_MATRIX "4x4";
+    return LUAGLM_STRING_MATRIX;
   }
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
@@ -1231,6 +1230,7 @@ struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
 using gLuaFloat = gLuaTrait<glm_Float>;
 using gLuaNumber = gLuaTrait<lua_Number>;
 using gLuaInteger = gLuaTrait<lua_Integer>;
+using gLuaLen_t = gLuaTrait<glm::length_t>;
 
 /// <summary>
 /// gLuaNumberCompileTime; See @LUAGLM_NUMBER_ARGS.
@@ -1262,15 +1262,15 @@ template<typename T = glm_Float> using gLuaMat4x4 = gLuaTrait<glm::mat<4, 4, T, 
 /// </summary>
 #if defined(LUAGLM_DRIFT)
 template<class T, bool FastPath = false>
-struct gLuaDir : gLuaTrait<T, FastPath> {
-  using safe = gLuaDir<T, false>;  // @SafeBinding
-  using fast = gLuaDir<T, true>;  // @UnsafeBinding
+struct gNormalizeFilter : gLuaTrait<T, FastPath> {
+  using safe = gNormalizeFilter<T, false>;  // @SafeBinding
+  using fast = gNormalizeFilter<T, true>;  // @UnsafeBinding
   LUA_BIND_QUALIFIER T Next(lua_State *L_, int &idx) {
     return glm::normalize(gLuaTrait<T, FastPath>::Next(L_, idx));
   }
 };
-template<typename T = glm_Float> using gLuaDir2 = gLuaDir<glm::vec<2, T, LUAGLM_BINDING_QUAL>>;
-template<typename T = glm_Float> using gLuaDir3 = gLuaDir<glm::vec<3, T, LUAGLM_BINDING_QUAL>>;
+template<typename T = glm_Float> using gLuaDir2 = gNormalizeFilter<glm::vec<2, T, LUAGLM_BINDING_QUAL>>;
+template<typename T = glm_Float> using gLuaDir3 = gNormalizeFilter<glm::vec<3, T, LUAGLM_BINDING_QUAL>>;
 #else
 template<typename T = glm_Float> using gLuaDir2 = gLuaTrait<glm::vec<2, T, LUAGLM_BINDING_QUAL>>;
 template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGLM_BINDING_QUAL>>;
@@ -1280,7 +1280,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 
 /*
 ** {==================================================================
-** Traits Functions.
+** Trait Bindings.
 ** ===================================================================
 */
 
@@ -1458,12 +1458,11 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 /*
 ** Argument Layout: In most cases the first argument to a GLM function is
 ** sufficient in template argument deduction. Moreover, that argument, or type
-** trait, is usually repeated. For example, consider a binary operation, e.g.,
-** glm::dot, in which the vector/quaternion trait/type is repeated once.
+** trait, is usually repeated.
 **
 ** LAYOUT_*(LB, F, Traits, ...) defined by:
 **    LB - the Lua stack iterator.
-**    F - the glm::function being wrapped.
+**    F - the function being wrapped.
 **    Tr - the first/deducing argument trait.
 **    ... - Any trailing traits (types) consistent across all templates of the
 **          same glm::function.
@@ -1562,7 +1561,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 */
 
 /* Invalid glm structure configurations */
-#define GLM_INVALID_MAT_DIMENSIONS ("invalid " GLM_STRING_MATRIX " dimensions")
+#define GLM_INVALID_MAT_DIMENSIONS ("invalid " LUAGLM_STRING_MATRIX " dimensions")
 #define LUAGLM_ARG_ERROR(L, I, S) (gLuaBase::argerror((L), (I), (S)), 0)
 #define LUAGLM_TYPE_ERROR(L, I, S) (gLuaBase::typeerror((L), (I), (S)), 0)
 #define LUAGLM_ERROR(L, S) (gLuaBase::error((L), (S)), 0)
@@ -1588,7 +1587,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     default:                                                                              \
       break;                                                                              \
   }                                                                                       \
-  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR); \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, LUAGLM_STRING_NUMBER " or " LUAGLM_STRING_VECTOR); \
   LUA_MLM_END
 
 /* Vector definition where the lua_Number operation takes priority */
@@ -1614,7 +1613,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     default:                                                                               \
       break;                                                                               \
   }                                                                                        \
-  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN); \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN); \
   LUA_MLM_END
 
 /* A GLM function that defined over any NxM matrix */
@@ -1673,7 +1672,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     default:                                                                                \
       break;                                                                                \
   }                                                                                         \
-  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_QUATERN " or " GLM_STRING_MATRIX);  \
+  return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, LUAGLM_STRING_QUATERN " or " LUAGLM_STRING_MATRIX); \
   LUA_MLM_END
 
 /* }================================================================== */
@@ -1719,7 +1718,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
   #define GLM_BINDING_END
 #endif
 
-/* GLM function that corresponds to one unique set of function parameters */
+/* GLM function that with one (unique) set of function parameters */
 #define BIND_DEFN(Name, F, ...)               \
   GLM_BINDING_QUALIFIER(Name) {               \
     GLM_BINDING_BEGIN                         \
@@ -1727,7 +1726,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     GLM_BINDING_END                           \
   }
 
-/* A GLM function where the first argument (Tr) is sufficient in template argument deduction; */
+/* A GLM function where the first argument (Tr) is sufficient in template argument deduction */
 #define LAYOUT_DEFN(Name, F, ArgLayout, Tr, ...) \
   GLM_BINDING_QUALIFIER(Name) {                  \
     GLM_BINDING_BEGIN                            \
@@ -1794,7 +1793,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     const TValue *o = LB.i2v();                                      \
     if (l_likely(ttismatrix(o)))                                     \
       PARSE_MATRIX(LB, mvalue_dims(o), F, ArgLayout, ##__VA_ARGS__); \
-    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, GLM_STRING_MATRIX);       \
+    return LUAGLM_TYPE_ERROR(LB.L, LB.idx, LUAGLM_STRING_MATRIX);    \
     GLM_BINDING_END                                                  \
   }
 
@@ -1805,7 +1804,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
     const TValue *o = LB.i2v();                                                \
     if (l_likely(ttismatrix(o)))                                               \
       PARSE_SYMMETRIC_MATRIX(LB, mvalue_dims(o), F, ArgLayout, ##__VA_ARGS__); \
-    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, GLM_STRING_SYMMATRIX);          \
+    return LUAGLM_TYPE_ERROR((LB).L, (LB).idx, LUAGLM_STRING_SYMMATRIX);       \
     GLM_BINDING_END                                                            \
   }
 

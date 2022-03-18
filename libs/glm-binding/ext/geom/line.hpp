@@ -46,19 +46,20 @@ namespace glm {
 
     Line(const vec<L, T, Q> &position, const vec<L, T, Q> &direction)
       : pos(position), dir(normalize(direction)) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
+      GLM_GEOM_ASSERT(isNormalized(dir, epsilon<T>()));
     }
 
     Line(const Line<L, T, Q> &line)
       : pos(line.pos), dir(line.dir) {
-      GLM_GEOM_ASSERT(glm::isNormalized(dir, epsilon<T>()));
+      GLM_GEOM_ASSERT(isNormalized(dir, epsilon<T>()));
+    }
+
+    Line<L, T, Q> &operator=(const Line<L, T, Q> &line) {
+      pos = line.pos;
+      dir = line.dir;
+      return *this;
     }
   };
-
-  // template<length_t L, typename T, qualifier Q>
-  // GLM_GEOM_QUALIFIER Ray<L, T, Q> toRay(const Line<L, T, Q> &line) {
-  //   return Ray<L, T, Q>(line.pos, line.dir;
-  // }
 
   template<length_t L, typename T, qualifier Q>
   static Line<L, T, Q> operator-(const Line<L, T, Q> &line) {
@@ -425,12 +426,12 @@ namespace glm {
     }
 
     const T d33 = dot(v3, v3);
-    if (!glm::detail::exactly_zero(d33)) {
+    if (!detail::exactly_zero(d33)) {
       const vec<L, T, Q> v4 = v0 - v2;
       const T d43 = dot(v4, v3);
       const T d31 = dot(v3, v1);
       const T denom = dot(v1, v1) * d33 - d31 * d31;
-      d1 = !glm::detail::exactly_zero(denom) ? (d43 * d31 - dot(v4, v1) * d33) / denom : T(0);
+      d1 = !detail::exactly_zero(denom) ? (d43 * d31 - dot(v4, v1) * d33) / denom : T(0);
       d2 = (d43 + d1 * d31) / d33;
       return true;
     }

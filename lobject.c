@@ -376,8 +376,8 @@ static int tostringbuff (TValue *obj, char *buff) {
 */
 void luaO_tostring (lua_State *L, TValue *obj) {
 #if defined(LUA_GRIT_COMPAT)
-  char buff[GLM_STRING_BUFFER];
-  int len = ttisvector(obj) ? glmVec_tostr(obj, buff, GLM_STRING_BUFFER) : tostringbuff(obj, buff);
+  char buff[LUAGLM_MAX2STR];
+  int len = ttisvector(obj) ? glmVec_tostr(obj, buff, LUAGLM_MAX2STR) : tostringbuff(obj, buff);
 #else
   char buff[MAXNUMBER2STR];
   int len = tostringbuff(obj, buff);

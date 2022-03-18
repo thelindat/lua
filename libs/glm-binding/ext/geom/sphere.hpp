@@ -88,7 +88,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   static bool operator==(const Sphere<L, T, Q> &s1, const Sphere<L, T, Q> &s2) {
-    return s1.pos == s2.pos && glm::detail::equal_strict(s1.r, s2.r);
+    return s1.pos == s2.pos && detail::equal_strict(s1.r, s2.r);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -411,7 +411,7 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER int intersects(const Sphere<L, T, Q> &sphere, const Ray<L, T, Q> &ray, T &d1, T &d2) {
-    int numIntersections = intersectLine(toLine(ray), sphere, d1, d2);
+    int numIntersections = intersectLine(ray, sphere, d1, d2);
     if (d1 < T(0) && numIntersections == 2)  // behind the ray.
       d1 = d2;
     return (d1 >= T(0)) ? numIntersections : 0;  // otherwise, negative direction of the ray.
@@ -457,19 +457,20 @@ namespace glm {
   /// Fetch each corner point of the given object: Then enclose points by
   /// furthest distance from sphere to smallest to ensure an optimal enclosure.
   /// </summary>
-  template<length_t L, typename T, qualifier Q, typename Object, int NumCorners>
-  static Sphere<L, T, Q> _enclose(const Sphere<L, T, Q> &sphere, const Object &obj) {
+  template<length_t L, typename T, qualifier Q, typename Object, length_t NumCorners>
+  static Sphere<L, T, Q> encloseObject(const Sphere<L, T, Q> &sphere, const Object &obj) {
     struct Tuple {
-      int idx;
+      length_t idx;
       vec<L, T, Q> point;
       T distance;
       bool operator<(const Tuple &rhs) const {
-        return glm::detail::equal_strict(distance, rhs.distance) ? idx < rhs.idx : distance < rhs.distance;
+        return detail::equal_strict(distance, rhs.distance) ? idx < rhs.idx : distance < rhs.distance;
       }
     };
 
-    Tuple corners[NumCorners];
-    for (int i = 0; i < NumCorners; ++i) {
+    GLM_STATIC_ASSERT(NumCorners > 0, "NumCorners");
+    Tuple corners[static_cast<size_t>(NumCorners)];
+    for (length_t i = 0; i < NumCorners; ++i) {
       const vec<L, T, Q> point = cornerPoint(obj, i);
       corners[i] = { i, point, distance2(sphere.pos, point) };
     }
@@ -485,8 +486,8 @@ namespace glm {
 #endif
 
     Sphere<L, T, Q> result(sphere);
-    for (int i = NumCorners - 1; i >= 0; --i)
-      result.enclose(corners[i].point);
+    for (length_t i = NumCorners; i > 0; --i)
+      result.enclose(corners[i - 1].point);
     return result;
   }
 
@@ -513,12 +514,12 @@ namespace glm {
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER Sphere<L, T, Q> enclose(const Sphere<L, T, Q> &sphere, const AABB<L, T, Q> &aabb) {
-    return _enclose<L, T, Q, AABB<L, T, Q>, 8>(sphere, aabb);
+    return encloseObject<L, T, Q, AABB<L, T, Q>, 8>(sphere, aabb);
   }
 
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER Sphere<L, T, Q> enclose(const Sphere<L, T, Q> &sphere, const Triangle<L, T, Q> &triangle) {
-    return _enclose<L, T, Q, Triangle<L, T, Q>, 3>(sphere, triangle);
+    return encloseObject<L, T, Q, Triangle<L, T, Q>, 3>(sphere, triangle);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -763,34 +764,20 @@ namespace glm {
   /// Therefore, at least one of the points is considered redundant (or
   /// unnecessary).
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d, const vec<3, T, Q> &e, int &redundantPoint, const T eps = epsilon<T>()) {
+  GLM_GEOM_QUALIFIER_NOINLINE Sphere<3, T, Q> optimalEnclosingSphere(const vec<3, T, Q> &a, const vec<3, T, Q> &b, const vec<3, T, Q> &c, const vec<3, T, Q> &d, const vec<3, T, Q> &e, size_t &redundantPoint, const T eps = epsilon<T>()) {
     Sphere<3, T, Q> s = optimalEnclosingSphere(b, c, d, e, eps);
-    if (contains(s, a, eps)) {
-      redundantPoint = 0;
-      return s;
+    if (contains(s, a, eps))
+      return (redundantPoint = 0, s);
+    else if (contains((s = optimalEnclosingSphere(a, c, d, e, eps)), b, eps))
+      return (redundantPoint = 1, s);
+    else if (contains((s = optimalEnclosingSphere(a, b, d, e, eps)), c, eps))
+      return (redundantPoint = 2, s);
+    else if (contains((s = optimalEnclosingSphere(a, b, c, e, eps)), d, eps))
+      return (redundantPoint = 3, s);
+    else {
+      s = optimalEnclosingSphere(a, b, c, d, eps);
+      return (redundantPoint = 4, s);
     }
-
-    s = optimalEnclosingSphere(a, c, d, e, eps);
-    if (contains(s, b, eps)) {
-      redundantPoint = 1;
-      return s;
-    }
-
-    s = optimalEnclosingSphere(a, b, d, e, eps);
-    if (contains(s, c, eps)) {
-      redundantPoint = 2;
-      return s;
-    }
-
-    s = optimalEnclosingSphere(a, b, c, e, eps);
-    if (contains(s, d, eps)) {
-      redundantPoint = 3;
-      return s;
-    }
-
-    s = optimalEnclosingSphere(a, b, c, d, eps);
-    redundantPoint = 4;
-    return s;
   }
 
   template<typename T, qualifier Q, class Vector>
@@ -819,7 +806,7 @@ namespace glm {
       // If the next point does not fit inside the currently computed minimal
       // sphere, compute a new minimal sphere that also contains pts[i].
       if (distance2(pts[i], s.pos) > rSq) {
-        int redundant = 0;
+        size_t redundant = 0;
         s = optimalEnclosingSphere(pts[sp[0]], pts[sp[1]], pts[sp[2]], pts[sp[3]], pts[i], redundant, eps);
         rSq = s.r * s.r + eps;
 

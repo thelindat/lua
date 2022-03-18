@@ -214,8 +214,8 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType wrapAngle2(genType value) {
     if (value >= genType(0))
-      return fmod(value + glm::pi<genType>(), glm::two_pi<genType>()) - glm::pi<genType>();
-    return fmod(value - glm::pi<genType>(), glm::two_pi<genType>()) + glm::pi<genType>();
+      return fmod(value + pi<genType>(), two_pi<genType>()) - pi<genType>();
+    return fmod(value - pi<genType>(), two_pi<genType>()) + pi<genType>();
   }
 
   /// <summary>
@@ -274,7 +274,7 @@ namespace glm {
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType snap(const genType value, const genType step) {
-    if (!glm::detail::exactly_zero(step))
+    if (!detail::exactly_zero(step))
       return floor((value / step) + genType(0.5)) * step;
     return value;
   }
@@ -300,7 +300,7 @@ namespace glm {
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType lerpinverse(const genType x, const genType y, const genType value) {
-    return equal(x, y, glm::epsilon<genType>()) ? genType(0) : (value - x) / (y - x);
+    return equal(x, y, epsilon<genType>()) ? genType(0) : (value - x) / (y - x);
   }
 
   /// <summary>
@@ -309,6 +309,37 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType nlerp(const genType x, const genType y, const genType t) {
     return lerp(x, y, t);
+  }
+
+  /// <summary>
+  /// Expands a 10-bit integer into 30 bits by inserting 2 zeros after each bit.
+  /// See https://developer.nvidia.com/blog/thinking-parallel-part-iii-tree-construction-gpu/
+  /// </summary>
+  GLM_FUNC_QUALIFIER unsigned int expandBits(unsigned int v) {
+    v = (v * 0x00010001u) & 0xFF0000FFu;
+    v = (v * 0x00000101u) & 0x0F00F00Fu;
+    v = (v * 0x00000011u) & 0xC30C30C3u;
+    v = (v * 0x00000005u) & 0x49249249u;
+    return v;
+  }
+
+  /// <summary>
+  /// Calculates a 30-bit Morton code for the given 3D point located within the
+  /// unit cube [0,1].
+  /// </summary>
+  GLM_FUNC_QUALIFIER unsigned int morton3D(float x, float y, float z) {
+    x = min(max(x * 1024.0f, 0.0f), 1023.0f);
+    y = min(max(y * 1024.0f, 0.0f), 1023.0f);
+    z = min(max(z * 1024.0f, 0.0f), 1023.0f);
+    unsigned int xx = expandBits(static_cast<unsigned int>(x));
+    unsigned int yy = expandBits(static_cast<unsigned int>(y));
+    unsigned int zz = expandBits(static_cast<unsigned int>(z));
+    return xx * 4 + yy * 2 + zz;
+  }
+
+  template<qualifier Q>
+  GLM_FUNC_QUALIFIER unsigned int morton3D(const vec<3, float, Q> &x) {
+    return morton3D(x.x, x.y, x.z);
   }
 
   /* API Completeness */

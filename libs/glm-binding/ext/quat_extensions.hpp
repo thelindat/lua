@@ -353,7 +353,7 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> fromBasis(const vec<3, T, Q> &basisX, const vec<3, T, Q> &basisY, const vec<3, T, Q> &basisZ) {
     T trace(0);
-    qua<T, Q> result = glm::identity<qua<T, Q>>();
+    qua<T, Q> result = identity<qua<T, Q>>();
     if (basisZ.z < T(0)) {
       if (basisX.x > basisY.y) {
         trace = T(1.0) + basisX.x - basisY.y - basisZ.z;
@@ -418,6 +418,27 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> shortest_equivalent(const qua<T, Q> &q) {
     return (q.w < T(0.0)) ? -q : q;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> twist(const qua<T, Q> &q, const vec<3, T, Q> &ref) {
+    const vec<3, T, Q> xyz = dot(vec<3, T, Q>(q.x, q.y, q.z), ref) * ref;
+    const qua<T, Q> twist(q.w, xyz);
+    const T twist_len = length2(twist);
+    return (twist_len != T(0)) ? (twist / sqrt(twist_len)) : identity<qua<T, Q>>();
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER void swingtwist(const qua<T, Q> &q, qua<T, Q> &outSwing, qua<T, Q> &outTwist) {
+    const T s = sqrt(q.w * q.w + q.x * q.x);
+    if (s != T(0)) {
+      outTwist = qua<T, Q>(q.w / s, q.x / s, T(0), T(0));
+      outSwing = qua<T, Q>(s, T(0), (q.w * q.y - q.x * q.z) / s, (q.w * q.z + q.x * q.y) / s);
+    }
+    else {
+      outTwist = identity<qua<T, Q>>();
+      outSwing = q;
+    }
   }
 
   /*

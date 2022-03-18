@@ -508,19 +508,22 @@ BIND_DEFN(aabb_centerPoint, glm::centerPoint, gLuaAABB<>)
 BIND_DEFN(aabb_pointInside, glm::pointInside, gLuaAABB<>, gLuaAABB<>::point_trait)
 BIND_DEFN(aabb_minimalEnclosingSphere, glm::minimalEnclosingSphere, gLuaAABB<>)
 BIND_DEFN(aabb_maximalContainedSphere, glm::maximalContainedSphere, gLuaAABB<>)
-BIND_DEFN(aabb_edge, glm::edge, gLuaAABB<>, gLuaTrait<int>)
-BIND_DEFN(aabb_cornerPoint, glm::cornerPoint, gLuaAABB<>, gLuaTrait<int>)
+BIND_DEFN(aabb_edge, glm::edge, gLuaAABB<>, gLuaLen_t)
+BIND_DEFN(aabb_cornerPoint, glm::cornerPoint, gLuaAABB<>, gLuaLen_t)
 BIND_DEFN(aabb_extremePoint, glm::extremePoint, gLuaAABB<>, gLuaAABB<>::point_trait)
-BIND_DEFN(aabb_pointOnEdge, glm::pointOnEdge, gLuaAABB<>, gLuaTrait<int>, gLuaAABB<>::value_trait)
-BIND_DEFN(aabb_faceCenterPoint, glm::faceCenterPoint, gLuaAABB<>, gLuaTrait<int>)
-BIND_DEFN(aabb_facePoint, glm::facePoint, gLuaAABB<>, gLuaTrait<int>, gLuaAABB<>::value_trait, gLuaAABB<>::value_trait)
-BIND_DEFN(aabb_faceNormal, glm::faceNormalAABB<gLuaFloat::value_type>, gLuaTrait<int>)
-BIND_DEFN(aabb_facePlane, glm::facePlane, gLuaAABB<>, gLuaTrait<int>)
+BIND_DEFN(aabb_pointOnEdge, glm::pointOnEdge, gLuaAABB<>, gLuaLen_t, gLuaAABB<>::value_trait)
+BIND_DEFN(aabb_faceCenterPoint, glm::faceCenterPoint, gLuaAABB<>, gLuaLen_t)
+BIND_DEFN(aabb_facePoint, glm::facePoint, gLuaAABB<>, gLuaLen_t, gLuaAABB<>::value_trait, gLuaAABB<>::value_trait)
+BIND_DEFN(aabb_faceNormal, glm::faceNormalAABB<gLuaFloat::value_type>, gLuaLen_t)
+BIND_DEFN(aabb_facePlane, glm::facePlane, gLuaAABB<>, gLuaLen_t)
 BIND_DEFN(aabb_size, glm::size, gLuaAABB<>)
 BIND_DEFN(aabb_halfSize, glm::halfSize, gLuaAABB<>)
 BIND_DEFN(aabb_volume, glm::volume, gLuaAABB<>)
 BIND_DEFN(aabb_surfaceArea, glm::surfaceArea, gLuaAABB<>)
 BIND_DEFN(aabb_scale, glm::scale, gLuaAABB<>, gLuaAABB<>::point_trait, gLuaAABB<>::value_trait)
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+BIND_DEFN(aabb_morton3D, glm::morton3D, gLuaAABB<>, gLuaAABB<>::point_trait)
+#endif
 BIND_DEFN(aabb_closestPoint, glm::closestPoint, gLuaAABB<>, gLuaAABB<>::point_trait)
 BIND_DEFN(aabb_distance, glm::distance, gLuaAABB<>, gLuaAABB<>::point_trait)
 BIND_DEFN(aabb_distanceSphere, glm::distance, gLuaAABB<>, gLuaSphere<>)
@@ -586,6 +589,9 @@ static const luaL_Reg luaglm_aabblib[] = {
   { "volume", GLM_NAME(aabb_volume) },
   { "surfaceArea", GLM_NAME(aabb_surfaceArea) },
   { "scale", GLM_NAME(aabb_scale) },
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+  { "morton3D", GLM_NAME(aabb_morton3D) },
+#endif
   { "closestPoint", GLM_NAME(aabb_closestPoint) },
   { "distance", GLM_NAME(aabb_distance) },
   { "distanceSphere", GLM_NAME(aabb_distanceSphere) },
@@ -688,8 +694,8 @@ BIND_DEFN(aabb2d_isfinite, glm::isfinite, gLuaAABB<2>)
 BIND_DEFN(aabb2d_isDegenerate, glm::isDegenerate, gLuaAABB<2>)
 BIND_DEFN(aabb2d_centerPoint, glm::centerPoint, gLuaAABB<2>)
 BIND_DEFN(aabb2d_pointInside, glm::pointInside, gLuaAABB<2>, gLuaAABB<2>::point_trait)
-BIND_DEFN(aabb2d_edge, glm::edge, gLuaAABB<2>, gLuaTrait<int>)
-BIND_DEFN(aabb2d_cornerPoint, glm::cornerPoint, gLuaAABB<2>, gLuaTrait<int>)
+BIND_DEFN(aabb2d_edge, glm::edge, gLuaAABB<2>, gLuaLen_t)
+BIND_DEFN(aabb2d_cornerPoint, glm::cornerPoint, gLuaAABB<2>, gLuaLen_t)
 BIND_DEFN(aabb2d_extremePoint, glm::extremePoint, gLuaAABB<2>, gLuaAABB<2>::point_trait)
 BIND_DEFN(aabb2d_size, glm::size, gLuaAABB<2>)
 BIND_DEFN(aabb2d_halfSize, glm::halfSize, gLuaAABB<2>)
@@ -1082,8 +1088,8 @@ BIND_DEFN(triangle_centroid, glm::centroid, gLuaTriangle<>)
 BIND_DEFN(triangle_area, glm::area, gLuaTriangle<>)
 BIND_DEFN(triangle_signedArea, glm::signedArea, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 BIND_DEFN(triangle_perimeter, glm::perimeter, gLuaTriangle<>)
-BIND_DEFN(triangle_edge, glm::edge, gLuaTriangle<>, gLuaTrait<int>)
-BIND_DEFN(triangle_cornerPoint, glm::cornerPoint, gLuaTriangle<>, gLuaTrait<int>)
+BIND_DEFN(triangle_edge, glm::edge, gLuaTriangle<>, gLuaLen_t)
+BIND_DEFN(triangle_cornerPoint, glm::cornerPoint, gLuaTriangle<>, gLuaLen_t)
 BIND_DEFN(triangle_barycentric_uvw, glm::barycentricUVW, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 BIND_DEFN(triangle_barycentric_uv, glm::barycentricUV, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 BIND_DEFN(triangle_barycentric_inside, glm::barycentricInsideTriangle, gLuaTriangle<>::value_trait, gLuaTriangle<>::value_trait, gLuaTriangle<>::value_trait)
@@ -1698,7 +1704,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     }
 
     // Populate the polygon with an array of coordinates, if one exists.
-    polygon->p = ::new (list) PolyList(LB.L, allocator);
+    polygon->p = construct_at(list, LB.L, allocator);
     if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
       gLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
       const auto e = lArray.end();
@@ -1734,7 +1740,7 @@ GLM_BINDING_QUALIFIER(polygon_gc) {
   if (l_likely(ud->p != GLM_NULLPTR)) {
     LuaCrtAllocator<void> allocator(L);
     ud->p->validate(L);
-    ud->p->~LuaVector();  // Invoke destructor.
+    destroy_at(ud->p);  // Invoke destructor.
     allocator.realloc(ud->p, sizeof(glm::List<gLuaPolygon<>::point_trait::type>), 0);  // Free allocation
     ud->p = GLM_NULLPTR;
   }
@@ -1755,7 +1761,7 @@ GLM_BINDING_QUALIFIER(polygon_call) {
   lua_createtable(LB.L, static_cast<int>(poly.size()), 0);  // arrow won't resize if overflow
   for (size_t i = 0; i < poly.size(); ++i) {
     if (l_unlikely(gLuaBase::Push(LB, poly[i]) != 1))
-      return LUAGLM_ERROR(LB.L, "invalid " GLM_STRING_VECTOR " structure");
+      return LUAGLM_ERROR(LB.L, "invalid " LUAGLM_STRING_VECTOR " structure");
     lua_rawseti(LB.L, -2, static_cast<lua_Integer>(i) + 1);
   }
   return 1;

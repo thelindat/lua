@@ -83,6 +83,14 @@ namespace glm {
       return forwardRH<T, Q>();
 #endif
     }
+
+    template<typename T, qualifier Q = defaultp>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> spherical(T phi, T theta) {
+      T sinphi, cosphi, sintheta, costheta;  // see sphericalRand
+      sincos(phi, sinphi, cosphi);
+      sincos(theta, sintheta, costheta);
+      return vec<3, T, Q>(sinphi * costheta, sinphi * sintheta, cosphi);
+    }
   }
 
   /* glm::all(glm::equal(...)) shorthand */
@@ -361,6 +369,16 @@ namespace glm {
     return isPerpendicular(vec<1, genType>(x), vec<1, genType>(y), eps);
   }
 
+  /* @TODO: Reduce number of perpendicular and orthogonal functions */
+
+  /// <summary>
+  /// Choose a perpendicular 'hint' axis which has a small component in this vector.
+  /// </summary>
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, T, Q> hint(const vec<3, T, Q> &v) {
+    return ((v.x * v.x) < T(0.5) * length2(v)) ? unit::right<T, Q>() : unit::forward<T, Q>();
+  }
+
   /// <summary>
   /// Return a normalized (direction) vector that is perpendicular to "v" and
   /// the provided "hint" vectors. If "v" points towards "hint", then "hint2" is
@@ -396,20 +414,11 @@ namespace glm {
     out2 = vec<3, T, Q>(b, s + v.y * v.y * a, -v.y);
   }
 
-  /// <summary>
-  /// From_Z
-  /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> perpendicularFast(const vec<3, T, Q> &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'perpendicularFast' only accept floating-point inputs");
-    if (abs(v.z) > one_over_root_two<T>()) {  // YZ Plane
-      const T k = 1 / sqrt(v.y * v.y + v.z * v.z);
-      return vec<3, T, Q>(T(0), -v.z * k, v.y * k);
-    }
-    else {  // XY Plane
-      const T k = 1 / sqrt(v.x * v.x + v.y * v.y);
-      return vec<3, T, Q>(-v.y * k, v.x * k, T(0));
-    }
+    const vec<3, T, Q> hint = (abs(v.z) > one_over_root_two<T>()) ? unit::right<T, Q>() : unit::up<T, Q>();
+    return cross(v, -hint);  // YZ or XY Plane
   }
 
   template<typename T, qualifier Q>
@@ -487,14 +496,14 @@ namespace glm {
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<2, T, Q> spherical_encode(const vec<3, T, Q> &v) {
-    const vec<2, T, Q> Result(glm::atan2<T, defaultp>(v.y, v.x) * glm::one_over_pi<T>(), v.z);
+    const vec<2, T, Q> Result(glm::atan2<T, defaultp>(v.y, v.x) * one_over_pi<T>(), v.z);
     return Result * T(0.5) + T(0.5);
   }
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> spherical_decode(const vec<2, T, Q> &v) {
     const vec<2, T, Q> ang = v * T(2) - T(1);
-    const vec<2, T, Q> sc(sin(ang.x * glm::pi<T>()), cos(ang.x * glm::pi<T>()));
+    const vec<2, T, Q> sc(sin(ang.x * pi<T>()), cos(ang.x * pi<T>()));
     const vec<2, T, Q> phi(sqrt(T(1) - ang.y * ang.y), ang.y);
     return vec<3, T, Q>(sc.y * phi.x, sc.x * phi.x, phi.y);
   }
@@ -1356,7 +1365,7 @@ namespace glm {
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType __angle(const genType &x, const genType &y) {
-    return glm::angle<genType>(x, y);
+    return angle<genType>(x, y);
   }
 
   /// <summary>

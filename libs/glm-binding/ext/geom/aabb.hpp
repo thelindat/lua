@@ -304,7 +304,7 @@ namespace glm {
   /// Return an edge (segment) of the AABB: [0, 11].
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER LineSegment<3, T, Q> edge(const AABB<3, T, Q> &aabb, int edgeIndex) {
+  GLM_GEOM_QUALIFIER LineSegment<3, T, Q> edge(const AABB<3, T, Q> &aabb, length_t edgeIndex) {
     switch (edgeIndex) {
       case 1: return LineSegment<3, T, Q>(aabb.minPoint, vec<3, T, Q>(aabb.minPoint.x, aabb.maxPoint.y, aabb.minPoint.z));
       case 2: return LineSegment<3, T, Q>(aabb.minPoint, vec<3, T, Q>(aabb.maxPoint.x, aabb.minPoint.y, aabb.minPoint.z));
@@ -325,7 +325,7 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER LineSegment<2, T, Q> edge(const AABB<2, T, Q> &aabb, int edgeIndex) {
+  GLM_GEOM_QUALIFIER LineSegment<2, T, Q> edge(const AABB<2, T, Q> &aabb, length_t edgeIndex) {
     switch (edgeIndex) {
       case 1: return LineSegment<2, T, Q>(vec<2, T, Q>(aabb.maxPoint.x, aabb.minPoint.y), aabb.maxPoint);
       case 2: return LineSegment<2, T, Q>(aabb.maxPoint, vec<2, T, Q>(aabb.minPoint.x, aabb.maxPoint.y));
@@ -341,7 +341,7 @@ namespace glm {
   /// Return a corner point of the AABB: [0, 7].
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<3, T, Q> cornerPoint(const AABB<3, T, Q> &aabb, int index) {
+  GLM_GEOM_QUALIFIER vec<3, T, Q> cornerPoint(const AABB<3, T, Q> &aabb, length_t index) {
     switch (index) {
       case 1: return vec<3, T, Q>(aabb.minPoint.x, aabb.minPoint.y, aabb.maxPoint.z);
       case 2: return vec<3, T, Q>(aabb.minPoint.x, aabb.maxPoint.y, aabb.minPoint.z);
@@ -362,7 +362,7 @@ namespace glm {
   /// Return a corner point of the AABB: [0, 3].
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<2, T, Q> cornerPoint(const AABB<2, T, Q> &aabb, int index) {
+  GLM_GEOM_QUALIFIER vec<2, T, Q> cornerPoint(const AABB<2, T, Q> &aabb, length_t index) {
     switch (index) {
       case 1: return vec<2, T, Q>(aabb.minPoint.x, aabb.maxPoint.y);
       case 2: return vec<2, T, Q>(aabb.maxPoint.x, aabb.minPoint.y);
@@ -400,7 +400,7 @@ namespace glm {
   /// Computes a point along an edge of the AABB.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<3, T, Q> pointOnEdge(const AABB<3, T, Q> &aabb, int edgeIndex, T u) {
+  GLM_GEOM_QUALIFIER vec<3, T, Q> pointOnEdge(const AABB<3, T, Q> &aabb, length_t edgeIndex, T u) {
     const vec<3, T, Q> d = aabb.maxPoint - aabb.minPoint;
     switch (edgeIndex) {
       case 1: return vec<3, T, Q>(aabb.minPoint.x, aabb.maxPoint.y, aabb.minPoint.z + u * d.z);
@@ -425,7 +425,7 @@ namespace glm {
   /// Return the point at the center of the given face, [0, 5], of the AABB.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<3, T, Q> faceCenterPoint(const AABB<3, T, Q> &aabb, int faceIndex) {
+  GLM_GEOM_QUALIFIER vec<3, T, Q> faceCenterPoint(const AABB<3, T, Q> &aabb, length_t faceIndex) {
     const vec<3, T, Q> center = (aabb.minPoint + aabb.maxPoint) * T(0.5);
     switch (faceIndex) {
       case 1: return vec<3, T, Q>(aabb.maxPoint.x, center.y, center.z);
@@ -444,7 +444,7 @@ namespace glm {
   /// Generate a point on the surface of the given face of the AABB.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER vec<3, T, Q> facePoint(const AABB<3, T, Q> &aabb, int faceIndex, T u, T v) {
+  GLM_GEOM_QUALIFIER vec<3, T, Q> facePoint(const AABB<3, T, Q> &aabb, length_t faceIndex, T u, T v) {
     const vec<3, T, Q> d = aabb.maxPoint - aabb.minPoint;
     switch (faceIndex) {
       case 1: return vec<3, T, Q>(aabb.maxPoint.x, aabb.minPoint.y + u * d.y, aabb.minPoint.z + v * d.z);
@@ -463,7 +463,7 @@ namespace glm {
   /// Return the surface normal of the given face of the AABB.
   /// </summary>
   template<typename T, qualifier Q = glm::defaultp>
-  GLM_GEOM_QUALIFIER vec<3, T, Q> faceNormalAABB(int faceIndex) {
+  GLM_GEOM_QUALIFIER vec<3, T, Q> faceNormalAABB(length_t faceIndex) {
     switch (faceIndex) {
       case 1: return vec<3, T, Q>(T(1), T(0), T(0));
       case 2: return vec<3, T, Q>(T(0), T(-1), T(0));
@@ -481,7 +481,7 @@ namespace glm {
   /// Generate a plane (point and normal) for the given face of the AABB.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_GEOM_QUALIFIER Plane<3, T, Q> facePlane(const AABB<3, T, Q> &aabb, int faceIndex) {
+  GLM_GEOM_QUALIFIER Plane<3, T, Q> facePlane(const AABB<3, T, Q> &aabb, length_t faceIndex) {
     return Plane<3, T, Q>(faceCenterPoint(aabb, faceIndex), faceNormalAABB<T, Q>(faceIndex));
   }
 
@@ -582,6 +582,11 @@ namespace glm {
     const T s = dot(axis, c);  // distance center/plane.
     dMin = s - r;
     dMax = s + r;
+  }
+
+  template<length_t L, typename T, qualifier Q>
+  GLM_GEOM_QUALIFIER unsigned int morton3D(const AABB<L, T, Q> &aabb, const vec<L, T, Q> &centroid) {
+    return morton3D((centroid - aabb.minPoint) / size(aabb));
   }
 
   /// <summary>
@@ -876,7 +881,7 @@ namespace glm {
   GLM_GEOM_QUALIFIER bool intersects(const AABB<L, T, Q> &aabb, const Ray<L, T, Q> &ray, T &dNear, T &dFar) {
     GLM_GEOM_ASSERT(lessThanEqual(dNear, dFar));
     GLM_GEOM_ASSERT(greaterThanEqual(dNear, -epsilon<T>()));
-    return intersectLineAABB(aabb, toLine(ray), dNear, dFar);
+    return intersectLineAABB(aabb, ray, dNear, dFar);
   }
 
   template<length_t L, typename T, qualifier Q>

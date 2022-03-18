@@ -354,7 +354,7 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER vec<3, T, Q> basisU(const Polygon<3, T, Q> &polygon) {
     if (polygon.size() < 2)
-      return glm::unit::right<T, Q>();
+      return unit::right<T, Q>();
     return normalize(polygon[1] - polygon[0]);
   }
 
@@ -364,7 +364,7 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_GEOM_QUALIFIER vec<3, T, Q> basisV(const Polygon<3, T, Q> &polygon) {
     if (polygon.size() < 2)
-      return glm::unit::up<T, Q>();
+      return unit::up<T, Q>();
     return normalize(cross(normalCCW(polygon), basisU(polygon)));
   }
 
@@ -715,7 +715,7 @@ namespace glm {
           ++numIntersections;
         else if (max(p0.x, p1.x) > T(0)) {
           const vec<2, T, Q> delta = p1 - p0;
-          if (!glm::detail::exactly_zero(delta.y)) {
+          if (!detail::exactly_zero(delta.y)) {
             const T t = -p0.y / delta.y;
             const T x = p0.x + t * delta.x;
             if (t >= T(0) && t <= T(1) && x > T(0)) {

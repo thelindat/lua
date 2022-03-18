@@ -238,7 +238,7 @@ namespace glm {
     m[2].x = T(-2) * n.z * n.x;
     m[2].y = T(-2) * n.y * n.z;
     m[2].z = T(1) - T(2) * n.z * n.z;
-    GLM_IF_CONSTEXPR(C >= 4) {
+    GLM_IF_CONSTEXPR(C > 3) {
       m[3].x = T(2) * d * n.x;
       m[3].y = T(2) * d * n.y;
       m[3].z = T(2) * d * n.z;
@@ -265,7 +265,7 @@ namespace glm {
     m[2].x = -n.z * n.x;
     m[2].y = -n.y * n.z;
     m[2].z = T(1) - n.z * n.z;
-    GLM_IF_CONSTEXPR(C >= 4) {
+    GLM_IF_CONSTEXPR(C > 3) {
       m[3].x = d * n.x;
       m[3].y = d * n.y;
       m[3].z = d * n.z;

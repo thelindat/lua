@@ -288,6 +288,13 @@ vec3 = forwardLH()
 vec3 = forwardRH()
 ```
 
+### spherical
+
+```lua
+-- Create a unit vector from spherical coordinates
+vec3 = spherical(phi --[[ number ]], theta --[[ number ]])
+```
+
 ### Aliases
 
 ## glm/common.hpp
@@ -314,6 +321,21 @@ s --[[ vecN ]] = signN(x --[[ vecN ]])
 -- Reverse the elements of a vector
 s --[[ number ]] = reverse(x --[[ number ]])
 s --[[ vecN ]] = reverse(x --[[ vecN ]])
+```
+
+### morton3D
+
+```lua
+-- Returns the 30-bit Morton code for a given point located within the unit
+-- cube: [0, 1].
+code --[[ integer ]] = morton3D(point --[[ vec3 ]])
+```
+
+### expandBits
+
+```lua
+-- Expand a 10-bit integer into 30 bits by inserting 2 zeros after each bit.
+expanded --[[ integer ]] = expandBits(i --[[ int ]])
 ```
 
 ### fdim
@@ -902,6 +924,22 @@ quat = quatbillboard(
     camUp --[[ vec3 ]],
     camFwd --[[ vec3 ]]
 )
+```
+
+### swingtwist
+
+```lua
+-- Decompose a quaternion into two concatenated rotations: swing (Y/Z axes) and
+-- twist (X axis).
+swing --[[ quat ]], twist --[[ quat ]] = swingtwist(q --[[ quat ]])
+```
+
+### twist
+
+```lua
+-- Given an axis, return the portion of the rotation that accounts for the twist
+-- about that axis.
+quat = twist(q --[[ quat ]], axis --[[ vec3 --]])
 ```
 
 ### Aliases
@@ -1791,6 +1829,13 @@ number = aabb.surfaceArea(...)
 -- Apply a uniform scale to the AABB
 aabbMin,aabbMax = aabb.scale(..., centerPoint --[[ vec3 --]], factor --[[ number ]])
 aabbMin,aabbMax = aabb2d.scale(..., centerPoint --[[ vec2 --]], factor --[[ number ]])
+```
+
+### aabb.morton3D
+
+```lua
+-- Returns the 30-bit Morton code for a given point located within the AABB.
+code --[[ integer ]] = morton3D(..., point --[[ vec3 ]])
 ```
 
 ### aabb.projectToAxis

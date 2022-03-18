@@ -304,7 +304,7 @@ static void vec_finishget(lua_State *L, const TValue *obj, TValue *key, StkId re
       }
       else if (strcmp(svalue(key), "axis") == 0) {
         const glm::vec<3, glm_Float> v3 = glm::axis(glm_qvalue(obj));
-        setvvalue(s2v(res), f4_cstore(v3.x, v3.y, v3.z, 0), LUA_VVECTOR3);
+        glm_setvvalue2s(res, v3, LUA_VVECTOR3);
         return;
       }
     }
@@ -418,7 +418,7 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
         case LUA_VQUAT: {
 #if LUAGLM_QUAT_WXYZ
           const luai_Float4 &v = vvalue_(obj);
-          const luai_Float4 swap = { { v.raw[1], v.raw[2], v.raw[3], v.raw[0] } };
+          const luai_Float4 swap = f4_init(v.raw[1], v.raw[2], v.raw[3], v.raw[0]);
           count = swizzle<4>(swap, svalue(key), f4);
 #else
           count = swizzle<4>(vvalue_(obj), svalue(key), f4);
@@ -436,8 +436,8 @@ void glmVec_get(lua_State *L, const TValue *obj, TValue *key, StkId res) {
         case 3: setvvalue(s2v(res), f4, LUA_VVECTOR3); return;
         case 4: {
           // Quaternion was swizzled and resultant vector is still normalized; keep quaternion semantics
-          const glm::vec<4, lua_VecF> v(f4_loadf(f4.raw[0]), f4_loadf(f4.raw[1]), f4_loadf(f4.raw[2]), f4_loadf(f4.raw[3]));
-          if (ttisquat(obj) && glm::isNormalized(v, glm::epsilon<lua_VecF>())) {
+          const glmVector v(f4_loadf4(f4));
+          if (ttisquat(obj) && glm::isNormalized(v.v4, glm::epsilon<lua_VecF>())) {
 #if LUAGLM_QUAT_WXYZ
             const luai_Float4 &swap = f4;
             f4 = f4_init(swap.raw[3], swap.raw[0], swap.raw[1], swap.raw[2]);
@@ -572,16 +572,15 @@ size_t glmVec_hash(const TValue *obj) {
 
 namespace glm {
   /// <summary>
-  /// Return true if all components of the vector are finite.
-  ///
-  /// @NOTE: -ffast-math will break this condition.
+  /// Return true if all components of the vector are finite. @NOTE: -ffast-math
+  /// will break this condition.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool l_isfinite(vec<L, T, Q> const &v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isnan' only accept floating-point inputs");
     bool result = true;
     for (length_t l = 0; l < L; ++l)
-      result &= glm::isfinite(v[l]);
+      result &= isfinite(v[l]);
     return result;
   }
 }
@@ -645,10 +644,10 @@ int luaglm_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, StkId res,
 ** ===================================================================
 */
 
-#define INVALID_MATRIX_DIMENSIONS "invalid " GLM_STRING_MATRIX " dimension"
+#define INVALID_MATRIX_DIMENSIONS "invalid " LUAGLM_STRING_MATRIX " dimension"
 
 /// <summary>
-/// If "raw" is true (denoting 'rawset'), the function will throw a Lua runtime
+/// If "raw" is true (denoting 'rawset') the function will throw a Lua runtime
 /// error when attempting to operate on invalid keys/fields. Otherwise, this
 /// function (like non 'raw' functions) will attempt to reference a metatable.
 /// </summary>
@@ -669,40 +668,41 @@ static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *v
       return raw ? glm_runerror(L, INVALID_MATRIX_DIMENSIONS) : glm_finishset(L, obj, key, val);
     }
 
+    const lua_Float4 f4 = f4_load(vvalue_(val));
     switch (m_secondary) {
       case 2: {
-        m.m.m2[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
-        m.m.m2[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
+        m.m.m2[m_idx][0] = f4.raw[0];
+        m.m.m2[m_idx][1] = f4.raw[1];
         break;
       }
       case 3: {
 #if LUAGLM_IMPLICIT_ALIGN
-        m.m.m4[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
-        m.m.m4[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
-        m.m.m4[m_idx][2] = f4_loadf(vvalue_(val).raw[2]);
-        m.m.m4[m_idx][3] = f4_loadf(0);
+        m.m.m4[m_idx][0] = f4.raw[0];
+        m.m.m4[m_idx][1] = f4.raw[1];
+        m.m.m4[m_idx][2] = f4.raw[2];
+        m.m.m4[m_idx][3] = 0;
 #else
-        m.m.m3[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
-        m.m.m3[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
-        m.m.m3[m_idx][2] = f4_loadf(vvalue_(val).raw[2]);
+        m.m.m3[m_idx][0] = f4.raw[0];
+        m.m.m3[m_idx][1] = f4.raw[1];
+        m.m.m3[m_idx][2] = f4.raw[2];
 #endif
         break;
       }
       case 4: {
 #if LUAGLM_QUAT_WXYZ
         if (ttisquat(val)) {
-          m.m.m4[m_idx][0] = f4_loadf(vvalue_(val).raw[1]);
-          m.m.m4[m_idx][1] = f4_loadf(vvalue_(val).raw[2]);
-          m.m.m4[m_idx][2] = f4_loadf(vvalue_(val).raw[3]);
-          m.m.m4[m_idx][3] = f4_loadf(vvalue_(val).raw[0]);
+          m.m.m4[m_idx][0] = f4.raw[1];
+          m.m.m4[m_idx][1] = f4.raw[2];
+          m.m.m4[m_idx][2] = f4.raw[3];
+          m.m.m4[m_idx][3] = f4.raw[0];
         }
         else
 #endif
         {
-          m.m.m4[m_idx][0] = f4_loadf(vvalue_(val).raw[0]);
-          m.m.m4[m_idx][1] = f4_loadf(vvalue_(val).raw[1]);
-          m.m.m4[m_idx][2] = f4_loadf(vvalue_(val).raw[2]);
-          m.m.m4[m_idx][3] = f4_loadf(vvalue_(val).raw[3]);
+          m.m.m4[m_idx][0] = f4.raw[0];
+          m.m.m4[m_idx][1] = f4.raw[1];
+          m.m.m4[m_idx][2] = f4.raw[2];
+          m.m.m4[m_idx][3] = f4.raw[3];
         }
         break;
       }
@@ -721,13 +721,13 @@ static int glmMat_auxset(lua_State *L, const TValue *obj, TValue *key, TValue *v
     }
     return raw ? glm_runerror(L, "position out of bounds") : glm_finishset(L, obj, key, val);
   }
-  return raw ? glm_runerror(L, "invalid " GLM_STRING_MATRIX " key") : glm_finishset(L, obj, key, val);
+  return raw ? glm_runerror(L, "invalid " LUAGLM_STRING_MATRIX " key") : glm_finishset(L, obj, key, val);
 }
 
 GCMatrix *glmMat_new(lua_State *L) {
   GCObject *o = luaC_newobj(L, LUA_VMATRIX, sizeof(GCMatrix));
   GCMatrix *mat = gco2mat(o);
-  glm_mat_boundary(&mat->mat4) = glm::identity<glm::mat<4, 4, glm_Float>>();
+  glm_mat_boundary(&(mat->m)) = glm::identity<glm::mat<4, 4, glm_Float>>();
   return mat;
 }
 
@@ -881,21 +881,50 @@ int glmMat_equalObj(lua_State *L, const TValue *o1, const TValue *o2) {
 ** ===================================================================
 */
 
-#define INVALID_VECTOR_TYPE "invalid " GLM_STRING_VECTOR " type"
+#define INVALID_VECTOR_TYPE "invalid " LUAGLM_STRING_VECTOR " type"
 
 /// <summary>
 /// Generalized TValue to glm::vec conversion
 /// </summary>
 template<glm::length_t D, typename T>
-static glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
+static inline glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
   glm::vec<D, glm_Float> result(0);
   const TValue *o = glm_index2value(L, idx);
   if (ttisvector(o) && glm_dimensions(ttypetag(o)) <= D) {
+    const lua_Float4 f4 = f4_loadf4(vvalue_(o));
     for (glm::length_t i = 0; i < D; ++i) {
-      result[i] = static_cast<T>(vvalue_(o).raw[i]);
+      result[i] = static_cast<T>(f4_loadf(f4.raw[i]));
     }
   }
   return result;
+}
+
+/// <summary>
+/// Internal glm_pushvec implementation; assumes 'dims <= D'.
+/// </summary>
+template<glm::length_t D, typename T>
+static inline int glmi_pushvec(lua_State *L, const glm::vec<D, T> &v, glm::length_t dims = D) {
+  GLM_STATIC_ASSERT(D >= 2 && D <= 4, "glmi_pushvec dimensions");
+  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");  // Sanitize LUAGLM_FORCES_ALIGNED_GENTYPES
+  lua_assert(dims <= D);
+  lua_lock(L);
+  glm_setvvalue2s(L->top, v, glm_variant(dims));
+  api_incr_top(L);
+  lua_unlock(L);
+  return 1;
+}
+
+/// <summary>
+/// Internal glm_pushquat implementation.
+/// </summary>
+template<typename T>
+static inline int glmi_pushquat(lua_State *L, const glm::qua<T> &q) {
+  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");
+  lua_lock(L);
+  glm_setvvalue2s(L->top, q, LUA_VQUAT);
+  api_incr_top(L);
+  lua_unlock(L);
+  return 1;
 }
 
 /// <summary>
@@ -903,8 +932,8 @@ static glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
 /// handle type conversions.
 /// </summary>
 template<glm::length_t C, glm::length_t R, typename T>
-static glm::mat<C, R, T> glm_tomat(lua_State *L, int idx) {
-  glm::mat<C, R, T> result = glm::identity<glm::mat<C, R, glm_Float>>();
+static inline glm::mat<C, R, T> glm_tomat(lua_State *L, int idx) {
+  glm::mat<C, R, T> result = glm::identity<glm::mat<C, R, T>>();
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
   if (l_likely(ttismatrix(o))) {
@@ -917,14 +946,57 @@ static glm::mat<C, R, T> glm_tomat(lua_State *L, int idx) {
   return result;
 }
 
-LUAGLM_API int glm_pushvec(lua_State *L, const glmVector &v, glm::length_t dimensions) {
-  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");  // Sanitize LUAGLM_FORCES_ALIGNED_GENTYPES
-  if (l_likely(dimensions >= 2 && dimensions <= 4)) {
-    lua_lock(L);
-    setvvalue(s2v(L->top), f4_cstore(v.v4.x, v.v4.y, v.v4.z, v.v4.w), glm_variant(dimensions));
-    api_incr_top(L);
-    lua_unlock(L);
+/// <summary>
+/// Ensure the packed matrix dimension is valid, i.e., ensure no casting or
+/// overflow issues may occur.
+/// </summary>
+static inline bool glm_verifyMatrix(glm::length_t type) {
+  return type <= 10 && type != 3 && type != 7 // Optimization based on current encoding.
+#if GLM_CONFIG_LENGTH_TYPE == GLM_LENGTH_INT
+         && type >= 0
+#endif
+  ;
+
+#if 0
+  switch (type) {
+    case LUAGLM_MATRIX_2x2: case LUAGLM_MATRIX_2x3: case LUAGLM_MATRIX_2x4:
+    case LUAGLM_MATRIX_3x2: case LUAGLM_MATRIX_3x3: case LUAGLM_MATRIX_3x4:
+    case LUAGLM_MATRIX_4x2: case LUAGLM_MATRIX_4x3: case LUAGLM_MATRIX_4x4:
+      return true;
+    default: {
+      return false;
+    }
   }
+#endif
+}
+
+/// <summary>
+/// Internal glm_pushmat implementation.
+/// </summary>
+template<glm::length_t C, glm::length_t R, typename T>
+static inline int glmi_pushmat(lua_State *L, const glm::mat<C, R, T> &m, glm::length_t type = LUAGLM_MATRIX_TYPE(C, R)) {
+  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");
+  GCMatrix *mat = GLM_NULLPTR;
+#if defined(LUA_USE_APICHECK)
+  if (l_unlikely(!glm_verifyMatrix(type))) {
+    luaG_runerror(L, INVALID_MATRIX_DIMENSIONS);
+    return 0;
+  }
+#endif
+  lua_lock(L);
+  mat = glmMat_new(L);
+  glm_mat_boundary(&mat->m) = m;
+  mat->m.dimensions = type;
+  setmvalue(L, s2v(L->top), mat);
+  api_incr_top(L);
+  luaC_checkGC(L);
+  lua_unlock(L);
+  return 1;
+}
+
+LUAGLM_API int glm_pushvec(lua_State *L, const glmVector &v, glm::length_t dimensions) {
+  if (l_likely(dimensions >= 2 && dimensions <= 4))
+    glmi_pushvec(L, v.v4, dimensions);
   else if (dimensions == 1)  // @ImplicitVec
     lua_pushnumber(L, cast_num(v.v1.x));
   else {
@@ -936,47 +1008,19 @@ LUAGLM_API int glm_pushvec(lua_State *L, const glmVector &v, glm::length_t dimen
   return 1;
 }
 
-LUAGLM_API int glm_pushvec_quat(lua_State *L, const glmVector &q) {
-  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");
-  lua_lock(L);  // Use operator[] to support LUAGLM_QUAT_WXYZ
-  setvvalue(s2v(L->top), f4_cstore(q.q[0], q.q[1], q.q[2], q.q[3]), LUA_VQUAT);
-  api_incr_top(L);
-  lua_unlock(L);
-  return 1;
-}
-
 LUAGLM_API int glm_pushmat(lua_State *L, const glmMatrix &m) {
-  GLM_STATIC_ASSERT(LUAGLM_Q == glm::defaultp, "LUAGLM_QUALIFIER");
-  GCMatrix *mat = GLM_NULLPTR;
-#if defined(LUA_USE_APICHECK)
-  const glm::length_t m_size = LUAGLM_MATRIX_COLS(m.dimensions);
-  const glm::length_t m_secondary = LUAGLM_MATRIX_ROWS(m.dimensions);
-  if (m_size < 2 || m_size > 4 || m_secondary < 2 || m_secondary > 4) {
-    luaG_runerror(L, INVALID_MATRIX_DIMENSIONS);
-    return 0;
-  }
-#endif
-  lua_lock(L);
-  mat = glmMat_new(L);
-  glm_mat_boundary(&mat->mat4) = m;
-  setmvalue(L, s2v(L->top), mat);
-  api_incr_top(L);
-  luaC_checkGC(L);
-  lua_unlock(L);
-  return 1;
+  if (l_likely(glm_verifyMatrix(m.dimensions)))
+    return glmi_pushmat(L, m.m44, m.dimensions);
+  return 0;
 }
 
-LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &size) {
-  bool result = true;
+LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &length) {
   const TValue *o = glm_index2value(L, idx);
-  if (ttisvector(o) && !ttisquat(o))
-    size = glm_dimensions(ttypetag(o));
+  if (l_likely(ttisvector(o) && !ttisquat(o)))
+    return (length = glm_dimensions(ttypetag(o)), true);
   else if (ttisnumber(o))
-    size = 1;
-  else {
-    result = false;
-  }
-  return result;
+    return (length = 1, true);
+  return false;
 }
 
 LUAGLM_API bool glm_isquat(lua_State *L, int idx) {
@@ -984,23 +1028,20 @@ LUAGLM_API bool glm_isquat(lua_State *L, int idx) {
   return ttisquat(o);
 }
 
-LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &dimensions) {
-  bool result = false;
+LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &type) {
+  bool ismatrix;
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
-  if (ttismatrix(o)) {
-    dimensions = mvalue_dims(o);
-    result = true;
-  }
+  type = (ismatrix = ttismatrix(o)) ? mvalue_dims(o) : LUAGLM_MATRIX_INVALID;
   lua_unlock(L);
-  return result;
+  return ismatrix;
 }
 
 LUAGLM_API int glm_pushvec1(lua_State *L, const glm::vec<1, glm_Float> &v) { lua_pushnumber(L, cast_num(v.x)); return 1; }
-LUAGLM_API int glm_pushvec2(lua_State *L, const glm::vec<2, glm_Float> &v) { return glm_pushvec(L, glmVector(v), 2); }
-LUAGLM_API int glm_pushvec3(lua_State *L, const glm::vec<3, glm_Float> &v) { return glm_pushvec(L, glmVector(v), 3); }
-LUAGLM_API int glm_pushvec4(lua_State *L, const glm::vec<4, glm_Float> &v) { return glm_pushvec(L, glmVector(v), 4); }
-LUAGLM_API int glm_pushquat(lua_State *L, const glm::qua<glm_Float> &q) { return glm_pushvec_quat(L, glmVector(q)); }
+LUAGLM_API int glm_pushvec2(lua_State *L, const glm::vec<2, glm_Float> &v) { return glmi_pushvec(L, v); }
+LUAGLM_API int glm_pushvec3(lua_State *L, const glm::vec<3, glm_Float> &v) { return glmi_pushvec(L, v); }
+LUAGLM_API int glm_pushvec4(lua_State *L, const glm::vec<4, glm_Float> &v) { return glmi_pushvec(L, v); }
+LUAGLM_API int glm_pushquat(lua_State *L, const glm::qua<glm_Float> &q) { return glmi_pushquat(L, q); }
 
 LUAGLM_API glm::vec<1, glm_Float> glm_tovec1(lua_State *L, int idx) { return glm::vec<1, glm_Float>(glm_castflt(lua_tonumber(L, idx))); }
 LUAGLM_API glm::vec<2, glm_Float> glm_tovec2(lua_State *L, int idx) { return glm_tovec<2, glm_Float>(L, idx); }
@@ -1011,15 +1052,15 @@ LUAGLM_API glm::qua<glm_Float> glm_toquat(lua_State *L, int idx) {
   return ttisquat(o) ? glm_qvalue(o) : glm::quat_identity<glm_Float, glm::defaultp>();
 }
 
-LUAGLM_API int glm_pushmat2x2(lua_State *L, const glm::mat<2, 2, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat2x3(lua_State *L, const glm::mat<2, 3, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat2x4(lua_State *L, const glm::mat<2, 4, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat3x2(lua_State *L, const glm::mat<3, 2, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat3x3(lua_State *L, const glm::mat<3, 3, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat3x4(lua_State *L, const glm::mat<3, 4, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat4x2(lua_State *L, const glm::mat<4, 2, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat4x3(lua_State *L, const glm::mat<4, 3, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
-LUAGLM_API int glm_pushmat4x4(lua_State *L, const glm::mat<4, 4, glm_Float> &m) { return glm_pushmat(L, glmMatrix(m)); }
+LUAGLM_API int glm_pushmat2x2(lua_State *L, const glm::mat<2, 2, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat2x3(lua_State *L, const glm::mat<2, 3, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat2x4(lua_State *L, const glm::mat<2, 4, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat3x2(lua_State *L, const glm::mat<3, 2, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat3x3(lua_State *L, const glm::mat<3, 3, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat3x4(lua_State *L, const glm::mat<3, 4, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat4x2(lua_State *L, const glm::mat<4, 2, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat4x3(lua_State *L, const glm::mat<4, 3, glm_Float> &m) { return glmi_pushmat(L, m); }
+LUAGLM_API int glm_pushmat4x4(lua_State *L, const glm::mat<4, 4, glm_Float> &m) { return glmi_pushmat(L, m); }
 
 LUAGLM_API glm::mat<2, 2, glm_Float> glm_tomat2x2(lua_State *L, int idx) { return glm_tomat<2, 2, glm_Float>(L, idx); }
 LUAGLM_API glm::mat<2, 3, glm_Float> glm_tomat2x3(lua_State *L, int idx) { return glm_tomat<2, 3, glm_Float>(L, idx); }
@@ -1094,14 +1135,14 @@ LUA_API int luaglm_dot(lua_State *L) {
       case LUA_VVECTOR4: lua_pushnumber(L, cast_num(glm::dot(glm_v4value(x), glm_v4value(y)))); break;
       case LUA_VQUAT: lua_pushnumber(L, cast_num(glm::dot(glm_qvalue(x), glm_qvalue(y)))); break;
       default: {
-        return luaL_typeerror(L, 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " type");
+        return luaL_typeerror(L, 1, LUAGLM_STRING_NUMBER " or " LUAGLM_STRING_VECTOR " type");
       }
     }
   }
   else if (ttisnumber(x) && ttisnumber(y))  // integer coercion
     lua_pushnumber(L, nvalue(x) * nvalue(y));
   else {
-    return luaL_typeerror(L, 1, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " type");
+    return luaL_typeerror(L, 1, LUAGLM_STRING_NUMBER " or " LUAGLM_STRING_VECTOR " type");
   }
   return 1;
 }
@@ -1115,27 +1156,27 @@ LUA_API int luaglm_cross(lua_State *L) {
         lua_pushnumber(L, cast_num(glm::cross(glm_v2value(x), glm_v2value(y))));
         return 1;
       }
-      return luaL_typeerror(L, 2, GLM_STRING_VECTOR2);
+      return luaL_typeerror(L, 2, LUAGLM_STRING_VECTOR2);
     }
     case LUA_VVECTOR3: {
 #if LUAGLM_FORCE_HIGHP  // @GCCHack
       if (ttypetag(y) == LUA_VQUAT) {
         const glm::vec<3, glm_Float, glm::qualifier::highp> v(glm_v3value(x));
         const glm::qua<glm_Float, glm::qualifier::highp> q(glm_qvalue(y));
-        return glm_pushvec3(L, glm::vec<3, glm_Float>(glm::cross(v, q)));
+        return glmi_pushvec(L, glm::vec<3, glm_Float>(glm::cross(v, q)));
       }
       else if (ttypetag(y) == LUA_VVECTOR3) {
         const glm::vec<3, glm_Float, glm::qualifier::highp> v(glm_v3value(x));
         const glm::vec<3, glm_Float, glm::qualifier::highp> v2(glm_v3value(y));
-        return glm_pushvec3(L, glm::vec<3, glm_Float>(glm::cross(v, v2)));
+        return glmi_pushvec(L, glm::vec<3, glm_Float>(glm::cross(v, v2)));
       }
 #else
       if (ttypetag(y) == LUA_VQUAT)
-        return glm_pushvec3(L, glm::cross(glm_v3value(x), glm_qvalue(y)));
+        return glmi_pushvec(L, glm::cross(glm_v3value(x), glm_qvalue(y)));
       if (ttypetag(y) == LUA_VVECTOR3)
-        return glm_pushvec3(L, glm::cross(glm_v3value(x), glm_v3value(y)));
+        return glmi_pushvec(L, glm::cross(glm_v3value(x), glm_v3value(y)));
 #endif
-      return luaL_typeerror(L, 2, GLM_STRING_VECTOR3 " or " GLM_STRING_QUATERN);
+      return luaL_typeerror(L, 2, LUAGLM_STRING_VECTOR3 " or " LUAGLM_STRING_QUATERN);
     }
     case LUA_VQUAT: {
 #if LUAGLM_FORCE_HIGHP  // @GCCHack
@@ -1147,21 +1188,21 @@ LUA_API int luaglm_cross(lua_State *L) {
       else if (ttypetag(y) == LUA_VVECTOR3) {
         const glm::qua<glm_Float, glm::qualifier::highp> q(glm_qvalue(x));
         const glm::vec<3, glm_Float, glm::qualifier::highp> v(glm_v3value(y));
-        return glm_pushvec3(L, glm::vec<3, glm_Float>(glm::cross(q, v)));
+        return glmi_pushvec(L, glm::vec<3, glm_Float>(glm::cross(q, v)));
       }
 #else
       if (ttypetag(y) == LUA_VQUAT)
-        return glm_pushquat(L, glm::cross(glm_qvalue(x), glm_qvalue(y)));
+        return glmi_pushquat(L, glm::cross(glm_qvalue(x), glm_qvalue(y)));
       if (ttypetag(y) == LUA_VVECTOR3)
-        return glm_pushvec3(L, glm::cross(glm_qvalue(x), glm_v3value(y)));
+        return glmi_pushvec(L, glm::cross(glm_qvalue(x), glm_v3value(y)));
 #endif
-      return luaL_typeerror(L, 2, GLM_STRING_VECTOR3 " or " GLM_STRING_QUATERN);
+      return luaL_typeerror(L, 2, LUAGLM_STRING_VECTOR3 " or " LUAGLM_STRING_QUATERN);
     }
     default: {
       break;
     }
   }
-  return luaL_typeerror(L, 1, GLM_STRING_VECTOR2 ", " GLM_STRING_VECTOR3 ", or " GLM_STRING_QUATERN);
+  return luaL_typeerror(L, 1, LUAGLM_STRING_VECTOR2 ", " LUAGLM_STRING_VECTOR3 ", or " LUAGLM_STRING_QUATERN);
 }
 
 LUA_API int luaglm_inverse(lua_State *L) {
@@ -1181,21 +1222,22 @@ LUA_API int luaglm_inverse(lua_State *L) {
       }
     }
   }
-  return luaL_typeerror(L, 1, GLM_STRING_QUATERN " or " GLM_STRING_SYMMATRIX);
+  return luaL_typeerror(L, 1, LUAGLM_STRING_QUATERN " or " LUAGLM_STRING_SYMMATRIX);
 }
 
 LUA_API int luaglm_normalize(lua_State *L) {
   const TValue *x = glm_index2value(L, 1);
   switch (ttypetag(x)) {
-    case LUA_VVECTOR2: return glm_pushvec2(L, glm::normalize(glm_v2value(x)));
-    case LUA_VVECTOR3: return glm_pushvec3(L, glm::normalize(glm_v3value(x)));
-    case LUA_VVECTOR4: return glm_pushvec4(L, glm::normalize(glm_v4value(x)));
-    case LUA_VQUAT: return glm_pushquat(L, glm::normalize(glm_qvalue(x)));
+    case LUA_VNUMINT: case LUA_VNUMFLT: lua_pushvalue(L, 1); return 1;
+    case LUA_VVECTOR2: return glmi_pushvec(L, glm::normalize(glm_v2value(x)));
+    case LUA_VVECTOR3: return glmi_pushvec(L, glm::normalize(glm_v3value(x)));
+    case LUA_VVECTOR4: return glmi_pushvec(L, glm::normalize(glm_v4value(x)));
+    case LUA_VQUAT: return glmi_pushquat(L, glm::normalize(glm_qvalue(x)));
     default: {
       break;
     }
   }
-  return luaL_typeerror(L, 1, GLM_STRING_VECTOR " or " GLM_STRING_QUATERN);
+  return luaL_typeerror(L, 1, LUAGLM_STRING_VECTOR " or " LUAGLM_STRING_QUATERN);
 }
 
 LUA_API int luaglm_slerp(lua_State *L) {
@@ -1205,10 +1247,13 @@ LUA_API int luaglm_slerp(lua_State *L) {
   if (ttypetag(x) == ttypetag(y) && ttype(a) == LUA_TNUMBER) {
     const glm_Float t = glm_castflt(nvalue(a));
     switch (ttypetag(x)) {
-      case LUA_VVECTOR2: return glm_pushvec2(L, glm::l_slerp(glm_v2value(x), glm_v2value(y), t));
-      case LUA_VVECTOR3: return glm_pushvec3(L, glm::l_slerp(glm_v3value(x), glm_v3value(y), t));
-      case LUA_VVECTOR4: return glm_pushvec4(L, glm::l_slerp(glm_v4value(x), glm_v4value(y), t));
-      case LUA_VQUAT: return glm_pushquat(L, glm::slerp(glm_qvalue(x), glm_qvalue(y), t));
+      case LUA_VVECTOR2: return glmi_pushvec(L, glm::l_slerp(glm_v2value(x), glm_v2value(y), t));
+      case LUA_VVECTOR3: return glmi_pushvec(L, glm::l_slerp(glm_v3value(x), glm_v3value(y), t));
+      case LUA_VVECTOR4: return glmi_pushvec(L, glm::l_slerp(glm_v4value(x), glm_v4value(y), t));
+      case LUA_VQUAT: return glmi_pushquat(L, glm::slerp(glm_qvalue(x), glm_qvalue(y), t));
+      case LUA_VNUMINT: case LUA_VNUMFLT:
+        lua_pushnumber(L, glm::l_slerp(glm::vec<1, lua_Number>(nvalue(x)), glm::vec<1, lua_Number>(nvalue(y)), nvalue(a)).x);
+        return 1;
       default: {
         break;
       }
@@ -1225,9 +1270,9 @@ LUA_API int luaglm_clamp(lua_State *L) {
     switch (ttypetag(x)) {
       case LUA_VNUMINT: /* grit-lua implementation will cast integers */
       case LUA_VNUMFLT: lua_pushnumber(L, glm::clamp(nvalue(x), nvalue(y), nvalue(z))); return 1;
-      case LUA_VVECTOR2: return glm_pushvec2(L, glm::clamp(glm_v2value(x), glm_v2value(y), glm_v2value(z)));
-      case LUA_VVECTOR3: return glm_pushvec3(L, glm::clamp(glm_v3value(x), glm_v3value(y), glm_v3value(z)));
-      case LUA_VVECTOR4: return glm_pushvec4(L, glm::clamp(glm_v4value(x), glm_v4value(y), glm_v4value(z)));
+      case LUA_VVECTOR2: return glmi_pushvec(L, glm::clamp(glm_v2value(x), glm_v2value(y), glm_v2value(z)));
+      case LUA_VVECTOR3: return glmi_pushvec(L, glm::clamp(glm_v3value(x), glm_v3value(y), glm_v3value(z)));
+      case LUA_VVECTOR4: return glmi_pushvec(L, glm::clamp(glm_v4value(x), glm_v4value(y), glm_v4value(z)));
       default: {
         break;
       }
@@ -1242,7 +1287,7 @@ LUA_API int luaglm_clamp(lua_State *L) {
     lua_pushnumber(L, glm::clamp(nvalue(x), lua_Number(0), lua_Number(1)));
     return 1;
   }
-  return luaL_error(L, GLM_STRING_NUMBER " or " GLM_STRING_VECTOR " expected");
+  return luaL_error(L, LUAGLM_STRING_NUMBER " or " LUAGLM_STRING_VECTOR " expected");
 }
 
 /* }================================================================== */
@@ -1269,26 +1314,27 @@ static glm::length_t PopulateVector(lua_State *L, int idx, glm::vec<4, T> &vec, 
     // To handle LUAGLM_QUAT_WXYZ it is much easier to force an explicit length
     // rule for quaternion types. For other vector variants, copy the vector or
     // a subset to satisfy 'v_desired'
+    const lua_Float4 f4 = f4_load(vvalue_(obj));
     if (ttisquat(obj)) {
-      if ((v_idx + 4) > v_desired)
-        return luaL_argerror(L, idx, "invalid " GLM_STRING_VECTOR " dimensions");
+      if (l_unlikely((v_idx + 4) > v_desired))
+        return luaL_argerror(L, idx, "invalid " LUAGLM_STRING_VECTOR " dimensions");
 #if LUAGLM_QUAT_WXYZ
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[1]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[2]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[3]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[0]));
+      vec[v_idx++] = static_cast<T>(f4.raw[1]);
+      vec[v_idx++] = static_cast<T>(f4.raw[2]);
+      vec[v_idx++] = static_cast<T>(f4.raw[3]);
+      vec[v_idx++] = static_cast<T>(f4.raw[0]);
 #else
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[0]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[1]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[2]));
-      vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[3]));
+      vec[v_idx++] = static_cast<T>(f4.raw[0]);
+      vec[v_idx++] = static_cast<T>(f4.raw[1]);
+      vec[v_idx++] = static_cast<T>(f4.raw[2]);
+      vec[v_idx++] = static_cast<T>(f4.raw[3]);
 #endif
       return 4;
     }
     else {
       const glm::length_t length = glm::min(glm_dimensions(ttypetag(obj)), v_desired - v_idx);
       for (glm::length_t i = 0; i < length; ++i)
-        vec[v_idx++] = static_cast<T>(f4_loadf(vvalue_(obj).raw[i]));
+        vec[v_idx++] = static_cast<T>(f4.raw[i]);
       return length;
     }
   }
@@ -1337,12 +1383,13 @@ static bool PopulateMatrix(lua_State *L, int idx, int top, bool fixed_size, glmM
     return true;
   }
   else if (stack_count == 1 && ttisvector(o)) {
+    const lua_Float4 f4 = f4_load(vvalue_(o));
     const grit_length_t dims = glm_dimensions(ttypetag(o));
     m.m44 = glm::mat<4, 4, glm_Float>(glm_Float(0));
-    m.m44[0][0] = f4_loadf(vvalue_(o).raw[0]);
-    m.m44[1][1] = f4_loadf(vvalue_(o).raw[1]);
-    m.m44[2][2] = (dims > 2) ? f4_loadf(vvalue_(o).raw[2]) : glm_Float(0);
-    m.m44[3][3] = (dims > 3) ? f4_loadf(vvalue_(o).raw[3]) : glm_Float(0);
+    m.m44[0][0] = f4.raw[0];
+    m.m44[1][1] = f4.raw[1];
+    m.m44[2][2] = (dims > 2) ? f4.raw[2] : glm_Float(0);
+    m.m44[3][3] = (dims > 3) ? f4.raw[3] : glm_Float(0);
     m.dimensions = fixed_size ? m.dimensions : dims;
     return true;
   }
@@ -1426,17 +1473,16 @@ static int glm_createVector(lua_State *L, glm::length_t desiredSize = 0) {
   glm::vec<4, T> v(T(0));
   glm::length_t v_len = 0;
 
-  // Hotpath no argument and single argument parameters
   const int top = _gettop(L);
   if (top == 0 && desiredSize > 0)  // No arguments; return zero vector
-    return glm_pushvec(L, glmVector(v), desiredSize);
+    return glmi_pushvec(L, v, desiredSize);
   // Fixed size and only one non-table argument
   else if (top == 1 && glm_castvalue<T>(glm_index2value(L, 1), v.x)) {
     if (desiredSize == 1)  // @ImplicitVec
       return glm_pushvalue<T>(L, v.x);
     else if (desiredSize > 1) {
       v.y = v.z = v.w = v.x;
-      return glm_pushvec(L, glmVector(v), desiredSize);
+      return glmi_pushvec(L, v, desiredSize);
     }
   }
 
@@ -1448,12 +1494,12 @@ static int glm_createVector(lua_State *L, glm::length_t desiredSize = 0) {
   lua_unlock(L);
 
   if (desiredSize == 0 && v_len == 0)
-    return luaL_error(L, GLM_STRING_VECTOR " requires 1 to 4 values");
+    return luaL_error(L, LUAGLM_STRING_VECTOR " requires 1 to 4 values");
   else if (desiredSize != 0 && v_len != desiredSize)
-    return luaL_error(L, GLM_STRING_VECTOR "%d requires 0, 1, or %d values", cast_int(desiredSize), cast_int(desiredSize));
+    return luaL_error(L, LUAGLM_STRING_VECTOR "%d requires 0, 1, or %d values", cast_int(desiredSize), cast_int(desiredSize));
   else if (v_len == 1)  // @ImplicitVec
     return glm_pushvalue<T>(L, v.x);
-  return glm_pushvec(L, glmVector(v), v_len);
+  return glmi_pushvec(L, v, v_len);
 }
 
 /// <summary>
@@ -1474,12 +1520,12 @@ static int glm_createMatrix(lua_State *L, glm::length_t dimensions) {
         break;
       }
     }
-    return glm_pushmat(L, result);
+    return glmi_pushmat(L, result.m44, result.dimensions);
   }
   else {  // Parse the contents of the stack and populate 'result'
+    lua_lock(L);
     const TValue *o = glm_index2value(L, 1);
     const bool recycle = top > 1 && ttismatrix(o);
-    lua_lock(L);
     if (PopulateMatrix(L, recycle ? 2 : 1, top, dimensions != INVALID_PACKED_DIM, result)) {
       // Realign column-vectors, ensuring the matrix can be faithfully
       // represented by its m.mCR union value.
@@ -1501,11 +1547,11 @@ static int glm_createMatrix(lua_State *L, glm::length_t dimensions) {
         return 1;
       }
       lua_unlock(L);
-      return glm_pushmat(L, result);
+      return glmi_pushmat(L, result.m44, result.dimensions);
     }
     lua_unlock(L);
   }
-  return luaL_error(L, "invalid " GLM_STRING_MATRIX " structure");
+  return luaL_error(L, "invalid " LUAGLM_STRING_MATRIX " structure");
 }
 
 LUA_API int luaglm_vec(lua_State *L) { return glm_createVector<glm_Float>(L); }
@@ -1542,7 +1588,7 @@ LUA_API int luaglm_mat(lua_State *L) { return glm_createMatrix<glm_Float>(L, INV
 /// </summary>
 LUA_API int luaglm_qua(lua_State *L) {
   const TValue *o = glm_index2value(L, 1);
-  if (o == &G(L)->nilvalue)  // No arguments: return the identity.
+  if (!_isvalid(L, o))  // No arguments: return the identity.
     return glm_pushquat(L, glm::identity<glm::qua<glm_Float>>());
   else if (ttisnumber(o)) {
     const TValue *o2 = glm_index2value(L, 2);
@@ -1585,23 +1631,23 @@ LUA_API int luaglm_qua(lua_State *L) {
       case LUAGLM_MATRIX_3x3: return glm_pushquat(L, glm::qua<glm_Float>(m.m33));
       case LUAGLM_MATRIX_4x4: return glm_pushquat(L, glm::qua<glm_Float>(m.m44));
       default: {
-        return luaL_typeerror(L, 1, GLM_STRING_MATRIX "3x3 or " GLM_STRING_MATRIX "4x4");
+        return luaL_typeerror(L, 1, LUAGLM_STRING_MATRIX "3x3 or " LUAGLM_STRING_MATRIX "4x4");
       }
     }
   }
-  return luaL_typeerror(L, 1, GLM_STRING_NUMBER ", " GLM_STRING_VECTOR3 ", or " GLM_STRING_MATRIX);
+  return luaL_typeerror(L, 1, LUAGLM_STRING_NUMBER ", " LUAGLM_STRING_VECTOR3 ", or " LUAGLM_STRING_MATRIX);
 }
 
 LUA_API const char *luaglm_typename(lua_State *L, int idx) {
   const TValue *o = glm_index2value(L, idx);
   switch (ttypetag(o)) {
-    case LUA_VNUMFLT: return GLM_STRING_NUMBER;
-    case LUA_VNUMINT: return GLM_STRING_INTEGER;
-    case LUA_VVECTOR2: return GLM_STRING_VECTOR2;
-    case LUA_VVECTOR3: return GLM_STRING_VECTOR3;
-    case LUA_VVECTOR4: return GLM_STRING_VECTOR4;
-    case LUA_VQUAT: return GLM_STRING_QUATERN;
-    case LUA_VMATRIX: return GLM_STRING_MATRIX;
+    case LUA_VNUMFLT: return LUAGLM_STRING_NUMBER;
+    case LUA_VNUMINT: return LUAGLM_STRING_INTEGER;
+    case LUA_VVECTOR2: return LUAGLM_STRING_VECTOR2;
+    case LUA_VVECTOR3: return LUAGLM_STRING_VECTOR3;
+    case LUA_VVECTOR4: return LUAGLM_STRING_VECTOR4;
+    case LUA_VQUAT: return LUAGLM_STRING_QUATERN;
+    case LUA_VMATRIX: return LUAGLM_STRING_MATRIX;
     default: {
       return "UnknownType";
     }
@@ -1615,14 +1661,14 @@ LUA_API const char *luaglm_pushstring(lua_State *L, int idx) {
   else if (ttisfloat(o))
     return lua_pushfstring(L, LUA_NUMBER_FMT, static_cast<LUAI_UACNUMBER>(lua_tonumber(L, idx)));
   else if (ttisvector(o)) {
-    char buff[GLM_STRING_BUFFER];
-    const int len = glmVec_tostr(o, buff, GLM_STRING_BUFFER);
+    char buff[LUAGLM_MAX2STR];
+    const int len = glmVec_tostr(o, buff, LUAGLM_MAX2STR);
     return lua_pushlstring(L, buff, cast_sizet(len < 0 ? 0 : len));
   }
   else if (ttismatrix(o)) {
-    char buff[GLM_STRING_BUFFER];
+    char buff[LUAGLM_MAX2STR];
     lua_lock(L);
-    const int len = glmMat_tostr(o, buff, GLM_STRING_BUFFER);
+    const int len = glmMat_tostr(o, buff, LUAGLM_MAX2STR);
     lua_unlock(L);
     return lua_pushlstring(L, buff, cast_sizet(len < 0 ? 0 : len));
   }
@@ -1633,34 +1679,42 @@ LUA_API int luaglm_unpack(lua_State *L, int idx) {
   luaL_checkstack(L, 4, "luaglm_unpack");  // Ensure stack-space
   const TValue *o = glm_index2value(L, idx);
   switch (ttypetag(o)) {
-    case LUA_VVECTOR2:
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[0])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[1])));
+    case LUA_VVECTOR2: {
+      const lua_Float4 f4 = f4_load(vvalue_(o));
+      lua_pushnumber(L, cast_num(f4.raw[0]));
+      lua_pushnumber(L, cast_num(f4.raw[1]));
       return 2;
-    case LUA_VVECTOR3:
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[0])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[1])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[2])));
+    }
+    case LUA_VVECTOR3: {
+      const lua_Float4 f4 = f4_load(vvalue_(o));
+      lua_pushnumber(L, cast_num(f4.raw[0]));
+      lua_pushnumber(L, cast_num(f4.raw[1]));
+      lua_pushnumber(L, cast_num(f4.raw[2]));
       return 3;
-    case LUA_VVECTOR4:
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[0])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[1])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[2])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[3])));
+    }
+    case LUA_VVECTOR4: {
+      const lua_Float4 f4 = f4_load(vvalue_(o));
+      lua_pushnumber(L, cast_num(f4.raw[0]));
+      lua_pushnumber(L, cast_num(f4.raw[1]));
+      lua_pushnumber(L, cast_num(f4.raw[2]));
+      lua_pushnumber(L, cast_num(f4.raw[3]));
       return 4;
-    case LUA_VQUAT:
+    }
+    case LUA_VQUAT: {
+      const lua_Float4 f4 = f4_load(vvalue_(o));
 #if LUAGLM_QUAT_WXYZ
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[1])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[2])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[3])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[0])));
+      lua_pushnumber(L, cast_num(f4.raw[1]));
+      lua_pushnumber(L, cast_num(f4.raw[2]));
+      lua_pushnumber(L, cast_num(f4.raw[3]));
+      lua_pushnumber(L, cast_num(f4.raw[0]));
 #else
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[0])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[1])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[2])));
-      lua_pushnumber(L, cast_num(f4_loadf(vvalue_(o).raw[3])));
+      lua_pushnumber(L, cast_num(f4.raw[0]));
+      lua_pushnumber(L, cast_num(f4.raw[1]));
+      lua_pushnumber(L, cast_num(f4.raw[2]));
+      lua_pushnumber(L, cast_num(f4.raw[3]));
 #endif
       return 4;
+    }
     case LUA_VMATRIX: {
       lua_lock(L);
       const lua_Mat4 /*&*/m = mvalue(o);
@@ -1689,7 +1743,7 @@ LUA_API int luaglm_unpack(lua_State *L, int idx) {
   }
 }
 
-LUA_API lua_Integer lua_tohash(lua_State *L, int idx, int ignore_case) {
+LUA_API lua_Integer luaglm_tohash(lua_State *L, int idx, int ignore_case) {
   lua_Integer hash = 0;
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
@@ -1719,13 +1773,13 @@ LUA_API lua_Integer lua_tohash(lua_State *L, int idx, int ignore_case) {
 #define VECTOR_DEFAULT VECTOR_PARSE_NUMBER
 
 /* Helper for grit-lua: lua_checkvectorX */
-#define checkvector(L, I, T, ERR)                     \
-  lua_Float4 f4 = f4_zero();                          \
-  do {                                                \
-    if (l_unlikely(tovector((L), (I), &f4) != (T))) { \
-      luaL_typeerror((L), (I), (ERR));                \
-      return;                                         \
-    }                                                 \
+#define checkvector(L, I, T, ERR)                         \
+  lua_Float4 f4 = f4_zero();                              \
+  do {                                                    \
+    if (l_unlikely(luai_tovector((L), (I), f4) != (T))) { \
+      luaL_typeerror((L), (I), (ERR));                    \
+      return;                                             \
+    }                                                     \
   } while (0)
 
 /// <summary>
@@ -1738,7 +1792,7 @@ LUA_API lua_Integer lua_tohash(lua_State *L, int idx, int ignore_case) {
 /// @NOTE: Function considered deprecated. The previous idea that tables can be
 /// implicit vector types does not "mesh" well with the glm binding library.
 /// </summary>
-static int glmH_tovector(lua_State *L, const TValue *o, lua_Float4 *v) {
+static int luai_tabletovec(lua_State *L, const TValue *o, lua_Float4 *v) {
   static const char *const dims[] = { "x", "y", "z", "w" };
 
   int count = 0;
@@ -1759,7 +1813,7 @@ static int glmH_tovector(lua_State *L, const TValue *o, lua_Float4 *v) {
 }
 
 template<int Flags = VECTOR_DEFAULT>
-static lu_byte isvector(lua_State *L, int idx) {
+static lu_byte luai_isvector(lua_State *L, int idx) {
   lua_lock(L);
   lu_byte variant = 0;
   const TValue *o = glm_index2value(L, idx);
@@ -1768,7 +1822,7 @@ static lu_byte isvector(lua_State *L, int idx) {
   else if ((Flags & VECTOR_PARSE_NUMBER) != 0 && ttisnumber(o))
     variant = LUA_VVECTOR1;  // @ImplicitVec
   else if ((Flags & VECTOR_PARSE_TABLE) != 0 && ttistable(o)) {
-    const int length = glmH_tovector(L, o, GLM_NULLPTR);
+    const int length = luai_tabletovec(L, o, GLM_NULLPTR);
     if (length == 1)
       variant = LUA_VVECTOR1;  // @ImplicitVec
     else if (length >= 2 && length <= 4)
@@ -1779,20 +1833,21 @@ static lu_byte isvector(lua_State *L, int idx) {
 }
 
 template<int Flags = VECTOR_DEFAULT>
-static int tovector(lua_State *L, int idx, lua_Float4 *f4) {
-  lu_byte variant = LUA_TNIL;
-  lua_Float4 v = f4_zero();
+static int luai_tovector(lua_State *L, int idx, lua_Float4 &f4) {
+  lu_byte variant = LUA_VNIL;
+  f4 = f4_zero();
 
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
   if (l_likely(ttisvector(o))) {
-    v = f4_load(vvalue_(o));
+    f4 = f4_load(vvalue_(o));
     variant = ttypetag(o);
   }
   else if ((Flags & VECTOR_PARSE_NUMBER) != 0 && ttisnumber(o))  // @ImplicitVec
-    variant = glm_castvalue<lua_VecF>(o, v.raw[0]) ? LUA_VVECTOR1 : LUA_TNIL;
+    variant = glm_castvalue<lua_VecF>(o, f4.raw[0]) ? LUA_VVECTOR1 : variant;
   else if ((Flags & VECTOR_PARSE_TABLE) != 0 && ttistable(o)) {
-    const int length = glmH_tovector(L, o, &v);
+    const int length = luai_tabletovec(L, o, &f4);
+    lua_assert(length >= 0 && length <= 4);
     if (length == 1)  // @ImplicitVec
       variant = LUA_VVECTOR1;
     else if (length >= 2 && length <= 4)
@@ -1800,47 +1855,35 @@ static int tovector(lua_State *L, int idx, lua_Float4 *f4) {
   }
   lua_unlock(L);
 
-  if (f4 != GLM_NULLPTR) {
-    if (novariant(variant) == LUA_TVECTOR) {
 #if LUAGLM_QUAT_WXYZ
-      if (variant == LUA_VQUAT) {  // Change ordering to xyzw for external use.
-        f4->raw[3] = v.raw[0];
-        f4->raw[0] = v.raw[1];
-        f4->raw[1] = v.raw[2];
-        f4->raw[2] = v.raw[3];
-      }
-      else
-#endif
-      *f4 = v;
-    }
-    else if (variant == LUA_VVECTOR1) {  // @ImplicitVec
-      f4->raw[0] = v.raw[0];
-    }
+  if (variant == LUA_VQUAT) {  // Change ordering to xyzw for external use.
+    const lua_Float4 swap = f4_init(f4.raw[1], f4.raw[2], f4.raw[3], f4.raw[0]);
+    f4 = swap;
   }
-
+#endif
   return variant;
 }
 
-LUA_API int lua_isvector2(lua_State *L, int idx) { return isvector(L, idx) == LUA_VVECTOR2; }
-LUA_API int lua_isvector3(lua_State *L, int idx) { return isvector(L, idx) == LUA_VVECTOR3; }
-LUA_API int lua_isvector4(lua_State *L, int idx) { return isvector(L, idx) == LUA_VVECTOR4; }
-LUA_API int lua_isquat(lua_State *L, int idx) { return isvector(L, idx) == LUA_VQUAT; }
+LUA_API int lua_isvector2(lua_State *L, int idx) { return luai_isvector(L, idx) == LUA_VVECTOR2; }
+LUA_API int lua_isvector3(lua_State *L, int idx) { return luai_isvector(L, idx) == LUA_VVECTOR3; }
+LUA_API int lua_isvector4(lua_State *L, int idx) { return luai_isvector(L, idx) == LUA_VVECTOR4; }
+LUA_API int lua_isquat(lua_State *L, int idx) { return luai_isvector(L, idx) == LUA_VQUAT; }
 
 LUA_API void lua_checkvector2(lua_State *L, int idx, lua_VecF *x, lua_VecF *y) {
-  checkvector(L, idx, LUA_VVECTOR2, GLM_STRING_VECTOR2);
+  checkvector(L, idx, LUA_VVECTOR2, LUAGLM_STRING_VECTOR2);
   if (x != GLM_NULLPTR) *x = f4.raw[0];
   if (y != GLM_NULLPTR) *y = f4.raw[1];
 }
 
 LUA_API void lua_checkvector3(lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z) {
-  checkvector(L, idx, LUA_VVECTOR3, GLM_STRING_VECTOR3);
+  checkvector(L, idx, LUA_VVECTOR3, LUAGLM_STRING_VECTOR3);
   if (x != GLM_NULLPTR) *x = f4.raw[0];
   if (y != GLM_NULLPTR) *y = f4.raw[1];
   if (z != GLM_NULLPTR) *z = f4.raw[2];
 }
 
 LUA_API void lua_checkvector4(lua_State *L, int idx, lua_VecF *x, lua_VecF *y, lua_VecF *z, lua_VecF *w) {
-  checkvector(L, idx, LUA_VVECTOR4, GLM_STRING_VECTOR4);
+  checkvector(L, idx, LUA_VVECTOR4, LUAGLM_STRING_VECTOR4);
   if (x != GLM_NULLPTR) *x = f4.raw[0];
   if (y != GLM_NULLPTR) *y = f4.raw[1];
   if (z != GLM_NULLPTR) *z = f4.raw[2];
@@ -1848,7 +1891,7 @@ LUA_API void lua_checkvector4(lua_State *L, int idx, lua_VecF *x, lua_VecF *y, l
 }
 
 LUA_API void lua_checkquat(lua_State *L, int idx, lua_VecF *w, lua_VecF *x, lua_VecF *y, lua_VecF *z) {
-  checkvector(L, idx, LUA_VQUAT, GLM_STRING_QUATERN);
+  checkvector(L, idx, LUA_VQUAT, LUAGLM_STRING_QUATERN);
   if (w != GLM_NULLPTR) *w = f4.raw[3];
   if (x != GLM_NULLPTR) *x = f4.raw[0];
   if (y != GLM_NULLPTR) *y = f4.raw[1];
@@ -1856,19 +1899,19 @@ LUA_API void lua_checkquat(lua_State *L, int idx, lua_VecF *w, lua_VecF *x, lua_
 }
 
 LUA_API void lua_pushvector2(lua_State *L, lua_VecF x, lua_VecF y) {
-  lua_pushvector(L, f4_ctor(x, y, 0, 0), LUA_VVECTOR2);
+  lua_pushvector(L, lua_Float4(f4_init(x, y, 0, 0)), LUA_VVECTOR2);
 }
 
 LUA_API void lua_pushvector3(lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z) {
-  lua_pushvector(L, f4_ctor(x, y, z, 0), LUA_VVECTOR3);
+  lua_pushvector(L, lua_Float4(f4_init(x, y, z, 0)), LUA_VVECTOR3);
 }
 
 LUA_API void lua_pushvector4(lua_State *L, lua_VecF x, lua_VecF y, lua_VecF z, lua_VecF w) {
-  lua_pushvector(L, f4_ctor(x, y, z, w), LUA_VVECTOR4);
+  lua_pushvector(L, lua_Float4(f4_init(x, y, z, w)), LUA_VVECTOR4);
 }
 
 LUA_API void lua_pushquat(lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua_VecF z) {
-  lua_pushvector(L, f4_ctor(x, y, z, w), LUA_VQUAT);
+  lua_pushvector(L, lua_Float4(f4_init(x, y, z, w)), LUA_VQUAT);
 }
 
 /* }================================================================== */
@@ -1881,11 +1924,11 @@ LUA_API void lua_pushquat(lua_State *L, lua_VecF w, lua_VecF x, lua_VecF y, lua_
 */
 
 LUA_API int lua_isvector(lua_State *L, int idx) {
-  return isvector(L, idx);
+  return luai_isvector(L, idx);
 }
 
 LUA_API int lua_tovector(lua_State *L, int idx, lua_Float4 *f4) {
-  return tovector(L, idx, f4);
+  return l_likely(f4 != GLM_NULLPTR) ? luai_tovector(L, idx, *f4) : luai_isvector(L, idx);
 }
 
 LUA_API void lua_pushvector(lua_State *L, lua_Float4 f4, int tt) {
@@ -1895,7 +1938,7 @@ LUA_API void lua_pushvector(lua_State *L, lua_Float4 f4, int tt) {
       f4 = f4_init(f4.raw[3], f4.raw[0], f4.raw[1], f4.raw[2]);
 #endif
     lua_lock(L);
-    setvvalue(s2v(L->top), f4_ctorf4(f4), cast_byte(withvariant(tt)));
+    setvvalue(s2v(L->top), f4_cstoref4(f4), cast_byte(withvariant(tt)));
     api_incr_top(L);
     lua_unlock(L);
   }
@@ -1915,35 +1958,30 @@ LUA_API void lua_pushquatf4(lua_State *L, lua_Float4 f4) {
   f4 = f4_init(f4.raw[3], f4.raw[0], f4.raw[1], f4.raw[2]);
 #endif
   lua_lock(L);
-  setvvalue(s2v(L->top), f4_ctorf4(f4), LUA_VQUAT);
+  setvvalue(s2v(L->top), f4_cstoref4(f4), LUA_VQUAT);
   api_incr_top(L);
   lua_unlock(L);
 }
 
-LUA_API int lua_ismatrix(lua_State *L, int idx, int *dimensions) {
-  int result = 0;
+LUA_API int lua_ismatrix(lua_State *L, int idx, int *type) {
+  int ismatrix;
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
-  if (l_likely(ttismatrix(o))) {
-    result = 1;
-    if (dimensions != GLM_NULLPTR) {
-      *dimensions = cast_int(mvalue_dims(o));
-    }
-  }
+  ismatrix = ttismatrix(o);
+  if (type != GLM_NULLPTR)
+    *type = ttismatrix(o) ? cast_int(mvalue_dims(o)) : LUAGLM_MATRIX_INVALID;
   lua_unlock(L);
-  return result;
+  return ismatrix;
 }
 
 LUA_API int lua_tomatrix(lua_State *L, int idx, lua_Mat4 *matrix) {
-  int result = 0;
+  int ismatrix;
   lua_lock(L);
   const TValue *o = glm_index2value(L, idx);
-  if (l_likely(ttismatrix(o) && matrix != GLM_NULLPTR)) {
-    result = 1;
+  if ((ismatrix = ttismatrix(o)) && matrix != GLM_NULLPTR)
     *matrix = mvalue(o);
-  }
   lua_unlock(L);
-  return result;
+  return ismatrix;
 }
 
 LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
@@ -1953,15 +1991,7 @@ LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
 #endif
     return;
   }
-
-#if defined(LUA_USE_APICHECK)
-  const glm::length_t m_size = LUAGLM_MATRIX_COLS(matrix->dimensions);
-  const glm::length_t m_secondary = LUAGLM_MATRIX_ROWS(matrix->dimensions);
-  if (!(m_size >= 2 && m_size <= 4 && m_secondary >= 2 && m_secondary <= 4)) {
-    luaG_runerror(L, INVALID_MATRIX_DIMENSIONS);
-  }
-#endif
-  glm_pushmat(L, glmMatrixBoundary(*matrix).glm);
+  glmi_pushmat(L, glm_constmat_boundary(matrix).m44, matrix->dimensions);
 }
 
 /* }================================================================== */
@@ -1984,13 +2014,13 @@ LUA_API void lua_pushmatrix(lua_State *L, const lua_Mat4 *matrix) {
 ** that operate on a per-value basis. Allowing the use of more generalized
 ** operations instead of logic for all nine matrix types.
 */
-#define glm_newmvalue(L, obj, x, dims)  \
-  LUA_MLM_BEGIN                         \
-  GCMatrix *mat = glmMat_new(L);        \
-  glm_mat_boundary(&(mat->mat4)) = (x); \
-  mat->mat4.dimensions = dims;          \
-  setmvalue(L, s2v(obj), mat);          \
-  luaC_checkGC(L);                      \
+#define glm_newmvalue(L, obj, x, dims) \
+  LUA_MLM_BEGIN                        \
+  GCMatrix *mat = glmMat_new(L);       \
+  glm_mat_boundary(&(mat->m)) = (x);   \
+  mat->m.dimensions = dims;            \
+  setmvalue(L, s2v(obj), mat);         \
+  luaC_checkGC(L);                     \
   LUA_MLM_END
 
 /*

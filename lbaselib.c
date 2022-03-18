@@ -618,7 +618,7 @@ static int luaB_joaat (lua_State *L) {
   const int type = lua_type(L, 1);
   if (type != LUA_TNUMBER && type != LUA_TBOOLEAN && type != LUA_TSTRING)
     return luaL_typeerror(L, 1, lua_typename(L, LUA_TSTRING));
-  lua_pushinteger(L, lua_tohash(L, 1, lua_toboolean(L, 2)));
+  lua_pushinteger(L, luaglm_tohash(L, 1, lua_toboolean(L, 2)));
   return 1;
 }
 #endif

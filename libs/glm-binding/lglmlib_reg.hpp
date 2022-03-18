@@ -50,6 +50,7 @@ GLM_LUA_REG(right),
 GLM_LUA_REG(forward),
 GLM_LUA_REG(forwardLH),
 GLM_LUA_REG(forwardRH),
+GLM_LUA_REG(spherical),
 GLM_LUA_REG(all_equal),
 GLM_LUA_REG(any_notequal),
 //{ "allEqual", GLM_NAME(all_equal) },  // @COMPAT: Changed naming convention.
@@ -102,6 +103,10 @@ GLM_LUA_REG(smoothstep),
 GLM_LUA_REG(step),
 GLM_LUA_REG(trunc),
 GLM_LUA_REG(reverse),  // @GLMVectorExtensions
+#if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
+GLM_LUA_REG(morton3D),
+GLM_LUA_REG(expandBits),
+#endif
 { "tointeger", GLM_NAME(toint) },  // @MathlibCompat
 #if GLM_HAS_CXX11_STL
 GLM_LUA_REG(fdim),
@@ -756,6 +761,7 @@ GLM_LUA_REG(perpendicular),
 GLM_LUA_REG(perpendicular2),
 GLM_LUA_REG(perpendicularBasis),
 GLM_LUA_REG(perpendicularFast),
+GLM_LUA_REG(hint),
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "basis", GLM_NAME(perpendicularBasis) },
 { "from_z", GLM_NAME(perpendicularFast) },
@@ -1107,6 +1113,8 @@ GLM_LUA_REG(quatbillboardRH),  // @GLMQuatExtensions
 GLM_LUA_REG(quatbillboardLH),
 GLM_LUA_REG(quatbillboard),
 GLM_LUA_REG(quatFromBasis),
+GLM_LUA_REG(twist),
+GLM_LUA_REG(swingtwist),
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "quatlookRotation", GLM_NAME(quatLookAt) },
 { "quatlookRotationRH", GLM_NAME(quatLookAtRH) },
@@ -1135,6 +1143,7 @@ GLM_LUA_REG(quat_identity),
 { "toQuat", GLM_NAME(quat_cast) },  // Invokes quat_cast regardless
 #if defined(LUAGLM_ALIASES_O3DE)
 { "Squad", GLM_NAME(squad) },
+{ "CreateShortestArc", GLM_NAME(rotation) },
 { "CreateFromMatrix3x3", GLM_NAME(quat_cast) },
 { "CreateFromMatrix3x4", GLM_NAME(quat_cast) },
 { "CreateFromMatrix4x4", GLM_NAME(quat_cast) },

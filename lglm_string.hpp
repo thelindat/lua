@@ -406,7 +406,7 @@ namespace glm {
     }
 
     template<typename T, glm::qualifier Q>
-    GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, size_t>::type hash(glm::vec<1, T, Q> const &v) {
+    GLM_FUNC_QUALIFIER size_t hash(glm::vec<1, T, Q> const &v) {
       const lua_hash<T> hasher;
       size_t seed = LUAGLM_DEFAULT_SEED;
       lua_combine(seed, hasher(v.x));
@@ -414,7 +414,7 @@ namespace glm {
     }
 
     template<typename T, glm::qualifier Q>
-    GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, size_t>::type hash(glm::vec<2, T, Q> const &v) {
+    GLM_FUNC_QUALIFIER size_t hash(glm::vec<2, T, Q> const &v) {
       const lua_hash<T> hasher;
       size_t seed = LUAGLM_DEFAULT_SEED;
       lua_combine(seed, hasher(v.x));
@@ -423,7 +423,7 @@ namespace glm {
     }
 
     template<typename T, glm::qualifier Q>
-    GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, size_t>::type hash(glm::vec<3, T, Q> const &v) {
+    GLM_FUNC_QUALIFIER size_t hash(glm::vec<3, T, Q> const &v) {
       const lua_hash<T> hasher;
       size_t seed = LUAGLM_DEFAULT_SEED;
       lua_combine(seed, hasher(v.x));
@@ -433,7 +433,7 @@ namespace glm {
     }
 
     template<typename T, glm::qualifier Q>
-    GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, size_t>::type hash(glm::vec<4, T, Q> const &v) {
+    GLM_FUNC_QUALIFIER size_t hash(glm::vec<4, T, Q> const &v) {
       const lua_hash<T> hasher;
       size_t seed = LUAGLM_DEFAULT_SEED;
       lua_combine(seed, hasher(v.x));
@@ -444,7 +444,7 @@ namespace glm {
     }
 
     template<typename T, glm::qualifier Q>
-    GLM_FUNC_QUALIFIER typename std::enable_if<std::is_floating_point<T>::value, size_t>::type hash(glm::qua<T, Q> const &v) {
+    GLM_FUNC_QUALIFIER size_t hash(glm::qua<T, Q> const &v) {
       const lua_hash<T> hasher;
       size_t seed = LUAGLM_DEFAULT_SEED;
       lua_combine(seed, hasher(v[3]));  // Avoid same sequence as glm::vec<4>
