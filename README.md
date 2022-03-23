@@ -763,7 +763,6 @@ Ordered by priority.
 
 1. Cleanup documentation and piggyback off GLMs doxygen.
 1. Cleanup testing scripts/environment and publish.
-1. Half precision vector storage
 1. Rewrite build scripts.
 1. Update the Benchmarking section.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
