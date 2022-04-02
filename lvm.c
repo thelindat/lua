@@ -47,9 +47,8 @@
 
 /*
 ** @LuaGLM: Prevent GCC, or attempt to, from optimizing the indirect jumps by
-** sharing them between opcodes when using threaded code.
-**
-** Note: icc/icpc does not recognize these optimization levels.
+** sharing them between opcodes when using threaded code. Note, icc/icpc does
+** not recognize these optimization levels.
 */
 #if defined(LUA_USE_JUMPTABLE) && LUA_HAS_ATTRIBUTE(optimize) && !defined(__INTEL_COMPILER)
   #define LUA_JUMPTABLE_ATTRIBUTE __attribute((optimize("no-crossjumping", "no-gcse")))
@@ -1984,6 +1983,7 @@ LUA_JUMPTABLE_ATTRIBUTE void luaV_execute (lua_State *L, CallInfo *ci) {
       }
 #if defined(LUAGLM_EXT_DEFER)
       vmcase(OP_DEFER) {
+        StkId ra = RA(i);
         halfProtect(luaF_newtbcupval(L, ra, 1));
         vmbreak;
       }

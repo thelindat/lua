@@ -292,7 +292,6 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> scaleLength(const vec<L, T, Q> &v, T newLength) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'scaleLength' only accept floating-point inputs");
-
     const T sqlen = length2(v);
     if (sqlen < epsilon<T>()) {
       vec<L, T, Q> result(T(0));
@@ -369,7 +368,7 @@ namespace glm {
     return isPerpendicular(vec<1, genType>(x), vec<1, genType>(y), eps);
   }
 
-  /* @TODO: Reduce number of perpendicular and orthogonal functions */
+  /* @TODO: Reduce number of perp* and ortho* functions */
 
   /// <summary>
   /// Choose a perpendicular 'hint' axis which has a small component in this vector.
@@ -495,13 +494,13 @@ namespace glm {
   /* Encode/Decode a spherical normal vector */
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<2, T, Q> spherical_encode(const vec<3, T, Q> &v) {
+  GLM_FUNC_QUALIFIER vec<2, T, Q> sphericalEncode(const vec<3, T, Q> &v) {
     const vec<2, T, Q> Result(glm::atan2<T, defaultp>(v.y, v.x) * one_over_pi<T>(), v.z);
     return Result * T(0.5) + T(0.5);
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<3, T, Q> spherical_decode(const vec<2, T, Q> &v) {
+  GLM_FUNC_QUALIFIER vec<3, T, Q> sphericalDecode(const vec<2, T, Q> &v) {
     const vec<2, T, Q> ang = v * T(2) - T(1);
     const vec<2, T, Q> sc(sin(ang.x * pi<T>()), cos(ang.x * pi<T>()));
     const vec<2, T, Q> phi(sqrt(T(1) - ang.y * ang.y), ang.y);
@@ -511,7 +510,7 @@ namespace glm {
   /* Encode/Decode a octahedron normal vector */
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<2, T, Q> octahedron_encode(const vec<3, T, Q> &v) {
+  GLM_FUNC_QUALIFIER vec<2, T, Q> octahedronEncode(const vec<3, T, Q> &v) {
     const vec<3, T, Q> n = v / (abs(v.x) + abs(v.y) + abs(v.z));
     vec<2, T, Q> Result(T(0));
     if (n.z >= T(0)) {
@@ -528,7 +527,7 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<3, T, Q> octahedron_decode(const vec<2, T, Q> &v) {
+  GLM_FUNC_QUALIFIER vec<3, T, Q> octahedronDecode(const vec<2, T, Q> &v) {
     const vec<2, T, Q> f(v.x * T(2) - T(1), v.y * T(2) - T(1));
     const T t = saturate(-(T(1) - abs(f.x) - abs(f.y)));
     return normalize(vec<3, T, Q>(f.x >= 0 ? -t : t, f.y >= 0 ? -t : t, t));
@@ -597,7 +596,6 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> lerpAngle(const vec<L, T, Q> &x, const vec<L, T, Q> &y, T t) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lerpAngle' only accept floating-point inputs");
-
     vec<L, T, Q> Result(T(0));
     for (length_t i = 0; i < L; ++i)
       Result[i] = lerpAngle<T>(x[i], y[i], t);
@@ -607,7 +605,6 @@ namespace glm {
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> lerpAngle(const vec<L, T, Q> &x, const vec<L, T, Q> &y, const vec<L, T, Q> &t) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lerpAngle' only accept floating-point inputs");
-
     vec<L, T, Q> Result(T(0));
     for (length_t i = 0; i < L; ++i)
       Result[i] = lerpAngle<T>(x[i], y[i], t[i]);
@@ -725,9 +722,9 @@ namespace glm {
   /// Note: Mouse coordinates must be scaled to: [-1, 1].
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<3, T, Q> rayPicking(const vec<3, T, Q> &cam_direction, const vec<3, T, Q> &cam_up, T fov, T aspectRatio, T zNear, T zFar, T mouseX, T mouseY) {
+  GLM_FUNC_QUALIFIER vec<3, T, Q> rayPicking(const vec<3, T, Q> &camForward, const vec<3, T, Q> &camUp, T fov, T aspectRatio, T zNear, T zFar, T mouseX, T mouseY) {
     const mat<4, 4, T, Q> proj = perspective(fov, aspectRatio, zNear, zFar);
-    const mat<4, 4, T, Q> view = lookAt(vec<3, T, Q>(T(0)), cam_direction, cam_up);
+    const mat<4, 4, T, Q> view = lookAt(vec<3, T, Q>(T(0)), camForward, camUp);
     const mat<4, 4, T, Q> invVP = inverse(proj * view);
     const vec<4, T, Q> screenPos = vec<4, T, Q>(mouseX, -mouseY, T(1), T(1));
     const vec<4, T, Q> worldPos = invVP * screenPos;
@@ -810,13 +807,13 @@ namespace glm {
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<L, T, Q> imod(vec<L, T, Q> const &x, T y) {
-    return mod(x, y);  // @TODO: Handle modulo-zero for integer vectors.
+  GLM_FUNC_QUALIFIER typename std::enable_if<!std::is_integral<T>::value, vec<L, T, Q>>::type imod(vec<L, T, Q> const &x, T y) {
+    return mod(x, y);
   }
 
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<L, T, Q> imod(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
-    return mod(x, y);  // @TODO: Handle modulo-zero for integer vectors.
+  GLM_FUNC_QUALIFIER typename std::enable_if<!std::is_integral<T>::value, vec<L, T, Q>>::type imod(vec<L, T, Q> const &x, vec<L, T, Q> const &y) {
+    return mod(x, y);
   }
 
   template<length_t L, typename T, qualifier Q>
@@ -1235,9 +1232,6 @@ namespace glm {
       }
     };
 
-    /// <summary>
-    /// @GLMFix: Similar to above
-    /// </summary>
     template<>
     struct compute_bitfieldReverseStep<4, uint, glm::aligned_highp, true, true> {
       GLM_FUNC_QUALIFIER static vec<4, uint, glm::aligned_highp> call(vec<4, uint, glm::aligned_highp> const &v, uint Mask, uint Shift) {
@@ -1387,14 +1381,11 @@ namespace glm {
   }
 
   /// <summary>
-  /// @GLMFix: Generalized slerp implementation
+  /// @GLMFix: Generalized slerp implementation; glm/ext/quaternion_common.inl
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<L, T, Q> __slerp(vec<L, T, Q> const &x, vec<L, T, Q> const &y, T const &a) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'slerp' only accept floating-point inputs");
-
-    // Perform a linear interpolation when CosAlpha is close to 1 to avoid side
-    // effect of sin(angle) becoming a zero denominator
     const T CosAlpha = dot(x, y);
     if (CosAlpha > static_cast<T>(1) - epsilon<T>())
       return mix(x, y, a);

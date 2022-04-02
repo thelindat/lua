@@ -7,10 +7,14 @@
 #ifndef lglmlib_hpp
 #define lglmlib_hpp
 
-#define LUAGLM_NAME "lua-glm"
-#define LUAGLM_VERSION "lua-glm 0.7.4"
+#define LUAGLM_VERSION_MAJOR "0"
+#define LUAGLM_VERSION_MINOR "7"
+#define LUAGLM_VERSION_PATCH "4"
+
+#define LUAGLM_NAME "LuaGLM"
 #define LUAGLM_COPYRIGHT "Copyright (C) 2022, Gottfried Leibniz"
 #define LUAGLM_DESCRIPTION "glm bindings for Lua"
+#define LUAGLM_VERSION LUAGLM_VERSION_MAJOR "." LUAGLM_VERSION_MINOR "." LUAGLM_VERSION_PATCH
 
 #include <lua.hpp>
 #if defined(__cplusplus)

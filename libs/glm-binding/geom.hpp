@@ -482,7 +482,7 @@ using gLuaPolygon = gLuaTrait<glm::Polygon<3, T, Q>>;
 /// </summary>
 GLM_BINDING_QUALIFIER(aabb_new) {
   GLM_BINDING_BEGIN
-  luaL_checktype(L, LB.idx, LUA_TTABLE);
+  luaL_checktype(LB.L, LB.idx, LUA_TTABLE);
   using value_type = gLuaAABB<>::point_trait::value_type;
   using Iterator = gLuaArray<gLuaAABB<>::point_trait>::Iterator;
   gLuaArray<gLuaAABB<>::point_trait> lArray(LB.L, LB.idx);
@@ -497,7 +497,7 @@ BIND_DEFN(aabb_operator_negate, operator-, gLuaAABB<>)
 BIND_DEFN(aabb_operator_equals, operator==, gLuaAABB<>, gLuaAABB<>)
 BIND_DEFN(aabb_operator_add, operator+, gLuaAABB<>, gLuaAABB<>::point_trait)
 BIND_DEFN(aabb_operator_sub, operator-, gLuaAABB<>, gLuaAABB<>::point_trait)
-ROTATION_MATRIX_DEFN(aabb_operator_mul, operator*, LAYOUT_UNARY, gLuaAABB<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(aabb_operator_mul, operator*, LAYOUT_UNARY, gLuaAABB<>)
 LAYOUT_DEFN(aabb_equal, glm::equal, GEOM_EQUALS, gLuaAABB<>)
 LAYOUT_DEFN(aabb_notEqual, glm::notEqual, GEOM_EQUALS, gLuaAABB<>)
 BIND_DEFN(aabb_isinf, glm::isinf, gLuaAABB<>)
@@ -670,7 +670,7 @@ static const luaL_Reg luaglm_aabblib[] = {
 
 GLM_BINDING_QUALIFIER(aabb2d_new) {
   GLM_BINDING_BEGIN
-  luaL_checktype(L, LB.idx, LUA_TTABLE);
+  luaL_checktype(LB.L, LB.idx, LUA_TTABLE);
   using value_type = gLuaAABB<2>::point_trait::value_type;
   using Iterator = gLuaArray<gLuaAABB<2>::point_trait>::Iterator;
   gLuaArray<gLuaAABB<2>::point_trait> lArray(LB.L, LB.idx);
@@ -685,7 +685,7 @@ BIND_DEFN(aabb2d_operator_negate, operator-, gLuaAABB<2>)
 BIND_DEFN(aabb2d_operator_equals, operator==, gLuaAABB<2>, gLuaAABB<2>)
 BIND_DEFN(aabb2d_operator_add, operator+, gLuaAABB<2>, gLuaAABB<2>::point_trait)
 BIND_DEFN(aabb2d_operator_sub, operator-, gLuaAABB<2>, gLuaAABB<2>::point_trait)
-ROTATION_MATRIX_DEFN(aabb2d_operator_mul, operator*, LAYOUT_UNARY, gLuaAABB<2>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(aabb2d_operator_mul, operator*, LAYOUT_UNARY, gLuaAABB<2>)
 LAYOUT_DEFN(aabb2d_equal, glm::equal, GEOM_EQUALS, gLuaAABB<2>)
 LAYOUT_DEFN(aabb2d_notEqual, glm::notEqual, GEOM_EQUALS, gLuaAABB<2>)
 BIND_DEFN(aabb2d_isinf, glm::isinf, gLuaAABB<2>)
@@ -781,7 +781,7 @@ BIND_DEFN(line_operator_negate, operator-, gLuaLine<>)
 BIND_DEFN(line_operator_equals, operator==, gLuaLine<>, gLuaLine<>)
 BIND_DEFN(line_operator_add, operator+, gLuaLine<>, gLuaLine<>::point_trait)
 BIND_DEFN(line_operator_sub, operator-, gLuaLine<>, gLuaLine<>::point_trait)
-ROTATION_MATRIX_DEFN(line_operator_mul, operator*, LAYOUT_UNARY, gLuaLine<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(line_operator_mul, operator*, LAYOUT_UNARY, gLuaLine<>)
 LAYOUT_DEFN(line_equal, glm::equal, GEOM_EQUALS, gLuaLine<>)
 LAYOUT_DEFN(line_notEqual, glm::notEqual, GEOM_EQUALS, gLuaLine<>)
 BIND_DEFN(line_to_segment, glm::toLineSegment, gLuaLine<>, gLuaLine<>::value_trait)
@@ -855,7 +855,7 @@ BIND_DEFN(ray_operator_negate, operator-, gLuaRay<>)
 BIND_DEFN(ray_operator_equals, operator==, gLuaRay<>, gLuaRay<>)
 BIND_DEFN(ray_operator_add, operator+, gLuaRay<>, gLuaRay<>::point_trait)
 BIND_DEFN(ray_operator_sub, operator-, gLuaRay<>, gLuaRay<>::point_trait)
-ROTATION_MATRIX_DEFN(ray_operator_mul, operator*, LAYOUT_UNARY, gLuaRay<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(ray_operator_mul, operator*, LAYOUT_UNARY, gLuaRay<>)
 LAYOUT_DEFN(ray_equal, glm::equal, GEOM_EQUALS, gLuaRay<>)
 LAYOUT_DEFN(ray_notEqual, glm::notEqual, GEOM_EQUALS, gLuaRay<>)
 BIND_DEFN(ray_isinf, glm::isinf, gLuaRay<>)
@@ -923,7 +923,7 @@ BIND_DEFN(segment_operator_negate, operator-, gLuaSegment<>)
 BIND_DEFN(segment_operator_equals, operator==, gLuaSegment<>, gLuaSegment<>)
 BIND_DEFN(segment_operator_add, operator+, gLuaSegment<>, gLuaSegment<>::point_trait)
 BIND_DEFN(segment_operator_sub, operator-, gLuaSegment<>, gLuaSegment<>::point_trait)
-ROTATION_MATRIX_DEFN(segment_operator_mul, operator*, LAYOUT_UNARY, gLuaSegment<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(segment_operator_mul, operator*, LAYOUT_UNARY, gLuaSegment<>)
 LAYOUT_DEFN(segment_equal, glm::equal, GEOM_EQUALS, gLuaSegment<>)
 LAYOUT_DEFN(segment_notEqual, glm::notEqual, GEOM_EQUALS, gLuaSegment<>)
 BIND_DEFN(segment_length, glm::length, gLuaSegment<>)
@@ -1077,7 +1077,7 @@ BIND_DEFN(triangle_operator_negate, operator-, gLuaTriangle<>)
 BIND_DEFN(triangle_operator_equals, operator==, gLuaTriangle<>, gLuaTriangle<>)
 BIND_DEFN(triangle_operator_add, operator+, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 BIND_DEFN(triangle_operator_sub, operator-, gLuaTriangle<>, gLuaTriangle<>::point_trait)
-ROTATION_MATRIX_DEFN(triangle_operator_mul, operator*, LAYOUT_UNARY, gLuaTriangle<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(triangle_operator_mul, operator*, LAYOUT_UNARY, gLuaTriangle<>)
 LAYOUT_DEFN(triangle_equal, glm::equal, GEOM_EQUALS, gLuaTriangle<>)
 LAYOUT_DEFN(triangle_notEqual, glm::notEqual, GEOM_EQUALS, gLuaTriangle<>)
 BIND_DEFN(triangle_isinf, glm::isinf, gLuaTriangle<>)
@@ -1175,42 +1175,11 @@ static const luaL_Reg luaglm_trianglelib[] = {
 ** ===================================================================
 */
 
-GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
-  GLM_BINDING_BEGIN
-  using point_trait = gLuaSphere<>::point_trait;
-  switch (LB.top()) {
-    case 2: BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait); break;
-    case 3: BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait, point_trait); break;
-    default: {
-      BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait, point_trait, point_trait);
-      break;
-    }
-  }
-  GLM_BINDING_END
-}
-
-// @BloatTodo:
-// GLM_BINDING_QUALIFIER(sphere_optimalEnclosingSphere) {
-//  GLM_BINDING_BEGIN
-//  using point_trait = gLuaSphere<>::point_trait;
-//  switch (LB.top()) {
-//    case 2: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait); break;
-//    case 3: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait, point_trait); break;
-//    case 4: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait, point_trait, point_trait); break;
-//    default: {
-//      luaL_checktype(L, LB.idx, LUA_TTABLE);
-//      gLuaArray<point_trait> lArray(LB.L, LB.idx);
-//      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, LUAGLM_BINDING_QUAL, gLuaArray<point_trait>>(lArray));
-//    }
-//  }
-//  GLM_BINDING_END
-//}
-
 BIND_DEFN(sphere_operator_negate, operator-, gLuaSphere<>)
 BIND_DEFN(sphere_operator_equals, operator==, gLuaSphere<>, gLuaSphere<>)
 BIND_DEFN(sphere_operator_add, operator+, gLuaSphere<>, gLuaSphere<>::point_trait)
 BIND_DEFN(sphere_operator_sub, operator-, gLuaSphere<>, gLuaSphere<>::point_trait)
-ROTATION_MATRIX_DEFN(sphere_operator_mul, operator*, LAYOUT_UNARY, gLuaSphere<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(sphere_operator_mul, operator*, LAYOUT_UNARY, gLuaSphere<>)
 LAYOUT_DEFN(sphere_equal, glm::equal, GEOM_EQUALS, gLuaSphere<>)
 LAYOUT_DEFN(sphere_notEqual, glm::notEqual, GEOM_EQUALS, gLuaSphere<>)
 BIND_DEFN(sphere_volume, glm::volume, gLuaSphere<>)
@@ -1249,6 +1218,37 @@ BIND_DEFN(sphere_extendRadiusToContain, glm::extendRadiusToContain, gLuaSphere<>
 BIND_DEFN(sphere_extendRadiusToContainSphere, glm::extendRadiusToContain, gLuaSphere<>, gLuaSphere<>, gLuaSphere<>::eps_trait)
 BIND_DEFN(sphere_maximalContainedAABB, glm::maximalContainedAABB, gLuaSphere<>)
 LAYOUT_DEFN(sphere_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaSphere<>, gLuaSphere<>::point_trait)
+GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
+  GLM_BINDING_BEGIN
+  using point_trait = gLuaSphere<>::point_trait;
+  switch (LB.top()) {
+    case 2: BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait); break;
+    case 3: BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait, point_trait); break;
+    default: {
+      BIND_FUNC(LB, glm::fitThroughPoints, point_trait, point_trait, point_trait, point_trait);
+      break;
+    }
+  }
+  GLM_BINDING_END
+}
+
+#if 0  // @BloatTodo:
+GLM_BINDING_QUALIFIER(sphere_optimalEnclosingSphere) {
+  GLM_BINDING_BEGIN
+  using point_trait = gLuaSphere<>::point_trait;
+  switch (LB.top()) {
+    case 2: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait); break;
+    case 3: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait, point_trait); break;
+    case 4: BIND_FUNC(LB, glm::optimalEnclosingSphere, point_trait, point_trait, point_trait, point_trait); break;
+    default: {  // Iterate over all points in an array and compute the optimal sphere
+      luaL_checktype(LB.L, LB.idx, LUA_TTABLE);
+      gLuaArray<point_trait> lArray(LB.L, LB.idx);
+      return gLuaBase::Push(LB, glm::optimalEnclosingSphere<point_trait::value_type, LUAGLM_BINDING_QUAL, gLuaArray<point_trait>>(lArray));
+    }
+  }
+  GLM_BINDING_END
+}
+#endif
 
 static const luaL_Reg luaglm_spherelib[] = {
   { "operator_negate", GLM_NAME(sphere_operator_negate) },
@@ -1408,7 +1408,7 @@ BIND_DEFN(plane_operator_negate, operator-, gLuaPlane<>)
 BIND_DEFN(plane_operator_equals, operator==, gLuaPlane<>, gLuaPlane<>)
 BIND_DEFN(plane_operator_add, operator+, gLuaPlane<>, gLuaPlane<>::point_trait)
 BIND_DEFN(plane_operator_sub, operator-, gLuaPlane<>, gLuaPlane<>::point_trait)
-ROTATION_MATRIX_DEFN(plane_operator_mul, operator*, LAYOUT_UNARY, gLuaPlane<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(plane_operator_mul, operator*, LAYOUT_UNARY, gLuaPlane<>)
 LAYOUT_DEFN(plane_equal, glm::equal, GEOM_EQUALS, gLuaPlane<>)
 LAYOUT_DEFN(plane_notEqual, glm::notEqual, GEOM_EQUALS, gLuaPlane<>)
 BIND_DEFN(plane_fromRay, glm::planeFrom, gLuaRay<>, gLuaPlane<>::point_trait)
@@ -1615,7 +1615,7 @@ BIND_DEFN(polygon_operator_negate, operator-, gLuaPolygon<>)
 BIND_DEFN(polygon_operator_equals, operator==, gLuaPolygon<>, gLuaPolygon<>)
 BIND_DEFN(polygon_operator_add, operator+, gLuaPolygon<>, gLuaPolygon<>::point_trait)
 BIND_DEFN(polygon_operator_sub, operator-, gLuaPolygon<>, gLuaPolygon<>::point_trait)
-ROTATION_MATRIX_DEFN(polygon_operator_mul, operator*, LAYOUT_UNARY, gLuaPolygon<>::as_type<gLuaQuat<>::value_type>)
+ROTATION_MATRIX_DEFN(polygon_operator_mul, operator*, LAYOUT_UNARY, gLuaPolygon<>)
 BIND_DEFN(polygon_edge, glm::edge, gLuaPolygon<>, gLuaTrait<size_t>)
 BIND_DEFN(polygon_edge2d, glm::edge2d, gLuaPolygon<>, gLuaTrait<size_t>)
 BIND_DEFN(polygon_diagonal, glm::diagonal, gLuaPolygon<>, gLuaTrait<size_t>, gLuaTrait<size_t>)
@@ -1699,8 +1699,8 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     using PolyList = glm::List<gLuaPolygon<>::point_trait::type>;
     PolyList *list = static_cast<PolyList *>(allocator.realloc(GLM_NULLPTR, 0, sizeof(PolyList)));
     if (l_unlikely(list == GLM_NULLPTR)) {
-      lua_pop(L, 1);
-      return LUAGLM_ERROR(L, "polygon allocation error");
+      lua_pop(LB.L, 1);
+      return LUAGLM_ERROR(LB.L, "polygon allocation error");
     }
 
     // Populate the polygon with an array of coordinates, if one exists.
@@ -1716,8 +1716,8 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     return 1;
   }
 
-  lua_pop(L, 2);
-  return LUAGLM_ERROR(L, "invalid polygon metatable");
+  lua_pop(LB.L, 2);
+  return LUAGLM_ERROR(LB.L, "invalid polygon metatable");
   GLM_BINDING_END
 }
 
@@ -1728,7 +1728,6 @@ GLM_BINDING_QUALIFIER(polygon_to_string) {
     lua_pushfstring(L, "Polygon<%I>", ud->p->size());
     return 1;
   }
-
   return LUAGLM_ARG_ERROR(L, 1, "Polygon");
 }
 
@@ -1777,14 +1776,15 @@ GLM_BINDING_QUALIFIER(polygon_index) {
       return gLuaBase::Push(LB, poly[index - 1]);
     return gLuaBase::Push(LB);  // nil
   }
-  // Attempt to fetch the contents from the polygon library.
-  else if (luaL_getmetatable(LB.L, gLuaPolygon<>::Metatable()) == LUA_TTABLE) {
-    lua_pushvalue(LB.L, LB.idx);
-    lua_rawget(LB.L, -2);
-    return 1;  // Have Lua remove the polygon metatable from the stack.
+  // Fetch function from polygon library
+  else if (luaL_getmetatable(LB.L, gLuaPolygon<>::Metatable()) == LUA_TTABLE) {  // [..., metatable]
+    lua_pushvalue(LB.L, LB.idx);  // [..., metatable, key]
+    lua_rawget(LB.L, -2);  // [..., metatable, value]
+    lua_remove(LB.L, -2);  // [..., value]
+    return 1;
   }
+  lua_pop(LB.L, 1);
 
-  lua_pop(LB.L, 1);  // Polygon metatable.
   return 0;
   GLM_BINDING_END
 }
@@ -1795,7 +1795,6 @@ GLM_BINDING_QUALIFIER(polygon_newindex) {
   if (l_likely(poly.p != GLM_NULLPTR)) {
     const size_t index = LB.AsNextType<size_t>();
     const gLuaPolygon<>::point_trait::type value = LB.Next<gLuaPolygon<>::point_trait>();
-
     poly.p->validate(LB.L);
     if (index >= 1 && index <= poly.size())
       poly[index - 1] = value;
@@ -1809,18 +1808,13 @@ GLM_BINDING_QUALIFIER(polygon_newindex) {
   GLM_BINDING_END
 }
 
-extern "C" {
-  /// <summary>
-  /// Iterator function for polygon vertices.
-  /// </summary>
-  static int polygon_iterator(lua_State *L) {
+/// <summary>
+/// Iterator function for polygon vertices.
+/// </summary>
+static int GLM_NAME(polygon_pairs)(lua_State *state) {
+  lua_pushcfunction(state, [](lua_State *L) -> int {  // iterator,
     GLM_BINDING_BEGIN
-    if (!LB.Is<gLuaPolygon<>>()) {
-      return LUAGLM_ARG_ERROR(LB.L, LB.idx, gLuaPolygon<>::Label());
-    }
-
-    lua_settop(LB.L, LB.idx + gLuaPolygon<>::stack_size);  // create a 2nd argument if there isn't one
-    const gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();  // Polygon
+    const gLuaPolygon<>::type poly = LB.Next<gLuaPolygon<>>();
     if (LB.IsNextType<size_t>()) {  // Index
       const size_t key = LB.AsNextType<size_t>();
       if (key >= 1 && key < poly.size())
@@ -1832,13 +1826,9 @@ extern "C" {
     else
       return gLuaBase::Push(LB);  // Nothing to iterate.
     GLM_BINDING_END
-  }
-}
-
-GLM_BINDING_QUALIFIER(polygon_pairs) {
-  lua_pushcfunction(L, polygon_iterator);  // will return generator,
-  lua_pushvalue(L, 1);  // state,
-  lua_pushnil(L);  // and initial value
+  });
+  lua_pushvalue(state, 1);  // state,
+  lua_pushnil(state);  // and initial value
   return 3;
 }
 

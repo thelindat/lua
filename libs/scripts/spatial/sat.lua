@@ -42,14 +42,12 @@ local Interval
 
 local vec3 = vec3
 
-local table = table
 local table_insert = table.insert
 local table_remove = table.remove
 local table_sort = table.sort
 local table_create = table.create or function() return {} end
 local table_wipe = table.wipe or function() return {} end
 
-local glm = glm
 local glm_min = glm.min
 local glm_max = glm.max
 local glm_log = glm.log
@@ -58,7 +56,8 @@ local glm_aabb_surfaceArea = glm.aabb.surfaceArea
 
 -- "Infinity" may not be available in cases where the Interval is serialized;
 -- Replace with some significantly large value.
-local glm_huge = glm.huge
+local glm_huge <const> = glm.huge
+local glm_eps <const> = glm.feps
 
 Interval = setmetatable({
     -- Internal point reference.
@@ -608,7 +607,7 @@ function Interval:IntervalCount(itemSet, axis, objectCount)
     local items = itemSet[axis]
     local minItem = values[items[1]][axis]
     local maxItem = values[items[#items]][axis]
-    if (maxItem - minItem) < glm.feps then
+    if (maxItem - minItem) < glm_eps then
         return self:MedianSplit(itemSet, axis, objectCount)
     end
 

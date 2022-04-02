@@ -801,7 +801,7 @@
   #define LUA_INLINE __forceinline
 #elif LUA_HAS_ATTRIBUTE(__always_inline__)
   #define LUA_INLINE inline __attribute__((__always_inline__))
-#elif defined(LUA_USE_C89)
+#elif defined(LUA_USE_C89) && !defined(_WIN32)
   #define LUA_INLINE
 #else
   #define LUA_INLINE inline
@@ -831,7 +831,7 @@
   #define LUA_RESTRICT
 #endif
 
-/* Compiler-specific multi-line macro definitions */
+/* Compiler-specific multi-line macro definition */
 #if defined(_MSC_VER)
   #define LUA_MLM_BEGIN do {
   #define LUA_MLM_END                 \
@@ -848,13 +848,13 @@
 /*
 ** {==================================================================
 ** Libraries linked against this runtime that use any GLM/vector feature will
-** require knowledge of changes to:
-**    1. LUAGLM_NUMBER_TYPE
-**    2. LUAGLM_FORCES_ALIGNED_GENTYPES*
-**    3. GLM_FORCE_SIZE_T_LENGTH
+** require knowledge of:
+**   1. LUAGLM_NUMBER_TYPE
+**   2. LUAGLM_FORCES_ALIGNED_GENTYPES
+**   3. GLM_FORCE_SIZE_T_LENGTH
 **
-** @TODO: In addition GLM_FORCE_QUAT_DATA_XYZW, formerly GLM_FORCE_QUAT_DATA_WXYZ,
-** requires consideration for quaternions when operating within the C boundary.
+** @NOTE: GLM_FORCE_QUAT_DATA_XYZW, formerly GLM_FORCE_QUAT_DATA_WXYZ, requires
+** consideration for quaternions when operating within the C boundary.
 ** ===================================================================
 */
 
@@ -867,9 +867,9 @@
 @@ LUAGLM_NUMBER_TYPE Use lua_Number/lua_Integer as the primitive-type of each
 ** vector and matrix component; otherwise use float/int.
 **
-** As vectors are offered as a base *Value* in the runtime. The minimum size of
-** each Value is increased to *at least* 16-bytes or 4xFloat (from 8-bytes).
-** It is advised to not use this macro until vectors-as-collectible types is
+** As vectors are treated as a Value in the runtime. The minimum size of each
+** Value is increased to *at least* 16-bytes or 4xFloat (from 8-bytes). It is
+** advised to not use this macro until vectors-as-collectible types is
 ** experimented with.
 */
 #if defined(LUAGLM_NUMBER_TYPE) && LUA_FLOAT_TYPE != LUA_FLOAT_LONGDOUBLE
@@ -886,8 +886,8 @@
 @@ LUAGLM_ALIGN Alignment macro for improved compiler intrinsics.
 **
 ** @TODO: Technically should follow GLM and only allow alignment when:
-**    1. GLM_CONFIG_XYZW_ONLY is not enabled; and
-**    2. GLM_CONFIG_ANONYMOUS_STRUCT == GLM_ENABLE
+**   1. GLM_CONFIG_XYZW_ONLY is not enabled; and
+**   2. GLM_CONFIG_ANONYMOUS_STRUCT == GLM_ENABLE
 */
 #if !defined(RC_INVOKED)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
@@ -910,7 +910,7 @@
 
 /*
 @@ LUAGLM_USE_ANONYMOUS_STRUCT If the compiler supports anonymous structs. Note,
-** this implementation should still be C89/C99 compatible where possible.
+** this implementation should still be C89 compatible where possible.
 */
 #if !defined(LUAGLM_USE_ANONYMOUS_STRUCT)
   #if defined(LUAGLM_NO_ANONYMOUS_STRUCT)
@@ -934,7 +934,7 @@
 @@ LUAGLM_MATRIX_TYPE Pack column/row dimensions into a single value.
 @@ LUAGLM_MATRIX_INVALID Placeholder value for denoting an invalid dimension.
 **
-** @NOTE: Previous definition:
+** Previous definition:
 **  #define LUAGLM_MATRIX_TYPE(C, R) ((C) | ((R) << 8))
 **  #define LUAGLM_MATRIX_COLS(T) ((T) & 0xFF)
 **  #define LUAGLM_MATRIX_ROWS(T) (((T) >> 8) & 0xFF)
@@ -955,9 +955,8 @@
 #define LUAGLM_MATRIX_INVALID 11
 
 /*
-** GLM_FORCE_SIZE_T_LENGTH forces length_t to be size_t. Otherwise, defined as
-** an int as GLSL declares it. This requires synchronization across the C and
-** CPP boundaries.
+** GLM_FORCE_SIZE_T_LENGTH forces length_t to be size_t. Otherwise, an int as
+** GLSL declares it. This requires synchronization across language boundaries.
 */
 #if defined(GLM_FORCE_SIZE_T_LENGTH)
   typedef size_t grit_length_t;
@@ -965,16 +964,15 @@
   typedef int grit_length_t;
 #endif
 
-/* vector/matrix floating point type */
+/* vector/matrix floating types */
 typedef LUAGLM_FLOAT_TYPE lua_VecF;
 typedef lua_VecF lua_CFloat2[2];
 typedef lua_VecF lua_CFloat3[3]; /* @TODO: @ImplicitAlign */
 typedef lua_VecF lua_CFloat4[4];
 
 /*
-** vector and quaternion extension. This structure is intended to be a byte-wise
-** equivalent/alias to glmVector in lglm.hpp and operates within the C boundary
-** of the Lua runtime.
+** vector and quaternion extension. This structure is intended to be an alias of
+** glmVector in lglm.hpp and operates within the C boundary of the runtime.
 */
 LUAGLM_ALIGNED_TYPEDEF(union, lua_Float4) {
   lua_CFloat4 raw;
@@ -990,31 +988,23 @@ LUAGLM_ALIGNED_TYPEDEF(union, lua_Float4) {
 lua_Float4;
 
 /*
-** Column-oriented matrix extension. This structure is intended to be equivalent
-** to glmMatrix in lglm.hpp and operates within the C boundaries of the Lua
-** runtime.
+** Column-oriented matrix extension. This structure is intended to be an alias
+** of glmMatrix in lglm.hpp and operates within the C boundary of the runtime.
 **
 ** When GLM_FORCE_DEFAULT_ALIGNED_GENTYPES is enabled: (attempt to) mirror the
-** alignment specified in glm/detail/qualifier.hpp. Note GLM uses unions to
+** alignment specified in glm/detail/qualifier.hpp. Also, GLM uses unions to
 ** implicitly load and store values instead of explicit _mm_loadu_ps and
 ** _mm_storeu_ps calls.
 **
 ** The current lua_Mat4 definition minimizes the number of changes required to
 ** make alignment consistent across different compilers. Avoiding issues of
 ** aligned loads, unaligned loads, auto-aligning, etc.
-*
-** These safeguards are not be required if LuaGLM is compiled strictly as C++ as
-** the "C" parts of this runtime may use the structs defined in lglm.hpp. Note,
-** default constructors (or lack-thereof) may require special handling with
-** certain compiler configurations.
 **
 ** @ImplicitAlign:
 ** @TODO: Compensate for: detail::storage<3, T, detail::is_aligned<Q>::value>::type
 ** data implicitly aligning vec3 types. This requires 'GLM_HAS_ALIGNOF'
 ** emulation. matgeti' in lglm.cpp compensates for this issue, however, external
 ** dependencies may not.
-**
-** @TODO: LUAGLM_USE_ANONYMOUS_STRUCT support?
 */
 LUAGLM_ALIGNED_TYPEDEF(struct, lua_Mat4) {
   union Columns {

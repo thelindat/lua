@@ -762,7 +762,7 @@ LUA_API int lua_getfield (lua_State *L, int idx, const char *k) {
   if (ttisvector(v) && (result = glmVec_rawgets(v, k, L->top)) != LUA_TNIL) {
     api_incr_top(L);  /* fast-path for single character field access */
   }
-  else {  /* otherwise, matrix or table */
+  else {
     result = auxgetstr(L, v, k);
   }
   lua_unlock(L);

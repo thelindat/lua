@@ -44,7 +44,7 @@
 
 namespace glm {
 
-  /* EulerAngles -> Quaternion; @TODO: Optimize to avoid intermediate matrix creation */
+  /* EulerAngles -> Quaternion; @TODO: Optimize */
   template<typename T, qualifier Q = defaultp> GLM_FUNC_QUALIFIER qua<T, Q> quatEulerAngleX(T angleX) { return toQuat(eulerAngleX(angleX)); }
   template<typename T, qualifier Q = defaultp> GLM_FUNC_QUALIFIER qua<T, Q> quatEulerAngleY(T angleY) { return toQuat(eulerAngleY(angleY)); }
   template<typename T, qualifier Q = defaultp> GLM_FUNC_QUALIFIER qua<T, Q> quatEulerAngleZ(T angleZ) { return toQuat(eulerAngleZ(angleZ)); }
@@ -61,7 +61,7 @@ namespace glm {
   template<typename T, qualifier Q = defaultp> GLM_FUNC_QUALIFIER qua<T, Q> quatEulerAngleZXZ(T t1, T t2, T t3) { return toQuat(eulerAngleZXZ(t1, t2, t3)); }
   template<typename T, qualifier Q = defaultp> GLM_FUNC_QUALIFIER qua<T, Q> quatEulerAngleZYZ(T t1, T t2, T t3) { return toQuat(eulerAngleZYZ(t1, t2, t3)); }
 
-  /* Euler Conversions; @TODO: Optimize to avoid intermediate matrix creation */
+  /* Euler Conversions; @TODO: Optimize */
   template<typename T, qualifier Q> GLM_FUNC_QUALIFIER void extractEulerAngleXYX(const qua<T, Q> &q, T &t1, T &t2, T &t3) { extractEulerAngleXYX(toMat3(q), t1, t2, t3); }
   template<typename T, qualifier Q> GLM_FUNC_QUALIFIER void extractEulerAngleXYZ(const qua<T, Q> &q, T &t1, T &t2, T &t3) { extractEulerAngleXYZ(toMat3(q), t1, t2, t3); }
   template<typename T, qualifier Q> GLM_FUNC_QUALIFIER void extractEulerAngleXZX(const qua<T, Q> &q, T &t1, T &t2, T &t3) { extractEulerAngleXZX(toMat3(q), t1, t2, t3); }
@@ -322,7 +322,6 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> barycentric(qua<T, Q> value1, qua<T, Q> value2, qua<T, Q> value3, T u, T v) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'barycentric' only accept floating-point inputs");
-
     const qua<T, Q> start = slerp(value1, value2, u + v);
     const qua<T, Q> end = slerp(value1, value3, u + v);
     return slerp(start, end, v / (u + v));
@@ -405,33 +404,33 @@ namespace glm {
   }
 
   /// <summary>
-  /// API completeness for matrix_extensions.
-  /// </summary>
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER qua<T, Q> inverse_transform(const qua<T, Q> &q) {
-    return inverse(q);
-  }
-
-  /// <summary>
   /// Get the shortest equivalent of the rotation.
   /// </summary>
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER qua<T, Q> shortest_equivalent(const qua<T, Q> &q) {
+  GLM_FUNC_QUALIFIER qua<T, Q> shortestEquivalent(const qua<T, Q> &q) {
     return (q.w < T(0.0)) ? -q : q;
   }
 
+  /// <summary>
+  /// Given an axis, return the portion of the rotation that accounts for the
+  /// twist about that axis.
+  /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER qua<T, Q> twist(const qua<T, Q> &q, const vec<3, T, Q> &ref) {
     const vec<3, T, Q> xyz = dot(vec<3, T, Q>(q.x, q.y, q.z), ref) * ref;
     const qua<T, Q> twist(q.w, xyz);
     const T twist_len = length2(twist);
-    return (twist_len != T(0)) ? (twist / sqrt(twist_len)) : identity<qua<T, Q>>();
+    return !detail::exactly_zero(twist_len) ? (twist / sqrt(twist_len)) : identity<qua<T, Q>>();
   }
 
+  /// <summary>
+  /// Decompose a quaternion into two concatenated rotations: swing (Y/Z axes)
+  /// and twist (X axis).
+  /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER void swingtwist(const qua<T, Q> &q, qua<T, Q> &outSwing, qua<T, Q> &outTwist) {
     const T s = sqrt(q.w * q.w + q.x * q.x);
-    if (s != T(0)) {
+    if (!detail::exactly_zero(s)) {
       outTwist = qua<T, Q>(q.w / s, q.x / s, T(0), T(0));
       outSwing = qua<T, Q>(s, T(0), (q.w * q.y - q.x * q.z) / s, (q.w * q.z + q.x * q.y) / s);
     }
@@ -439,6 +438,35 @@ namespace glm {
       outTwist = identity<qua<T, Q>>();
       outSwing = q;
     }
+  }
+
+  /* API completeness for matrix_extensions */
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER qua<T, Q> inverseTransform(const qua<T, Q> &q) {
+    return inverse(q);
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER vec<3, T, Q> extractScale(const qua<T, Q> &q) {
+    ((void)(q));
+    return vec<3, T, Q>(T(1));
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER bool hasUniformScale(const qua<T, Q> &q, const T eps = epsilon<T>()) {
+    ((void)(q)); ((void)(eps));
+    return true;
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> transformPos(const qua<T, Q> &q, const vec<3, T, Q> &v) {
+    return operator*(q, v);
+  }
+
+  template<typename T, qualifier Q>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> transformDir(const qua<T, Q> &q, const vec<3, T, Q> &v) {
+    return q * v;
   }
 
   /*

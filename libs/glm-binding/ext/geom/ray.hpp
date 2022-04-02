@@ -426,8 +426,7 @@ namespace glm {
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER void projectToAxis(const Ray<L, T, Q> &ray, const vec<L, T, Q> &direction, T &outMin, T &outMax) {
-    T d = dot(direction, ray.dir);
-
+    const T d = dot(direction, ray.dir);
     outMin = outMax = dot(direction, ray.pos);
     if (d > epsilon<T>())
       outMax = std::numeric_limits<T>::infinity();

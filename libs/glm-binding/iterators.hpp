@@ -187,7 +187,7 @@ public:
     /// <summary>
     /// Within array bounds & is a valid trait.
     /// </summary>
-    GLM_INLINE bool valid() const {
+    LUA_INLINE bool valid() const {
       return m_arrayIdx >= 1 && m_arrayIdx <= m_arraySize;
     }
 

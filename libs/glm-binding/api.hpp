@@ -2,9 +2,6 @@
 ** $Id: api.hpp $
 ** External Lua/GLM binding API.
 **
-** Missing Headers:
-**  glm/gtx/associated_min_max.hpp
-**
 ** See Copyright Notice in lua.h
 */
 #ifndef BINDING_API_HPP
@@ -23,25 +20,25 @@
 @@ LUAGLM_INCLUDE_GTX Include glm/gtx/+
 @@ LUAGLM_INCLUDE_EXT Include glm/ext/+
 @@ LUAGLM_INCLUDE_ALL Include all GLM headers.
-@@ LUAGLM_ALIASES Include aliases (e.g., length vs. magnitude) to functions.
+@@ LUAGLM_ALIASES Include aliases (e.g., length vs. magnitude) of functions.
 **
 ** Features:
-@@ LUAGLM_INSTALL_METATABLES Update the global metatables for vector and matrix,
-**  types, if ones are not already defined, with lglmlib on load.
+@@ LUAGLM_INSTALL_METATABLES On load, update the global metatables for vector
+**  and matrix types if ones are not already defined.
 @@ LUAGLM_TYPE_COERCION Enable string-to-number type coercion when parsing
 **  arguments from the Lua stack. For this binding library to be a superset of
 **  lmathlib, e.g., math = require('glm'), this flag must be enabled.
 @@ LUAGLM_RECYCLE Enable object recycling: trailing/unused parameters in a
 **  function call, e.g., matrix objects, are used as a result store.
 @@ LUAGLM_FORCED_RECYCLE Disable this library from allocating memory, i.e.,
-**  force use of LUAGLM_RECYCLE. Note, polygons other geom/ structures ignore
+**  force LUAGLM_RECYCLE use. Note, polygons other geom/ structures ignore
 **  this flag (this may change).
 @@ LUAGLM_SAFELIB Enable a general try/catch wrapper for API/binding functions.
 **  This should not be enabled.
 **
 ** Experimental:
 @@ LUAGLM_NUMBER_ARGS Control where the lua_Number-to-float typecasting occurs
-**  when binding to *float-only* functions:
+**  when binding to *float/scalar-only* functions:
 **    1. parsing parameters (default);
 **    2. pushing result, e.g., glm::eulerAngleXYZ.
 @@ LUAGLM_DRIFT Implicitly normalize parameters that expect direction vectors
@@ -278,13 +275,11 @@ GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
   while (LB.idx <= n) {
     const TValue *o = LB.i2v();
     switch (ttypetag(o)) {
-      case LUA_VTRUE:
-      case LUA_VFALSE: LAYOUT_HASH(LB, std::hash, gLuaTrait<bool>::fast); break;
-      case LUA_VSHRSTR:
+      case LUA_VTRUE: case LUA_VFALSE: LAYOUT_HASH(LB, std::hash, gLuaTrait<bool>::fast); break;
   #if defined(LUA_VBLOBSTR)
       case LUA_VBLOBSTR:
   #endif
-      case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
+      case LUA_VSHRSTR: case LUA_VLNGSTR: LAYOUT_HASH(LB, std::hash, gLuaTrait<const char *>::fast); break;
       case LUA_VNUMINT: LAYOUT_HASH(LB, std::hash, gLuaInteger::fast); break;
       case LUA_VNUMFLT: LAYOUT_HASH(LB, std::hash, gLuaNumber::fast); break;
       case LUA_VVECTOR2: LAYOUT_HASH(LB, std::hash, gLuaVec2<>::fast); break;
@@ -382,7 +377,7 @@ BIND_DEFN(spherical, glm::unit::spherical, gLuaNumCoT, gLuaNumCoT);
 MATRIX_DEFN(mat_add, operator+, LAYOUT_ADDITION_OP);
 MATRIX_DEFN(mat_sub, operator-, LAYOUT_ADDITION_OP);
 MATRIX_DEFN(mat_negate, operator-, LAYOUT_UNARY);
-GLM_BINDING_QUALIFIER(mat_mul) {  // @TODO: Reduce bloat!
+GLM_BINDING_QUALIFIER(mat_mul) {  // @BloatTodo
   GLM_BINDING_BEGIN
   const TValue *o = LB.i2v();
   switch (ttypetag(o)) {
@@ -620,7 +615,7 @@ GLM_BINDING_QUALIFIER(inverse) {
   GLM_BINDING_END
 }
 SYMMETRIC_MATRIX_DEFN(invertible, glm::invertible, LAYOUT_UNARY)  // @GLMMatrixExtensions
-ROTATION_MATRIX_DEFN(inverse_transform, glm::inverse_transform, LAYOUT_UNARY)
+ROTATION_MATRIX_DEFN(inverseTransform, glm::inverseTransform, LAYOUT_UNARY)
 #endif
 
 #if defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
@@ -1068,7 +1063,7 @@ SYMMETRIC_MATRIX_DEFN(findEigenvaluesSymReal, glm::findEigenvaluesSymReal, LAYOU
 GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
   GLM_BINDING_BEGIN
   glm::length_t dimensions = 0;
-  luaL_checktype(L, LB.idx, LUA_TTABLE);
+  luaL_checktype(LB.L, LB.idx, LUA_TTABLE);
   lua_rawgeti(LB.L, LB.idx, 1);  // Determine array dimensions
   if (glm_isvector(LB.L, -1, dimensions)) {
     lua_pop(LB.L, 1);
@@ -1162,7 +1157,7 @@ GLM_BINDING_QUALIFIER(modf) { /* @MathlibCompat */
   GLM_BINDING_BEGIN
   if (lua_isinteger(LB.L, LB.idx)) {
     lua_pushvalue(LB.L, LB.idx); /* number is its own integer part */
-    lua_pushnumber(L, 0); /* no fractional part */
+    lua_pushnumber(LB.L, 0); /* no fractional part */
     return 2;
   }
   PARSE_NUMBER_VECTOR(LB, glm::modf, LAYOUT_MODF, LAYOUT_MODF);
@@ -1235,16 +1230,16 @@ GLM_BINDING_QUALIFIER(clamp) {
 GLM_BINDING_QUALIFIER(min) { /* @MathlibCompat */
   GLM_BINDING_BEGIN
   const int n = LB.top_for_recycle(); /* number of arguments */
-  luaL_argcheck(L, n >= 1, 1, "value expected");
+  luaL_argcheck(LB.L, n >= 1, 1, "value expected");
 
   const TValue *o = LB.i2v();
   if (ttisnumber(o) || cvt2num(o)) {
     int imin = 1; /* index of current minimum value */
     for (int i = 2; i <= n; i++) {
-      if (lua_compare(L, i, imin, LUA_OPLT))
+      if (lua_compare(LB.L, i, imin, LUA_OPLT))
         imin = i;
     }
-    lua_pushvalue(L, imin);
+    lua_pushvalue(LB.L, imin);
     return 1;
   }
   PARSE_NUMBER_VECTOR(LB, glm::min, LAYOUT_MINMAX, LAYOUT_MINMAX);
@@ -1254,16 +1249,16 @@ GLM_BINDING_QUALIFIER(min) { /* @MathlibCompat */
 GLM_BINDING_QUALIFIER(max) { /* @MathlibCompat */
   GLM_BINDING_BEGIN
   const int n = LB.top_for_recycle(); /* number of arguments */
-  luaL_argcheck(L, n >= 1, 1, "value expected");
+  luaL_argcheck(LB.L, n >= 1, 1, "value expected");
 
   const TValue *o = LB.i2v();
   if (ttisnumber(o) || cvt2num(o)) {
     int imax = 1; /* index of current maximum value */
     for (int i = 2; i <= n; i++) {
-      if (lua_compare(L, imax, i, LUA_OPLT))
+      if (lua_compare(LB.L, imax, i, LUA_OPLT))
         imax = i;
     }
-    lua_pushvalue(L, imax);
+    lua_pushvalue(LB.L, imax);
     return 1;
   }
   PARSE_NUMBER_VECTOR(LB, glm::max, LAYOUT_MINMAX, LAYOUT_MINMAX);
@@ -1852,10 +1847,10 @@ GLM_BINDING_QUALIFIER(orthonormalize3) {  // @GLMVectorExtensions
   }
   GLM_BINDING_END
 }
-BIND_DEFN(spherical_encode, glm::spherical_encode, gLuaVec3<>)
-BIND_DEFN(spherical_decode, glm::spherical_decode, gLuaVec2<>)
-BIND_DEFN(octahedron_encode, glm::octahedron_encode, gLuaVec3<>)
-BIND_DEFN(octahedron_decode, glm::octahedron_decode, gLuaVec2<>)
+BIND_DEFN(sphericalEncode, glm::sphericalEncode, gLuaVec3<>)
+BIND_DEFN(sphericalDecode, glm::sphericalDecode, gLuaVec2<>)
+BIND_DEFN(octahedronEncode, glm::octahedronEncode, gLuaVec3<>)
+BIND_DEFN(octahedronDecode, glm::octahedronDecode, gLuaVec2<>)
 #endif
 
 #if defined(GTX_PERPENDICULAR_HPP)
@@ -1982,7 +1977,7 @@ GLM_BINDING_QUALIFIER(rotate) {
 
 // BIND_DEFN(rotate_slow, glm::rotate_slow, gLuaMat4x4<>, gLuaMat4x4<>::value_trait, gLuaDir3<>)
 BIND_DEFN(rotateFromTo, glm::rotateFromTo, gLuaVec3<>, gLuaVec3<>)  // @GLMQuatExtensions
-BIND_DEFN(shortest_equivalent, glm::shortest_equivalent, gLuaQuat<>)
+BIND_DEFN(shortestEquivalent, glm::shortestEquivalent, gLuaQuat<>)
 ROTATION_MATRIX_DEFN(transformDir, glm::transformDir, LAYOUT_UNARY, gLuaVec3<>)  // @GLMMatrixExtensions
 ROTATION_MATRIX_DEFN(transformPos, glm::transformPos, LAYOUT_UNARY, gLuaVec3<>)
 BIND_DEFN(transformPosPerspective, glm::transformPosPerspective, gLuaMat4x4<>, gLuaVec3<>)
@@ -2026,7 +2021,7 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
 MATRIX_TRANSFORM_DEFN(scale, glm::scale)
 MATRIX_TRANSFORM_DEFN(translate, glm::translate)
 BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // @GLMMatrixExtensions
-BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x3<>)
+BIND_DEFN(inverseWorldTensor, glm::inverseWorldTensor, gLuaVec3<>, gLuaMat3x3<>)
 #endif
 
 #if defined(GTX_VECTOR_ANGLE_HPP) || defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
@@ -2046,8 +2041,8 @@ BIND_DEFN(inverse_world_tensor, glm::inverse_world_tensor, gLuaVec3<>, gLuaMat3x
 
 NUMBER_VECTOR_QUAT_DEFNS(angle, glm::angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)
 ORIENTED_ANGLE_DEFN(orientedAngle, glm::orientedAngle)
-NUMBER_VECTOR_QUAT_DEFNS(angle_atan, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // @GLMVectorExtensions
-ORIENTED_ANGLE_DEFN(orientedAngle_atan, glm::__orientedAngle)
+NUMBER_VECTOR_QUAT_DEFNS(angleStable, glm::__angle, LAYOUT_BINARY, LAYOUT_BINARY, LAYOUT_UNARY_OR_BINARY)  // @GLMVectorExtensions
+ORIENTED_ANGLE_DEFN(orientedAngleStable, glm::__orientedAngle)
 #endif
 
 #if defined(GTX_VECTOR_QUERY_HPP)
@@ -2155,6 +2150,7 @@ LAYOUT_DEFN(student_t, std::student_t_distribution<raNum::type>, RAND_TRAIT, raA
 // discrete
 // piecewise_constant_distribution
 // piecewise_linear_distribution
+
 #endif
 /* }================================================================== */
 

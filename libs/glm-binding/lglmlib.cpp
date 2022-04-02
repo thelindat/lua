@@ -2,14 +2,14 @@
 ** $Id: lglmlib.cpp $
 ** GLM binding library
 **
-** Porting GLM-specific code between luaglm and cpp should be painless (or as
-** painless as possible). With key differences being:
-**  1. Static versus Dynamic typing (or 'auto' versus 'local' syntax);
+** Porting GLM-specific code between luaglm and C++ should be painless (or as
+** painless as possible) with key differences being:
+**  1. Static versus dynamic typing (or 'auto' versus 'local');
 **  2. Namespace resolution (::) versus table access (.) syntax. However, the
-**    'LUAGLM_EXT_SCOPE_RESOLUTION' build option removes this case at the cost
+**     LUAGLM_EXT_SCOPE_RESOLUTION build option removes this change at the cost
 **     of 'goto' no longer being a language feature.
-**  3. Constants in luaglm are stored by value, e.g. glm.pi. However in cpp,
-**    they are templated constant expressions, e.g., glm::pi<float>().
+**  3. Constants in luaglm are stored by value, e.g. glm.pi. In GLM they are
+**     constant expressions, e.g., glm::pi<float>().
 **  4. Floating-point literals (1.0f) vs. lua_Number (1.0).
 **
 ** See Copyright Notice in lua.h
@@ -68,7 +68,7 @@
 
 /// <summary>
 /// Pushes onto the stack the value GLM[k], where GLM is the binding library
-/// stored as an upvalue to this metamethod.
+/// stored as an upvalue to this function.
 /// </summary>
 static int glm_libraryindex(lua_State *L) {
   lua_settop(L, 2);

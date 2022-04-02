@@ -53,8 +53,6 @@ GLM_LUA_REG(forwardRH),
 GLM_LUA_REG(spherical),
 GLM_LUA_REG(all_equal),
 GLM_LUA_REG(any_notequal),
-//{ "allEqual", GLM_NAME(all_equal) },  // @COMPAT: Changed naming convention.
-//{ "anyNotEqual", GLM_NAME(any_notequal) },  // @COMPAT: Changed naming convention.
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Equals", GLM_NAME(all_equal) },
 #endif
@@ -71,7 +69,7 @@ GLM_LUA_REG(mat_sub),
 GLM_LUA_REG(mat_mul),
 GLM_LUA_REG(mat_negate),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "Clone", GLM_NAME() }, // @O3DEAlias: @TODO for O3DE library aliasing; added on as-needed basis.
+//{ "Clone", GLM_NAME() }, // @O3DEAlias: @TODO for O3DE library aliasing; included on as-needed basis.
 //{ "Add", GLM_NAME() }, // @O3DEAlias
 //{ "Subtract", GLM_NAME() }, // @O3DEAlias
 //{ "Unary", GLM_NAME() }, // @O3DEAlias
@@ -130,7 +128,7 @@ GLM_LUA_REG(toint),
 { "Ceil", GLM_NAME(ceil) },
 { "Floor", GLM_NAME(floor) },
 { "Round", GLM_NAME(round) },
-//{ "CeilToInt", GLM_NAME() }, // @UnityAlias: @TODO for Unity library aliasing; added on as-needed basis.
+//{ "CeilToInt", GLM_NAME() }, // @UnityAlias: @TODO for Unity library aliasing; included on as-needed basis.
 //{ "FloorToInt", GLM_NAME() }, // @UnityAlias
 //{ "RoundToInt", GLM_NAME() }, // @UnityAlias
 #endif
@@ -745,10 +743,10 @@ GLM_LUA_REG(pow4),
 #if defined(GTX_ORTHONORMALIZE_HPP)
 GLM_LUA_REG(orthonormalize),
 GLM_LUA_REG(orthonormalize3),  // @GLMVectorExtensions
-GLM_LUA_REG(spherical_encode),
-GLM_LUA_REG(spherical_decode),
-GLM_LUA_REG(octahedron_encode),
-GLM_LUA_REG(octahedron_decode),
+GLM_LUA_REG(sphericalEncode),
+GLM_LUA_REG(sphericalDecode),
+GLM_LUA_REG(octahedronEncode),
+GLM_LUA_REG(octahedronDecode),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetOrthogonalized", GLM_NAME(orthonormalize) },  // @O3DEAlias; Orthogonalize
 #endif
@@ -828,12 +826,15 @@ GLM_LUA_REG(transformPos),  // @GLMMatrixExtensions
 GLM_LUA_REG(transformPosPerspective),
 GLM_LUA_REG(transformDir),
 GLM_LUA_REG(rotateFromTo),  // @GLMQuatExtensions
-GLM_LUA_REG(shortest_equivalent),
+GLM_LUA_REG(shortestEquivalent),
 #if defined(LUAGLM_ALIASES_UNITY)
 { "MultiplyPoint", GLM_NAME(transformPosPerspective) },
 { "MultiplyPoint3x4", GLM_NAME(transformPos) },
 { "MultiplyVector", GLM_NAME(transformDir) },
 { "Rotate", GLM_NAME(rotate) },
+#endif
+#if defined(LUAGLM_ALIASES_O3DE)
+{ "shortest_equivalent", GLM_NAME(shortestEquivalent) },
 #endif
 #endif
 
@@ -855,7 +856,7 @@ GLM_LUA_REG(scale),
 // GLM_LUA_REG(scale_slow),  // @COMPAT: Defined in ext/matrix_transform.inl
 GLM_LUA_REG(translate),
 GLM_LUA_REG(trs),  // @GLMMatrixExtensions
-GLM_LUA_REG(inverse_world_tensor),
+GLM_LUA_REG(inverseWorldTensor),
 #if defined(LUAGLM_ALIASES_UNITY)
 { "Scale", GLM_NAME(scale) },
 { "Translate", GLM_NAME(translate) },
@@ -868,8 +869,8 @@ GLM_LUA_REG(inverse_world_tensor),
 #if defined(GTX_VECTOR_ANGLE_HPP) || defined(EXT_QUATERNION_TRIGONOMETRIC_HPP)
 GLM_LUA_REG(angle),
 GLM_LUA_REG(orientedAngle),
-GLM_LUA_REG(angle_atan),  // @GLMVectorExtensions
-GLM_LUA_REG(orientedAngle_atan),
+GLM_LUA_REG(angleStable),  // @GLMVectorExtensions
+GLM_LUA_REG(orientedAngleStable),
 #if defined(LUAGLM_ALIASES_SIMPLE)
 { "angle_to", GLM_NAME(angle) },
 { "signedAngle", GLM_NAME(orientedAngle) },
@@ -1082,12 +1083,12 @@ GLM_LUA_REG(conjugate),
 #if defined(EXT_QUATERNION_COMMON_HPP) || defined(MATRIX_HPP)
 GLM_LUA_REG(inverse),
 GLM_LUA_REG(invertible),  // @GLMMatrixExtensions
-GLM_LUA_REG(inverse_transform),
+GLM_LUA_REG(inverseTransform),
 #if defined(LUAGLM_ALIASES_O3DE)
 { "GetReciprocal", GLM_NAME(inverse) },
 { "GetReciprocalEstimate", GLM_NAME(inverse) },
 { "GetInverseFull", GLM_NAME(inverse) },  // @O3DEAlias; InvertFull; InvertFast
-{ "GetInverseTransform", GLM_NAME(inverse_transform) },  // @O3DEAlias: InvertTransform
+{ "GetInverseTransform", GLM_NAME(inverseTransform) },  // @O3DEAlias: InvertTransform
 #endif
 #endif
 

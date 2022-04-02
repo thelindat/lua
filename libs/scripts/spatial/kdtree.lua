@@ -71,8 +71,8 @@ local glm_aabb_intersectsSphere = glm.aabb.intersectsSphere
 
 -- "Infinity" may not be available in cases where the K-d Tree is serialized;
 -- Replace with some significantly large value.
-local glm_huge = glm.huge
-local __emptybounds = vec3(0)
+local glm_huge <const> = glm.huge
+local emptyBounds <const> = vec3(0)
 
 KDTree = setmetatable({
     DefaultLeafSize = 16, -- Maximum number of objects per leaf node.
@@ -330,16 +330,16 @@ function KDTree:DeleteNode(node)
         self.high[node] = 0
         self.cardinalAxis[node] = 0
         self.cardinalValues[node] = vec3(0, -glm_huge, glm_huge)
-        self.nodeMinBounds[node] = __emptybounds
-        self.nodeMaxBounds[node] = __emptybounds
+        self.nodeMinBounds[node] = emptyBounds
+        self.nodeMaxBounds[node] = emptyBounds
 
         self.availableNodeIndices[#self.availableNodeIndices + 1] = node
     else
         local leafNode = -node
 
         self.objects[leafNode] = table_wipe(self.objects[leafNode])
-        self.leafMinBounds[leafNode] = __emptybounds
-        self.leafMaxBounds[leafNode] = __emptybounds
+        self.leafMinBounds[leafNode] = emptyBounds
+        self.leafMaxBounds[leafNode] = emptyBounds
         self.availableLeafIndices[#self.availableLeafIndices + 1] = leafNode
     end
     return self
@@ -612,20 +612,20 @@ function KDTree:Split(pooler, intervals, itemSet, objectCount, minBounds, maxBou
     end
 
     -- Apply the axis,value partition to each interval: create sub-partitions
-    local _p = pooler:Pool()
-    local lowSplit,highSplit,iset,ocount,imin,imax
+    local part = pooler:Pool()
+    local lowSplit,highSplit,set,count,min,max
 
-    iset,ocount,imin,imax = intervals:PartitionIntervals(itemSet, partitions.Lower, axis, value, _p)
-    if ocount > 0 then
-        lowSplit = self:Split(pooler, intervals, iset, ocount, imin, imax)
+    set,count,min,max = intervals:PartitionIntervals(itemSet, partitions.Lower, axis, value, part)
+    if count > 0 then
+        lowSplit = self:Split(pooler, intervals, set, count, min, max)
     end
 
-    iset,ocount,imin,imax = intervals:PartitionIntervals(itemSet, partitions.Upper, axis, value, pooler:Recycle(_p))
-    if ocount > 0 then
-        highSplit = self:Split(pooler, intervals, iset, ocount, imin, imax)
+    set,count,min,max = intervals:PartitionIntervals(itemSet, partitions.Upper, axis, value, pooler:Recycle(part))
+    if count > 0 then
+        highSplit = self:Split(pooler, intervals, set, count, min, max)
     end
 
-    pooler:Release(_p)
+    pooler:Release(part)
     return self:NewNode(axis, value, minBounds, maxBounds, lowSplit, highSplit)
 end
 
@@ -742,7 +742,7 @@ function KDTree:GenericQuery(stack, F, arg0, arg1, yield)
     local pointer = 1 ; stack[1] = self.root
     while pointer > 0 do
         local node = stack[pointer] ; stack[pointer] = nil ; pointer = pointer - 1
-        if node < 0 then -- Node is a leaf, see what objects the ray intersects through.
+        if node < 0 then -- Node is a leaf, see what objects intersect
             local leafObjects = objects[-node]
             for i=1,#leafObjects do
                 local object = leafObjects[i]
@@ -750,7 +750,7 @@ function KDTree:GenericQuery(stack, F, arg0, arg1, yield)
                     yield(object)
                 end
             end
-        else -- Intersects the AABB of the node, process its children
+        else -- Intersects the node AABB, process children
             local nodeMin = nodeMinBnds[node]
             if F(nodeMin, nodeMaxBnds[node] or nodeMin, arg0, arg1) then
                 if low[node] ~= 0 then pointer = pointer + 1 ; stack[pointer] = low[node] end

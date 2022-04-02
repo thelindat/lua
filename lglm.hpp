@@ -1,22 +1,19 @@
 /*
-** $Id: lglm.h $
-** Library & API definitions for LuaGLM.
-**
-** All functions defined in this header are expected to have C++ linkage
-** and are to be isolated from the Lua core.
+** $Id: lglm.hpp $
+** Library & API definitions for Lua/GLM interfacing.
 **
 ** See Copyright Notice in lua.h
 */
-#ifndef lglm_h
-#define lglm_h
+#ifndef lglm_hpp
+#define lglm_hpp
 
 #include "lua.hpp"
 #include <glm/glm.hpp>
 
 /*
 ** @COMPAT: Fix for missing "ext/quaternion_common.hpp" include in type_quat.hpp
-**  was introduced in 0.9.9.9. Note, "detail/qualifier.hpp" forward declares the
-**  quaternion type so this include must be placed before "type_quat.hpp".
+** was introduced in 0.9.9.9. Note, "detail/qualifier.hpp" forward declares the
+** quaternion type so this include must be placed before "type_quat.hpp".
 */
 #if GLM_VERSION < 999
   #include <glm/gtc/quaternion.hpp>
@@ -55,10 +52,11 @@
 #endif
 
 /*
-** @COMPAT: defaulted constructors fixed in PR #1027
-**  Compensating for that change will require expanding the glmVector, glmMatrix,
-**  and GLM boundary structs to handle the implicitly deleted constructors and
-**  assignment operators.
+** @COMPAT: defaulted constructors fixed in PR #1027.
+**
+** Compensating for GLM versions/commits without this fix will require expanding
+** the glmVector, glmMatrix, and GLM boundary bits to handle the implicitly
+** deleted constructors and assignment operators. Low priority.
 */
 #if GLM_HAS_DEFAULTED_FUNCTIONS && GLM_CONFIG_DEFAULTED_FUNCTIONS == GLM_DISABLE
   #error "GLM error: invalid GLM_FORCE_CTOR_INIT configuration (WIP)"
@@ -74,19 +72,19 @@
 @@ LUAGLM_API A mark for all core GLM API functions.
 */
 #if !defined(LUAGLM_API)
-  #define LUAGLM_API LUA_API
+#define LUAGLM_API LUA_API
 #endif
 
-/* Floating point glm-operation type */
+/* Floating point glm type */
 typedef LUAGLM_FLOAT_TYPE glm_Float;
 
-/* Integer glm-operation type */
+/* Integer glm type */
 typedef LUAGLM_INT_TYPE glm_Integer;
 
 /*
 @@ LUAGLM_Q Specifies how vector, quat, and matrix types are qualified in terms
 ** of alignment and precision by the runtime/API. In practice, this is used to
-** allow libraries to use different GLM alignment configurations.
+** allow libraries to use different alignment configurations.
 */
 #if !defined(LUAGLM_Q)
 #if defined(LUAGLM_FORCES_ALIGNED_GENTYPES)
@@ -101,7 +99,7 @@ typedef LUAGLM_INT_TYPE glm_Integer;
 #endif
 #endif
 
-/* lib:LuaGLM requirements */
+/* Labels */
 #define LUAGLM_STRING_INTEGER "integer"
 #define LUAGLM_STRING_NUMBER "number"
 #define LUAGLM_STRING_VECTOR "vector"
@@ -122,17 +120,17 @@ typedef LUAGLM_INT_TYPE glm_Integer;
 */
 
 /*
-** Return true if the element at the given index is a vector; setting "length"
-** to length the vector.
+** Return true if the value at the given index is a vector, setting 'length' to
+** the dimension count of the vector.
 */
 LUAGLM_API bool glm_isvector(lua_State *L, int idx, glm::length_t &length);
 
-/* Return true if the element at the given index is a quaternion. */
+/* Return true if the value at the given index is a quaternion. */
 LUAGLM_API bool glm_isquat(lua_State *L, int idx);
 
 /*
-** Return true if the element at the given index is a matrix; setting
-** "type" to the type of matrix; see LUAGLM_MATRIX_TYPE.
+** Return true if the value at the given index is a matrix, setting 'type' to
+** the type of matrix. See LUAGLM_MATRIX_TYPE.
 */
 LUAGLM_API bool glm_ismatrix(lua_State *L, int idx, glm::length_t &type);
 
@@ -144,9 +142,9 @@ LUAGLM_API int glm_pushvec4(lua_State *L, const glm::vec<4, glm_Float, LUAGLM_Q>
 LUAGLM_API int glm_pushquat(lua_State *L, const glm::qua<glm_Float, LUAGLM_Q> &q);
 
 /*
-** Convert the element at the given index into a vector/quaternion if
-** permissible, i.e., the dimensions of element is greater-than-or-equal to the
-** dimensions of the conversion.
+** Convert the value at the given index into a GLM value if permissible, i.e.,
+** the dimension count of the value is greater-than-or-equal to the dimension
+** requirement of the function.
 */
 LUAGLM_API glm::vec<1, glm_Float, LUAGLM_Q> glm_tovec1(lua_State *L, int idx);
 LUAGLM_API glm::vec<2, glm_Float, LUAGLM_Q> glm_tovec2(lua_State *L, int idx);
@@ -166,9 +164,9 @@ LUAGLM_API int glm_pushmat4x3(lua_State *L, const glm::mat<4, 3, glm_Float, LUAG
 LUAGLM_API int glm_pushmat4x4(lua_State *L, const glm::mat<4, 4, glm_Float, LUAGLM_Q> &m);
 
 /*
-** Convert the element at the given index into a matrix if permissible, i.e.,
-** the number of columns to the element is greater-than-or-equal to the
-** dimensions of the conversion.
+** Convert the value at the given index into a matrix if permissible, i.e., the
+** number of columns to the element is greater-than-or-equal to the dimension
+** requirement of the function.
 */
 LUAGLM_API glm::mat<2, 2, glm_Float, LUAGLM_Q> glm_tomat2x2(lua_State *L, int idx);
 LUAGLM_API glm::mat<2, 3, glm_Float, LUAGLM_Q> glm_tomat2x3(lua_State *L, int idx);
@@ -318,7 +316,7 @@ LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
 };
 
 /*
-** Pushes a vector 'v' with dimensions 'd' onto the stack. Returning one on
+** Pushes a vector value 'v' with dimension 'd' onto the stack. Returning one on
 ** success (i.e., valid dimension argument), zero otherwise.
 **
 ** @NOTE: If Lua is compiled with LUA_USE_APICHECK, a runtime error will be
@@ -327,11 +325,11 @@ LUAGLM_ALIGNED_TYPE(struct, glmMatrix) {
 LUAGLM_API int glm_pushvec(lua_State *L, const glmVector &v, glm::length_t d);
 
 /*
-** Creates a new Matrix object, represented by 'm', and places it onto the stack.
-** Returning one on success, zero otherwise (invalid glmMatrix dimensions).
+** Creates a new Matrix object, populated by 'm', and places it onto the stack.
+** Returning one on success and zero otherwise (invalid glmMatrix dimensions).
 **
 ** @NOTE: If Lua is compiled with LUA_USE_APICHECK, a runtime error will be
-**  thrown if an invalid matrix (packed-)dimension is supplied.
+** thrown if an invalid matrix (packed-)dimension is supplied.
 */
 LUAGLM_API int glm_pushmat(lua_State *L, const glmMatrix &m);
 

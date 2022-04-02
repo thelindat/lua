@@ -12,8 +12,8 @@
 #include <glm/glm.hpp>
 
 /*
-** @GLMFix: GCC forbids forceinline on variadic functions. Compiling with
-** glm/gtx/string_cast with GLM_FORCE_INLINE will lead to errors
+** @GLMFix: GCC forbids forceinline on variadic functions and gtx/string_cast
+** will not compile with GLM_FORCE_INLINE enabled.
 */
 #define LUAGLM_STRFUNC_QUALIFIER
 

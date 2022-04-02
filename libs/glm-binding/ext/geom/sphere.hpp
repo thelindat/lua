@@ -811,7 +811,7 @@ namespace glm {
         rSq = s.r * s.r + eps;
 
         // A sphere is uniquely defined by four points: one of the five points
-        // above is now redundant and can be removed from sp.
+        // above is now redundant and can be removed.
         if (redundant != 4 && (sp[redundant] < i || expendable[redundant])) {
           sp[redundant] = i;
           expendable[redundant] = false;

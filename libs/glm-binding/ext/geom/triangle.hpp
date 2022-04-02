@@ -175,7 +175,7 @@ namespace glm {
   }
 
   /// <summary>
-  /// Return the center of the triangle.
+  /// Compute the centroid of the triangle.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
   GLM_GEOM_QUALIFIER vec<L, T, Q> centroid(const Triangle<L, T, Q> &t) {
@@ -334,7 +334,7 @@ namespace glm {
   /// Helper
   /// </summary>
   template<typename T>
-  static GLM_INLINE T triangleArea2D(T x1, T y1, T x2, T y2, T x3, T y3) {
+  GLM_GEOM_QUALIFIER T triangleArea2D(T x1, T y1, T x2, T y2, T x3, T y3) {
     return (x1 - x2) * (y2 - y3) - (x2 - x3) * (y1 - y2);
   }
 

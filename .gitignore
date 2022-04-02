@@ -19,6 +19,10 @@ manual/manual.html
 temp
 minilua.hpp
 
+# WASM
+lua.js
+lua.wasm
+
 # MSYS
 lua.exe
 luac.exe

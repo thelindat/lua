@@ -44,10 +44,9 @@ local glm_midpoint = function(x, y) return x + 0.5 * (y - x) end
 
 -- "Infinity" may not be available in cases where the Octree is serialized;
 -- Replace with some significantly large value.
-local glm_huge = glm.huge
-
-local __emptybounds = vec3(0)
-local __emptycenter = vec4(0)
+local glm_huge <const> = glm.huge
+local emptyBounds <const> = vec3(0)
+local emptyCenter <const> = vec4(0)
 
 Octree = setmetatable({
     DefaultLeafSize = 16, -- default leaf size.
@@ -294,9 +293,9 @@ function Octree:Recycle(node)
     self.availableIndices[#self.availableIndices + 1] = node
 
     self.parent[node] = 0
-    self.center[node] = __emptycenter
-    self.nodeMinBounds[node] = __emptybounds
-    self.nodeMaxBounds[node] = __emptybounds
+    self.center[node] = emptyCenter
+    self.nodeMinBounds[node] = emptyBounds
+    self.nodeMaxBounds[node] = emptyBounds
     self.hasObjects[node] = false
     return self
 end
@@ -824,7 +823,7 @@ RecursiveNeighborSearch = function(self, node, point, neighborList)
         local visited = 0
         local continue = true
         while continue do
-            local nextBest,nextDist = 0,glm.huge
+            local nextBest,nextDist = 0,glm_huge
             for i=1,8 do
                 local childNode = children[i]
                 if ((visited >> i) & 1) == 0 then

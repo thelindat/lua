@@ -8,9 +8,9 @@
 local OrderedList
 
 local glm = glm
-
 local table = table
 local table_insert = table.insert
+local table_wipe = table.wipe or function() return {} end
 
 OrderedList = setmetatable({
     SequentialBinaryThreshold = 32,
@@ -55,8 +55,8 @@ function OrderedList:Clear(maxSize)
 
     self.worstDist = glm.huge
     self.maxSize = size
-    self.data = table.wipe(self.data)
-    self.dataIndexScores = table.wipe(self.dataIndexScores)
+    self.data = table_wipe(self.data)
+    self.dataIndexScores = table_wipe(self.dataIndexScores)
     return self
 end
 

@@ -766,7 +766,7 @@ Ordered by priority.
 1. Rewrite build scripts.
 1. Update the Benchmarking section.
 1. Optimize `glm_createMatrix`. Profiling case '4x4 matrix creation (lua\_Alloc)' is the one of the slowest operations in the added vector/matrix API. Worse when using the default Windows allocator.
-1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported.
+1. Improve `lua_CFloatX` struct definitions, i.e., mimic `glm::detail::storage` when anonymous structs are supported (annotated `ImplicitAlign`).
 1. Utility API that resembles `glUniformMatrix*v`-style functions, i.e., extracting/parsing array of matrices/vectors.
 1. [ext](libs/glm-binding/ext): Improve SIMD support.
 1. [geom](libs/glm-binding/ext/geom): Move to new namespace (library pollutes glm enough).

@@ -106,6 +106,7 @@ q = quat()
 -- Generic quaternion constructor. Note, "qua" also aliased to quat.
 q = quat(w --[[ number ]], x --[[ number ]], y --[[ number ]], z --[[ number ]])
 q = quat(xyz --[[ vec3 ]], w --[[ number ]])
+q = quat(xyzw --[[ vec4 --]])
 
 -- The shortest arc quaternion that rotates a source direction to coincide with
 -- the target.
@@ -671,8 +672,8 @@ vecN = tgamma(v --[[ vecN ]])
 ```lua
 -- Note, mouse coordinates are on a [-1, 1] scale
 vec3 = rayPicking(
-    cam_direction --[[ vec3 ]],
-    cam_up --[[ vec3 ]],
+    camForward --[[ vec3 ]],
+    camUp --[[ vec3 ]],
     fov --[[ number ]],
     aspectRatio --[[ number ]],
     nearDof --[[ number ]],
@@ -875,11 +876,11 @@ mat4x4 = trs(
 )
 ```
 
-### inverse\_world\_tensor
+### inverseWorldTensor
 
 ```lua
 -- Return the inertia tensor in global coordinates
-mat3x3 = inverse_world_tensor(inverseTensor --[[ vec3 --]], localToWorld --[[ mat3x3 --]])
+mat3x3 = inverseWorldTensor(inverseTensor --[[ vec3 --]], localToWorld --[[ mat3x3 --]])
 ```
 
 ## glm/gtc/epsilon.hpp
@@ -1165,11 +1166,11 @@ quat = rotateTowards(
 )
 ```
 
-### shortest\_equivalent
+### shortestEquivalent
 
 ```lua
 -- Return the shortest equivalent of the rotation.
-quat = shortest_equivalent(q --[[ quat ]])
+quat = shortestEquivalent(q --[[ quat ]])
 ```
 
 ### Aliases
@@ -1202,23 +1203,23 @@ vecN = barycentric(
 rads = angle2(x --[[ vecN ]], y --[[ vecN ]])
 ```
 
-### angle\_atan
+### angleStable
 
 ```lua
 -- glm::angle that is numerically stable at all angles.
-rads = angle_atan(x --[[ number ]], y --[[ number ]])
-rads = angle_atan(x --[[ vecN ]], y --[[ vecN ]])
-rads = angle_atan(x --[[ quat ]])
-rads = angle_atan(x --[[ quat ]], y --[[ quat ]])
+rads = angleStable(x --[[ number ]], y --[[ number ]])
+rads = angleStable(x --[[ vecN ]], y --[[ vecN ]])
+rads = angleStable(x --[[ quat ]])
+rads = angleStable(x --[[ quat ]], y --[[ quat ]])
 ```
 
-### orientedAngle\_atan
+### orientedAngleStable
 
 ```lua
--- glm::orientedAngle implementation that uses angle_atan
-rads = orientedAngle_atan(x --[[ vec2 --]], y --[[ vec2 --]])
-rads = orientedAngle_atan(x --[[ vec3 --]], y --[[ vec3 --]], ref --[[ vec3 --]])
-rads = orientedAngle_atan(x --[[ quat --]], y --[[ quat --]], ref --[[ vec3 --]])
+-- glm::orientedAngle implementation that uses angleStable
+rads = orientedAngleStable(x --[[ vec2 --]], y --[[ vec2 --]])
+rads = orientedAngleStable(x --[[ vec3 --]], y --[[ vec3 --]], ref --[[ vec3 --]])
+rads = orientedAngleStable(x --[[ quat --]], y --[[ quat --]], ref --[[ vec3 --]])
 ```
 
 ### Aliases

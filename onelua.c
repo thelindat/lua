@@ -2,7 +2,7 @@
 * one.c -- Lua core, libraries, and interpreter in a single file
 */
 #if !defined(__cplusplus)
-  #error "onelua must be compiled with cplusplus for GLM integration"
+#error "onelua must be compiled with cplusplus for GLM integration"
 #endif
 
 /* default is to build the full interpreter */

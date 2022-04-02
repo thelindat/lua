@@ -9,9 +9,6 @@
 --]]
 local SequentialSpatial
 
-local vec3 = vec3
-
-local table = table
 local table_remove = table.remove
 local table_wipe = table.wipe or function() return {} end
 

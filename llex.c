@@ -602,7 +602,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       case ':': {
         ls_next(ls);
         /*
-        @@ LUAGLM_EXT_SCOPE_RESOLUTION: Replace TK_DBCOLON tokens with field
+        @@ LUAGLM_EXT_SCOPE_RESOLUTION Replace TK_DBCOLON tokens with field
         ** selection (e.g., emulate C++ scope resolution operator). Note, this
         ** invalidates the 'label' rule in the grammar.
         */

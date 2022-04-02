@@ -12,11 +12,11 @@
 
 /* Ensure linkage specification is defined; compensate for unity builds. */
 #if !defined(LUA_API_LINKAGE)
-  #if defined(LUA_C_LINKAGE)
-    #define LUA_API_LINKAGE "C"
-  #else
-    #define LUA_API_LINKAGE "C++"
-  #endif
+#if defined(LUA_C_LINKAGE)
+  #define LUA_API_LINKAGE "C"
+#else
+  #define LUA_API_LINKAGE "C++"
+#endif
 #endif
 
 #include <glm/glm.hpp>
@@ -281,14 +281,14 @@ static LUA_INLINE const TValue *glm_i2v(const lua_State *L, int idx) {
 /// </summary>
 class lua_LockScope {
 private:
-  lua_State *L;
+  lua_State *m_state;
 public:
-  lua_LockScope(lua_State *L_) : L(L_) { lua_lock(L); }
+  lua_LockScope(lua_State *L) : m_state(L) { lua_lock(m_state); }
   ~lua_LockScope() { Unlock(); }
   inline void Unlock() {
-    if (L != nullptr) {
-      lua_unlock(L);
-      L = nullptr;
+    if (m_state != nullptr) {
+      lua_unlock(m_state);
+      m_state = nullptr;
     }
   }
 };
@@ -305,17 +305,21 @@ public:
 #define LUA_BIND_DECL static
 
 /* Extended Lua binding declaration (always inline when possible) */
-#define LUA_BIND_QUALIFIER LUA_BIND_DECL GLM_INLINE
+#if defined(LUA_DEBUG)
+  #define LUA_BIND_QUALIFIER LUA_BIND_DECL
+#else
+  #define LUA_BIND_QUALIFIER LUA_BIND_DECL GLM_INLINE
+#endif
 
 /*
 ** Extended Lua binding declaration (never inline).
 **
 ** Prevent the compiler from inlining the 'heavier' interface declarations.
 ** For instance, tointegerx and tonumberx are relatively heavy, will interfere
-** with otherwise-nice codegen, and used in most binding functions (satisfying
-** the lmathlib superset requirement).
+** with otherwise-nice codegen, and are used in most binding functions (to
+** satisfy the lmathlib superset requirement).
 */
-#define LUA_BIND_QUALIFIER_NIL LUA_BIND_DECL GLM_NEVER_INLINE
+#define LUA_BIND_QUALIFIER_NOINLINE LUA_BIND_DECL GLM_NEVER_INLINE
 
 /* Wrapper for LUAGLM_TYPE_SANITIZE */
 #if defined(LUAGLM_TYPE_SANITIZE)
@@ -499,7 +503,7 @@ struct gLuaBase {
   /// lua_tointeger with additional rules for casting booleans.
   /// </summary>
   template<typename T = lua_Integer>
-  LUA_BIND_QUALIFIER_NIL T tointegerx(lua_State *L_, int idx_) {
+  LUA_BIND_QUALIFIER_NOINLINE T tointegerx(lua_State *L_, int idx_) {
     const TValue *o = glm_i2v(L_, idx_);
     switch (ttypetag(o)) {
       case LUA_VTRUE: return static_cast<T>(1);
@@ -525,7 +529,7 @@ struct gLuaBase {
   /// optimized, luaV_tonumber_ is not an exported function.
   /// </summary>
   template<typename T = lua_Number>
-  LUA_BIND_QUALIFIER_NIL T tonumberx(lua_State *L_, int idx_) {
+  LUA_BIND_QUALIFIER_NOINLINE T tonumberx(lua_State *L_, int idx_) {
     const TValue *o = glm_i2v(L_, idx_);
     switch (ttypetag(o)) {
       case LUA_VTRUE: return static_cast<T>(1);
@@ -779,7 +783,7 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   }
 
   template<typename U>
-  LUA_BIND_QUALIFIER_NIL typename std::enable_if<std::is_integral<U>::value && !std::is_same<U, bool>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
+  LUA_BIND_QUALIFIER_NOINLINE typename std::enable_if<std::is_integral<U>::value && !std::is_same<U, bool>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
     lua_LockScope _lock(LB.L);
     setivalue(s2v(LB.L->top), LUA_NARROW_CAST(LB.L, lua_Integer, v));
     api_incr_top(LB.L);
@@ -787,14 +791,14 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   }
 
   template<typename U>
-  LUA_BIND_QUALIFIER_NIL typename std::enable_if<std::is_floating_point<U>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
+  LUA_BIND_QUALIFIER_NOINLINE typename std::enable_if<std::is_floating_point<U>::value, int>::type PushPrimitive(const gLuaBase &LB, U v) {
     lua_LockScope _lock(LB.L);
     setfltvalue(s2v(LB.L->top), static_cast<lua_Number>(v));
     api_incr_top(LB.L);
     return 1;
   }
 
-  LUA_BIND_QUALIFIER_NIL int PushPrimitive(const gLuaBase &LB, bool b) {
+  LUA_BIND_QUALIFIER_NOINLINE int PushPrimitive(const gLuaBase &LB, bool b) {
     lua_LockScope _lock(LB.L);
     settt_(s2v(LB.L->top), b ? LUA_VTRUE : LUA_VFALSE);
     api_incr_top(LB.L);
@@ -807,6 +811,16 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
   LUA_BIND_QUALIFIER int Push(const gLuaBase &LB, T v) {
     return PushPrimitive(LB, v);
   }
+};
+
+/// <summary>
+/// Abstraction (shared properties) for trait constraints.
+/// </summary>
+template<class Tr>
+struct gLuaConstraint : gLuaTrait<typename Tr::type, false> {
+  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return Tr::Label(); }
+  LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
+  LUA_BIND_QUALIFIER GLM_CONSTEXPR typename Tr::type Zero() { return Tr::Zero(); }
 };
 
 /// <summary>
@@ -1021,9 +1035,8 @@ struct gLuaTrait<glm::qua<T, Q>, FastPath> : gLuaAbstractTrait<glm::qua<T, Q>> {
 /// <summary>
 /// Trait for glm::mat<C, R, T, Q> types.
 ///
-/// @TODO: As matrix objects are mutable: column-vectors may be added/removed,
-/// the matrix object being recycled, etc., lua_LockScope stubs *should* be
-/// placed around all matrix object use.
+/// @TODO: As matrix objects are mutable (or may be recycled): lua_LockScope
+/// stubs *should* be placed around all matrix object use.
 /// </summary>
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C, R, T, Q>> {
@@ -1164,13 +1177,9 @@ struct gEpsilon : gLuaTrait<T, FastPath> {
 /// often reflects an assert clause within the GLM implementation.
 /// </summary>
 template<class Tr, bool Inclusive = true, bool IncludeEps = false>
-struct gPositiveConstraint : gLuaTrait<typename Tr::type, false> {
+struct gPositiveConstraint : gLuaConstraint<Tr> {
   using safe = gPositiveConstraint<typename Tr::safe, Inclusive, IncludeEps>;  // @SafeBinding
   using fast = gPositiveConstraint<typename Tr::fast, Inclusive, IncludeEps>;  // @UnsafeBinding
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return Tr::Label(); }
-
-  LUA_BIND_QUALIFIER GLM_CONSTEXPR typename Tr::type Zero() { return Tr::Zero(); }
-  LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_BIND_QUALIFIER typename Tr::type Next(lua_State *L, int &idx) {
     using T = typename Tr::type;
     const T min = T(0) + (IncludeEps ? std::numeric_limits<typename Tr::value_type>::epsilon() : 0);
@@ -1187,13 +1196,9 @@ struct gPositiveConstraint : gLuaTrait<typename Tr::type, false> {
 /// @GLMAssert: Specialization for arguments between zero and one.
 /// </summary>
 template<class Tr, bool MinInclusive = true, bool MaxInclusive = true>
-struct gRelativeConstraint : gLuaTrait<typename Tr::type, false> {
+struct gRelativeConstraint : gLuaConstraint<Tr> {
   using safe = gRelativeConstraint<typename Tr::safe, MinInclusive, MaxInclusive>;  // @SafeBinding
   using fast = gRelativeConstraint<typename Tr::fast, MinInclusive, MaxInclusive>;  // @UnsafeBinding
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return Tr::Label(); }
-
-  LUA_BIND_QUALIFIER GLM_CONSTEXPR typename Tr::type Zero() { return Tr::Zero(); }
-  LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_BIND_QUALIFIER typename Tr::type Next(lua_State *L, int &idx) {
     using T = typename Tr::type;
     const T value = Tr::Next(L, idx);
@@ -1209,13 +1214,9 @@ struct gRelativeConstraint : gLuaTrait<typename Tr::type, false> {
 /// @GLMAssert: Specialization that ensures values cannot be zero (fmod)
 /// </summary>
 template<class Tr>
-struct gZeroConstraint : gLuaTrait<typename Tr::type, false> {
+struct gZeroConstraint : gLuaConstraint<Tr> {
   using safe = gZeroConstraint<typename Tr::safe>;  // @SafeBinding
   using fast = gZeroConstraint<typename Tr::fast>;  // @UnsafeBinding
-  LUA_BIND_DECL LUA_CONSTEXPR const char *Label() { return Tr::Label(); }
-
-  LUA_BIND_QUALIFIER GLM_CONSTEXPR typename Tr::type Zero() { return Tr::Zero(); }
-  LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) { return Tr::Is(L, idx); }
   LUA_BIND_QUALIFIER typename Tr::type Next(lua_State *L, int &idx) {
     using T = typename Tr::type;
     const T value = Tr::Next(L, idx);
@@ -1570,9 +1571,9 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 ** Generalized vector parser.
 **
 ** @NOTE: Due to the nature of storing most/all data as floating point types,
-**  bitfield operations on vectors may be inconsistent with float -> int -> float
-**  casting. Therefore, all INTEGER_VECTOR definitions are considered unsafe
-**  when the function isn't explicitly operating on lua_Integer types.
+** bitfield operations on vectors may be inconsistent with float -> int -> float
+** casting. Therefore, all INTEGER_VECTOR definitions are considered unsafe when
+** the function isn't explicitly operating on lua_Integer types.
 */
 #define PARSE_VECTOR_TYPE(LB, F, IType, FType, VType, ILayout, FLayout, VLayout, ...)     \
   LUA_MLM_BEGIN                                                                           \
@@ -1598,7 +1599,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 #define PARSE_INTEGER_NUMBER_VECTOR(LB, F, ILayout, FLayout, VLayout, ...) \
   PARSE_VECTOR_TYPE(LB, F, gLuaInteger::value_type, gLuaNumber::value_type, gLuaVec3<>::value_type, ILayout, FLayout, VLayout, ##__VA_ARGS__)
 
-/* glm::function defined over the vector & quaternion space: vec1, vec2, vec3, vec4, quat */
+/* glm::function defined for vectors and quaternions */
 #define PARSE_NUMBER_VECTOR_QUAT(LB, F, FLayout, VLayout, QLayout, ...)                    \
   LUA_MLM_BEGIN                                                                            \
   switch (ttypetag((LB).i2v())) {                                                          \
@@ -1648,8 +1649,8 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
 
 /*
 ** a GLM function that operates on rotation matrices. These operations are
-** intended to be an analogue to generic (Affine)Transform wrappers that
-** abstract away TRS vs. explicit matrix representation etc.
+** intended to be an analogue to (Affine)Transform wrappers that abstract away
+** TRS vs. matrix representation etc.
 **
 ** All geometric objects must support multiplication operations for quats,
 ** mat3x3, mat3x4, mat4x3, and mat4x4.
@@ -1658,7 +1659,7 @@ template<typename T = glm_Float> using gLuaDir3 = gLuaTrait<glm::vec<3, T, LUAGL
   LUA_MLM_BEGIN                                                                             \
   const TValue *_tv = (LB).i2v();                                                           \
   switch (ttypetag(_tv)) {                                                                  \
-    case LUA_VQUAT: ArgLayout(LB, F, gLuaQuat<>, ##__VA_ARGS__); break;                     \
+    case LUA_VQUAT: ArgLayout(LB, F, gLuaQuat<>::fast, ##__VA_ARGS__); break;               \
     case LUA_VMATRIX: {                                                                     \
       switch (mvalue_dims(_tv)) {                                                           \
         case LUAGLM_MATRIX_3x3: ArgLayout(LB, F, gLuaMat3x3<>::fast, ##__VA_ARGS__); break; \

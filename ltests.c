@@ -1000,7 +1000,11 @@ static int stacklevel (lua_State *L) {
   lua_pushinteger(L, stacksize(L));
   lua_pushinteger(L, L->nCcalls);
   lua_pushinteger(L, L->nci);
+#if defined(LUA_USE_C89) && !defined(_WIN32)
+  lua_pushinteger(L, (unsigned long)&a);
+#else
   lua_pushinteger(L, cast(lua_Integer, cast(intptr_t, &a)));  /* @LuaGLM: changed pointer-casting */
+#endif
   return 5;
 }
 
@@ -1129,8 +1133,11 @@ static int pushuserdata (lua_State *L) {
 
 
 static int udataval (lua_State *L) {
-  /* @LuaGLM: changed pointer-casting */
+#if defined(LUA_USE_C89) && !defined(_WIN32)
+  lua_pushinteger(L, cast(long, lua_touserdata(L, 1)));
+#else  /* @LuaGLM: changed pointer-casting */
   lua_pushinteger(L, cast(lua_Integer, cast(intptr_t, lua_touserdata(L, 1))));
+#endif
   return 1;
 }
 
@@ -1475,7 +1482,11 @@ static int runC (lua_State *L, lua_State *L1, const char *pc) {
     }
     else if EQ("func2num") {
       lua_CFunction func = lua_tocfunction(L1, getindex);
+#if defined(LUA_USE_C89) && !defined(_WIN32)
+      lua_pushnumber(L1, cast_sizet(func));
+#else
       lua_pushnumber(L1, cast_num(cast(intptr_t, func)));  /* @LuaGLM: changed pointer-casting */
+#endif
     }
     else if EQ("getfield") {
       int t = getindex;

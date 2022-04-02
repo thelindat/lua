@@ -234,7 +234,6 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType lerpAngle(genType a, genType b, genType t) {
     GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'lerpAngle' only accept floating-point inputs");
-
     const genType dt = loopRepeat((b - a), two_pi<genType>());
     return lerp(a, a + (dt > pi<genType>() ? dt - two_pi<genType>() : dt), t);
   }
@@ -266,7 +265,6 @@ namespace glm {
     GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'moveTowards' only accept floating-point inputs");
     if (abs(target - current) <= maxDist)
       return target;
-
     return current + sign(target - current) * maxDist;
   }
 
@@ -376,9 +374,7 @@ namespace glm {
 
   template<typename T>
   GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, T>::type imod(T x, T y) {
-    if (y == T(0))
-      return T(0);  // attempt to perform 'n % 0'
-    return ((x % y) + y) % y;
+    return detail::exactly_zero(y) ? T(0) : ((x % y) + y) % y;  // attempt to perform 'n % 0'
   }
 
   template<typename T>
@@ -393,7 +389,7 @@ namespace glm {
 
   template<typename T>
   GLM_FUNC_QUALIFIER typename std::enable_if<std::is_integral<T>::value, T>::type pow(T x, uint y) {
-    if (y == T(0))
+    if (detail::exactly_zero(y))
       return x >= T(0) ? T(1) : T(-1);
 
     T result = x;

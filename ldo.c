@@ -60,7 +60,7 @@
 ** and all other caught exceptions (ellipses catch) are programming errors that
 ** should lead to panics.
 **
-@@ LUA_CPP_EXCEPTIONS: If enabled, LUAI_THROW throws a checked exception instead
+@@ LUA_CPP_EXCEPTIONS If enabled, LUAI_THROW throws a checked exception instead
 ** of a lua_longjmp + ellipses-catch. This allows more flexibility when dealing
 ** with libraries compiled with C++ and properly maintaining the Lua stack.
 */

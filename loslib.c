@@ -243,8 +243,7 @@ static int os_nanotime(lua_State *L) {
 #endif
 
 /*
-@@ LUA_SYS_RDTSC: Sample the rdtsc instruction and return the processor
-** timestamp.
+@@ LUA_SYS_RDTSC Sample the rdtsc instruction and return the processor timestamp
 **
 ** @NVC: rdtsc is not supported, see '7.4. x86-64 ABM Intrinsics', disable
 ** everything for now (@TODO: expose __rdtscp).

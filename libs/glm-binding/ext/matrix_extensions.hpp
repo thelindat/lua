@@ -89,9 +89,11 @@ namespace glm {
   }
 
   /// <summary>
-  /// Transforms the given point vector by this matrix M, i.e, returns: M * (x, y, z, 1).
+  /// Transforms the given point vector by this matrix M, i.e,
+  /// computes M * (x, y, z, 1).
   ///
-  /// This function does not divide by w, or output it, so it cannot have a projection.
+  /// This function does not divide by w, or output it, so it cannot have a
+  /// projection.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> transformPos(const mat<C, R, T, Q> &m, const vec<3, T, Q> &v) {
@@ -113,10 +115,6 @@ namespace glm {
     return operator*(m, v);
   }
 
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> transformPos(const qua<T, Q> &q, const vec<3, T, Q> &v) {
-    return operator*(q, v);
-  }
 
   /// <summary>
   /// Transforms a position by a mat4x4 with a perspective divide.
@@ -129,10 +127,11 @@ namespace glm {
   }
 
   /// <summary>
-  /// Transforms the given direction vector by this matrix m, i.e, returns
+  /// Transforms the given direction vector by this matrix m, i.e, computes
   /// M * (x, y, z, 0).
   ///
-  /// This function does not divide by w or output it, it cannot have a projection
+  /// This function does not divide by w or output it, it cannot have a
+  /// projection
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> transformDir(const mat<C, R, T, Q> &m, const vec<3, T, Q> &v) {
@@ -142,25 +141,11 @@ namespace glm {
   }
 
   /// <summary>
-  /// API completeness for transformDir
-  /// </summary>
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> transformDir(const qua<T, Q> &q, const vec<3, T, Q> &v) {
-    return q * v;
-  }
-
-  /// <summary>
   /// Return the scaling components of the matrix.
   /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<3, T, Q> extractScale(const mat<3, 3, T, Q> &m) {
     return vec<3, T, Q>(length(m[0]), length(m[1]), length(m[2]));
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER vec<3, T, Q> extractScale(const qua<T, Q> &q) {
-    ((void)(q));
-    return vec<3, T, Q>(T(1));
   }
 
   template<typename T, qualifier Q>
@@ -204,11 +189,6 @@ namespace glm {
   GLM_FUNC_QUALIFIER bool hasUniformScale(const mat<C, R, T, Q> &m, const T eps = epsilon<T>()) {
     const vec<3, T, Q> scale = extractScale(m);
     return epsilonEqual(scale.x, scale.y, eps) && epsilonEqual(scale.x, scale.z, eps);
-  }
-
-  template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool hasUniformScale(const qua<T, Q> &q, const T eps = epsilon<T>()) {
-    return hasUniformScale(toMat3(q), eps);
   }
 
   /// <summary>
@@ -298,7 +278,6 @@ namespace glm {
   template<typename T, qualifier Q, length_t C = 3, length_t R = 3>
   GLM_FUNC_QUALIFIER mat<C, R, T, Q> lookRotationRH(const vec<3, T, Q> &fwd, const vec<3, T, Q> &up) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'lookRotationRH' only accept floating-point inputs");
-
     const vec<3, T, Q> f = -fwd;
     const vec<3, T, Q> s(normalize(cross(up, f)));
     const vec<3, T, Q> u(cross(f, s));
@@ -673,7 +652,7 @@ namespace glm {
   /// glm::inverse that assumes the last row is (0, 0, 0, 1)
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<C, R, T, Q> inverse_transform(mat<C, R, T, Q> const &m) {
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> inverseTransform(mat<C, R, T, Q> const &m) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid extraction dimensions");
     const T OneOverDeterminant = static_cast<T>(1) / (
       + m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
@@ -698,17 +677,17 @@ namespace glm {
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverse_transform(mat<3, 3, T, Q> const &m) {
+  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverseTransform(mat<3, 3, T, Q> const &m) {
     return inverse(m);
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<2, 2, T, Q> inverse_transform(mat<2, 2, T, Q> const &m) {
+  GLM_FUNC_QUALIFIER mat<2, 2, T, Q> inverseTransform(mat<2, 2, T, Q> const &m) {
     return inverse(m);
   }
 
   template<typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverse_world_tensor(const vec<3, T, Q> &inverseTensor, const mat<3, 3, T, Q> &localToWorld) {
+  GLM_FUNC_QUALIFIER mat<3, 3, T, Q> inverseWorldTensor(const vec<3, T, Q> &inverseTensor, const mat<3, 3, T, Q> &localToWorld) {
     return localToWorld * diagonal3x3(inverseTensor) * transpose(localToWorld);
   }
 
@@ -770,7 +749,6 @@ namespace glm {
       typename mat<C, R, T, Q>::row_type v(T(0));
       for (length_t j = 0; j < C; ++j)
         v[j] = m[j][i];
-
       result &= isNormalized(v, eps);
     }
     return result;

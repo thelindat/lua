@@ -422,24 +422,24 @@ static int handle_luainit (lua_State *L) {
 
 
 #if defined(LUAGLM_EXT_READLINE_HISTORY)
-  /*
-  ** LUA_HISTORY is the name of the environment variable that Lua checks
-  ** to load its command-line history.
-  ** CHANGE it if you want a different name.
-  */
-  #if !defined(LUA_HISTORY)
-    #define LUA_HISTORY     "LUA_HISTORY"
-  #endif
+/*
+** LUA_HISTORY is the name of the environment variable that Lua checks
+** to load its command-line history.
+** CHANGE it if you want a different name.
+*/
+#if !defined(LUA_HISTORY)
+  #define LUA_HISTORY     "LUA_HISTORY"
+#endif
 
-  /*
-  ** LUA_HISTORY_DEFAULT is the default path that Lua uses to look for
-  ** the command-line history.
-  */
-  #if defined(_WIN32)
-    #define LUA_HISTORY_DEFAULT "lua_history.txt"
-  #else
-    #define LUA_HISTORY_DEFAULT ".lua_history"
-  #endif
+/*
+** LUA_HISTORY_DEFAULT is the default path that Lua uses to look for
+** the command-line history.
+*/
+#if defined(_WIN32)
+  #define LUA_HISTORY_DEFAULT "lua_history.txt"
+#else
+  #define LUA_HISTORY_DEFAULT ".lua_history"
+#endif
 #endif
 
 /*

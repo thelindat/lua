@@ -45,7 +45,7 @@ cat << EOF >> ${OUTFILE}
 ** See Copyright Notice at the end of this file
 */
 #if !defined(__cplusplus)
-  #error "LuaGLM must be compiled with cplusplus for GLM integration"
+#error "LuaGLM must be compiled with cplusplus for GLM integration"
 #endif
 
 /* default is to build the library; Note this deviates from onelua.c */
