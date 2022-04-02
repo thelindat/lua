@@ -8,8 +8,8 @@
 #define lglmlib_hpp
 
 #define LUAGLM_VERSION_MAJOR "0"
-#define LUAGLM_VERSION_MINOR "7"
-#define LUAGLM_VERSION_PATCH "4"
+#define LUAGLM_VERSION_MINOR "8"
+#define LUAGLM_VERSION_PATCH "0"
 
 #define LUAGLM_NAME "LuaGLM"
 #define LUAGLM_COPYRIGHT "Copyright (C) 2022, Gottfried Leibniz"
