@@ -832,17 +832,10 @@ typedef struct Table {
 #define f4_zero() f4_init(0, 0, 0, 0)
 
 /* Conversion between internal/external storage types */
-#if (LUAGLM_HALF_TYPE & (LUAGLM_HALF_FLOAT16 | LUAGLM_HALF_SHORT))
 #define f4_loadf(input) lua_extendhfsf(input)
 #define f4_storef(input) lua_truncsfhf(input)
 #define f4_load(input) lua_unpackf4(input)
 #define f4_store(input) lua_packf4(input)
-#else
-#define f4_loadf(i) (i)
-#define f4_storef(i) (i)
-#define f4_load(F) F
-#define f4_store(F) F
-#endif
 
 #define ttisvector(o) checktype((o), LUA_TVECTOR)
 #define ttisvector2(o) checktag((o), LUA_VVECTOR2)

@@ -1054,7 +1054,7 @@ static inline glm::vec<D, T> glm_tovec(lua_State *L, int idx) {
   if (ttisvector(o) && glm_dimensions(ttypetag(o)) <= D) {
     const lua_Float4 f4 = f4_loadf4(vvalue_(o));
     for (glm::length_t i = 0; i < D; ++i) {
-      result[i] = static_cast<T>(f4_loadf(f4.raw[i]));
+      result[i] = static_cast<T>(f4.raw[i]);
     }
   }
   return result;
