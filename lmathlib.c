@@ -20,7 +20,7 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 
 
 #undef PI
@@ -886,6 +886,10 @@ static const luaL_Reg mathlib[] = {
   { "round", math_round },
   { "scalbn", math_scalbn },
   { "trunc", math_trunc },
+  /* placeholders */
+  { "nan", NULL },
+  { "eps", NULL },
+  { "feps", NULL },
 #endif
 #endif
   /* grit-lua compatibility */
@@ -926,6 +930,7 @@ LUAMOD_API int luaopen_math (lua_State *L) {
   );
   lua_setfield(L, -2, "eps");
   lua_pushnumber(L, (lua_Number)FLT_EPSILON); lua_setfield(L, -2, "feps");
+  lua_pushnumber(L, (lua_Number)NAN); lua_setfield(L, -2, "nan");
 #endif
   setrandfunc(L);
   return 1;

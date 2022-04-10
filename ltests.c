@@ -20,7 +20,7 @@
 
 #include "lapi.h"
 #include "lauxlib.h"
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 #include "lcode.h"
 #include "lctype.h"
 #include "ldebug.h"

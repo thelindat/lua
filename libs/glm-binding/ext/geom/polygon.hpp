@@ -22,7 +22,7 @@ namespace glm {
   /// A STL vector that uses the Lua allocator
   /// </summary>
   template<typename T>
-  using List = LuaVector<T>;
+  using List = lua::Vector<T>;
 
   /// <summary>
   /// Describes the thickness of the polygon (i.e., how the third dimension

@@ -1,20 +1,20 @@
 -- $Id: testes/glm.lua $
 -- See Copyright Notice in file all.lua
--- @TODO: Eventually merge/incorporate collection of other test scripts
+-- @TODO: Eventually merge repository of other test scripts
 
 print("testing glm lib")
 local function _eq(x, y) return x == y end
 local function _meq(x, y) return x == y and math.type(x) == math.type(y) end
 
-v3 = vec(1, 2, 3)
-v4 = vec(1, 2, 3, 4)
-q = quat(0.953717, 0.080367, 0.160734, 0.241101)
+local v3 = vec(1, 2, 3)
+local v4 = vec(1, 2, 3, 4)
+local q = quat(0.953717, 0.080367, 0.160734, 0.241101)
 
-c1 = vec(1, 2, 3)
-c2 = vec(4, 5, 6)
-c3 = vec(7, 8, 9)
-c4 = vec(10, 11, 12)
-mt = debug.getmetatable(mat(c1, c2, c3, c4)) -- Save previous matrix metatable
+local c1 = vec(1, 2, 3)
+local c2 = vec(4, 5, 6)
+local c3 = vec(7, 8, 9)
+local c4 = vec(10, 11, 12)
+local mt = debug.getmetatable(mat(c1, c2, c3, c4)) -- Save previous matrix metatable
 
 ------------------------------------------
 -- lmathlib string coercion consistency --

@@ -320,14 +320,14 @@ static int str_blob (lua_State *L) {
   }
   else if (type == LUA_TSTRING) {  /* Convert the string into a externalizable blob */
     lua_settop(L, 1);
-    lua_tostringblob(L, 1, NULL);
+    lua_toblob(L, 1, NULL);
     return 1;
   }
   return luaL_typeerror(L, 1, "number or string");
 }
 
 static int str_isblob (lua_State *L) {
-  lua_pushboolean(L, lua_isstringblob(L, 1));
+  lua_pushboolean(L, lua_isblob(L, 1));
   return 1;
 }
 #endif
@@ -1994,40 +1994,34 @@ static int str_unpack (lua_State *L) {
 
 
 #if defined(LUAGLM_EXT_BLOB)
-/* blob_pack(blob, pos (optional), fmt, v1, v2, ···) */
-static int str_blobpack (lua_State *L) {
+/* blob_pack(blob [, pos], fmt, v1, v2, ···) */
+static int str_blobpack(lua_State *L) {
   luaL_Buffer b;
   char *blob;
-  const char *format;  /* string.pack format string */
-  size_t blob_len = 0;  /* length of current blob */
-  size_t offset = 0;  /* offset into blob */
+  size_t blob_len = 0; /* length of current blob */
+  size_t offset = 0;   /* offset into blob */
+  const char *format;  /* format string */
   int format_idx = 2;  /* stack index of format string */
-  if (!lua_isstringblob(L, 1)) {
-    return luaL_typeerror(L, 1, "blob");
-  }
+  luaL_argexpected(L, lua_isblob(L, 1), 1, "string blob");
 
-  blob = lua_tostringblob(L, 1, &blob_len);
+  blob = lua_toblob(L, 1, &blob_len);
   if (lua_type(L, format_idx) == LUA_TNUMBER) {
-    format_idx = 3;  /* second argument is the format string */
+    format_idx = 3;
     offset = posrelatI(luaL_checkinteger(L, 2), blob_len) - 1;
     luaL_argcheck(L, offset <= blob_len, 2, "initial position out of string");
   }
-
   format = luaL_checkstring(L, format_idx);
 
   /*
   ** Create a temporary buffer that contains the result to string.pack for the
-  ** given function parameters; ensuring the original blob is unaltered in case
+  ** given function parameters. Ensuring the original blob is unaltered in case
   ** of error.
   **
-  ** On success: if the resulting pack cannot be safely copied into the given
-  ** blob instance, a new blob object must be made.
-  **
-  ** @TODO: Consider alleviating the all-or-nothing nature of blobpack. The
-  **  current implementation is quite slow.
+  ** If the resulting pack cannot be safely copied into the given 'blob', a new
+  ** blob object is made.
   */
   lua_pushnil(L);  /* [..., mark]; mark to separate arguments from string buffer */
-  luaL_buffinit(L, &b);  /* [..., mark, buff_placeholder]*/
+  luaL_buffinit(L, &b);  /* [..., mark, buff_placeholder] */
   shared_pack(L, &b, format, format_idx);
   if ((blob_len - offset) < b.n) {  /* Create a new blob of increased size */
     char *new_blob = lua_pushblob(L, offset + b.n);
@@ -2040,7 +2034,6 @@ static int str_blobpack (lua_State *L) {
     lua_pushvalue(L, 1);  /* [..., mark, buff_placeholder, result] */
   }
 
-  /* lauxlib luaL_pushresult */
   if (b.b != b.init.b)
     lua_closeslot(L, -2);  /* close the box */
   lua_rotate(L, -3, -2);  /* [..., result, mark, buff_placeholder] */
@@ -2048,23 +2041,22 @@ static int str_blobpack (lua_State *L) {
   return 1;
 }
 
-/* blob_unpack(blob, fmt [, pos]) */
+/* blob_unpack(blob [, pos], fmt) */
 static int str_blobunpack (lua_State *L) {
-  size_t blob_len = 0;  /* length of current blob */
-  size_t offset = 0;  /* offset into blob */
+  size_t blob_len = 0; /* length of current blob */
+  size_t offset = 0;   /* offset into blob */
   const char *blob = luaL_checklstring(L, 1, &blob_len);
-  const char *fmt;
+  const char *format;
 
-  int format_idx = 2;  /* stack index of format string */
+  int format_idx = 2;  /* index of format string */
   if (lua_type(L, 2) == LUA_TNUMBER) {
-    format_idx = 3;  /* second argument is the format string */
+    format_idx = 3;
     offset = posrelatI(luaL_checkinteger(L, 2), blob_len) - 1;
     luaL_argcheck(L, offset <= blob_len, 2, "initial position out of string");
   }
 
-  fmt = luaL_checkstring(L, format_idx);
-  luaL_argcheck(L, offset <= blob_len, 3, "initial position out of string");
-  return shared_unpack(L, fmt, blob, blob_len, offset);
+  format = luaL_checkstring(L, format_idx);
+  return shared_unpack(L, format, blob, blob_len, offset);
 }
 #endif
 

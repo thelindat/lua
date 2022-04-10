@@ -569,9 +569,9 @@ LUA_API const char *lua_pushstring (lua_State *L, const char *s) {
 
 
 #if defined(LUAGLM_EXT_BLOB)
-LUA_API int lua_isstringblob (lua_State *L, int idx) {
+LUA_API int lua_isblob (lua_State *L, int idx) {
   const TValue *o = index2value(L, idx);
-  return ttisblobstring(o);
+  return ttisblob(o);
 }
 
 LUA_API char *lua_pushblob (lua_State *L, size_t len) {
@@ -585,14 +585,14 @@ LUA_API char *lua_pushblob (lua_State *L, size_t len) {
   return getstr(ts);
 }
 
-LUA_API char *lua_tostringblob (lua_State *L, int idx, size_t *len) {
+LUA_API char *lua_toblob (lua_State *L, int idx, size_t *len) {
   char *result = NULL;
   TValue *o;
   lua_lock(L);
   o = index2value(L, idx);
   if (ttisstring(o)) {
-    TString *str = luaS_asblob(L, tsvalue(o));
-    if (str != NULL) {  /* new object created; replace stack object */
+    if (!ttisblob(o)) {  /* Create blob, replacing 'o' */
+      TString *str = luaS_toblob(L, tsvalue(o));
       setsvalue(L, o, str);
       luaC_checkGC(L);
       o = index2value(L, idx);  /* previous call may reallocate the stack */

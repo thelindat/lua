@@ -17,7 +17,7 @@
 #include "lua.h"
 
 #include "lapi.h"
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 #include "ldebug.h"
 #include "ldo.h"
 #include "lfunc.h"

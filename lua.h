@@ -304,10 +304,10 @@ LUA_API void  (lua_setreadonly) (lua_State *L, int idx, int value);
 */
 #if defined(LUAGLM_EXT_BLOB)
 /* Returns 1 if the value at the given index is a blob variant */
-LUA_API int (lua_isstringblob) (lua_State *L, int idx);
+LUA_API int (lua_isblob) (lua_State *L, int idx);
 
 /* Converts the string at the given index to a (C-)string blob. */
-LUA_API char *(lua_tostringblob) (lua_State *L, int idx, size_t *len);
+LUA_API char *(lua_toblob) (lua_State *L, int idx, size_t *len);
 
 /* Pushes the string pointed to by s with size len onto the stack as a blob variant. */
 LUA_API char *(lua_pushblob) (lua_State *L, size_t len);

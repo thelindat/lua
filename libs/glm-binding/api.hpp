@@ -328,7 +328,6 @@ BIND_DEFN(spherical, glm::unit::spherical, gLuaNumCoT, gLuaNumCoT);
 /*
 ** {==================================================================
 ** Arithmetic operators: Function wrappers that allow the use of LUAGLM_RECYCLE.
-** @TODO: Better
 ** ===================================================================
 */
 
@@ -1668,7 +1667,7 @@ NUMBER_VECTOR_DEFN(fastCos, glm::fastCos, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(fastSin, glm::fastSin, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(fastTan, glm::fastTan, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(wrapAngle, glm::wrapAngle, LAYOUT_UNARY)
-NUMBER_VECTOR_DEFN(wrapAngle2, glm::wrapAngle2, LAYOUT_UNARY)  // @GLMVectorExtensions
+NUMBER_VECTOR_DEFN(wrapAngleSigned, glm::wrapAngleSigned, LAYOUT_UNARY)  // @GLMVectorExtensions
 #endif
 
 #if defined(GTX_FUNCTIONS_HPP)

@@ -258,15 +258,11 @@ TString *luaS_newblob (lua_State *L, size_t l) {
   return NULL;
 }
 
-TString *luaS_asblob (lua_State *L, TString *str) {
-  if (str->tt == LUA_VBLOBSTR)
-    return NULL;
-  else {  /* This can be optimized, memset + memcpy is redundant*/
-    const size_t l = tsslen(str);
-    TString *blob = luaS_newblob(L, l);
-    memcpy(getstr(blob), getstr(str), l);
-    return blob;
-  }
+TString *luaS_toblob (lua_State *L, TString *str) {
+  const size_t l = tsslen(str);
+  TString *blob = luaS_newblob(L, l);
+  memcpy(getstr(blob), getstr(str), l);  /* memset+memcpy is redundant */
+  return blob;
 }
 #endif
 

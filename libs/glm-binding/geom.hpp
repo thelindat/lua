@@ -1693,7 +1693,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
   // Setup metatable.
   if (luaL_getmetatable(LB.L, gLuaPolygon<>::Metatable()) == LUA_TTABLE) {  // [..., poly, meta]
     lua_setmetatable(LB.L, -2);  // [..., poly]
-    LuaCrtAllocator<gLuaPolygon<>::point_trait::type> allocator(LB.L);
+    lua::STLAllocator<gLuaPolygon<>::point_trait::type> allocator(LB.L);
 
     // Create a vector backed by the Lua allocator.
     using PolyList = glm::List<gLuaPolygon<>::point_trait::type>;
@@ -1704,7 +1704,7 @@ GLM_BINDING_QUALIFIER(polygon_new) {
     }
 
     // Populate the polygon with an array of coordinates, if one exists.
-    polygon->p = construct_at(list, LB.L, allocator);
+    polygon->p = lua::construct_at(list, LB.L, allocator);
     if (l_likely(n >= 1 && lua_istable(LB.L, LB.idx))) {
       gLuaArray<gLuaPolygon<>::point_trait> lArray(LB.L, LB.idx);
       const auto e = lArray.end();
@@ -1737,9 +1737,9 @@ GLM_BINDING_QUALIFIER(polygon_to_string) {
 GLM_BINDING_QUALIFIER(polygon_gc) {
   gLuaPolygon<>::type *ud = static_cast<gLuaPolygon<>::type *>(luaL_checkudata(L, 1, gLuaPolygon<>::Metatable()));
   if (l_likely(ud->p != GLM_NULLPTR)) {
-    LuaCrtAllocator<void> allocator(L);
+    lua::STLAllocator<void> allocator(L);
     ud->p->validate(L);
-    destroy_at(ud->p);  // Invoke destructor.
+    lua::destroy_at(ud->p);  // Invoke destructor.
     allocator.realloc(ud->p, sizeof(glm::List<gLuaPolygon<>::point_trait::type>), 0);  // Free allocation
     ud->p = GLM_NULLPTR;
   }

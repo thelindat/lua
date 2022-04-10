@@ -885,7 +885,7 @@
 /*
 @@ LUAGLM_ALIGN Alignment macro for improved compiler intrinsics.
 **
-** @TODO: Technically should follow GLM and only allow alignment when:
+** @TODO: Follow GLM and only allow LUA_ALIGNED when:
 **   1. GLM_CONFIG_XYZW_ONLY is not enabled; and
 **   2. GLM_CONFIG_ANONYMOUS_STRUCT == GLM_ENABLE
 */
@@ -967,7 +967,7 @@
 /* vector/matrix floating types */
 typedef LUAGLM_FLOAT_TYPE lua_VecF;
 typedef lua_VecF lua_CFloat2[2];
-typedef lua_VecF lua_CFloat3[3]; /* @TODO: @ImplicitAlign */
+typedef lua_VecF lua_CFloat3[3]; /* @ImplicitAlign */
 typedef lua_VecF lua_CFloat4[4];
 
 /*
@@ -1002,9 +1002,9 @@ lua_Float4;
 **
 ** @ImplicitAlign:
 ** @TODO: Compensate for: detail::storage<3, T, detail::is_aligned<Q>::value>::type
-** data implicitly aligning vec3 types. This requires 'GLM_HAS_ALIGNOF'
-** emulation. matgeti' in lglm.cpp compensates for this issue, however, external
-** dependencies may not.
+** data aligning vec3 types. This requires 'GLM_HAS_ALIGNOF' emulation. matgeti
+** in lglm.cpp compensates for this issue, however, external dependencies may
+** not.
 */
 LUAGLM_ALIGNED_TYPEDEF(struct, lua_Mat4) {
   union Columns {

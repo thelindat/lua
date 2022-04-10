@@ -18,7 +18,7 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 
 
 /*

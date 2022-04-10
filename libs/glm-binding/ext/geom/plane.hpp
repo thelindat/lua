@@ -370,8 +370,7 @@ namespace glm {
 
   /// <summary>
   /// @TODO: Clip a polygon against a plane, i.e., remove part(s) of the polygon
-  /// that lie in the negative halfspace of the plane and returning a new
-  /// polygon.
+  /// that lie in the negative halfspace of the plane and return a new polygon.
   /// </summary>
   // template<length_t L, typename T, qualifier Q>
   // GLM_GEOM_QUALIFIER Polygon<L, T, Q> clip(const Plane<L, T, Q> &plane, const Polygon<L, T, Q> &polygon) {

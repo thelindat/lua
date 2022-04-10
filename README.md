@@ -101,7 +101,7 @@ the same C API functions:
 
 See [lglm.hpp](lglm.hpp) the external header for interfacing with ``glm``
 defined structures within Lua. The deprecated grit-lua C API can still be
-referenced by [lgrit\_lib.h](lgrit_lib.h).
+referenced by [lgritlib.h](lgritlib.h).
 
 ### Metamethods
 
@@ -492,10 +492,10 @@ const char *lua_pushblob(lua_State *L, size_t len);
 
 /*
 ** Converts the (explicit) string at the given index to a blob. If the string
-** value is not already a blob, then lua_tostringblob changes the actual value
+** value is not already a blob, then lua_toblob changes the actual value
 ** in the stack to a blob (same lua_tolstring caveats apply).
 */
-const char *lua_tostringblob(lua_State *L, int idx, size_t *len);
+const char *lua_toblob(lua_State *L, int idx, size_t *len);
 ```
 
 A

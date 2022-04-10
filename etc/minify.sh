@@ -169,7 +169,7 @@ echo "#if defined(LUA_IMPLEMENTATION)" >> ${OUTFILE}
 
   echo "/* luaglm */" >> ${OUTFILE}
   cat ${LUA_DIR}/lglm_core.h >> ${OUTFILE}
-  cat ${LUA_DIR}/lgrit_lib.h >> ${OUTFILE} # Designed to be used externally
+  cat ${LUA_DIR}/lgritlib.h >> ${OUTFILE} # Designed to be used externally
   cat ${LUA_DIR}/lglm.hpp >> ${OUTFILE} # Also designed to be used externally
   cat ${LUA_DIR}/lglm_string.hpp >> ${OUTFILE}
 

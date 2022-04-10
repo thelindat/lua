@@ -197,7 +197,7 @@ namespace glm {
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType wrap(genType value, genType maxValue) {
-    return fmod(value, maxValue) + ((value < genType(0.0)) ? maxValue : genType(0.0));
+    return fmod(value, maxValue) + ((value < genType(0)) ? maxValue : genType(0));
   }
 
   /// <summary>
@@ -212,7 +212,7 @@ namespace glm {
   /// glm::wrapAngle defined over [-pi, pi].
   /// </summary>
   template<typename genType>
-  GLM_FUNC_QUALIFIER genType wrapAngle2(genType value) {
+  GLM_FUNC_QUALIFIER genType wrapAngleSigned(genType value) {
     if (value >= genType(0))
       return fmod(value + pi<genType>(), two_pi<genType>()) - pi<genType>();
     return fmod(value - pi<genType>(), two_pi<genType>()) + pi<genType>();
@@ -220,7 +220,6 @@ namespace glm {
 
   /// <summary>
   /// Loops "t", so that it is never greater than "length" and less than zero.
-  /// @TODO: Replace with wrap
   /// </summary>
   template<typename genType>
   GLM_FUNC_QUALIFIER genType loopRepeat(genType t, genType length) {

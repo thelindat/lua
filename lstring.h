@@ -60,12 +60,8 @@ LUAI_FUNC TString *luaS_createlngstrobj (lua_State *L, size_t l);
 */
 LUAI_FUNC TString *luaS_newblob (lua_State *L, size_t l);
 
-/*
-** Convert the provided string object into a blob-variant. If the string is
-** already a blob-variant, then NULL is returned. Otherwise, a new string object
-** is allocated.
-*/
-LUAI_FUNC TString *luaS_asblob (lua_State *L, TString *str);
+/* Convert the provided string object into a blob-variant */
+LUAI_FUNC TString *luaS_toblob (lua_State *L, TString *str);
 #endif
 
 #endif

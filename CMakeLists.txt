@@ -769,7 +769,7 @@ INCLUDE_DIRECTORIES( . )
 INCLUDE_DIRECTORIES( ./libs/glm/ )
 INCLUDE_DIRECTORIES( ./libs/glm-binding/ )
 
-SET(LUA_PUBLIC_HDRS luaconf.h lua.h lauxlib.h lualib.h lua.hpp lglm.hpp )
+SET(LUA_PUBLIC_HDRS luaconf.h lua.h lauxlib.h lgritlib.h lualib.h lua.hpp lglm.hpp )
 
 SET(SRC_LUA lua.c)
 SET(SRC_LUAC luac.c)

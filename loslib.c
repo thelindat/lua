@@ -245,13 +245,12 @@ static int os_nanotime(lua_State *L) {
 /*
 @@ LUA_SYS_RDTSC Sample the rdtsc instruction and return the processor timestamp
 **
-** @NVC: rdtsc is not supported, see '7.4. x86-64 ABM Intrinsics', disable
-** everything for now (@TODO: expose __rdtscp).
+** @NVC: rdtsc is not supported, see '7.4. x86-64 ABM Intrinsics'.
 */
 #if defined(_MSC_VER) && defined(_M_X64)
   #include <intrin.h>
   #define LUA_SYS_RDTSC
-#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__NVCOMPILER)
+#elif defined(__GNUC__) && defined(__x86_64__)
   #if defined(__has_include) && __has_include(<x86intrin.h>)
     #include <x86intrin.h>
     #define LUA_SYS_RDTSC
@@ -260,7 +259,12 @@ static int os_nanotime(lua_State *L) {
 
 #if defined(LUA_SYS_RDTSC)
 static int os_rdtsc(lua_State *L) {
+#if defined(__NVCOMPILER) /* @HACK */
+  unsigned int aux;
+  l_pushtime(L, __rdtscp(&aux));
+#else
   l_pushtime(L, __rdtsc());
+#endif
   return 1;
 }
 
@@ -275,7 +279,7 @@ static int os_rdtscp(lua_State *L) {
 /* }================================================================== */
 
 
-#if !defined(LUA_SANDBOX_OSLIB)  /* @TODO: Temporary; see LUA_SANDBOX */
+#if !defined(LUA_SANDBOX_OSLIB)  /* @TODO: See LUA_SANDBOX */
 static int os_execute (lua_State *L) {
   const char *cmd = luaL_optstring(L, 1, NULL);
   int stat;

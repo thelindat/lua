@@ -69,7 +69,7 @@ GLM_LUA_REG(mat_sub),
 GLM_LUA_REG(mat_mul),
 GLM_LUA_REG(mat_negate),
 #if defined(LUAGLM_ALIASES_O3DE)
-//{ "Clone", GLM_NAME() }, // @O3DEAlias: @TODO for O3DE library aliasing; included on as-needed basis.
+//{ "Clone", GLM_NAME() }, // @O3DEAlias: for O3DE library aliasing; included on as-needed basis.
 //{ "Add", GLM_NAME() }, // @O3DEAlias
 //{ "Subtract", GLM_NAME() }, // @O3DEAlias
 //{ "Unary", GLM_NAME() }, // @O3DEAlias
@@ -128,7 +128,7 @@ GLM_LUA_REG(toint),
 { "Ceil", GLM_NAME(ceil) },
 { "Floor", GLM_NAME(floor) },
 { "Round", GLM_NAME(round) },
-//{ "CeilToInt", GLM_NAME() }, // @UnityAlias: @TODO for Unity library aliasing; included on as-needed basis.
+//{ "CeilToInt", GLM_NAME() }, // @UnityAlias: for Unity library aliasing; included on as-needed basis.
 //{ "FloorToInt", GLM_NAME() }, // @UnityAlias
 //{ "RoundToInt", GLM_NAME() }, // @UnityAlias
 #endif
@@ -631,9 +631,9 @@ GLM_LUA_REG(fastCos),
 GLM_LUA_REG(fastSin),
 GLM_LUA_REG(fastTan),
 GLM_LUA_REG(wrapAngle),
-GLM_LUA_REG(wrapAngle2),  // @GLMVectorExtensions
+GLM_LUA_REG(wrapAngleSigned),  // @GLMVectorExtensions
 #if defined(LUAGLM_ALIASES_O3DE)
-{ "GetAngleMod", GLM_NAME(wrapAngle2) },
+{ "GetAngleMod", GLM_NAME(wrapAngleSigned) },
 #endif
 #endif
 

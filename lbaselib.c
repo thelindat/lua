@@ -19,7 +19,7 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 
 
 #if defined(LUAGLM_EXT_READONLY)

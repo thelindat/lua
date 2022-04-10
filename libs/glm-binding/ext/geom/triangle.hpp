@@ -754,7 +754,6 @@ namespace glm {
   /// </summary>
   // template<length_t L, typename T, qualifier Q>
   // GLM_GEOM_QUALIFIER bool intersects(const Triangle<L, T, Q> &t, const Triangle<L, T, Q> &other, LineSegment<L, T, Q> &intersection) {
-  //   UNUSED(t); UNUSED(other); UNUSED(intersect);
   //   return false;
   // }
 
@@ -763,7 +762,6 @@ namespace glm {
   /// </summary>
   // template<length_t L, typename T, qualifier Q>
   // GLM_GEOM_QUALIFIER bool intersects(const Triangle<L, T, Q> &t, const AABB<L, T, Q> &aabb) {
-  //   UNUSED(t); UNUSED(aabb);
   //   return false;
   // }
 

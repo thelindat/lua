@@ -361,7 +361,7 @@ typedef struct GCObject {
 #define ttisshrstring(o)	checktag((o), ctb(LUA_VSHRSTR))
 #define ttislngstring(o)	checktag((o), ctb(LUA_VLNGSTR))
 #if defined(LUAGLM_EXT_BLOB)
-  #define ttisblobstring(o)	checktag((o), ctb(LUA_VBLOBSTR))
+  #define ttisblob(o)	checktag((o), ctb(LUA_VBLOBSTR))
   #define islongstring(tt) ((tt) == LUA_VLNGSTR || (tt) == LUA_VBLOBSTR)
 #endif
 

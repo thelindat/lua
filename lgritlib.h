@@ -1,5 +1,5 @@
 /*
-** $Id: lgrit_lib.h $
+** $Id: lgritlib.h $
 ** API definitions for grit-lua.
 **
 ** See Copyright Notice in lua.h

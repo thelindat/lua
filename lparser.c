@@ -1609,56 +1609,67 @@ static void compound_assignment (LexState *ls, expdesc *v) {
 
 
 #if defined(LUAGLM_EXT_INTABLE)
-#define RET_ASSIGN_RESULT int
-#define RET_ASSIGN_RETURN 0
-#define RET_ASSIGN_SKIP_ASSIGNMENTS 1
-
-static int get_table_unpack(LexState *ls, struct LHS_assign *lh, expdesc *e) {
+#define RESTASSIGN_RESULT int
+#define RESTASSIGN_RETURN 0
+#define RESTASSIGN_SKIP_ASSIGNMENTS 1
+static int in_unpack(LexState *ls, struct LHS_assign *lh, expdesc *e) {
+  FuncState *fs = ls->fs;
   lu_byte from_var;
   luaX_next(ls);
   new_localvarliteral(ls, "(in)");
   suffixedexp(ls, e);
+  luaK_exp2nextreg(fs, e);
 
-  luaK_exp2nextreg(ls->fs, e);
-  from_var = ls->fs->nactvar;
+  from_var = fs->nactvar;
   adjustlocalvars(ls, 1);
-  luaK_setoneret(ls->fs, e);  /* close last expression */
+  luaK_setoneret(fs, e);  /* close last expression */
   while (lh) {
-    expdesc key;
-    expdesc *v = &lh->v;
+    expdesc k, *v = &lh->v;
     switch (v->k) {
       case VLOCAL:
-        codestring(&key, getlocalvardesc(ls->fs, v->u.info)->vd.name);
+        codestring(&k, getlocalvardesc(fs, v->u.var.ridx)->vd.name);
+        luaK_indexed(fs, e, &k);
         break;
       case VUPVAL:
-        codestring(&key, ls->fs->f->upvalues[v->u.info].name);
+        codestring(&k, fs->f->upvalues[v->u.info].name);
+        luaK_indexed(fs, e, &k);
         break;
-      case VINDEXED:
-        lua_assert(GETARG_k(v->u.ind.idx));
-        init_exp(&key, VK, GETARG_k(v->u.ind.idx));
+      case VINDEXUP: {
+        luaK_codeABC(fs, OP_MOVE, fs->freereg, e->u.info, 0);
+        luaK_reserveregs(fs, 1);
+        e->k = VINDEXSTR;
+        e->u.ind.t = fs->freereg - 1;
+        e->u.ind.idx = v->u.ind.idx;  /* literal string */
         break;
-      case VINDEXUP:
-        init_exp(&key, VK, v->u.info);
+      }
+      case VINDEXED: {
+        const int extra = fs->freereg;  /* @SEE: check_conflict */
+        luaK_codeABC(fs, OP_MOVE, extra, e->u.info, 0);
+        luaK_codeABC(fs, OP_MOVE, extra + 1, v->u.ind.idx, 0);
+        luaK_reserveregs(fs, 2);
+        e->k = VINDEXED;
+        e->u.ind.t = extra;
+        e->u.ind.idx = extra + 1;
         break;
+      }
       default: {
         luaX_syntaxerror(ls, "syntax error in \"in\" vars");
         break;
       }
     }
-    luaK_indexed(ls->fs, e, &key);
-    luaK_storevar(ls->fs, v, e);
-    lh = lh->prev;
-    if (lh) {
-      init_exp(e, VNONRELOC, ls->fs->freereg - 1);
+
+    luaK_storevar(fs, v, e);
+    if ((lh = lh->prev) != NULL) {
+      init_exp(e, VNONRELOC, fs->freereg - 1);
     }
   }
-  removevars(ls->fs, from_var);
-  return RET_ASSIGN_SKIP_ASSIGNMENTS;
+  removevars(fs, from_var);
+  return RESTASSIGN_SKIP_ASSIGNMENTS;
 }
 #else
-#define RET_ASSIGN_RESULT void
-#define RET_ASSIGN_RETURN
-#define RET_ASSIGN_SKIP_ASSIGNMENTS
+#define RESTASSIGN_RESULT void
+#define RESTASSIGN_RETURN
+#define RESTASSIGN_SKIP_ASSIGNMENTS
 #endif
 
 /*
@@ -1669,7 +1680,7 @@ static int get_table_unpack(LexState *ls, struct LHS_assign *lh, expdesc *e) {
 ** restassign -> ',' suffixedexp restassign | '=' explist
 ** restassign -> ',' suffixedexp restassign | '=' explist | opeq expr
 */
-static RET_ASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
+static RESTASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
   expdesc e;
   check_condition(ls, vkisvar(lh->v.k), "syntax error");
   check_readonly(ls, &lh->v);
@@ -1683,7 +1694,7 @@ static RET_ASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nv
 #if defined(LUAGLM_EXT_INTABLE)
     if (restassign(ls, &nv, nvars + 1)) {  /* skip_assignments */
       leavelevel(ls);
-      return RET_ASSIGN_SKIP_ASSIGNMENTS;
+      return RESTASSIGN_SKIP_ASSIGNMENTS;
     }
 #else
     restassign(ls, &nv, nvars+1);
@@ -1692,7 +1703,7 @@ static RET_ASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nv
   }
 #if defined(LUAGLM_EXT_INTABLE)
   else if (ls->t.token == TK_IN) {  /* hook for table unpack */
-    return get_table_unpack(ls, lh, &e);
+    return in_unpack(ls, lh, &e);
   }
 #endif
 #if defined(LUAGLM_EXT_COMPOUND)
@@ -1709,23 +1720,23 @@ static RET_ASSIGN_RESULT restassign (LexState *ls, struct LHS_assign *lh, int nv
     else {
       luaK_setoneret(ls->fs, &e);  /* close last expression */
       luaK_storevar(ls->fs, &lh->v, &e);
-      return RET_ASSIGN_RETURN;  /* avoid default */
+      return RESTASSIGN_RETURN;  /* avoid default */
     }
   }
 #if defined(LUAGLM_EXT_COMPOUND)
   else if (opeqexpr(ls->t.token)) {  /* restassign -> opeq expr */
     check_condition(ls, nvars == 1, "compound assignment not allowed on tuples");
     compound_assignment(ls, &lh->v);
-    return RET_ASSIGN_RETURN;
+    return RESTASSIGN_RETURN;
   }
   else {
     error_expected(ls, '=');
-    return RET_ASSIGN_RETURN;
+    return RESTASSIGN_RETURN;
   }
 #endif
   init_exp(&e, VNONRELOC, ls->fs->freereg-1);  /* default assignment */
   luaK_storevar(ls->fs, &lh->v, &e);
-  return RET_ASSIGN_RETURN;
+  return RESTASSIGN_RETURN;
 }
 
 
@@ -2106,11 +2117,15 @@ static void localstat (LexState *ls) {
     luaK_setoneret(ls->fs, &e);  /* close last expression */
     for (nexps = 0; nexps < nvars; nexps++) {
       expdesc v, key;
-      TString *key_str = getlocalvardesc(ls->fs, vars + nexps)->vd.name;
+      Vardesc *vd = getlocalvardesc(ls->fs, vars + nexps);
+      v.f = v.t = NO_JUMP;
+      v.k = VLOCAL;
+      v.u.var.vidx = 0;  /* compute 'v' into proper place */
+      v.u.var.ridx = regs + nexps;
+      lua_assert(vd->vd.ridx == regs + nexps);
       init_exp(&e, VNONRELOC, ls->fs->freereg - 1);
-      codestring(&key, key_str);
+      codestring(&key, vd->vd.name);
       luaK_indexed(ls->fs, &e, &key);
-      init_exp(&v, VLOCAL, regs + nexps);
       luaK_storevar(ls->fs, &v, &e);
     }
     removevars(ls->fs, from_var);

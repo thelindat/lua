@@ -24,8 +24,8 @@
 ** The hook table at registry[HOOKKEY] maps threads to their current
 ** hook function.
 **
-** @TODO: LUA_SANDBOX the base macro for improved runtime sandboxing;
-**        see: http://lua-users.org/wiki/SandBoxes
+** @TODO: LUA_SANDBOX the base macro for improved runtime sandboxing; see:
+**  http://lua-users.org/wiki/SandBoxes
 */
 #if !defined(LUA_SANDBOX_DBLIB)
 static const char *const HOOKKEY = "_HOOKKEY";

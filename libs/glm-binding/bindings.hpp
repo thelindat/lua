@@ -30,7 +30,7 @@
 #include <lua.hpp>
 #include <lglm.hpp>
 extern LUA_API_LINKAGE {
-#include "lgrit_lib.h"
+#include "lgritlib.h"
 #include "lapi.h"
 #include "lobject.h"
 #include "lgc.h"
@@ -759,8 +759,8 @@ struct gLuaPrimitive : gLuaAbstractTrait<T, T> {
 
   LUA_BIND_QUALIFIER bool Is(lua_State *L, int idx) {
     const TValue *o = glm_i2v(L, idx);
-    LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) return ttisboolean(o);  // lua_isboolean(LB.L, idx);
-    LUA_IF_CONSTEXPR(std::is_integral<T>::value) return ttisinteger(o) || ttisboolean(o);  // lua_isinteger(LB.L, idx)
+    LUA_IF_CONSTEXPR(std::is_same<T, bool>::value) return ttisboolean(o);
+    LUA_IF_CONSTEXPR(std::is_integral<T>::value) return ttisinteger(o) || ttisboolean(o);
     LUA_IF_CONSTEXPR(std::is_floating_point<T>::value) return lua_isnumber(L, idx);  // @TODO: isboolean
     lua_assert(false);
     return false;
@@ -892,9 +892,9 @@ template<bool FastPath> struct gLuaTrait<long double, FastPath> : gLuaPrimitive<
 #endif
 
 /// <summary>
-/// strings type trait; includes the ability to also fetch the length of a
-/// string on Next. As lua_tolstring has the ability to relocate the Lua stack,
-/// this implementation will not coerce other types.
+/// String type trait that includes the option to fetch the length of a string
+/// on Next. As lua_tolstring has the ability to relocate the Lua stack, this
+/// trait will not coerce other types.
 /// </summary>
 template<bool FastPath>
 struct gLuaTrait<const char *, FastPath> : gLuaAbstractTrait<const char *, const char *> {
@@ -1035,8 +1035,10 @@ struct gLuaTrait<glm::qua<T, Q>, FastPath> : gLuaAbstractTrait<glm::qua<T, Q>> {
 /// <summary>
 /// Trait for glm::mat<C, R, T, Q> types.
 ///
-/// @TODO: As matrix objects are mutable (or may be recycled): lua_LockScope
-/// stubs *should* be placed around all matrix object use.
+/// As matrix objects are mutable (or may be recycled): LockScope stubs should
+/// be placed around all matrix object use. Ensuring absolute correctness here
+/// is a low priority: disabling parser fast-pathing for matrix types should be
+/// sufficient.
 /// </summary>
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, bool FastPath>
 struct gLuaTrait<glm::mat<C, R, T, Q>, FastPath> : gLuaAbstractTrait<glm::mat<C, R, T, Q>> {

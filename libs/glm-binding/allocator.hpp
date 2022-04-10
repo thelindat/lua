@@ -39,10 +39,7 @@
   #define LUA_ALLOC_EXCEPTIONS 0
 #endif
 
-/// <summary>
-/// @TODO: Move all declarations in this header to this namespace.
-/// </summary>
-// namespace lua { }
+namespace lua {
 #if __cplusplus >= 202002L
 using std::construct_at;
 #else
@@ -62,23 +59,23 @@ void destroy_at(T *p) {
 #endif
 
 /// <summary>
-/// A CRuntime allocator that uses lua_Alloc.
+/// A std::allocator that uses lua_Alloc.
 /// </summary>
 template<class T>
-struct LuaCrtAllocator {
+struct STLAllocator {
   typedef T value_type;
-  mutable lua_Alloc l_alloc = LUA_ALLOC_NULLPTR;  // A cache of the memory-allocation function used by Lua states.
-  mutable void *l_ud = LUA_ALLOC_NULLPTR;  // An (optional) opaque pointer used by the allocator.
+  mutable lua_Alloc m_alloc = LUA_ALLOC_NULLPTR;  // A cache of the memory-allocation function used by Lua states.
+  mutable void *m_ud = LUA_ALLOC_NULLPTR;  // An (optional) opaque pointer used by the allocator.
 
-  LuaCrtAllocator() = default;
-  LuaCrtAllocator(lua_State *L) {
-    l_alloc = lua_getallocf(L, &l_ud);
+  STLAllocator() = default;
+  STLAllocator(lua_State *L) {
+    m_alloc = lua_getallocf(L, &m_ud);
   }
 
   template<class U>
-  LUA_ALLOC_CONSTEXPR LuaCrtAllocator(const LuaCrtAllocator<U> &o) LUA_ALLOC_NOEXCEPT
-    : l_alloc(o.l_alloc),
-      l_ud(o.l_ud) {
+  LUA_ALLOC_CONSTEXPR STLAllocator(const STLAllocator<U> &o) LUA_ALLOC_NOEXCEPT
+    : m_alloc(o.l_alloc),
+      m_ud(o.l_ud) {
   }
 
   /// <summary>
@@ -89,16 +86,16 @@ struct LuaCrtAllocator {
   /// library, e.g., a memory profiler, replaces the allocator then l_alloc and
   /// l_ud to have the potential to reference invalid data.
   /// </summary>
-  LUA_INLINE LuaCrtAllocator &validate(lua_State *L) const {
-    l_alloc = lua_getallocf(L, &l_ud);
-    return *const_cast<LuaCrtAllocator *>(this);
+  LUA_INLINE STLAllocator &validate(lua_State *L) const {
+    m_alloc = lua_getallocf(L, &m_ud);
+    return *const_cast<STLAllocator *>(this);
   }
 
   /// <summary>
   /// lua_Alloc: See Lua manual
   /// </summary>
   inline void *realloc(void *block, size_t osize, size_t nsize) {
-    return (l_alloc == LUA_ALLOC_NULLPTR) ? LUA_ALLOC_NULLPTR : l_alloc(l_ud, block, osize, nsize);
+    return (m_alloc == LUA_ALLOC_NULLPTR) ? LUA_ALLOC_NULLPTR : m_alloc(m_ud, block, osize, nsize);
   }
 
   T *allocate(std::size_t n) {
@@ -125,7 +122,7 @@ struct LuaCrtAllocator {
   }
 
   void deallocate(T *p, std::size_t n) LUA_ALLOC_NOEXCEPT {
-    if (l_alloc != LUA_ALLOC_NULLPTR) {  // otherwise, allocate would have failed
+    if (m_alloc != LUA_ALLOC_NULLPTR) {  // otherwise, allocate would have failed
 #if defined(LUA_ALLOC_DEBUG)
       report(p, n, 0);
 #endif
@@ -143,26 +140,12 @@ private:
 #endif
 };
 
-template<class T, class U>
-bool operator==(const LuaCrtAllocator<T> &, const LuaCrtAllocator<U> &) {
-  return true;
-}
-
-template<class T, class U>
-bool operator!=(const LuaCrtAllocator<T> &, const LuaCrtAllocator<U> &) {
-  return false;
-}
-
-/* LuaVector */
-#define LUA_ALLOC_IS_TRIVIAL(T) std::is_trivial<T>::value
-
 /// <summary>
 /// A std::vector analogue that uses 'lua_Alloc' for all internal allocations.
-///
-/// @NOTE: Documentation is mirrored from https://en.cppreference.com/w/cpp/container/vector
+/// Documentation is mirrored from https://en.cppreference.com/w/cpp/container/vector
 /// </summary>
 template<class T>
-class LuaVector {
+class Vector {
 public:
   // Index Types
   using size_type = std::size_t;
@@ -181,9 +164,10 @@ public:
 
 private:
   static LUA_ALLOC_CONSTEXPR size_type grow_factor = 2;
+  static const LUA_ALLOC_CONSTEXPR bool is_trivial_value = std::is_trivial<T>::value;
 
   lua_State *m_state;
-  LuaCrtAllocator<T> m_alloc;
+  STLAllocator<T> m_alloc;
   T *m_data = LUA_ALLOC_NULLPTR;
   size_type m_size = 0;
   size_type m_capacity = 0;
@@ -256,8 +240,7 @@ private:
 
 public:
   /* Constructors */
-
-  LuaVector(lua_State *L, LuaCrtAllocator<T> &alloc)
+  Vector(lua_State *L, STLAllocator<T> &alloc)
     : m_state(L),
       m_alloc(alloc),
       m_data(LUA_ALLOC_NULLPTR),
@@ -265,7 +248,7 @@ public:
       m_capacity(0) {
   }
 
-  LuaVector(const LuaVector<T> &other)
+  Vector(const Vector<T> &other)
     : m_state(other.m_state),
       m_alloc(other.m_alloc),
       m_data(LUA_ALLOC_NULLPTR),
@@ -273,7 +256,7 @@ public:
       m_capacity(other.m_capacity) {
 
     m_data = static_cast<T *>(malloc_(other.m_capacity * sizeof(T)));
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       std::memcpy(static_cast<void *>(m_data), other.m_data, other.m_size);
     }
     else {
@@ -281,7 +264,7 @@ public:
     }
   }
 
-  LuaVector(LuaVector<T> &&other) LUA_ALLOC_NOEXCEPT
+  Vector(Vector<T> &&other) LUA_ALLOC_NOEXCEPT
     : m_state(other.m_state),
       m_alloc(other.m_alloc),
       m_data(other.m_data),
@@ -292,14 +275,14 @@ public:
     other.m_state = LUA_ALLOC_NULLPTR;
   }
 
-  LuaVector<T> &operator=(const LuaVector<T> &other) {
+  Vector<T> &operator=(const Vector<T> &other) {
     m_state = other.m_state;
     m_alloc = other.m_alloc;
     m_size = other.m_size;
     m_capacity = other.m_capacity;
 
     m_data = static_cast<T *>(malloc_(other.m_capacity * sizeof(T)));
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       std::memcpy(static_cast<void *>(m_data), other.m_data, other.m_size);
     }
     else {
@@ -309,7 +292,7 @@ public:
     return *this;
   }
 
-  LuaVector<T> &operator=(LuaVector<T> &&other) LUA_ALLOC_NOEXCEPT {
+  Vector<T> &operator=(Vector<T> &&other) LUA_ALLOC_NOEXCEPT {
     m_state = other.m_state;
     m_alloc = other.m_alloc;
     m_data = other.m_data;
@@ -321,8 +304,8 @@ public:
     return *this;
   }
 
-  ~LuaVector() LUA_ALLOC_NOEXCEPT {
-    LUA_ALLOC_IF_CONSTEXPR(!LUA_ALLOC_IS_TRIVIAL(T)) {
+  ~Vector() LUA_ALLOC_NOEXCEPT {
+    LUA_ALLOC_IF_CONSTEXPR(!is_trivial_value) {
       destroyInPlace(begin(), end());
     }
 
@@ -355,7 +338,7 @@ public:
   /// <summary>
   /// Returns the number of elements in the container, i.e. std::distance(begin(), end()).
   /// </summary>
-  typename LuaVector<T>::size_type size() const LUA_ALLOC_NOEXCEPT {
+  typename Vector<T>::size_type size() const LUA_ALLOC_NOEXCEPT {
     return m_size;
   }
 
@@ -364,11 +347,11 @@ public:
   /// new_cap. If new_cap is greater than the current capacity(), new storage is
   /// allocated, otherwise the function does nothing.
   /// </summary>
-  void reserve(LuaVector<T>::size_type new_cap) {
+  void reserve(Vector<T>::size_type new_cap) {
     if (new_cap <= m_capacity)
       return;
 
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       void *data_ = realloc_(static_cast<void *>(m_data), internal_capacity(), new_cap * sizeof(T));
       m_data = static_cast<T *>(data_);
       assert(m_data != LUA_ALLOC_NULLPTR && "Reallocation failed");
@@ -391,7 +374,7 @@ public:
   /// Returns the number of elements that the container has currently allocated
   /// space for.
   /// </summary>
-  typename LuaVector<T>::size_type capacity() const LUA_ALLOC_NOEXCEPT {
+  typename Vector<T>::size_type capacity() const LUA_ALLOC_NOEXCEPT {
     return m_capacity;
   }
 
@@ -406,7 +389,7 @@ public:
     if (m_size == m_capacity)
       return;
 
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       m_data = static_cast<T *>(realloc_(static_cast<void *>(m_data), internal_capacity(), m_size * sizeof(T)));
       assert(m_data != LUA_ALLOC_NULLPTR && "Reallocation failed");
     }
@@ -462,7 +445,7 @@ public:
   /// Returns a reference to the element at specified location pos. No bounds
   /// checking is performed.
   /// </summary>
-  reference operator[](LuaVector<T>::size_type pos) {
+  reference operator[](Vector<T>::size_type pos) {
     assert(pos < m_size && "Position is out of bounds");
     return m_data[pos];
   }
@@ -471,7 +454,7 @@ public:
   /// Returns a reference to the element at specified location pos. No bounds
   /// checking is performed.
   /// </summary>
-  const_reference operator[](LuaVector<T>::size_type pos) const {
+  const_reference operator[](Vector<T>::size_type pos) const {
     assert(pos < m_size && "Position is out of bounds");
     return m_data[pos];
   }
@@ -482,7 +465,7 @@ public:
   ///
   /// @NOTE: std::out_of_range exception is avoided for the time being.
   /// </summary>
-  reference at(LuaVector<T>::size_type pos) {
+  reference at(Vector<T>::size_type pos) {
     assert(pos < m_size && "Position is out of bounds");
     return m_data[pos];
   }
@@ -491,7 +474,7 @@ public:
   /// Returns a reference to the element at specified location pos, with bounds
   /// checking. (C++20)
   /// </summary>
-  const_reference at(LuaVector<T>::size_type pos) const {
+  const_reference at(Vector<T>::size_type pos) const {
     assert(pos < m_size && "Position is out of bounds");
     return m_data[pos];
   }
@@ -553,7 +536,7 @@ public:
   /// zero.
   /// </summary>
   void clear() LUA_ALLOC_NOEXCEPT {
-    LUA_ALLOC_IF_CONSTEXPR(!LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(!is_trivial_value) {
       destroyInPlace(begin(), end());
     }
 
@@ -574,7 +557,7 @@ public:
       reserve(m_capacity * grow_factor + 1);
     }
 
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       m_data[m_size] = value;
     }
     else {
@@ -592,7 +575,7 @@ public:
       reserve(m_capacity * grow_factor + 1);
     }
 
-    LUA_ALLOC_IF_CONSTEXPR(LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(is_trivial_value) {
       m_data[m_size] = value;
     }
     else {
@@ -610,7 +593,7 @@ public:
   /// </summary>
   template<class... Args>
   void emplace_back(Args &&...args) {
-    assert(!LUA_ALLOC_IS_TRIVIAL(T));  // "Use push_back instead of emplace_back for trivial types"
+    assert(!is_trivial_value);  // "Use push_back instead of emplace_back for trivial types"
     if (m_size == m_capacity) {
       reserve(m_capacity * grow_factor + 1);
     }
@@ -629,7 +612,7 @@ public:
   /// </summary>
   void pop_back() {
     assert(m_size > 0 && "Container is empty");
-    LUA_ALLOC_IF_CONSTEXPR(!LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(!is_trivial_value) {
       m_data[m_size - 1].~T();
     }
 
@@ -646,13 +629,13 @@ public:
   ///   1) additional default-inserted elements are appended
   ///   2) additional copies of value are appended.
   /// </summary>
-  void resize(LuaVector<T>::size_type count) {
+  void resize(Vector<T>::size_type count) {
     if (count == m_size)
       return;
     if (count > m_capacity)
       reserve(count);
 
-    LUA_ALLOC_IF_CONSTEXPR(!LUA_ALLOC_IS_TRIVIAL(T)) {
+    LUA_ALLOC_IF_CONSTEXPR(!is_trivial_value) {
       if (count > m_size)
         constructInPlace(m_data + m_size, m_data + count);
       else if (count < m_size)
@@ -662,5 +645,16 @@ public:
     m_size = count;
   }
 };
+}  // namespace lua
+
+template<class T, class U>
+inline bool operator==(const lua::STLAllocator<T> &, const lua::STLAllocator<U> &) {
+  return true;
+}
+
+template<class T, class U>
+inline bool operator!=(const lua::STLAllocator<T> &, const lua::STLAllocator<U> &) {
+  return false;
+}
 
 #endif

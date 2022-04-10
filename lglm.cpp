@@ -55,7 +55,7 @@
 #include "lglm.hpp"
 #include "lglm_string.hpp"
 extern LUA_API_LINKAGE {
-#include "lgrit_lib.h" /* @TODO: Rename lgritlib.h and include in lua.hpp */
+#include "lgritlib.h"
 #include "lglm_core.h" /* Internal Headers */
 #include "lapi.h"
 #include "ldebug.h"
@@ -567,7 +567,7 @@ int glmVec_equalKey(const TValue *k1, const Node *n2, int rtt) {
 size_t glmVec_hash(const TValue *obj) {
   size_t seed = 0xDEAD;  // C0D3
   if (ttisvector(obj)) {
-    const glm::hash::lua_hash<luai_VecF> hasher;
+    glm::hash::lua_hash<luai_VecF> hasher;
     for (grit_length_t i = 0; i < glm_dimensions(ttypetag(obj)); ++i) {
       glm::hash::lua_combine(seed, hasher(vvalue_(obj).raw[i]));
     }

@@ -975,9 +975,11 @@ vecN = compNormalize_u16(v --[[ vecN ]])
 
 ## glm/gtx/fast\_trigonometry.hpp
 
+### wrapAngleSigned
+
 ```lua
 -- Wrap an angle to [-pi, pi]
-vecN = wrapAngle2(v --[[ vecN ]])
+vecN = wrapAngleSigned(v --[[ vecN ]])
 ```
 
 ## glm/gtx/matrix\_query.hpp
