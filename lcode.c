@@ -780,7 +780,7 @@ void luaK_dischargevars (FuncState *fs, expdesc *e) {
     }
     case VLOCAL: {  /* already in a register */
       /*
-      ** @NVC: will incorrectly discard e->u.info = e->u.var.ridx (>=O1):
+      ** @NVC: will discard e->u.info = e->u.var.ridx:
       **   13df: ... ; switch jump
       **   13e6: 41 c7 06 08 00 00 00    movl   $0x8,(%r14)
       **   13ed: e9 8e 02 00 00          jmp    1680 <luaK_dischargevars+0x2c0>
