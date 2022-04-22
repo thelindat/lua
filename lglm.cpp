@@ -98,6 +98,7 @@ extern LUA_API_LINKAGE {
 ** call __builtin_*, e.g., _mm_shuffle_ps and ia32_shufps (avoid gxx_personality).
 ** The goal is to avoid requiring fno-exceptions when compiling this unit.
 **
+** @COMPAT: Fixed in PR #1049:
 ** @QuatHack: workarounds for incorrect SIMD implementations:
 **    type_quat_simd.inl:180:31: error: ‘const struct glm::vec<4, float, glm::aligned_highp>’
 **    has no member named ‘Data’
@@ -2174,7 +2175,7 @@ static int glmVec_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, Stk
             return 1;
           }
           case LUA_VVECTOR4: {
-#if LUAGLM_ALIGNED  // @QuatHack
+#if LUAGLM_ALIGNED && GLM_VERSION <= 998  // @QuatHack
             const glm::vec<4, glm_Float, glm::qualifier::highp> vx(glm_v4value(p1));
             const glm::qua<glm_Float, glm::qualifier::highp> qy(glm_qvalue(p2));
             const glm::vec<4, glm_Float> result(vx * qy);
@@ -2299,7 +2300,7 @@ static int glmQua_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, Stk
     }
     case TM_SUB: {
       if (ttypetag(p2) == LUA_VQUAT) {
-#if LUAGLM_ALIGNED  // @QuatHack
+#if LUAGLM_ALIGNED && GLM_VERSION <= 998  // @QuatHack
         const glm::qua<glm_Float, glm::qualifier::highp> qx(glm_qvalue(p1));
         const glm::qua<glm_Float, glm::qualifier::highp> qy(glm_qvalue(p2));
         glm_setvvalue2s(res, glm::qua<glm_Float>(qx - qy), LUA_VQUAT);
@@ -2331,7 +2332,7 @@ static int glmQua_trybinTM(lua_State *L, const TValue *p1, const TValue *p2, Stk
           return 1;
         }
         case LUA_VVECTOR4: {
-#if LUAGLM_ALIGNED  // @QuatHack
+#if LUAGLM_ALIGNED && GLM_VERSION <= 998  // @QuatHack
           const glm::qua<glm_Float, glm::qualifier::highp> qx(glm_qvalue(p1));
           const glm::vec<4, glm_Float, glm::qualifier::highp> vy(glm_v4value(p2));
           const glm::vec<4, glm_Float> result(qx * vy);

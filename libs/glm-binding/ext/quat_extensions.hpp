@@ -537,7 +537,11 @@ namespace glm {
   /// </summary>
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<4, T, Q> __rotate(qua<T, Q> const &q, vec<4, T, Q> const &v) {
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1049
     return detail::compute_quat_mul_vec4<T, Q, false>::call(q, v);
+#else
+    return q * v;
+#endif
   }
 
   /* }====================================================== */

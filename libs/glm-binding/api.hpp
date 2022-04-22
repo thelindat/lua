@@ -1543,7 +1543,7 @@ BIND_DEFN(convertLinearSRGBToD65XYZ, glm::convertLinearSRGBToD65XYZ, gLuaVec3<>)
 #endif
 
 #if defined(GTX_COLOR_SPACE_HPP) && !defined(GLM_FORCE_XYZW_ONLY)
-BIND_DEFN(hsvColor, glm::hsvColor, gLuaVec3<float>)
+BIND_DEFN(hsvColor, glm::hsvColor, gLuaVec3<float>)  // @GLMFix: @TODO: Fixed in PR #1097
 BIND_DEFN(luminosity, glm::luminosity, gLuaVec3<>)
 BIND_DEFN(rgbColor, glm::rgbColor, gLuaVec3<>)
 GLM_BINDING_QUALIFIER(saturation) {
@@ -2023,6 +2023,9 @@ INTEGER_NUMBER_VECTOR_DEFN(levels, glm::levels, LAYOUT_UNARY)
 
 MATRIX_TRANSFORM_DEFN(scale, glm::scale)
 MATRIX_TRANSFORM_DEFN(translate, glm::translate)
+#if GLM_VERSION >= 999  // @COMPAT: Added in PR #1099
+BIND_DEFN(shear, glm::shear, gLuaMat4x4<>, gLuaVec3<>, gLuaVec2<>, gLuaVec2<>, gLuaVec2<>)
+#endif
 BIND_DEFN(trs, glm::trs, gLuaVec3<>, gLuaQuat<>, gLuaVec3<>)  // @GLMMatrixExtensions
 BIND_DEFN(inverseWorldTensor, glm::inverseWorldTensor, gLuaVec3<>, gLuaMat3x3<>)
 #endif

@@ -495,7 +495,7 @@ namespace glm {
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<2, T, Q> sphericalEncode(const vec<3, T, Q> &v) {
-    const vec<2, T, Q> Result(atan2<T, defaultp>(v.y, v.x) * one_over_pi<T>(), v.z);
+    const vec<2, T, Q> Result(atan2(v.y, v.x) * one_over_pi<T>(), v.z);
     return Result * T(0.5) + T(0.5);
   }
 
@@ -1076,6 +1076,7 @@ namespace glm {
   ** =======================================================
   */
 
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1096
   /// <summary>
   /// @GLMFix: Incorrect 'vec<2, U, Q> associatedMin' declaration.
   /// </summary>
@@ -1125,6 +1126,7 @@ namespace glm {
   GLM_FUNC_QUALIFIER vec<4, U, Q> associatedMax(vec<4, T, Q> const &x, vec<4, U, Q> const &a, vec<4, T, Q> const &y, vec<4, U, Q> const &b) {
     return __associatedMax(x, a, y, b);
   }
+#endif
 
   /// <summary>
   /// @GLMFix: Generalized closestPointOnLine implementation
@@ -1148,6 +1150,7 @@ namespace glm {
     return closestPointOnLine(vec<1, genType>(point), vec<1, genType>(a), vec<1, genType>(b)).x;
   }
 
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1100
   /// <summary>
   /// @GLMFix: 'int' to 'unsigned char' [-Wimplicit-int-conversion]
   /// </summary>
@@ -1160,7 +1163,7 @@ namespace glm {
       }
     };
 
-#if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
+  #if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
     template<>
     struct compute_rand<1, uint8, glm::aligned_highp> {
       GLM_FUNC_QUALIFIER static vec<1, uint8, glm::aligned_highp> call() {
@@ -1168,8 +1171,9 @@ namespace glm {
         std::rand() % static_cast<int>(std::numeric_limits<uint8>::max())));
       }
     };
-#endif
+  #endif
   }
+#endif
 
 #if GLM_CONFIG_SIMD == GLM_ENABLE
   #if !(GLM_ARCH & GLM_ARCH_SSE41_BIT)
@@ -1253,7 +1257,7 @@ namespace glm {
   }
   #endif
 
-  #if (GLM_ARCH & GLM_ARCH_NEON_BIT)
+  #if (GLM_ARCH & GLM_ARCH_NEON_BIT) && GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1098
   namespace detail {
     /// <summary>
     /// @GLMFix: type_vec4_simd.inl:503:27: error: cannot convert ‘int32x4_t’ {aka ‘__vector(4) int’} to ‘glm::detail::storage<4, unsigned int, true>::type’ {aka ‘__vector(4) unsigned int’} in assignment
@@ -1320,7 +1324,11 @@ namespace glm {
         return r == ~0u;
       }
     };
+  }
+  #endif
 
+  #if (GLM_ARCH & GLM_ARCH_NEON_BIT)
+  namespace detail {
     /// <summary>
     /// @GLMFix: ARMv7: fatal error: use of undeclared identifier 'vdivq_f32'
     /// </summary>
@@ -1353,7 +1361,7 @@ namespace glm {
     const vec<L, T, Q> yxl = y * length(x);
     const T n = length(xyl - yxl);
     if (epsilonNotEqual(n, T(0), epsilon<T>()))
-      return T(2) * atan2<T, defaultp>(n, length(xyl + yxl));
+      return T(2) * atan2(n, length(xyl + yxl));
     return T(0);
   }
 

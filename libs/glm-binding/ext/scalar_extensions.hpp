@@ -448,10 +448,12 @@ namespace glm {
     return v;
   }
 
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1089
   template<typename genType>
-  GLM_FUNC_QUALIFIER genType atan2(genType x, genType y) {
-    return atan(x, y);
+  GLM_FUNC_QUALIFIER genType atan2(genType y, genType x) {
+    return atan(y, x);  // x and y are incorrectly labeled in gtx/compatibility.hpp
   }
+#endif
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType normalize(genType x) {
@@ -496,10 +498,12 @@ namespace glm {
     return fastNormalizeDot(vec<1, genType>(x), vec<1, genType>(y));
   }
 
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1089
   template<typename genType>
   GLM_FUNC_QUALIFIER genType saturate(genType x) {
     return clamp(x, genType(0), genType(1));
   }
+#endif
 
   template<typename genType>
   GLM_FUNC_QUALIFIER bool openBounded(genType Value, genType Min, genType Max) {
@@ -735,6 +739,7 @@ namespace glm {
   ** =======================================================
   */
 
+#if GLM_VERSION <= 998  // @COMPAT: Fixed in PR #1096
   /// <summary>
   /// @GLMFix: Inconsistent template arguments in associatedMin; see max:
   ///   template<typename T, typename U>
@@ -744,6 +749,7 @@ namespace glm {
   GLM_FUNC_QUALIFIER U associatedMin(T x, U a, T y, U b) {
     return x < y ? a : b;
   }
+#endif
 
   /// <summary>
   /// @GLMFix: -Werror when using bitfieldFillOne and bitfieldFillZero:

@@ -854,8 +854,10 @@ GLM_LUA_REG(levels),
 
 #if defined(GTX_TRANSFORM_HPP) || defined(EXT_MATRIX_TRANSFORM_HPP)
 GLM_LUA_REG(scale),
-// GLM_LUA_REG(scale_slow),  // @COMPAT: Defined in ext/matrix_transform.inl
 GLM_LUA_REG(translate),
+#if GLM_VERSION >= 999
+GLM_LUA_REG(shear),
+#endif
 GLM_LUA_REG(trs),  // @GLMMatrixExtensions
 GLM_LUA_REG(inverseWorldTensor),
 #if defined(LUAGLM_ALIASES_UNITY)
