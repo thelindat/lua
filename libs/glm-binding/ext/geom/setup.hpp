@@ -28,9 +28,7 @@
 
 /* Redefinition of GLM_FUNC_QUALIFIER for "geom/" */
 #define GLM_GEOM_QUALIFIER static GLM_FUNC_QUALIFIER
-
-/* @NOTE: Requires NEVER_INLINE fix in lglm.hpp. */
-#define GLM_GEOM_QUALIFIER_NOINLINE static GLM_NEVER_INLINE
+#define GLM_GEOM_QUALIFIER_OUTINLINE static GLM_NEVER_INLINE
 
 /*
 ** Basic exception-handling check. Allow STL dependencies iff exception handling
@@ -74,17 +72,21 @@
   #define GLM_GEOM_ASSUME(x, onError)
 #endif
 
+/* @TODO: Move to glm::geom */
+#define GLM_GEOM_BEGIN_NAMESPACE namespace glm {
+#define GLM_GEOM_END_NAMESPACE }
+
 /* Forward declare all structures. */
-namespace glm {
-  template<length_t L, typename T, qualifier Q = defaultp> struct AABB;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Line;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Ray;
-  template<length_t L, typename T, qualifier Q = defaultp> struct LineSegment;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Triangle;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Sphere;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Plane;
-  template<length_t L, typename T, qualifier Q = defaultp> struct Polygon;
-}
+GLM_GEOM_BEGIN_NAMESPACE
+template<length_t L, typename T, qualifier Q = defaultp> struct AABB;
+template<length_t L, typename T, qualifier Q = defaultp> struct Line;
+template<length_t L, typename T, qualifier Q = defaultp> struct Ray;
+template<length_t L, typename T, qualifier Q = defaultp> struct LineSegment;
+template<length_t L, typename T, qualifier Q = defaultp> struct Triangle;
+template<length_t L, typename T, qualifier Q = defaultp> struct Sphere;
+template<length_t L, typename T, qualifier Q = defaultp> struct Plane;
+template<length_t L, typename T, qualifier Q = defaultp> struct Polygon;
+GLM_GEOM_END_NAMESPACE
 
 /******************************************************************************
 * GLM Binding:

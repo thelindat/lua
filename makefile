@@ -80,7 +80,7 @@ LUA_LINKAGE= -DLUA_C_LINKAGE
 CC= gcc -std=gnu99 -Wall $(CWARNSCPP) $(CWARNSC) $(CWARNGCC) $(GCC_SANITIZE)
 CPP= g++ -std=c++11 -Wall $(CWARNSCPP) $(CWARNGCC) $(GCC_SANITIZE) $(GPP_SANITIZE)
 CFLAGS= -O2 -DNDEBUG $(SYSCFLAGS) $(MYCFLAGS)
-CPERF_FLAGS= -O3 -march=native -ffast-math -fno-finite-math-only # -fno-plt
+CPERF_FLAGS= -O3 -march=native -ffast-math -fno-finite-math-only # -fno-align-functions -fno-align-jumps -fno-align-loops # -fno-plt
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS) $(GCC_SANITIZE) $(GPP_SANITIZE)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
 

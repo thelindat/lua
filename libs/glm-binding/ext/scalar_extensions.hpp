@@ -81,6 +81,35 @@ namespace glm {
     };
   }
 
+  /* Constants */
+
+  template<typename genType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType squared_eps() {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'squared_eps' only accepts floating-point inputs");
+    return genType(1E-4);  // sqrt(epsilon<genType>());
+  }
+
+  /// <summary>
+  /// Epsilon value for intersection tests.
+  ///
+  /// Used to increase tolerances for functions that route through the more
+  /// imprecise functions, e.g., closestPointLineLine
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType intersect_eps() {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'intersection_epsilon' only accepts floating-point inputs");
+    return genType(1E-4);
+  }
+
+  /// <summary>
+  /// Epsilon value for containment tests.
+  /// </summary>
+  template<typename genType>
+  GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType contains_eps() {
+    GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'contains_eps' only accepts floating-point inputs");
+    return genType(1E-3);
+  }
+
   /* glm::all(glm::equal(...)) shorthand */
 
   template<typename T>
@@ -161,13 +190,13 @@ namespace glm {
   template<typename genType>
   GLM_FUNC_QUALIFIER genType signP(genType v) {
     GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559 || (std::numeric_limits<genType>::is_signed && std::numeric_limits<genType>::is_integer), "'sign' only accept signed inputs");
-    return (v >= 0) ? genType(1) : genType(-1);
+    return (v >= genType(0)) ? genType(1) : genType(-1);
   }
 
   template<typename genType>
   GLM_FUNC_QUALIFIER genType signN(genType v) {
     GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559 || (std::numeric_limits<genType>::is_signed && std::numeric_limits<genType>::is_integer), "'sign' only accept signed inputs");
-    return (v > 0) ? genType(1) : genType(-1);
+    return (v > genType(0)) ? genType(1) : genType(-1);
   }
 
   /* Numeric extensions */

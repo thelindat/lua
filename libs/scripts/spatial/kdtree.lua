@@ -17,6 +17,19 @@
         -- Create a tree
         local tree = KDTree():Build(intervals):Immutable()
 
+        -- Create a cache for querying (e.g., DFS stack)
+        local cache = tree:CreateQueryCache()
+
+        -- Querying the tree:
+        tree:Query(cache, coordinate, function(object)
+            -- Do something with object ('i' above).
+        end)
+
+        tree:Raycast(cache, rayOrigin, rayDir, function(object)
+            -- Do something with object
+            -- @TODO: Expose parametric intersection values in yield.
+        end)
+
     See 'notes.txt' for a list of operations
 
 @NOTE:

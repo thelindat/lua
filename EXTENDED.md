@@ -688,7 +688,7 @@ vec3 = rayPicking(
 ```lua
 -- Returns true if the matrix contains a projection, i.e., the last row differs
 -- (up to an epsilon) of [0, 0, 0, 1]
-bool = containsProjection(m --[[ mat4x4 ]], epsilon --[[ number ]])
+bool = containsProjection(m --[[ mat4x4 ]] [, epsilon --[[ number ]]])
 ```
 
 ## glm/ext/matrix\_transform.hpp
@@ -995,7 +995,7 @@ vecN = extractScale(m --[[ matNxM ]])
 
 ```lua
 -- Returns true if the matrix contains only uniform scaling (up to a given eps)
-bool = hasUniformScale(m --[[ matNxM ]], epsilon --[[ number ]])
+bool = hasUniformScale(m --[[ matNxM ]] [, epsilon --[[ number ]]])
 ```
 
 ## glm/gtx/matrix\_operation.hpp
@@ -1105,7 +1105,7 @@ para --[[ vecN ]], perp --[[ vecN ]] = projDecompose(v --[[ vecN ]], dir --[[ ve
 
 ```lua
 -- Return true if two vectors are perpendicular to one other
-bool = isPerpendicular(v1 --[[ vecN ]], v2 --[[ vecN ]], epsilon --[[ number ]])
+bool = isPerpendicular(v1 --[[ vecN ]], v2 --[[ vecN ]] [, epsilon --[[ number ]]])
 ```
 
 ### perpendicular
@@ -1234,7 +1234,7 @@ rads = orientedAngleStable(x --[[ quat --]], y --[[ quat --]], ref --[[ vec3 --]
 
 ```lua
 -- Check whether all components are nearly equal.
-bool = isUniform(v --[[ vecN ]], epsilon --[[ number ]])
+bool = isUniform(v --[[ vecN ]] [, epsilon --[[ number ]]])
 ```
 
 ### Aliases
@@ -1556,7 +1556,7 @@ value = student_t([n])
 
 ## AABB
 
-An Axis-Aligned Bounding Box. All operators (non-constructors) are of the form:
+An Axis-Aligned Bounding Box. All operations are of the form:
 
 ```lua
 -- aabbMin --[[ vec3 ]]: The minimum extent of the AABB in world space,
@@ -1665,7 +1665,7 @@ bool = aabb2d.notEqual(..., otherMin --[[ vec2 ]], otherMax --[[ vec2 ]], ULPs -
 ### aabb.isinf
 
 ```lua
--- Tests if any component of the AABB is infinite
+-- Test if any component of the AABB is infinite
 bool = aabb.isinf(...)
 bool = aabb2d.isinf(...)
 ```
@@ -1673,7 +1673,7 @@ bool = aabb2d.isinf(...)
 ### aabb.isnan
 
 ```lua
--- Tests if any component of the AABB is NaN
+-- Test if any component of the AABB is NaN
 bool = aabb.isnan(...)
 bool = aabb2d.isnan(...)
 ```
@@ -1956,7 +1956,7 @@ aabbMin,aabbMax = aabb2d.intersection(..., otherMin --[[ vec2 ]], otherMax --[[ 
 
 ## Line
 
-A line that extends to plus/minus infinity. All operators (non-constructors)
+A line that extends to plus/minus infinity. All operations (non-constructors)
 are of the form:
 
 ```lua
@@ -2025,14 +2025,14 @@ segStart --[[ vec3 ]], segEnd --[[ vec3 ]] = line.to_segment(..., distance --[[ 
 ### line.isinf
 
 ```lua
--- Tests if any component of the line is infinite
+-- Test if any component of the line is infinite
 bool = line.isinf(...)
 ```
 
 ### line.isnan
 
 ```lua
--- Tests if any component of the line is NaN
+-- Test if any component of the line is NaN
 bool = line.isnan(...)
 ```
 
@@ -2076,9 +2076,9 @@ p,d,u,v = line.closestTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ ve
 
 ```lua
 -- Tests if the given object is fully contained on the line
-bool = line.contains(..., point --[[ vec3 ]], epsilon --[[ number ]])
-bool = line.containsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]], epsilon --[[ number ]])
-bool = line.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], epsilon --[[ number ]])
+bool = line.contains(..., point --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = line.containsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = line.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]] [, epsilon --[[ number ]]])
 ```
 
 ### line.distance
@@ -2176,14 +2176,14 @@ bool = ray.notEqual(..., otherPos --[[ vec3 ]], otherDir --[[ vec3 ]], ULPs --[[
 ### ray.isinf
 
 ```lua
--- Tests if any component of the ray is infinite
+-- Test if any component of the ray is infinite
 bool = ray.isinf(...)
 ```
 
 ### ray.isnan
 
 ```lua
--- Tests if any component of the ray is NaN
+-- Test if any component of the ray is NaN
 bool = ray.isnan(...)
 ```
 
@@ -2230,8 +2230,8 @@ p,d,d2 = ray.closestSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
 
 ```lua
 -- Tests if the given object is fully contained on the ray.
-bool = ray.contains(..., point --[[ vec3 ]])
-bool = ray.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
+bool = ray.contains(..., point --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = ray.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]] [, epsilon --[[ number ]]])
 ```
 
 ### ray.distance
@@ -2338,6 +2338,30 @@ bool = segment2d.notEqual(..., otherStart --[[ vec2 ]], otherEnd --[[ vec2 ]], e
 bool = segment2d.notEqual(..., otherStart --[[ vec2 ]], otherEnd --[[ vec2 ]], ULPs --[[ integer ]])
 ```
 
+### segment.isinf
+
+```lua
+-- Test if any component of the line segment is infinite
+bool = segment.isinf(...)
+bool = segment2d.isinf(...)
+```
+
+### segment.isnan
+
+```lua
+-- Test if any component of the line segment is NaN
+bool = segment.isnan(...)
+bool = segment2d.isnan(...)
+```
+
+### segment.isfinite
+
+```lua
+-- Test if all components of the line segment are finite
+bool = segment.isfinite(...)
+bool = segment2d.isfinite(...)
+```
+
 ### segment.length
 
 ```lua
@@ -2350,10 +2374,10 @@ number = segment.length2(...)
 number = segment2d.length2(...)
 ```
 
-### segment.isfinite
+### segment.length2
 
 ```lua
--- Tests if any component of the segment is infinite
+-- Test if any component of the segment is infinite
 number = segment.length2(...)
 number = segment2d.length2(...)
 ```
@@ -2424,11 +2448,11 @@ p,d,d2 = segment2d.closestSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]
 
 ```lua
 -- Tests if the given object is fully contained on the segment
-bool = segment.containsPoint(..., point --[[ vec3 ]], epsilon --[[ number ]])
-bool = segment2d.containsPoint(..., point --[[ vec2 ]], epsilon --[[ number ]])
+bool = segment.contains(..., point --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = segment2d.contains(..., point --[[ vec2 ]] [, epsilon --[[ number ]]])
 
-bool = segment.containsSegment(... segStart --[[ vec3 ]], segEnd --[[ vec3 ]], epsilon --[[ number ]])
-bool = segment2d.containsSegment(... segStart --[[ vec2 ]], segEnd --[[ vec2 ]], epsilon --[[ number ]])
+bool = segment.containsSegment(... segStart --[[ vec3 ]], segEnd --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = segment2d.containsSegment(... segStart --[[ vec2 ]], segEnd --[[ vec2 ]] [, epsilon --[[ number ]]])
 ```
 
 ### segment.distance
@@ -2473,17 +2497,27 @@ dist,d,d2 = segment2d.distanceSegment2(..., segStart --[[ vec2 ]], segEnd --[[ v
 bool,d,d2 = segment.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]])
 bool,d,d2 = segment2d.intersectsAABB(..., aabbMin --[[ vec2 ]], aabbMax --[[ vec2 ]])
 
-bool,d,d2 = segment.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], epsilon --[[ number ]])
-bool,d,d2 = segment2d.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]], epsilon --[[ number ]])
+bool,d,d2 = segment.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
+bool,d,d2 = segment2d.intersectsSegment(..., segStart --[[ vec2 ]], segEnd --[[ vec2 ]])
 
 bool,d = segment.intersectsPlane(..., planeNormal --[[ vec3 ]], planeOffset --[[ number ]])
 bool,d,u,v = segment.intersectsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]])
 count,dNear,dFar = segment.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]])
 ```
 
+## Triangle
+
+A Triangle. All operations are of the form:
+
+```lua
+-- a, b, c: Points of the triangle.
+-- ...: variadic function parameters
+result = triangle.function(a --[[ vec3 ]], b --[[ vec3 ]], c --[[ vec3 ]], ...)
+```
+
 ## Sphere
 
-A Sphere. All operators (non-constructors) are of the form:
+A Sphere. All operations are of the form:
 
 ```lua
 -- spherePos: The centroid of the sphere (or circle),
@@ -2558,7 +2592,7 @@ bool = circle.notEqual(..., otherPos --[[ vec2 ]], otherRad --[[ number ]], ULPs
 ### sphere.isinf
 
 ```lua
--- Tests if any component of the sphere/circle is infinite
+-- Test if any component of the sphere/circle is infinite
 bool = sphere.isinf(...)
 bool = circle.isinf(...)
 ```
@@ -2566,7 +2600,7 @@ bool = circle.isinf(...)
 ### sphere.isnan
 
 ```lua
--- Tests if any component of the sphere/circle is NaN
+-- Test if any component of the sphere/circle is NaN
 bool = sphere.isnan(...)
 bool = circle.isnan(...)
 ```
@@ -2576,6 +2610,7 @@ bool = circle.isnan(...)
 ```lua
 -- Test if all components of the sphere/circle are finite
 bool = sphere.isfinite(...)
+bool = circle.isfinite(...)
 ```
 
 ### sphere.isDegenerate
@@ -2761,8 +2796,8 @@ An affine 2D subspace of a 3D dimensional space. All operators
 (non-constructors) are of the form:
 
 ```lua
--- planeNormal --[[ vec3 ]]: The direction the plane is facing,
--- planeOffset --[[ vec3 ]]: The offset of this plane from the origin (0,0,0),
+-- normal --[[ vec3 ]]: The direction the plane is facing,
+-- offset --[[ number ]]: The offset of this plane from the origin (0,0,0),
 -- ...: variadic function parameters
 result = plane.function(planeNormal, planeOffset, ...)
 ```
@@ -2815,6 +2850,27 @@ bool = plane.notEqual(..., otherNormal --[[ vec3 ]], otherOffset --[[ number ]],
 bool = plane.notEqual(..., otherNormal --[[ vec3 ]], otherOffset --[[ number ]], ULPs --[[ integer ]])
 ```
 
+### plane.isinf
+
+```lua
+-- Test if any component of the plane is infinite
+bool = plane.isinf(...)
+```
+
+### plane.isnan
+
+```lua
+-- Test if any component of the plane is NaN
+bool = plane.isnan(...)
+```
+
+### plane.isfinite
+
+```lua
+-- Test if all components of the plane are finite
+bool = plane.isfinite(...)
+```
+
 ### plane.from
 
 ```lua
@@ -2846,7 +2902,7 @@ bool = plane.isDegenerate(...)
 
 ```lua
 -- Return true if two planes are parallel (up to a given epsilon)
-bool = plane.isParallel(..., otherNormal --[[ vec3 ]], otherOffset --[[ number ]], epsilon --[[ number ]])
+bool = plane.isParallel(..., otherNormal --[[ vec3 ]], otherOffset --[[ number ]] [, epsilon --[[ number ]]])
 ```
 
 ### plane.areOnSameSide
@@ -2863,7 +2919,7 @@ bool = plane.areOnSameSide(..., point --[[ vec3 ]], other --[[ vec3 ]])
 --   1 - If the triangle is completely in the positive half-space of the plane;
 --  -1 - If the triangle is completely in the negative half-space of the plane;
 --   0 - If the triangle intersects the plane.
-result --[[ int ]] = plane.examineSide(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]], epsilon --[[ number ]])
+result --[[ int ]] = plane.examineSide(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]] [, epsilon --[[ number ]]])
 ```
 
 ### plane.isInPositiveDirection
@@ -3053,10 +3109,10 @@ number = plane.signedDistanceTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc 
 ```lua
 -- Tests if this plane contains the given object(s)
 bool = plane.contains(..., point --[[ vec3 ]])
-bool = plane.containsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]])
-bool = plane.containsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]])
-bool = plane.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
-bool = plane.containsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]])
+bool = plane.containsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = plane.containsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = plane.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]] [, epsilon --[[ number ]]])
+bool = plane.containsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]] [, epsilon --[[ number ]]])
 ```
 
 ### plane.intersects
@@ -3066,6 +3122,8 @@ bool = plane.containsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec
 bool,dist --[[ number ]] = plane.intersectsRay(..., rayPos --[[ vec3 ]], rayDir --[[ vec3 ]])
 bool,dist --[[ number ]] = plane.intersectsLine(..., linePos --[[ vec3 ]], lineDir --[[ vec3 ]])
 bool,dist --[[ number ]] = plane.intersectsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]])
+bool,line --[[ line --]] = plane.intersectsPlane(..., normalB --[[ vec3 ]], offsetB --[[ number ]])
+bool,line --[[ segment --]] = plane.intersectsPlanes(..., normalB --[[ vec3 ]], offsetB --[[ number ]], normalC --[[ vec3 ]], offsetC --[[ number ]])
 bool = plane.intersectsSphere(..., spherePos --[[ vec3 ]], sphereRad --[[ number ]])
 bool = plane.intersectsAABB(..., aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]])
 bool = plane.intersectsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]])
@@ -3277,7 +3335,7 @@ vec3 = polygon.centroid(...)
 ```lua
 -- Tests if the polygon is planar, i.e., all of its vertices lie on the same
 -- plane
-bool = polygon.isPlanar(...)
+bool = polygon.isPlanar(... [, epsilonSq --[[ number ]]])
 ```
 
 ### polygon.isSimple
@@ -3308,7 +3366,7 @@ bool = polygon.isfinite(...)
 -- Return true if the polygon is degenerate:
 --   1. It has two-or-less vertices
 --   2. its surface area is less or equal than a given epsilon
-bool = polygon.isDegenerate(..., epsilon --[[ number ]])
+bool = polygon.isDegenerate(... [, epsilon --[[ number ]]])
 ```
 
 ### polygon.isConvex
@@ -3412,16 +3470,16 @@ aabbMin --[[ vec3 ]], aabbMax --[[ vec3 ]] = polygon.minimalEnclosingAABB(...)
 -- "epsilon" to handle floating-point inaccuracies.
 --
 -- Thickness emanates from the plane: 0.5 * thickness in each half-space.
-bool = polygon.contains(..., point --[[ vec3 ]], thickness --[[ number ]])
+bool = polygon.contains(..., point --[[ vec3 ]] [, thickness --[[ number ]]])
 bool = polygon.containsPolygon(..., otherPolygon --[[ userdata ]])
-bool = polygon.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]], thickness --[[ number ]]))
-bool = polygon.containsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]], thickness --[[ number ]])
+bool = polygon.containsSegment(..., segStart --[[ vec3 ]], segEnd --[[ vec3 ]] [, thickness --[[ number ]])])
+bool = polygon.containsTriangle(..., ta --[[ vec3 ]], tb --[[ vec3 ]], tc --[[ vec3 ]] [, thickness --[[ number ]]])
 
 -- Thickness expands only in the positive half-space, emanating from the plane
-bool = polygon.containsAbove(..., point --[[ vec3 ]], thickness --[[ number ]])
+bool = polygon.containsAbove(..., point --[[ vec3 ]] [, thickness --[[ number ]]])
 
 -- Thickness expands only in the negative half-space, emanating from the plane
-bool = polygon.containsBelow(..., point --[[ vec3 ]], thickness --[[ number ]])
+bool = polygon.containsBelow(..., point --[[ vec3 ]] [, thickness --[[ number ]]])
 
 -- Tests if the given line segment, expressed in parametric/local coordinates,
 -- is fully contained inside the polygon

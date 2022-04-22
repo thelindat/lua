@@ -35,9 +35,13 @@
 /*
 ** By default, use jump tables in the main interpreter loop on gcc
 ** and compatible compilers.
+**
+** @NVC: Does not support the labels-as-values extension.
+** @LuaGLM: Enable computed gotos when compiled with clang-cl.
 */
 #if !defined(LUA_USE_JUMPTABLE)
-#if defined(__GNUC__) && !defined(__NVCOMPILER)
+#if (defined(__GNUC__) && !defined(__NVCOMPILER)) \
+|| (defined(__clang__) && defined(_WIN32))
 #define LUA_USE_JUMPTABLE	1
 #else
 #define LUA_USE_JUMPTABLE	0

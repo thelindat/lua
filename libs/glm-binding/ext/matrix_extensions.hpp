@@ -204,7 +204,7 @@ namespace glm {
   /// Create a matrix that mirrors the given plane normal.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<C, R, T, Q> planeMirror(const glm::vec<3, T, Q> &n, T d = T(0)) {
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> planeMirror(const vec<3, T, Q> &n, T d = T(0)) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid affine plane mirror");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'planeMirror' only accept floating-point inputs");
 
@@ -231,7 +231,7 @@ namespace glm {
   /// the provided plane.
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER mat<C, R, T, Q> orthoProjection(const glm::vec<3, T, Q> &n, T d = T(0)) {
+  GLM_FUNC_QUALIFIER mat<C, R, T, Q> orthoProjection(const vec<3, T, Q> &n, T d = T(0)) {
     GLM_STATIC_ASSERT(C >= 3 && R >= 3, "invalid affine plane projection");
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'orthoProjection' only accept floating-point inputs");
 
@@ -710,7 +710,7 @@ namespace glm {
   /// <summary>
   /// @GLMFix: glm::scaleBias that ensures the matrix is initialized.
   /// </summary>
-  template<typename T, qualifier Q = glm::qualifier::defaultp>
+  template<typename T, qualifier Q = qualifier::defaultp>
   GLM_FUNC_QUALIFIER mat<4, 4, T, Q> __scaleBias(T scale, T bias) {
     mat<4, 4, T, Q> result(0);
     result[3] = vec<4, T, Q>(vec<3, T, Q>(bias), static_cast<T>(1));
@@ -726,7 +726,7 @@ namespace glm {
   }
 
   /// <summary>
-  /// @GLMFix: corrected glm::isNull implementation
+  /// @GLMFix @RemoveSqrt: corrected glm::isNull implementation
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool _isNull(mat<C, R, T, Q> const &m, const T eps = epsilon<T>()) {
@@ -737,7 +737,7 @@ namespace glm {
   }
 
   /// <summary>
-  /// @GLMFix: corrected glm::isNormalized implementation
+  /// @GLMFix @RemoveSqrt: corrected glm::isNormalized implementation
   /// </summary>
   template<length_t C, length_t R, typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool _isNormalized(mat<C, R, T, Q> const &m, const T eps = epsilon<T>()) {

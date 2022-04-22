@@ -915,7 +915,7 @@
 #if !defined(LUAGLM_USE_ANONYMOUS_STRUCT)
   #if defined(LUAGLM_NO_ANONYMOUS_STRUCT)
     #define LUAGLM_USE_ANONYMOUS_STRUCT 0
-  #elif defined(_MSVC_VER)                                     \
+  #elif defined(_MSC_VER)                                      \
   || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 20112L) \
   || (defined(__cplusplus) && __cplusplus >= 201103L)
     #define LUAGLM_USE_ANONYMOUS_STRUCT 1

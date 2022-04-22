@@ -358,9 +358,9 @@ namespace glm {
   /// Return true if two vectors are perpendicular to each other.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool isPerpendicular(const vec<L, T, Q> &v, const vec<L, T, Q> &other, T epsSq = epsilon<T>()) {
+  GLM_FUNC_QUALIFIER bool isPerpendicular(const vec<L, T, Q> &v, const vec<L, T, Q> &other, const T eps = epsilon<T>()) {
     const T d = dot(v, other);
-    return d * d <= epsSq * length2(v) * length2(other);
+    return d <= eps * length(v) * length(other);  // @RemoveSqrt
   }
 
   template<typename genType>
@@ -487,15 +487,15 @@ namespace glm {
   /// Return true if the three given points are collinear, i.e., lie on the same line.
   /// </summary>
   template<length_t L, typename T, qualifier Q>
-  GLM_FUNC_QUALIFIER bool areCollinear(const vec<L, T, Q> &p1, const vec<L, T, Q> &p2, const vec<L, T, Q> &p3, T epsSq = epsilon<T>()) {
-    return length2(cross(p2 - p1, p3 - p1)) <= epsSq;
+  GLM_FUNC_QUALIFIER bool areCollinear(const vec<L, T, Q> &p1, const vec<L, T, Q> &p2, const vec<L, T, Q> &p3, T eps = epsilon<T>()) {
+    return length(cross(p2 - p1, p3 - p1)) <= eps;  // @RemoveSqrt
   }
 
   /* Encode/Decode a spherical normal vector */
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER vec<2, T, Q> sphericalEncode(const vec<3, T, Q> &v) {
-    const vec<2, T, Q> Result(glm::atan2<T, defaultp>(v.y, v.x) * one_over_pi<T>(), v.z);
+    const vec<2, T, Q> Result(atan2<T, defaultp>(v.y, v.x) * one_over_pi<T>(), v.z);
     return Result * T(0.5) + T(0.5);
   }
 
@@ -1353,7 +1353,7 @@ namespace glm {
     const vec<L, T, Q> yxl = y * length(x);
     const T n = length(xyl - yxl);
     if (epsilonNotEqual(n, T(0), epsilon<T>()))
-      return T(2) * glm::atan2<T, defaultp>(n, length(xyl + yxl));
+      return T(2) * atan2<T, defaultp>(n, length(xyl + yxl));
     return T(0);
   }
 

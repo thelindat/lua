@@ -184,13 +184,13 @@ namespace glm {
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool isNormalized(qua<T, Q> const &q, const T eps = epsilon<T>()) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNormalized' only accept floating-point inputs");
-    return abs(length(q) - static_cast<T>(1)) <= static_cast<T>(2) * eps;
+    return abs(length(q) - static_cast<T>(1)) <= static_cast<T>(2) * eps;  // @RemoveSqrt
   }
 
   template<typename T, qualifier Q>
   GLM_FUNC_QUALIFIER bool isNull(qua<T, Q> const &q, const T eps = epsilon<T>()) {
     GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'isNull' only accept floating-point inputs");
-    return length(q) <= eps;
+    return length(q) <= eps;  // @RemoveSqrt
   }
 
   template<typename T, qualifier Q>

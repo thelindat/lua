@@ -267,7 +267,7 @@ EQUAL_DEFN(all_equal, glm::all_equal)  // @GLMVectorExtensions
 EQUAL_DEFN(any_notequal, glm::any_notequal)  // @GLMVectorExtensions
 #if GLM_HAS_CXX11_STL
 #define LAYOUT_HASH(LB, F, Tr, ...) \
-  BIND_PUSH_V(LB, F<Tr::type>()((LB).Next<Tr>()))
+  return gLuaBase::Push((LB), F<Tr::type>()((LB).Next<Tr>()))
 
 GLM_BINDING_QUALIFIER(hash) { /* glm/gtx/hash.hpp */
   GLM_BINDING_BEGIN
@@ -762,15 +762,15 @@ GLM_BINDING_QUALIFIER(identity) {
   const lua_Integer size = LB.AsNextType<lua_Integer>();
   const lua_Integer secondary = LB.AsNextType<lua_Integer>();
   switch (LUAGLM_MATRIX_TYPE(size, secondary)) {
-    case LUAGLM_MATRIX_2x2: BIND_RESULT(LB, glm::identity<gLuaMat2x2<>::type>());
-    case LUAGLM_MATRIX_2x3: BIND_RESULT(LB, glm::identity<gLuaMat2x3<>::type>());
-    case LUAGLM_MATRIX_2x4: BIND_RESULT(LB, glm::identity<gLuaMat2x4<>::type>());
-    case LUAGLM_MATRIX_3x2: BIND_RESULT(LB, glm::identity<gLuaMat3x2<>::type>());
-    case LUAGLM_MATRIX_3x3: BIND_RESULT(LB, glm::identity<gLuaMat3x3<>::type>());
-    case LUAGLM_MATRIX_3x4: BIND_RESULT(LB, glm::identity<gLuaMat3x4<>::type>());
-    case LUAGLM_MATRIX_4x2: BIND_RESULT(LB, glm::identity<gLuaMat4x2<>::type>());
-    case LUAGLM_MATRIX_4x3: BIND_RESULT(LB, glm::identity<gLuaMat4x3<>::type>());
-    case LUAGLM_MATRIX_4x4: BIND_RESULT(LB, glm::identity<gLuaMat4x4<>::type>());
+    case LUAGLM_MATRIX_2x2: return gLuaBase::Push(LB, glm::identity<gLuaMat2x2<>::type>());
+    case LUAGLM_MATRIX_2x3: return gLuaBase::Push(LB, glm::identity<gLuaMat2x3<>::type>());
+    case LUAGLM_MATRIX_2x4: return gLuaBase::Push(LB, glm::identity<gLuaMat2x4<>::type>());
+    case LUAGLM_MATRIX_3x2: return gLuaBase::Push(LB, glm::identity<gLuaMat3x2<>::type>());
+    case LUAGLM_MATRIX_3x3: return gLuaBase::Push(LB, glm::identity<gLuaMat3x3<>::type>());
+    case LUAGLM_MATRIX_3x4: return gLuaBase::Push(LB, glm::identity<gLuaMat3x4<>::type>());
+    case LUAGLM_MATRIX_4x2: return gLuaBase::Push(LB, glm::identity<gLuaMat4x2<>::type>());
+    case LUAGLM_MATRIX_4x3: return gLuaBase::Push(LB, glm::identity<gLuaMat4x3<>::type>());
+    case LUAGLM_MATRIX_4x4: return gLuaBase::Push(LB, glm::identity<gLuaMat4x4<>::type>());
     default: {
       break;
     }
@@ -952,8 +952,8 @@ ROTATION_MATRIX_DEFN(axisAngle, glm::__axisAngle, LAYOUT_AXIS_ANGLE)
   GLM_BINDING_QUALIFIER(Name) {                   \
     GLM_BINDING_BEGIN                             \
     if (LB.Is<Tr::col_type>())                    \
-      ArgLayout(LB, F, Tr::col_type);             \
-    BIND_RESULT(LB, F(LB.Next<Tr>()));            \
+      _VA_EXPAND(ArgLayout(LB, F, Tr::col_type)); \
+    BIND_RESULT(LB, F, LB.Next<Tr>());            \
     GLM_BINDING_END                               \
   }
 
@@ -1102,7 +1102,7 @@ GLM_BINDING_QUALIFIER(computeCovarianceMatrix) {
   Tr::type v2;                                 \
   const Tr::type v3 = F((LB).Next<Tr>(), v2);  \
   const int _a = gLuaBase::PushNumInt(LB, v2); \
-  return _a + BIND_PUSH_V(LB, v3);             \
+  return _a + gLuaBase::Push((LB), v3);        \
   LUA_MLM_END
 
 #define LAYOUT_UNARY_TOINT(LB, _, Tr, ...) \
@@ -1129,7 +1129,7 @@ NUMBER_VECTOR_DEFN(smoothstep, glm::smoothstep, LAYOUT_TERNARY)
 NUMBER_VECTOR_DEFN(step, glm::step, LAYOUT_BINARY)
 NUMBER_VECTOR_DEFN(trunc, glm::trunc, LAYOUT_UNARY)
 NUMBER_VECTOR_DEFN(ldexp, glm::ldexp, LAYOUT_BINARY_AS_INT)
-NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP, int)
+NUMBER_VECTOR_DEFN(frexp, glm::frexp, LAYOUT_FREXP)
 NUMBER_VECTOR_DEFN(reverse, glm::reverse, LAYOUT_UNARY)  // @GLMVectorExtensions
 #if LUAGLM_VEC_TYPE == LUA_FLOAT_FLOAT
 BIND_DEFN(morton3D, glm::morton3D, gLuaVec3<>)
@@ -1462,7 +1462,7 @@ NUMBER_VECTOR_DEFN(iround, glm::iround, LAYOUT_ROUND_BOUNDED)
 NUMBER_VECTOR_DEFN(uround, glm::uround, LAYOUT_ROUND_BOUNDED)
 #endif
 
-#if defined(GTC_RANDOM_HPP)
+#if defined(GTC_RANDOM_HPP) && GLM_HAS_CXX11_STL
 using gRandValue = gPositiveConstraint<gLuaNumber, false>;  // @GLMAssert: assert(Radius > static_cast<T>(0));
 NUMBER_VECTOR_DEFN(linearRand, glm::linearRand, LAYOUT_BINARY)
 BIND_DEFN(ballRand, glm::ballRand, gRandValue)
@@ -1470,6 +1470,10 @@ BIND_DEFN(circularRand, glm::circularRand, gRandValue)
 BIND_DEFN(diskRand, glm::diskRand, gRandValue)
 BIND_DEFN(gaussRand, glm::gaussRand, gRandValue, gRandValue)
 BIND_DEFN(sphericalRand, glm::sphericalRand, gRandValue)
+GLM_BINDING_QUALIFIER(srand) {
+  std::srand(static_cast<unsigned int>(lua_tointeger(L, 1)));
+  return 0;
+}
 #endif
 
 #if defined(GTC_RECIPROCAL_HPP)
@@ -1897,14 +1901,14 @@ GLM_BINDING_QUALIFIER(components) {  // An optimized variant of glm::components
   GLM_BINDING_BEGIN
   const TValue *o = LB.i2v();
   switch (ttype(o)) {
-    case LUA_TVECTOR: BIND_RESULT(LB, glm_dimensions(ttypetag(o)));
+    case LUA_TVECTOR: return gLuaBase::Push(LB, glm_dimensions(ttypetag(o)));
     case LUA_TMATRIX: {
       gLuaBase::Push(LB, LUAGLM_MATRIX_COLS(mvalue_dims(o)));
       gLuaBase::Push(LB, LUAGLM_MATRIX_ROWS(mvalue_dims(o)));
       return 2;
     }
     default: {
-      BIND_RESULT(LB, 1);
+      return gLuaBase::Push(LB, 1);
     }
   }
   GLM_BINDING_END
@@ -2062,8 +2066,8 @@ NUMBER_VECTOR_DEFN(isCompNull, glm::isCompNull, LAYOUT_BINARY_EPS)
     GLM_BINDING_END                                                                           \
   }
 
-QUERY_DEFN(isNormalized, glm::isNormalized, glm::_isNormalized)
-QUERY_DEFN(isNull, glm::isNull, glm::_isNull)
+QUERY_DEFN(isNormalized, glm::isNormalized, glm::_isNormalized)  // @RemoveSqrt
+QUERY_DEFN(isNull, glm::isNull, glm::_isNull)  // @RemoveSqrt
 NUMBER_VECTOR_DEFN(isUniform, glm::isUniform, LAYOUT_BINARY_EPS)  // @GLMVectorExtensions
 #endif
 
@@ -2090,23 +2094,23 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
 
 #define RAND_TRAIT(LB, F, A, ...) RANDOM_DEVICE(LB, F, A) /* Avoid /Zc:preprocessor- headache */
 #define RANDOM_DEVICE(...) VA_CALL(RANDOM_DEVICE, ##__VA_ARGS__) /* Mapping to <random> structures */
-#define RANDOM_DEVICE1(LB) BIND_RESULT(LB, 0) /* zero */
-#define RANDOM_DEVICE2(LB, F) BIND_RESULT(LB, F()(LB)) /* std::rand_func<>()(LB) */
-#define RANDOM_DEVICE3(LB, F, A)            \
-  LUA_MLM_BEGIN                             \
-  if ((LB).top() > 0)                       \
-    BIND_RESULT(LB, F((LB).Next<A>())(LB)); \
-  BIND_RESULT(LB, F()(LB));                 \
+#define RANDOM_DEVICE1(LB) return gLuaBase::Push(LB, 0) /* zero */
+#define RANDOM_DEVICE2(LB, F) return gLuaBase::Push(LB, F()(LB)) /* std::rand_func<>()(LB) */
+#define RANDOM_DEVICE3(LB, F, A)                      \
+  LUA_MLM_BEGIN                                       \
+  if ((LB).top() > 0)                                 \
+    return gLuaBase::Push(LB, F((LB).Next<A>())(LB)); \
+  return gLuaBase::Push(LB, F()(LB));                 \
   LUA_MLM_END
 
-#define RANDOM_DEVICE4(LB, F, A, B)    \
-  LUA_MLM_BEGIN                        \
-  if ((LB).top() > 0) {                \
-    const A::type _a = (LB).Next<A>(); \
-    const B::type _b = (LB).Next<B>(); \
-    BIND_RESULT(LB, F(_a, _b)(LB));    \
-  }                                    \
-  BIND_RESULT(LB, F()(LB));            \
+#define RANDOM_DEVICE4(LB, F, A, B)           \
+  LUA_MLM_BEGIN                               \
+  if ((LB).top() > 0) {                       \
+    const A::type _a = (LB).Next<A>();        \
+    const B::type _b = (LB).Next<B>();        \
+    return gLuaBase::Push(LB, F(_a, _b)(LB)); \
+  }                                           \
+  return gLuaBase::Push(LB, F()(LB));         \
   LUA_MLM_END
 
 /* std::rand_func<>(a, b)(LB) | a <= b */
@@ -2116,10 +2120,10 @@ NUMBER_VECTOR_DEFN(lerpAngle, glm::lerpAngle, LAYOUT_TERNARY_OPTIONAL)
     const A::type _a = (LB).Next<A>();                                           \
     const B::type _b = (LB).Next<B>();                                           \
     if (_a <= _b && (0 <= _a || _b <= _a + std::numeric_limits<A::type>::max())) \
-      BIND_RESULT(LB, F(_a, _b)(LB));                                            \
+      return gLuaBase::Push(LB, F(_a, _b)(LB));                                  \
     return LUAGLM_ERROR(LB.L, "invalid uniform_dist arguments");                 \
   }                                                                              \
-  BIND_RESULT(LB, F()(LB));                                                      \
+  return gLuaBase::Push(LB, F()(LB));                                            \
   LUA_MLM_END
 
 using raNum = gLuaNumber;

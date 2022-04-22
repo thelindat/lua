@@ -403,13 +403,14 @@ GLM_LUA_REG(iround),
 GLM_LUA_REG(uround),
 #endif
 
-#if defined(GTC_RANDOM_HPP)
+#if defined(GTC_RANDOM_HPP) && GLM_HAS_CXX11_STL
 GLM_LUA_REG(ballRand),
 GLM_LUA_REG(circularRand),
 GLM_LUA_REG(diskRand),
 GLM_LUA_REG(gaussRand),
 GLM_LUA_REG(linearRand),
 GLM_LUA_REG(sphericalRand),
+GLM_LUA_REG(srand),
 #endif
 
 #if defined(GTC_RECIPROCAL_HPP)

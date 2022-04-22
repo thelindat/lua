@@ -443,7 +443,7 @@ static int tisfrozen(lua_State *L) {
 
 
 #if defined(LUAGLM_EXT_API)
-static int type (lua_State *L) {
+static int ttypestr (lua_State *L) {
   if (lua_type(L, 1) == LUA_TTABLE) {
     switch (lua_tabletype(L, 1)) {
       case LUA_TTEMPTY: lua_pushstring(L, "empty"); break;
@@ -517,7 +517,7 @@ static const luaL_Reg tab_funcs[] = {
   {"isfrozen", tisfrozen},
 #endif
 #if defined(LUAGLM_EXT_API)
-  {"type", type},
+  {"type", ttypestr},
   {"create", tcreate}, {"new", tcreate},
   {"wipe", treset}, {"clear", treset},
   {"compact", tcompact},

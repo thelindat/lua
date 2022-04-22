@@ -54,7 +54,7 @@ InsertPoint(object, point)
 -- Remove an object from the index
 --
 -- @RETURN self
-Remove(self, objectIndex)
+Remove(self, object)
 
 ---------------------------------------
 --------------- Queries ---------------

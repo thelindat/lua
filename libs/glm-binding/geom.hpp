@@ -794,9 +794,9 @@ LAYOUT_DEFN(line_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaRa
 LAYOUT_DEFN(line_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaLine<>)
 LAYOUT_DEFN(line_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaLine<>, gLuaSegment<>)
 LAYOUT_DEFN(line_closestTriangle, glm::closestPoint, GEOM_CLOSEST_TRIANGLE, gLuaLine<>, gLuaTriangle<>)
-BIND_DEFN(line_contains, glm::contains, gLuaLine<>, gLuaLine<>::point_trait, gLuaLine<>::eps_trait)
-BIND_DEFN(line_containsRay, glm::contains, gLuaLine<>, gLuaRay<>, gLuaLine<>::eps_trait)
-BIND_DEFN(line_containsSegment, glm::contains, gLuaLine<>, gLuaSegment<>, gLuaLine<>::eps_trait)
+BIND_DEFN(line_contains, glm::contains, gLuaLine<>, gLuaLine<>::point_trait, gLuaLine<>::eps_trait::contains)
+BIND_DEFN(line_containsRay, glm::contains, gLuaLine<>, gLuaRay<>, gLuaLine<>::eps_trait::contains)
+BIND_DEFN(line_containsSegment, glm::contains, gLuaLine<>, gLuaSegment<>, gLuaLine<>::eps_trait::contains)
 LAYOUT_DEFN(line_distance, glm::distance, GEOM_DISTANCE, gLuaLine<>, gLuaLine<>::point_trait)
 LAYOUT_DEFN(line_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaLine<>, gLuaRay<>)
 LAYOUT_DEFN(line_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaLine<>, gLuaLine<>)
@@ -866,8 +866,8 @@ LAYOUT_DEFN(ray_closest, glm::closestPoint, GEOM_DISTANCE, gLuaRay<>, gLuaRay<>:
 LAYOUT_DEFN(ray_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaRay<>)
 LAYOUT_DEFN(ray_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaLine<>)
 LAYOUT_DEFN(ray_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaRay<>, gLuaSegment<>)
-BIND_DEFN(ray_contains, glm::contains, gLuaRay<>, gLuaRay<>::point_trait, gLuaRay<>::eps_trait)
-BIND_DEFN(ray_containsSegment, glm::contains, gLuaRay<>, gLuaSegment<>, gLuaRay<>::eps_trait)
+BIND_DEFN(ray_contains, glm::contains, gLuaRay<>, gLuaRay<>::point_trait, gLuaRay<>::eps_trait::contains)
+BIND_DEFN(ray_containsSegment, glm::contains, gLuaRay<>, gLuaSegment<>, gLuaRay<>::eps_trait::contains)
 LAYOUT_DEFN(ray_distance, glm::distance, GEOM_DISTANCE, gLuaRay<>, gLuaRay<>::point_trait)
 LAYOUT_DEFN(ray_distanceRay, glm::distance, GEOM_DISTANCE_UV, gLuaRay<>, gLuaRay<>)
 LAYOUT_DEFN(ray_distanceLine, glm::distance, GEOM_DISTANCE_UV, gLuaRay<>, gLuaLine<>)
@@ -939,8 +939,8 @@ LAYOUT_DEFN(segment_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, 
 LAYOUT_DEFN(segment_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, gLuaLine<>)
 LAYOUT_DEFN(segment_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<>, gLuaSegment<>)
 LAYOUT_DEFN(segment_closestTriangle, glm::closestPoint, GEOM_INTERSECTS_TRIANGLE, gLuaSegment<>, gLuaTriangle<>)
-BIND_DEFN(segment_containsPoint, glm::contains, gLuaSegment<>, gLuaSegment<>::point_trait, gLuaSegment<>::eps_trait)
-BIND_DEFN(segment_containsSegment, glm::contains, gLuaSegment<>, gLuaSegment<>, gLuaSegment<>::eps_trait)
+BIND_DEFN(segment_contains, glm::contains, gLuaSegment<>, gLuaSegment<>::point_trait, gLuaSegment<>::eps_trait::contains)
+BIND_DEFN(segment_containsSegment, glm::contains, gLuaSegment<>, gLuaSegment<>, gLuaSegment<>::eps_trait::contains)
 LAYOUT_DEFN(segment_distance2, glm::distance2, GEOM_DISTANCE, gLuaSegment<>, gLuaSegment<>::point_trait)
 LAYOUT_DEFN(segment_distanceSegment2, glm::distance2, GEOM_DISTANCE_UV, gLuaSegment<>, gLuaSegment<>)
 LAYOUT_DEFN(segment_distance, glm::distance, GEOM_DISTANCE, gLuaSegment<>, gLuaSegment<>::point_trait)
@@ -976,7 +976,7 @@ static const luaL_Reg luaglm_segmentlib[] = {
   { "closestRay", GLM_NAME(segment_closestRay) },
   { "closestLine", GLM_NAME(segment_closestLine) },
   { "closestSegment", GLM_NAME(segment_closestSegment) },
-  { "containsPoint", GLM_NAME(segment_containsPoint) },
+  { "contains", GLM_NAME(segment_contains) },
   { "containsSegment", GLM_NAME(segment_containsSegment) },
   { "closestTriangle", GLM_NAME(segment_closestTriangle) },
   { "distance2", GLM_NAME(segment_distance2) },
@@ -1020,8 +1020,8 @@ LAYOUT_DEFN(segment2d_closestPoint, glm::closestPoint, GEOM_DISTANCE, gLuaSegmen
 LAYOUT_DEFN(segment2d_closestRay, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaRay<2>)
 LAYOUT_DEFN(segment2d_closestLine, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaLine<2>)
 LAYOUT_DEFN(segment2d_closestSegment, glm::closestPoint, GEOM_CLOSEST, gLuaSegment<2>, gLuaSegment<2>)
-BIND_DEFN(segment2d_containsPoint, glm::contains, gLuaSegment<2>, gLuaSegment<2>::point_trait, gLuaSegment<2>::eps_trait)
-BIND_DEFN(segment2d_containsSegment, glm::contains, gLuaSegment<2>, gLuaSegment<2>, gLuaSegment<2>::eps_trait)
+BIND_DEFN(segment2d_contains, glm::contains, gLuaSegment<2>, gLuaSegment<2>::point_trait, gLuaSegment<2>::eps_trait::contains)
+BIND_DEFN(segment2d_containsSegment, glm::contains, gLuaSegment<2>, gLuaSegment<2>, gLuaSegment<2>::eps_trait::contains)
 LAYOUT_DEFN(segment2d_distance2, glm::distance2, GEOM_DISTANCE, gLuaSegment<2>, gLuaSegment<2>::point_trait)
 LAYOUT_DEFN(segment2d_distanceSegment2, glm::distance2, GEOM_DISTANCE_UV, gLuaSegment<2>, gLuaSegment<2>)
 LAYOUT_DEFN(segment2d_distance, glm::distance, GEOM_DISTANCE, gLuaSegment<2>, gLuaSegment<2>::point_trait)
@@ -1053,7 +1053,7 @@ static const luaL_Reg luaglm_segment2dlib[] = {
   { "closestRay", GLM_NAME(segment2d_closestRay) },
   { "closestLine", GLM_NAME(segment2d_closestLine) },
   { "closestSegment", GLM_NAME(segment2d_closestSegment) },
-  { "containsPoint", GLM_NAME(segment2d_containsPoint) },
+  { "contains", GLM_NAME(segment2d_contains) },
   { "containsSegment", GLM_NAME(segment2d_containsSegment) },
   { "distance2", GLM_NAME(segment2d_distance2) },
   { "distanceSegment2", GLM_NAME(segment2d_distanceSegment2) },
@@ -1103,9 +1103,9 @@ BIND_DEFN(triangle_unnormalizedNormalCW, glm::unnormalizedNormalCW, gLuaTriangle
 BIND_DEFN(triangle_normalCW, glm::normalCW, gLuaTriangle<>)
 BIND_DEFN(triangle_extremePoint, glm::extremePoint, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 BIND_DEFN(triangle_boundingAABB, glm::boundingAABB, gLuaTriangle<>)
-BIND_DEFN(triangle_contains, glm::contains, gLuaTriangle<>, gLuaTriangle<>::point_trait, gLuaTriangle<>::eps_trait)
-BIND_DEFN(triangle_containsSegment, glm::contains, gLuaTriangle<>, gLuaSegment<>, gLuaTriangle<>::eps_trait)
-BIND_DEFN(triangle_containsTriangle, glm::contains, gLuaTriangle<>, gLuaTriangle<>, gLuaTriangle<>::eps_trait)
+BIND_DEFN(triangle_contains, glm::contains, gLuaTriangle<>, gLuaTriangle<>::point_trait, gLuaTriangle<>::eps_trait::squared)
+BIND_DEFN(triangle_containsSegment, glm::contains, gLuaTriangle<>, gLuaSegment<>, gLuaTriangle<>::eps_trait::squared)
+BIND_DEFN(triangle_containsTriangle, glm::contains, gLuaTriangle<>, gLuaTriangle<>, gLuaTriangle<>::eps_trait::squared)
 BIND_DEFN(triangle_closestPoint, glm::closestPoint, gLuaTriangle<>, gLuaTriangle<>::point_trait)
 LAYOUT_DEFN(triangle_closestSegment, glm::closestPoint, GEOM_DISTANCE, gLuaTriangle<>, gLuaSegment<>)
 LAYOUT_DEFN(triangle_closestLine, glm::closestPoint, GEOM_DISTANCE, gLuaTriangle<>, gLuaLine<>)
@@ -1214,8 +1214,8 @@ BIND_DEFN(sphere_encloseSegment, glm::enclose, gLuaSphere<>, gLuaSegment<>)
 BIND_DEFN(sphere_encloseSphere, glm::enclose, gLuaSphere<>, gLuaSphere<>)
 BIND_DEFN(sphere_encloseAABB, glm::enclose, gLuaSphere<>, gLuaAABB<>)
 BIND_DEFN(sphere_encloseTriangle, glm::enclose, gLuaSphere<>, gLuaTriangle<>)
-BIND_DEFN(sphere_extendRadiusToContain, glm::extendRadiusToContain, gLuaSphere<>, gLuaSphere<>::point_trait, gLuaSphere<>::eps_trait)
-BIND_DEFN(sphere_extendRadiusToContainSphere, glm::extendRadiusToContain, gLuaSphere<>, gLuaSphere<>, gLuaSphere<>::eps_trait)
+BIND_DEFN(sphere_extendRadiusToContain, glm::extendRadiusToContain, gLuaSphere<>, gLuaSphere<>::point_trait, gLuaSphere<>::eps_trait::zeroed)
+BIND_DEFN(sphere_extendRadiusToContainSphere, glm::extendRadiusToContain, gLuaSphere<>, gLuaSphere<>, gLuaSphere<>::eps_trait::zeroed)
 BIND_DEFN(sphere_maximalContainedAABB, glm::maximalContainedAABB, gLuaSphere<>)
 LAYOUT_DEFN(sphere_projectToAxis, glm::projectToAxis, GEOM_PROJECTION, gLuaSphere<>, gLuaSphere<>::point_trait)
 GLM_BINDING_QUALIFIER(sphere_fitThroughPoints) {
@@ -1452,14 +1452,15 @@ BIND_DEFN(plane_mirrorMatrix, glm::mirrorMatrix, gLuaPlane<>)
 BIND_DEFN(plane_mirror, glm::mirror, gLuaPlane<>, gLuaPlane<>::point_trait)
 BIND_DEFN(plane_closestPointRay, glm::closestPoint, gLuaPlane<>, gLuaRay<>)
 BIND_DEFN(plane_closestPointSegment, glm::closestPoint, gLuaPlane<>, gLuaSegment<>)
-BIND_DEFN(plane_contains, glm::contains, gLuaPlane<>, gLuaPlane<>::point_trait, gLuaPlane<>::eps_trait)
-BIND_DEFN(plane_containsLine, glm::contains, gLuaPlane<>, gLuaLine<>, gLuaPlane<>::eps_trait)
-BIND_DEFN(plane_containsRay, glm::contains, gLuaPlane<>, gLuaRay<>, gLuaPlane<>::eps_trait)
-BIND_DEFN(plane_containsSegment, glm::contains, gLuaPlane<>, gLuaSegment<>, gLuaPlane<>::eps_trait)
-BIND_DEFN(plane_containsTriangle, glm::contains, gLuaPlane<>, gLuaTriangle<>, gLuaPlane<>::eps_trait)
+BIND_DEFN(plane_contains, glm::contains, gLuaPlane<>, gLuaPlane<>::point_trait, gLuaPlane<>::eps_trait::contains)
+BIND_DEFN(plane_containsLine, glm::contains, gLuaPlane<>, gLuaLine<>, gLuaPlane<>::eps_trait::contains)
+BIND_DEFN(plane_containsRay, glm::contains, gLuaPlane<>, gLuaRay<>, gLuaPlane<>::eps_trait::contains)
+BIND_DEFN(plane_containsSegment, glm::contains, gLuaPlane<>, gLuaSegment<>, gLuaPlane<>::eps_trait::contains)
+BIND_DEFN(plane_containsTriangle, glm::contains, gLuaPlane<>, gLuaTriangle<>, gLuaPlane<>::eps_trait::contains)
 LAYOUT_DEFN(plane_intersectsRay, glm::intersects, GEOM_DISTANCE, gLuaPlane<>, gLuaRay<>)
 LAYOUT_DEFN(plane_intersectsLine, glm::intersects, GEOM_DISTANCE, gLuaPlane<>, gLuaLine<>)
 LAYOUT_DEFN(plane_intersectsSegment, glm::intersects, GEOM_DISTANCE, gLuaPlane<>, gLuaSegment<>)
+LAYOUT_DEFN(plane_intersectsPlane, glm::intersects, LAYOUT_GEOM_PARAMETRIC_U, gLuaPlane<>, gLuaPlane<>, gLuaLine<>)
 BIND_DEFN(plane_intersectsTriangle, glm::intersects, gLuaPlane<>, gLuaTriangle<>)
 BIND_DEFN(plane_intersectsSphere, glm::intersects, gLuaPlane<>, gLuaSphere<>)
 BIND_DEFN(plane_intersectsAABB, glm::intersects, gLuaPlane<>, gLuaAABB<>)
@@ -1483,7 +1484,7 @@ GLM_BINDING_QUALIFIER(plane_clipLine) {
   GLM_BINDING_END
 }
 
-GLM_BINDING_QUALIFIER(plane_intersectsPlane) {
+GLM_BINDING_QUALIFIER(plane_intersectsPlanes) {
   GLM_BINDING_BEGIN
   gLuaPlane<>::point_trait::type result;
   const gLuaPlane<>::type a = LB.Next<gLuaPlane<>>();
@@ -1576,6 +1577,7 @@ static const luaL_Reg luaglm_planelib[] = {
   { "intersectsSphere", GLM_NAME(plane_intersectsSphere) },
   { "intersectsAABB", GLM_NAME(plane_intersectsAABB) },
   { "intersectsPlane", GLM_NAME(plane_intersectsPlane) },
+  { "intersectsPlanes", GLM_NAME(plane_intersectsPlanes) },
   { "intersectsTriangle", GLM_NAME(plane_intersectsTriangle) },
   { "clipSegment", GLM_NAME(plane_clipSegment) },
   { "clipLine", GLM_NAME(plane_clipLine) },
@@ -1626,7 +1628,7 @@ BIND_DEFN(polygon_mapFrom2D, glm::mapFrom2D, gLuaPolygon<>, gLuaVec2<gLuaPolygon
 BIND_DEFN(polygon_area, glm::area, gLuaPolygon<>)
 BIND_DEFN(polygon_perimeter, glm::perimeter, gLuaPolygon<>)
 BIND_DEFN(polygon_centroid, glm::centroid, gLuaPolygon<>)
-BIND_DEFN(polygon_isPlanar, glm::isPlanar, gLuaPolygon<>, gLuaPolygon<>::eps_trait)
+BIND_DEFN(polygon_isPlanar, glm::isPlanar, gLuaPolygon<>, gLuaPolygon<>::eps_trait::squared)
 BIND_DEFN(polygon_isSimple, glm::isSimple, gLuaPolygon<>)
 BIND_DEFN(polygon_isNull, glm::isNull, gLuaPolygon<>)
 BIND_DEFN(polygon_isfinite, glm::isfinite, gLuaPolygon<>)
@@ -1640,12 +1642,12 @@ BIND_DEFN(polygon_pointOnEdge, glm::pointOnEdge, gLuaPolygon<>, gLuaPolygon<>::v
 BIND_DEFN(polygon_edgeNormal, glm::edgeNormal, gLuaPolygon<>, gLuaTrait<size_t>)
 BIND_DEFN(polygon_edgePlane, glm::edgePlane, gLuaPolygon<>, gLuaTrait<size_t>)
 BIND_DEFN(polygon_containsSegment2D, glm::contains2D, gLuaPolygon<>, gLuaSegment<>)
-BIND_DEFN(polygon_contains, glm::contains, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait)
-BIND_DEFN(polygon_containsAbove, glm::containsAbove, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait)
-BIND_DEFN(polygon_containsBelow, glm::containsBelow, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait)
-BIND_DEFN(polygon_containsPolygon, glm::contains, gLuaPolygon<>, gLuaPolygon<>, gLuaPolygon<>::eps_trait)
-BIND_DEFN(polygon_containsSegment, glm::contains, gLuaPolygon<>, gLuaSegment<>, gLuaPolygon<>::eps_trait)
-BIND_DEFN(polygon_containsTriangle, glm::contains, gLuaPolygon<>, gLuaTriangle<>, gLuaPolygon<>::eps_trait)
+BIND_DEFN(polygon_contains, glm::contains, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait::intersect)
+BIND_DEFN(polygon_containsAbove, glm::containsAbove, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait::intersect)
+BIND_DEFN(polygon_containsBelow, glm::containsBelow, gLuaPolygon<>, gLuaPolygon<>::point_trait, gLuaPolygon<>::eps_trait::intersect)
+BIND_DEFN(polygon_containsPolygon, glm::contains, gLuaPolygon<>, gLuaPolygon<>, gLuaPolygon<>::eps_trait::intersect)
+BIND_DEFN(polygon_containsSegment, glm::contains, gLuaPolygon<>, gLuaSegment<>, gLuaPolygon<>::eps_trait::intersect)
+BIND_DEFN(polygon_containsTriangle, glm::contains, gLuaPolygon<>, gLuaTriangle<>, gLuaPolygon<>::eps_trait::intersect)
 BIND_DEFN(polygon_minimalEnclosingAABB, glm::minimalEnclosingAABB, gLuaPolygon<>)
 BIND_DEFN(polygon_intersectsSegment2D, glm::intersects2D, gLuaPolygon<>, gLuaSegment<>)
 BIND_DEFN(polygon_intersectsLine, glm::intersects, gLuaPolygon<>, gLuaLine<>)
